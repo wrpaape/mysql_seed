@@ -51,7 +51,7 @@ UNDERLINE("OPTIONS:") "\n"					\
 
 void cli_parse_input(struct SeedMode *const restrict mode,
 		     const int argc,
-		     const char *const restrict *argv);
+		     char *const restrict *const restrict argv);
 
 
 

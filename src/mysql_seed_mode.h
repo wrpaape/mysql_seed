@@ -12,8 +12,8 @@
 /* seed_create
  * ────────────────────────────────────────────────────────────────────────── */
 struct FieldSpec {
-	const char *field_name;
-	const char *base_value;	/* optional */
+	const char *restrict field_name;
+	const char *restrict base_value;	/* optional */
 };
 
 struct TableSpec {
@@ -28,13 +28,13 @@ struct SeedTableSpec {
 };
 
 struct SeedDatabaseSpec {
-	const char *name;
-	struct SeedTableSpec *seed_tables;
+	const char *restrict name;
+	struct SeedTableSpec *restrict seed_tables;
 	unsigned int table_count;
 };
 
 struct SeedCreateSpec {
-	const char *filename;
+	const char *restrict filename;
 	struct SeedDatabaseSpec *seed_databases;
 	unsigned int database_count;
 };
@@ -43,9 +43,9 @@ struct SeedCreateSpec {
 /* seed_run
  * ────────────────────────────────────────────────────────────────────────── */
 struct SeedRunSpec {
-	const char *filename;
-	const char *user;
-	const char *password;
+	const char *restrict filename;
+	const char *restrict user;
+	const char *restrict password;
 };
 
 
@@ -53,8 +53,8 @@ struct SeedRunSpec {
  * ────────────────────────────────────────────────────────────────────────── */
 struct SeedExitSpec {
 	int status;
-	const FILE *stream;
-	const char *format;
+	FILE *restrict stream;
+	const char *restrict format;
 	va_list ap;
 };
 

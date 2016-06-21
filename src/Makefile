@@ -12,7 +12,7 @@ all: ../bin/mysql_seed
 		   ../obj/mysql_seed_create.o 	\
 		   ../obj/mysql_seed_run.o	\
 	           ../obj/mysql_seed_exit.o
-	$(CC) $(CC_FLAGS) -c $< -o $@
+	$(CC) $(CC_FLAGS) $^ -o $@
 
 
 ../obj/mysql_seed.o: mysql_seed.c		\
