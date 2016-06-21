@@ -2,7 +2,7 @@
 
 extern inline void seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
 				      const int status,
-				      const File *const restrict stream,
+				      const FILE *const restrict stream,
 				      const char *const restrict format,
 				      ...);
 

@@ -17,7 +17,7 @@ void seed_exit(const union SeedModeSpec *const restrict mode_spec);
  *─────────────────────────────────────────────────────────────────────────── */
 inline void seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
 			       const int status,
-			       const File *const restrict stream,
+			       const FILE *const restrict stream,
 			       const char *const restrict format,
 			       ...)
 {

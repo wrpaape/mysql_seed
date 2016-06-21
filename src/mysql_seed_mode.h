@@ -53,7 +53,7 @@ struct SeedRunSpec {
  * ────────────────────────────────────────────────────────────────────────── */
 struct SeedExitSpec {
 	int status;
-	FILE *stream;
+	const FILE *stream;
 	const char *format;
 	va_list ap;
 };
@@ -70,7 +70,7 @@ union SeedModeSpec {
 
 /* mode procedure dispatch
  * ────────────────────────────────────────────────────────────────────────── */
-typespec void SeedModeHandler(const union SeedModeSpec *const restrict spec);
+typedef void SeedModeHandler(const union SeedModeSpec *const restrict spec);
 
 
 /* 'SeedModeHandler' dispatch function
