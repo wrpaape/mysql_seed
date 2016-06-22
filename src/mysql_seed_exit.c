@@ -1,39 +1,36 @@
 #include "mysql_seed_exit.h"
 
-/* global variables
- *─────────────────────────────────────────────────────────────────────────── */
-char message_buffer[MESSAGE_BUFFER_LENGTH];
-
 /* extern inline function declarations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-seed_exit_spec_init(struct SeedExitSpec *const restrict spec,
-		    const int status,
-		    FILE *const restrict stream,
-		    const char *const restrict message);
+seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
+		   const int status,
+		   FILE *const restrict stream,
+		   const char *const restrict message);
 
 extern inline void
-seed_exit_spec_init_failure(struct SeedExitSpec *const restrict spec,
-			    const char *const restrict reason);
+seed_exit_spec_set_failure(struct SeedExitSpec *const restrict spec,
+			   const char *const restrict reason);
 
 extern inline void
-seed_exit_spec_init_invalid_option(struct SeedExitSpec *const restrict spec,
-				   const char *const restrict option);
+seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
+				  char *const restrict buffer,
+				  const char *const restrict option);
 
 extern inline void
-seed_exit_spec_init_help(struct SeedExitSpec *const restrict spec,
-			 const char *const restrict message);
+seed_exit_spec_set_help(struct SeedExitSpec *const restrict spec,
+			const char *const restrict message);
 extern inline void
-seed_exit_spec_init_help_usage(struct SeedExitSpec *const restrict spec);
-
-extern inline void
-seed_exit_spec_init_help_create(struct SeedExitSpec *const restrict spec);
+seed_exit_spec_set_help_usage(struct SeedExitSpec *const restrict spec);
 
 extern inline void
-seed_exit_spec_init_help_run(struct SeedExitSpec *const restrict spec);
+seed_exit_spec_set_help_create(struct SeedExitSpec *const restrict spec);
+
+extern inline void
+seed_exit_spec_set_help_run(struct SeedExitSpec *const restrict spec);
 
 
-/* function definitions
+/* function defsetions
  *─────────────────────────────────────────────────────────────────────────── */
 void
 seed_exit(const union SeedModeSpec *const restrict mode_spec)

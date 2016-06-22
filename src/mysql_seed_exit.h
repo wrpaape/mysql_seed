@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdlib.h>		/* exit */
-#include <string.h>		/* stpcpy, stpncpy */
+#include "mysql_seed_utils.h"	/* string utils */
 #include "mysql_seed_mode.h"	/* <stdio.h>, SeedExitSpec, SeedModeSpec */
 
 
@@ -51,11 +51,6 @@ ERROR_HEADER("missing input options\n")
 ERROR_HEADER("invalid option: ")
 
 
-/* global variables
- *─────────────────────────────────────────────────────────────────────────── */
-extern char message_buffer[MESSAGE_BUFFER_LENGTH];
-
-
 /* 'SeedModeHandler' dispatch function
  *─────────────────────────────────────────────────────────────────────────── */
 void
@@ -65,7 +60,7 @@ seed_exit(const union SeedModeSpec *const restrict mode_spec);
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-seed_exit_spec_init(struct SeedExitSpec *const restrict spec,
+seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
 		    const int status,
 		    FILE *const restrict stream,
 		    const char *const restrict message)
@@ -76,62 +71,63 @@ seed_exit_spec_init(struct SeedExitSpec *const restrict spec,
 }
 
 inline void
-seed_exit_spec_init_failure(struct SeedExitSpec *const restrict spec,
+seed_exit_spec_set_failure(struct SeedExitSpec *const restrict spec,
 			    const char *const restrict reason)
 {
-	seed_exit_spec_init(spec,
+	seed_exit_spec_set(spec,
 			    EXIT_FAILURE,
 			    stderr,
 			    reason);
 }
 
 inline void
-seed_exit_spec_init_invalid_option(struct SeedExitSpec *const restrict spec,
+seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
+				   char *const restrict buffer,
 				   const char *const restrict option)
 {
-	char *restrict buffer_ptr = stpcpy(&message_buffer[0],
-					   ERROR_INVALID_OPTION);
+	char *restrict ptr = buffer;
 
-	buffer_ptr = stpncpy(buffer_ptr,
-			     option,
-			     OPTION_MAX_LENGTH);
+	ptr = put_string(ptr,
+			 ERROR_INVALID_OPTION);
 
-	*buffer_ptr = '\n';
-	++buffer_ptr;
-	*buffer_ptr = '\0';
+	ptr = put_string_length(ptr,
+				option,
+				OPTION_MAX_LENGTH);
 
-	seed_exit_spec_init_failure(spec,
-				    &message_buffer[0]);
+	PUTS_CLOSE(ptr);
+
+	seed_exit_spec_set_failure(spec,
+				    buffer);
 }
 
 inline void
-seed_exit_spec_init_help(struct SeedExitSpec *const restrict spec,
+seed_exit_spec_set_help(struct SeedExitSpec *const restrict spec,
 			 const char *const restrict message)
 {
-	seed_exit_spec_init(spec,
+	seed_exit_spec_set(spec,
 			    EXIT_SUCCESS,
 			    stdout,
 			    message);
 }
 
 inline void
-seed_exit_spec_init_help_usage(struct SeedExitSpec *const restrict spec)
+seed_exit_spec_set_help_usage(struct SeedExitSpec *const restrict spec)
 {
-	seed_exit_spec_init_help(spec,
+	seed_exit_spec_set_help(spec,
 				 HELP_USAGE_MESSAGE);
 }
 
 inline void
-seed_exit_spec_init_help_create(struct SeedExitSpec *const restrict spec)
+seed_exit_spec_set_help_create(struct SeedExitSpec *const restrict spec)
 {
-	seed_exit_spec_init_help(spec,
+	seed_exit_spec_set_help(spec,
 				 HELP_CREATE_MESSAGE);
 }
 
 inline void
-seed_exit_spec_init_help_run(struct SeedExitSpec *const restrict spec)
+seed_exit_spec_set_help_run(struct SeedExitSpec *const restrict spec)
 {
-	seed_exit_spec_init_help(spec,
+	seed_exit_spec_set_help(spec,
 				 HELP_RUN_MESSAGE);
 }
 

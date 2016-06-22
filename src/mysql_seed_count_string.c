@@ -1,7 +1,5 @@
 #include "mysql_seed_count_string.h"
 
-
-
 #define SIZE_1_9		18lu		/* (1 digit  + '\0') * 9 */
 #define SIZE_10_99		270lu		/* (2 digits + '\0') * 90 */
 #define SIZE_100_999		3600lu		/* (3 digits + '\0') * 900 */
@@ -23,7 +21,7 @@ extern inline void
 count_string_destroy(char *restrict *string);
 
 char **
-count_string_create(struct SeedExitSpec *const restrict spec,
+count_string_create(char *const *restrict log_ptr,
 		    const size_t upto)
 {
 	char **string_ptrs;
@@ -36,7 +34,7 @@ count_string_create(struct SeedExitSpec *const restrict spec,
 					   upto);
 
 	if (csa_status != CSA_SUCCESS) {
-		csa_failure(spec,
+		csa_failure(log_ptr,
 			    csa_status,
 			    upto);
 		return NULL;
@@ -48,35 +46,49 @@ count_string_create(struct SeedExitSpec *const restrict spec,
 }
 
 void
-csa_failure(struct SeedExitSpec *const restrict spec,
+csa_failure(char *const *restrict log_ptr,
 	    const enum CountStringAllocateFlag status,
 	    const size_t upto)
 {
-	char *buffer_ptr = stpcpy(&memory_buffer[0],
-				  "failed to allocat count string memory for "
-				  "'upto' of ");
 
-	while (upto)
+	char *restrict ptr = *log_ptr;
+
+	ptr = put_string(ptr,
+			 "failed to allocate count string memory for 'upto' "
+			 "of ");
+
+	ptr = put_digits(ptr,
+			 upto);
+
+	ptr = put_string(ptr,
+			 " ('UPTO_MAX' = " #UPTO_MAX ")\n"
+			 "reason:\n"):
+
 
 	switch (status) {
 
 	case CSA_FAILURE_UPTO_MAX_EXCEEDED:
+		ptr = put_string(ptr,
+				 "'UPTO_MAX' exceeded\n\n");
+		break;
 
 	case CSA_FAILURE_OUT_OF_MEMORY:
-
-		message_buffer[0]
-
-		csa_known
-		seed_exit_spec_init_failure(spec,
-					    "failed to allocate count string "
-					    "memory for upto: "
-					    );
+		ptr = stpcpy(ptr,
+				 "malloc failure (out of memory)\n\n");
+		break;
 
 	default:
+		ptr = stpcpy(ptr,
+				 "malloc failure (out of memory)\n\n");
+
 		seed_exit_spec_init_failure(spec,
 					    "unknown failure to allocate"
 					    " count string memory");
 	}
+
+	if (spec->status == EXIT_SUCCESS)
+		seed_exit_spec_init_failure(spec,
+					    &message_buffer[0]);
 }
 
 

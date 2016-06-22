@@ -5,7 +5,9 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_exit.h"	/* <stdlib.h>, <string.h>, exit utils */
+/* #include "mysql_seed_exit.h"	/1* <stdlib.h>, exit utils *1/ */
+/* #include "mysql_seed_log.h"	/1* log_buffer, log_ptr *1/ */
+#include "mysql_seed_utils.h"	/* string utils */
 
 
 /* error flags

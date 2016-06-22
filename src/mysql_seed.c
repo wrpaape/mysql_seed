@@ -19,7 +19,7 @@ parse_input(struct SeedMode *const restrict mode,
 	    char *const restrict *const restrict argv)
 {
 	if (argc == 1) {
-		seed_mode_init_exit_failure(mode,
+		seed_mode_set_exit_failure(mode,
 					    ERROR_NO_INPUT_MESSAGE);
 		return;
 	}
@@ -44,9 +44,9 @@ parse_input(struct SeedMode *const restrict mode,
 
 	case 'h':
 		if (option[2] == '\0') {
-			seed_mode_init_exit_help(mode,
-						 argc,
-						 argv);
+			seed_mode_set_exit_help(mode,
+						argc,
+						argv);
 			return;
 		}
 
@@ -69,9 +69,8 @@ parse_input(struct SeedMode *const restrict mode,
 	/* parse long option */
 	switch (option[2]) {
 	case 'c':
-		if (strncmp("reate",
-			    &option[3],
-			    OPTION_MAX_LENGTH) == 0) {
+		if (strings_equal("reate",
+				  &option[3])) {
 			/* TODO: dispatch 'create' mode */
 			return;
 		}
@@ -80,13 +79,12 @@ parse_input(struct SeedMode *const restrict mode,
 
 
 	case 'h':
-		if (strncmp("elp",
-			    &option[3],
-			    OPTION_MAX_LENGTH) == 0) {
+		if (strings_equal("elp",
+				  &option[3])) {
 
-			seed_mode_init_exit_help(mode,
-						 argc,
-						 argv);
+			seed_mode_set_exit_help(mode,
+						argc,
+						argv);
 			return;
 		}
 
@@ -94,9 +92,8 @@ parse_input(struct SeedMode *const restrict mode,
 
 
 	case 'r':
-		if (strncmp("un",
-			    &option[3],
-			    OPTION_MAX_LENGTH) == 0) {
+		if (strings_equal("un",
+				  &option[3])) {
 			/* TODO: dispatch 'run' mode */
 			return;
 		}
@@ -105,23 +102,24 @@ parse_input(struct SeedMode *const restrict mode,
 	}
 
 EXIT_INVALID_OPTION:
-	seed_mode_init_exit_invalid_option(mode,
-					   option);
+	seed_mode_set_exit_invalid_option(mode,
+					  &log_buffer[0],
+					  option);
 }
 
 inline void
-seed_mode_init_exit_failure(struct SeedMode *const restrict mode,
-			    const char *const restrict reason)
+seed_mode_set_exit_failure(struct SeedMode *const restrict mode,
+			   const char *const restrict reason)
 {
 	mode->handle = &seed_exit;
-	seed_exit_spec_init_failure(&mode->spec.exit,
-				    reason);
+	seed_exit_spec_set_failure(&mode->spec.exit,
+				   reason);
 }
 
 inline void
-seed_mode_init_exit_help(struct SeedMode *const restrict mode,
-			 const int argc,
-			 char *const restrict *const restrict argv)
+seed_mode_set_exit_help(struct SeedMode *const restrict mode,
+			const int argc,
+			char *const restrict *const restrict argv)
 {
 	mode->handle = &seed_exit;
 
@@ -136,7 +134,7 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 
 	case 'c':
 		if (help_option[2] == '\0') {
-			seed_exit_spec_init_help_create(&mode->spec.exit);
+			seed_exit_spec_set_help_create(&mode->spec.exit);
 			return;
 		}
 
@@ -144,7 +142,7 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 
 	case 'r':
 		if (help_option[2] == '\0') {
-			seed_exit_spec_init_help_run(&mode->spec.exit);
+			seed_exit_spec_set_help_run(&mode->spec.exit);
 			return;
 		}
 
@@ -159,22 +157,20 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 	/* parse long option */
 	switch (help_option[2]) {
 	case 'c':
-		if (strncmp("reate",
-			    &help_option[3],
-			    OPTION_MAX_LENGTH) == 0) {
+		if (strings_equal("reate",
+				  &help_option[3])) {
 
-			seed_exit_spec_init_help_create(&mode->spec.exit);
+			seed_exit_spec_set_help_create(&mode->spec.exit);
 			return;
 		}
 
 		goto HELP_USAGE;
 
 	case 'r':
-		if (strncmp("un",
-			    &help_option[3],
-			    OPTION_MAX_LENGTH) == 0) {
+		if (strings_equal("un",
+				  &help_option[3])) {
 
-			seed_exit_spec_init_help_run(&mode->spec.exit);
+			seed_exit_spec_set_help_run(&mode->spec.exit);
 			return;
 		}
 
@@ -182,14 +178,16 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 	}
 
 HELP_USAGE:
-	seed_exit_spec_init_help_usage(&mode->spec.exit);
+	seed_exit_spec_set_help_usage(&mode->spec.exit);
 }
 
 inline void
-seed_mode_init_exit_invalid_option(struct SeedMode *const restrict mode,
-				   const char *const restrict option)
+seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
+				  char *const restrict buffer,
+				  const char *const restrict option)
 {
 	mode->handle = &seed_exit;
-	seed_exit_spec_init_invalid_option(&mode->spec.exit,
-					   option);
+	seed_exit_spec_set_invalid_option(&mode->spec.exit,
+					  buffer,
+					  option);
 }
