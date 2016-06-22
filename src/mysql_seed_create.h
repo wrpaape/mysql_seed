@@ -5,7 +5,6 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_mode.h"	/* SeedCreateSpec, SeedModeSpec */
 
-
 /* 'SeedModeHandler' dispatch function
  *─────────────────────────────────────────────────────────────────────────── */
 void seed_create(const union SeedModeSpec *const restrict mode_spec);

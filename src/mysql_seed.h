@@ -10,50 +10,29 @@
 #include "mysql_seed_exit.h"
 
 
-/* print message → exit
+
+
+/* parse stdin args
  *─────────────────────────────────────────────────────────────────────────── */
-#define EXIT_MESSAGE(STATUS, STREAM, FORMAT, ...)		\
-do {								\
-	fprintf(STREAM, FORMAT, ##__VA_ARGS__);			\
-	exit(STATUS);						\
-} while (0)
-
-#define EXIT_ERROR(FORMAT, ...)					\
-EXIT_MESSAGE(EXIT_FAILURE, stderr, FORMAT, ##__VA_ARGS__)
-
-#define EXIT_HELP(MESSAGE)					\
-EXIT_MESSAGE(EXIT_SUCCESS, stdout, MESSAGE)
+void
+parse_input(struct SeedMode *const restrict mode,
+	    const int argc,
+	    char *const restrict *const restrict argv);
 
 
-/* ANSI escape sequences
+/* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
-#define ANSI_BRIGHT "\e[1m"
-#define ANSI_RESET "\e[0m"
-#define ANSI_UNDERLINE "\e[4m"
-#define ANSI_NO_UNDERLINE "\e[24m"
+extern inline void
+seed_mode_init_exit_failure(struct SeedMode *const restrict mode,
+			    const char *const restrict reason);
 
-#define UNDERLINE(STRING) ANSI_UNDERLINE STRING ANSI_NO_UNDERLINE
-#define BRIGHTEN(STRING)  ANSI_BRIGHT    STRING ANSI_RESET
+extern inline void
+seed_mode_init_exit_help(struct SeedMode *const restrict mode,
+			 const int argc,
+			 char *const restrict *const restrict argv);
 
-
-/* help messages
- *─────────────────────────────────────────────────────────────────────────── */
-#define HELP_USAGE_MESSAGE					\
-UNDERLINE("USAGE:") "\n"					\
-"\t" BRIGHTEN("mysql_seed [OPTIONS] <INPUTS>") "\n\n"		\
-UNDERLINE("OPTIONS:") "\n"					\
-"\t" BRIGHTEN("-h, --help")   "\tprints this message\n"		\
-"\t" BRIGHTEN("-c, --create") "\tcreates a seed file\n"		\
-"\t" BRIGHTEN("-r, --run")    "\truns a seed file\n"
-
-
-
-
-void cli_parse_input(struct SeedMode *const restrict mode,
-		     const int argc,
-		     char *const restrict *const restrict argv);
-
-
-
+extern inline void
+seed_mode_init_exit_invalid_option(struct SeedMode *const restrict mode,
+				   const char *const restrict option);
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_H_ */

@@ -54,8 +54,7 @@ struct SeedRunSpec {
 struct SeedExitSpec {
 	int status;
 	FILE *restrict stream;
-	const char *restrict format;
-	va_list ap;
+	const char *restrict message;
 };
 
 
