@@ -33,44 +33,75 @@ parse_input(struct SeedMode *const restrict mode,
 	case '-':
 		break;
 	case 'c':
-		return;
+		if (option[2] == '\0') {
+			/* TODO: dispatch 'create' mode */
+			return;
+		}
+
+		goto EXIT_INVALID_OPTION;
+
+
 	case 'h':
 		if (option[2] == '\0') {
 			seed_mode_init_exit_help(mode,
 						 argc,
 						 argv);
 			return;
-		} else {
-			goto EXIT_INVALID_OPTION;
 		}
 
+		goto EXIT_INVALID_OPTION;
+
+
 	case 'r':
-		return;
+		if (option[2] == '\0') {
+			/* TODO: dispatch 'run' mode */
+			return;
+		}
+
+		/* fall through */
+
 	default:
 		goto EXIT_INVALID_OPTION;
 	}
 
+
+	/* parse long option */
 	switch (option[2]) {
 	case 'c':
-		return;
+		if (strncmp("reate",
+			    &option[3],
+			    OPTION_MAX_LENGTH) == 0) {
+			/* TODO: dispatch 'create' mode */
+			return;
+		}
+
+		goto EXIT_INVALID_OPTION;
+
 
 	case 'h':
 		if (strncmp("elp",
 			    &option[3],
 			    OPTION_MAX_LENGTH) == 0) {
+
 			seed_mode_init_exit_help(mode,
 						 argc,
 						 argv);
 			return;
-		} else {
-			goto EXIT_INVALID_OPTION;
 		}
 
-	case 'r':
-		return;
-	default:
 		goto EXIT_INVALID_OPTION;
-}
+
+
+	case 'r':
+		if (strncmp("un",
+			    &option[3],
+			    OPTION_MAX_LENGTH) == 0) {
+			/* TODO: dispatch 'run' mode */
+			return;
+		}
+
+		/* fall through */
+	}
 
 EXIT_INVALID_OPTION:
 	seed_mode_init_exit_invalid_option(mode,
@@ -115,7 +146,8 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 			seed_exit_spec_init_help_run(&mode->spec.exit);
 			return;
 		}
-		/* goto HELP_USAGE; */
+
+		/* fall through */
 
 	default:
 		goto HELP_USAGE;
@@ -123,6 +155,7 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 
 
 
+	/* parse long option */
 	switch (help_option[2]) {
 	case 'c':
 		if (strncmp("reate",
@@ -143,11 +176,9 @@ seed_mode_init_exit_help(struct SeedMode *const restrict mode,
 			seed_exit_spec_init_help_run(&mode->spec.exit);
 			return;
 		}
-		/* goto HELP_USAGE; */
+
+		/* fall through */
 	}
-
-
-
 
 HELP_USAGE:
 	seed_exit_spec_init_help_usage(&mode->spec.exit);

@@ -7,7 +7,8 @@
 
 /* 'SeedModeHandler' dispatch function
  *─────────────────────────────────────────────────────────────────────────── */
-void seed_create(const union SeedModeSpec *const restrict mode_spec);
+void
+seed_create(const union SeedModeSpec *const restrict mode_spec);
 
 
 /* misc helper functions
