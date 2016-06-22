@@ -1,5 +1,11 @@
 #include "mysql_seed_exit.h"
 
+/* global variables
+ *─────────────────────────────────────────────────────────────────────────── */
+char message_buffer[MESSAGE_BUFFER_LENGTH];
+
+/* extern inline function declarations
+ *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 seed_exit_spec_init(struct SeedExitSpec *const restrict spec,
 		    const int status,
@@ -27,6 +33,8 @@ extern inline void
 seed_exit_spec_init_help_run(struct SeedExitSpec *const restrict spec);
 
 
+/* function definitions
+ *─────────────────────────────────────────────────────────────────────────── */
 void
 seed_exit(const union SeedModeSpec *const restrict mode_spec)
 {

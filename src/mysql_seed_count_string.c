@@ -19,82 +19,115 @@
 
 #define UPTO_MAX 99999999lu
 
+extern inline void
+count_string_destroy(char *restrict *string);
 
-size_t digits(const size_t upto)
+char **
+count_string_create(struct SeedExitSpec *const restrict spec,
+		    const size_t upto)
 {
-	if (upto < 10lu)
-		return upto * 2lu + sizeof(char *);
+	char **string_ptrs;
+	char *digits;
 
-	if (upto < 100lu)
-		return (((upto - 9lu) * 3lu) + 18lu +  sizeof(char *);
+
+	const enum CountStringAllocateFlag
+	csa_status = count_string_allocate(&string_ptrs,
+					   &digits,
+					   upto);
+
+	if (csa_status != CSA_SUCCESS) {
+		csa_failure(spec,
+			    csa_status,
+			    upto);
+		return NULL;
+	}
+
+
+
+
 }
 
-enum CountStringInitFlag
-count_string_init(char *const *restrict *string_pointers,
-		  char *const *restrict digits,
-		  const size_t upto)
+void
+csa_failure(struct SeedExitSpec *const restrict spec,
+	    const enum CountStringAllocateFlag status,
+	    const size_t upto)
+{
+	char *buffer_ptr = stpcpy(&memory_buffer[0],
+				  "failed to allocat count string memory for "
+				  "'upto' of ");
+
+	while (upto)
+
+	switch (status) {
+
+	case CSA_FAILURE_UPTO_MAX_EXCEEDED:
+
+	case CSA_FAILURE_OUT_OF_MEMORY:
+
+		message_buffer[0]
+
+		csa_known
+		seed_exit_spec_init_failure(spec,
+					    "failed to allocate count string "
+					    "memory for upto: "
+					    );
+
+	default:
+		seed_exit_spec_init_failure(spec,
+					    "unknown failure to allocate"
+					    " count string memory");
+	}
+}
+
+
+
+
+
+/* allocates space for count string 'string_ptrs' and 'digits' buffer */
+enum CountStringAllocateFlag
+count_string_allocate(char *const *restrict *string_ptrs,
+		      char *const *restrict digits,
+		      const size_t upto)
 {
 	if (upto > UPTO_MAX)
-		return CSI_FAILURE_UPTO_MAX_EXCEEDED;
+		return CSA_FAILURE_UPTO_MAX_EXCEEDED;
 
-	/* room for string pointers + 1 (NULL terminator) */
-	const size_t size_pointers = sizeof(char **) * (upto + 1lu);
+	/* room for string ptrs + 1 (NULL terminator) */
+	const size_t size_string_ptrs = sizeof(char *) * (upto + 1lu);
 
-	size_t size_digits;
-
-	if (upto < 10lu)
-		size_digits = (upto * 2lu);
-
-	else if (upto < 100lu)
-		size_digits = (upto * 3lu) + SIZE_1_99;
-
-
-	else if (upto < 1000lu)
-		size_digits = (upto * 4lu) + SIZE_1_999;
-
-	else if (upto < 10000lu)
-		size_digits = (upto * 5lu) + SIZE_1_9999;
-
-
-
-	else if (upto < 100000lu)
-		size_digits = (upto * 6lu) + SIZE_1_99999;
-
-	else if (upto < 1000000lu)
-		size_digits = (upto * 7lu) + SIZE_1_999999;
-
-	else if (upto < 10000000lu)
-		size_digits = (upto * 8lu) + SIZE_1_9999999;
-
-	else
-		size_digits = (upto * 9lu) + SIZE_1_99999999;
-
+	size_t count_chars;
 
 	if (upto < 10000lu) {
-
 		if (upto < 100lu) {
-			size_digits = (upto < 10lu)
+			count_chars = (upto < 10lu)
 				    ? (upto * 2lu)
 				    : (upto * 3lu) + SIZE_1_99;
-
 		} else {
-			size_digits = (upto < 1000lu)
+			count_chars = (upto < 1000lu)
 				    ? (upto * 4lu) + SIZE_1_999
 				    : (upto * 5lu) + SIZE_1_9999;
 		}
 	} else {
 		if (upto < 1000000lu) {
-			size_digits = (upto < 100000lu)
+			count_chars = (upto < 100000lu)
 				    ? (upto * 6lu) + SIZE_1_99999
 				    : (upto * 7lu) + SIZE_1_999999;
-
 		} else {
-			size_digits = (upto < 10000000lu)
+			count_chars = (upto < 10000000lu)
 				    ? (upto * 8lu) + SIZE_1_9999999
 				    : (upto * 9lu) + SIZE_1_99999999;
 		}
-
 	}
 
+	*string_ptrs = malloc(size_string_ptrs
+			      + (sizeof(char) * count_chars));
 
+	if ((*string_ptrs) == NULL)
+		return CSA_FAILURE_OUT_OF_MEMORY;
+
+	*digits	= (*string_ptrs) + size_string_ptrs;
+
+	return CSA_SUCCESS;
 }
+
+

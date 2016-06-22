@@ -53,7 +53,7 @@ ERROR_HEADER("invalid option: ")
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-char message_buffer[MESSAGE_BUFFER_LENGTH];
+extern char message_buffer[MESSAGE_BUFFER_LENGTH];
 
 
 /* 'SeedModeHandler' dispatch function

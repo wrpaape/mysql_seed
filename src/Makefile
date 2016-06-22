@@ -11,7 +11,8 @@ all: ../bin/mysql_seed
 ../bin/mysql_seed: ../obj/mysql_seed.o 		\
 		   ../obj/mysql_seed_create.o 	\
 		   ../obj/mysql_seed_run.o	\
-	           ../obj/mysql_seed_exit.o
+	           ../obj/mysql_seed_exit.o	\
+	           ../obj/mysql_seed_utils.o
 	$(CC) $(CC_FLAGS) $^ -o $@
 
 
@@ -40,9 +41,13 @@ all: ../bin/mysql_seed
 			  mysql_seed_mode.h
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+../obj/mysql_seed_utils.o: mysql_seed_utils.c	\
+			   mysql_seed_utils.h
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
 clean:
 	$(RM) ../bin/mysql_seed			\
 	      ../obj/mysql_seed_create.o	\
 	      ../obj/mysql_seed_run.o		\
-	      ../obj/mysql_seed_exit.o
+	      ../obj/mysql_seed_exit.o		\
+	      ../obj/mysql_seed_utils.o

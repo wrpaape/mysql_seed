@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+
 	struct SeedMode mode;
 
 	parse_input(&mode, argc, &argv[0]);

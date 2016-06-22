@@ -8,6 +8,7 @@
 #include "mysql_seed_create.h"
 #include "mysql_seed_run.h"
 #include "mysql_seed_exit.h"
+#include "mysql_seed_utils.h"	/* temporarily */
 
 
 
