@@ -103,7 +103,6 @@ parse_input(struct SeedMode *const restrict mode,
 
 EXIT_INVALID_OPTION:
 	seed_mode_set_exit_invalid_option(mode,
-					  &log_buffer[0],
 					  option);
 }
 
@@ -183,11 +182,9 @@ HELP_USAGE:
 
 inline void
 seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
-				  char *const restrict buffer,
 				  const char *const restrict option)
 {
 	mode->handle = &seed_exit;
 	seed_exit_spec_set_invalid_option(&mode->spec.exit,
-					  buffer,
 					  option);
 }

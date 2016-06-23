@@ -5,10 +5,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-/* #include "mysql_seed_exit.h"	/1* <stdlib.h>, exit utils *1/ */
-/* #include "mysql_seed_log.h"	/1* log_buffer, log_ptr *1/ */
-#include "mysql_seed_utils.h"	/* string utils */
-
+#include "mysql_seed_log.h"	/* seed_log, string utils */
 
 /* error flags
  *─────────────────────────────────────────────────────────────────────────── */
@@ -33,9 +30,13 @@ count_string_destroy(char *restrict *string)
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
+void
+log_csa_failure(const enum CountStringAllocateFlag status,
+		const size_t upto);
+
 enum CountStringAllocateFlag
 count_string_allocate(char *const *restrict *string_pointers,
 		      char *const *restrict digits,
-		      const size_t upto)
+		      const size_t upto);
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_COUNT_STRING_H_ */

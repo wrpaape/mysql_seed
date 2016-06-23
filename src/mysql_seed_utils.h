@@ -8,7 +8,6 @@
 #include <stdint.h>	/* SIZE_MAX, UINT16/32/64_MAX */
 #include <stdbool.h>	/* bool */
 
-
 #undef DIGIT_COUNT_MAX
 
 #if (SIZE_MAX == UINT64_MAX)
@@ -41,8 +40,8 @@ extern size_t ten_pow_map[DIGIT_COUNT_MAX + 1u];
 
 #define PUT_CHAR(PTR, CHAR)	\
 do {				\
-	*PTR = CHAR;		\
-	++PTR;			\
+	*(PTR) = CHAR;		\
+	++(PTR);		\
 } while (0)
 
 #define PUTS_CLOSE(PTR)		\

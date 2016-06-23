@@ -21,8 +21,7 @@ extern inline void
 count_string_destroy(char *restrict *string);
 
 char **
-count_string_create(char *const *restrict log_ptr,
-		    const size_t upto)
+count_string_create(const size_t upto)
 {
 	char **string_ptrs;
 	char *digits;
@@ -34,65 +33,45 @@ count_string_create(char *const *restrict log_ptr,
 					   upto);
 
 	if (csa_status != CSA_SUCCESS) {
-		csa_failure(log_ptr,
-			    csa_status,
-			    upto);
+		log_csa_failure(csa_status,
+				upto);
 		return NULL;
 	}
 
 
 
-
+	return string_ptrs;
 }
 
+
 void
-csa_failure(char *const *restrict log_ptr,
-	    const enum CountStringAllocateFlag status,
-	    const size_t upto)
+log_csa_failure(const enum CountStringAllocateFlag status,
+		const size_t upto)
 {
 
 	char *restrict ptr = *log_ptr;
 
-	ptr = put_string(ptr,
-			 "failed to allocate count string memory for 'upto' "
-			 "of ");
+	seed_log_append_string("failed to allocate count string memory for "
+			       "'upto' of ");
 
-	ptr = put_digits(ptr,
-			 upto);
+	seed_log_append_digits(upto);
 
-	ptr = put_string(ptr,
-			 " ('UPTO_MAX' = " #UPTO_MAX ")\n"
-			 "reason:\n"):
-
-
+	seed_log_append_string(" ('UPTO_MAX' = " #UPTO_MAX ")\n"
+			       "reason:\n\t");
 	switch (status) {
 
 	case CSA_FAILURE_UPTO_MAX_EXCEEDED:
-		ptr = put_string(ptr,
-				 "'UPTO_MAX' exceeded\n\n");
-		break;
+		seed_log_append_string("'UPTO_MAX' exceeded\n\n");
+		return;
 
 	case CSA_FAILURE_OUT_OF_MEMORY:
-		ptr = stpcpy(ptr,
-				 "malloc failure (out of memory)\n\n");
-		break;
+		seed_log_append_string("malloc failure (out of memory)\n\n");
+		return;
 
 	default:
-		ptr = stpcpy(ptr,
-				 "malloc failure (out of memory)\n\n");
-
-		seed_exit_spec_init_failure(spec,
-					    "unknown failure to allocate"
-					    " count string memory");
+		seed_log_append_string("unknown\n\n");
 	}
-
-	if (spec->status == EXIT_SUCCESS)
-		seed_exit_spec_init_failure(spec,
-					    &message_buffer[0]);
 }
-
-
-
 
 
 /* allocates space for count string 'string_ptrs' and 'digits' buffer */

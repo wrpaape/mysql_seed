@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdlib.h>		/* exit */
-#include "mysql_seed_utils.h"	/* string utils */
+#include "mysql_seed_log.h"	/* seed_log, string utils */
 #include "mysql_seed_mode.h"	/* <stdio.h>, SeedExitSpec, SeedModeSpec */
 
 
@@ -82,13 +82,10 @@ seed_exit_spec_set_failure(struct SeedExitSpec *const restrict spec,
 
 inline void
 seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
-				   char *const restrict buffer,
-				   const char *const restrict option)
+				  const char *const restrict option)
 {
-	char *restrict ptr = buffer;
+	seed_log_append_string(ERROR_INVALID_OPTION);
 
-	ptr = put_string(ptr,
-			 ERROR_INVALID_OPTION);
 
 	ptr = put_string_length(ptr,
 				option,
