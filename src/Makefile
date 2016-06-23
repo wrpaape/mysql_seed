@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all test clean
 
 # SYSTEM CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
@@ -33,6 +33,20 @@ else
                 SYS_ENV_FLAGS 	+= -DARM
         endif
 endif
+# Path delimiter
+# ──────────────────────────────────────────────────────────────────────────────
+ifdef $(SYSTEM_WINDOWS)
+PATH_DELIM	:= \\
+else
+PATH_DELIM	:= /
+endif
+# Chain commands
+# ──────────────────────────────────────────────────────────────────────────────
+ifdef $(SYSTEM_WINDOWS)
+CMD_DELIM 	:= &
+else
+CMD_DELIM	:= ;
+endif
 
 
 
@@ -48,6 +62,11 @@ CC_FLAGS	:= -g -O2 -std=c99 -Wall $(CC_ENV_FLAGS)
 LD		:= ld
 LD_FLAGS	:= -no_pie
 LD_LIB_FLAGS	:= -lpthread -lc
+# Change Directory
+# ──────────────────────────────────────────────────────────────────────────────
+CD	    	:= cd
+ifdef $(SYSTEM_WINDOWS)
+MKDIR_FLAGS 	:= -p
 # Make Directory
 # ──────────────────────────────────────────────────────────────────────────────
 MKDIR	    	:= mkdir
@@ -64,7 +83,7 @@ RM_FLAGS	:= /F /Q
 else
 RM		:= rm
 RM_FLAGS	:= -rf
-endif 
+endif
 # Ruby
 # ──────────────────────────────────────────────────────────────────────────────
 RUBY		:= ruby
@@ -74,14 +93,6 @@ RUBY_FLAGS	:= $(EMPTY)
 
 # DIRECTORY CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════════
-# Path delimiter
-# ──────────────────────────────────────────────────────────────────────────────
-ifdef $(SYSTEM_WINDOWS)
-PATH_DELIM	:= \\
-else
-PATH_DELIM	:= /
-endif 
-
 PATH_JOIN	 	 = $(subst $(SPACE),$(PATH_DELIM),$(strip $1))
 
 PROJECT 		:= mysql_seed
@@ -127,27 +138,28 @@ TEST_RUNNER_OBJECT_PATH		= $(call PROJECT_FILE,$(OBJECT_DIR),$1,_test_runner.o)#
 TEST_BINARY_PATH 		= $(call PROJECT_FILE,$(TEST_DIR),$1,_test)# binary executable output
 
 
-# MISC
+## MISC
 # ══════════════════════════════════════════════════════════════════════════════
+# String Utils
+# ──────────────────────────────────────────────────────────────────────────────
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 TAB	:= $(EMPTY)	$(EMPTY)
+TRIM	 = $(subst $(SPACE),$(EMPTY),$1)
 define NEWLINE :=
 
 
 endef
+# Run all Tests
+# ──────────────────────────────────────────────────────────────────────────────
+TEST_FILES_GLOB	:= $(call TEST_BINARY_PATH,*)
 
-TRIM = $(subst $(SPACE),$(EMPTY),$1)
-SOURCE_HEADER_PATHS = $(call SOURCE_PATH,$1) $(call HEADER_PATH,$1)
+ifdef $(SYSTEM_WINDOWS)
+RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
 
-define GENERATE_TEST_RUNNER
-$(NEWLINE)
-$(strip $1: $2)
-	$(strip $(RUBY) $(RUBY_FLAGS) $(UNITY_SCRIPTS)/generate_test_runner.rb $$< $$@)
-
-TARGETS += $1
-$(NEWLINE)
-endef
+else
+RUN_ALL_TESTS	:= for test in $(TEST_FILES_GLOB); do "./$$test"; done
+endif
 
 
 
@@ -179,7 +191,6 @@ CREATE_TEST_BIN		:= $(call TEST_BINARY_PATH,create)
 
 TEST_BINARIES		+= $(CREATE_TEST_BIN)
 TARGETS			+= $(CREATE_OBJ)				\
-			   $(CREATE_BIN)				\
 			   $(CREATE_TRNR_SRC)				\
 			   $(CREATE_TRNR_OBJ)				\
 			   $(CREATE_TEST_OBJ)				\
@@ -198,7 +209,6 @@ RUN_TEST_BIN		:= $(call TEST_BINARY_PATH,run)
 
 TEST_BINARIES		+= $(RUN_TEST_BIN)
 TARGETS			+= $(RUN_OBJ)					\
-			   $(RUN_BIN)					\
 			   $(RUN_TRNR_SRC)				\
 			   $(RUN_TRNR_OBJ)				\
 			   $(RUN_TEST_OBJ)				\
@@ -217,7 +227,6 @@ EXIT_TEST_BIN		:= $(call TEST_BINARY_PATH,exit)
 
 TEST_BINARIES		+= $(EXIT_TEST_BIN)
 TARGETS			+= $(EXIT_OBJ)					\
-			   $(EXIT_BIN)					\
 			   $(EXIT_TRNR_SRC)				\
 			   $(EXIT_TRNR_OBJ)				\
 			   $(EXIT_TEST_OBJ)				\
@@ -236,7 +245,6 @@ COUNT_STRING_TEST_BIN	:= $(call TEST_BINARY_PATH,count_string)
 
 TEST_BINARIES		+= $(COUNT_STRING_TEST_BIN)
 TARGETS			+= $(COUNT_STRING_OBJ)				\
-			   $(COUNT_STRING_BIN)				\
 			   $(COUNT_STRING_TRNR_SRC)			\
 			   $(COUNT_STRING_TRNR_OBJ)			\
 			   $(COUNT_STRING_TEST_OBJ)			\
@@ -255,11 +263,28 @@ LOG_TEST_BIN		:= $(call TEST_BINARY_PATH,log)
 
 TEST_BINARIES		+= $(LOG_TEST_BIN)
 TARGETS			+= $(LOG_OBJ)					\
-			   $(LOG_BIN)					\
 			   $(LOG_TRNR_SRC)				\
 			   $(LOG_TRNR_OBJ)				\
 			   $(LOG_TEST_OBJ)				\
 			   $(LOG_TEST_BIN)
+# mysql_seed_parallel
+# ──────────────────────────────────────────────────────────────────────────────
+PARALLEL_SRC 		:= $(call SOURCE_PATH,parallel)
+PARALLEL_HDR		:= $(call HEADER_PATH,parallel)
+PARALLEL_OBJ 		:= $(call OBJECT_PATH,parallel)
+PARALLEL_TEST_SRC	:= $(call TEST_SOURCE_PATH,parallel)
+PARALLEL_TRNR_SRC	:= $(call TEST_RUNNER_SOURCE_PATH,parallel)
+PARALLEL_TEST_OBJ	:= $(call TEST_RUNNER_OBJECT_PATH,parallel)
+PARALLEL_TRNR_OBJ	:= $(call TEST_RUNNER_OBJECT_PATH,parallel)
+PARALLEL_TEST_OBJ	:= $(call TEST_OBJECT_PATH,parallel)
+PARALLEL_TEST_BIN	:= $(call TEST_BINARY_PATH,parallel)
+
+TEST_BINARIES		+= $(PARALLEL_TEST_BIN)
+TARGETS			+= $(PARALLEL_OBJ)				\
+			   $(PARALLEL_TRNR_SRC)				\
+			   $(PARALLEL_TRNR_OBJ)				\
+			   $(PARALLEL_TEST_OBJ)				\
+			   $(PARALLEL_TEST_BIN)
 # mysql_seed_utils
 # ──────────────────────────────────────────────────────────────────────────────
 UTILS_SRC 		:= $(call SOURCE_PATH,utils)
@@ -274,7 +299,6 @@ UTILS_TEST_BIN		:= $(call TEST_BINARY_PATH,utils)
 
 TEST_BINARIES		+= $(UTILS_TEST_BIN)
 TARGETS			+= $(UTILS_OBJ)					\
-			   $(UTILS_BIN)					\
 			   $(UTILS_TRNR_SRC)				\
 			   $(UTILS_TRNR_OBJ)				\
 			   $(UTILS_TEST_OBJ)				\
@@ -287,72 +311,103 @@ UNITY_CONFIG_HDR 	:= $(call UNITY_HEADER_PATH,unity_config)
 UNITY_INTERNALS_HDR 	:= $(call UNITY_HEADER_PATH,unity_internals)
 UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
 UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_AUTO_PATH,generate_test_runner)
-UNITY_CC_FLAGS 		:= -DUNITY_INCLUDE_CONFIG_H
+UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 
-TARGETS			+= $(UNITY_OBJ)					\
-			   $(UNITY_BIN)					\
-			   $(UNITY_TRNR_SRC)				\
-			   $(UNITY_TRNR_OBJ)				\
-			   $(UNITY_TEST_OBJ)				\
-			   $(UNITY_TEST_BIN)
-
-all: $(PROJECT_BINARY)
+TARGETS			+= $(UNITY_OBJ)
 
 
-../bin/mysql_seed: ../obj/mysql_seed.o 				\
-		   ../obj/mysql_seed_create.o 			\
-		   ../obj/mysql_seed_run.o			\
-	           ../obj/mysql_seed_exit.o			\
-	           ../obj/mysql_seed_count_string.o		\
-	           ../obj/mysql_seed_log.o			\
-	           ../obj/mysql_seed_utils.o			\
-	$(CC) $(CC_FLAGS) $^ -o $@
+define GENERATE_TEST_RUNNER
+$(NEWLINE)
+$(strip $1: $2)
+	$(strip $(RUBY) $(RUBY_FLAGS) $(UNITY_SCRIPTS)/generate_test_runner.rb $$< $$@)
 
+TARGETS += $1
+$(NEWLINE)
+endef
 
-../obj/mysql_seed.o: mysql_seed.c				\
-		     mysql_seed.h				\
-		     mysql_seed_create.h			\
-		     mysql_seed_run.h				\
-		     mysql_seed_exit.h
+## MAKE RULES
+# ══════════════════════════════════════════════════════════════════════════════
+# make all targets
+# ──────────────────────────────────────────────────────────────────────────────
+all: $(TARGETS)
+
+# make mysql_seed binary
+# ──────────────────────────────────────────────────────────────────────────────
+$(PROJECT_BIN): $(PROJECT_OBJ) 						\
+		$(CREATE_OBJ) 						\
+		$(RUN_OBJ) 						\
+		$(EXIT_OBJ) 						\
+		$(COUNT_STRING_OBJ) 					\
+		$(LOG_OBJ) 						\
+		$(PARALLEL_OBJ)						\
+		$(UTILS_OBJ)
+	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+
+# make mysql_seed object
+# ──────────────────────────────────────────────────────────────────────────────
+$(PROJECT_OBJ): $(PROJECT_SRC)						\
+		$(PROJECT_HDR)						\
+		$(CREATE_HDR)						\
+		$(RUN_HDR)						\
+		$(EXIT_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_create object
+# ──────────────────────────────────────────────────────────────────────────────
+$(CREATE_OBJ): $(CREATE_SRC)						\
+	       $(CREATE_HDR)						\
+	       $(MODE_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_run object
+# ──────────────────────────────────────────────────────────────────────────────
+$(RUN_OBJ): $(RUN_SRC)							\
+	    $(RUN_HDR)							\
+	    $(MODE_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_exit object
+# ──────────────────────────────────────────────────────────────────────────────
+$(EXIT_OBJ): $(EXIT_SRC)						\
+	     $(EXIT_HDR)						\
+	     $(MODE_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_count_string object
+# ──────────────────────────────────────────────────────────────────────────────
+$(COUNT_STRING_OBJ): $(COUNT_STRING_SRC)				\
+		     $(COUNT_STRING_HDR)				\
+		     $(LOG_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_log object
+# ──────────────────────────────────────────────────────────────────────────────
+$(LOG_OBJ): $(LOG_SRC)							\
+	    $(LOG_HDR)							\
+	    $(UTILS_HDR)						\
+	    $(PARALLEL_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_parallel object
+# ──────────────────────────────────────────────────────────────────────────────
+$(PARALLEL_OBJ): $(PARALLEL_SRC)					\
+		 $(PARALLEL_HDR)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(UTILS_OBJ): $(UTILS_SRC)						\
+	      $(UTILS_HDR)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 
-../obj/mysql_seed_create.o: mysql_seed_create.c			\
-			    mysql_seed_create.h			\
-			    mysql_seed_mode.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
+# run all unit tests
+# ──────────────────────────────────────────────────────────────────────────────
+test: $(TEST_BINARIES)
+	$(RUN_ALL_TESTS)
 
 
-../obj/mysql_seed_run.o: mysql_seed_run.c			\
-			 mysql_seed_run.h			\
-			 mysql_seed_mode.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-
-../obj/mysql_seed_exit.o: mysql_seed_exit.c			\
-			  mysql_seed_exit.h			\
-			  mysql_seed_mode.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-
-../obj/mysql_seed_count_string.o: mysql_seed_count_string.c	\
-				  mysql_seed_count_string.h	\
-				  mysql_seed_exit.h		\
-				  mysql_seed_utils.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-../obj/mysql_seed_log.o: mysql_seed_log.c			\
-			 mysql_seed_log.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-
-../obj/mysql_seed_utils.o: mysql_seed_utils.c			\
-			   mysql_seed_utils.h
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
+# remove all targets
+# ──────────────────────────────────────────────────────────────────────────────
 clean:
-	$(RM) ../bin/mysql_seed			\
-	      ../obj/mysql_seed_create.o	\
-	      ../obj/mysql_seed_run.o		\
-	      ../obj/mysql_seed_exit.o		\
-	      ../obj/mysql_seed_utils.o
+	$(RM) $(RM_FLAGS) $(TARGETS)
