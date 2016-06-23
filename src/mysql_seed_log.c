@@ -1,6 +1,5 @@
 #include "mysql_seed_log.h"
 
-#define LOG_BUFFER_LAST (LOG_BUFFER_LENGTH - 1lu)
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -12,14 +11,6 @@ struct SeedLog seed_log = {
 		[0 ... LOG_BUFFER_LAST] = '\0';		/* ensure null-filled */
 	}
 };
-
-/* helper macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define SEED_LOG_INIT()							\
-do {									\
-	seed_log.current_ptr = &seed_log.buffer[0];			\
-	seed_log.end_ptr     = &seed_log.buffer[LOG_BUFFER_LAST];	\
-} while (0)
 
 
 /* initialize, reset

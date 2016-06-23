@@ -1,5 +1,3 @@
-.PHONY: all test clean
-
 # ══════════════════════════════════════════════════════════════════════════════
 # ──────────────────────────────────────────────────────────────────────────────
 #				CONFIGURATION
@@ -9,6 +7,10 @@
 #
 ## MISC
 # ══════════════════════════════════════════════════════════════════════════════
+# Phony Targets
+# ──────────────────────────────────────────────────────────────────────────────
+.PHONY: all test clean
+
 # String Utils
 # ──────────────────────────────────────────────────────────────────────────────
 EMPTY	       :=
@@ -26,13 +28,17 @@ endef
 # taken from user 'Trevor Robinson''s response to stackoverflow question:
 #
 # 	http://stackoverflow.com/questions/714100/os-detecting-makefile
+
 ifeq ($(OS),Windows_NT)
+
         SYSTEM_WINDOWS 	:= T
         SYS_ENV_FLAGS 	:= -DWIN32
 
         ifeq      (AMD64,$(PROCESSOR_ARCHITECTURE))
+                SYS_ARCH_FLAG	:= -arch x86_64
                 SYS_ENV_FLAGS	+= -DAMD64
         else ifeq (x86,$(PROCESSOR_ARCHITECTURE))
+                SYS_ARCH_FLAG	:= -arch i386
                 SYS_ENV_FLAGS	+= -DIA32
         endif
 else
@@ -47,23 +53,29 @@ else
 
         UNAME_P := $(shell uname -p)
         ifeq      (x86_64,$(UNAME_P))
+                SYS_ARCH_FLAG	:= -arch i386
                 SYS_ENV_FLAGS	+= -DAMD64
         else ifneq (,$(filter %86,$(UNAME_P)))
+                SYS_ARCH_FLAG	:= -arch x86_64
                 SYS_ENV_FLAGS 	+= -DIA32
         else ifneq (,$(filter arm%,$(UNAME_P)))
+                SYS_ARCH_FLAG	:= -arch AArch64
                 SYS_ENV_FLAGS 	+= -DARM
         endif
 endif
+
+
 # Path delimiter
 # ──────────────────────────────────────────────────────────────────────────────
-ifdef $(SYSTEM_WINDOWS)
+ifeq (T,$(SYSTEM_WINDOWS))
 PATH_DELIM	:= \\
 else
 PATH_DELIM	:= /
 endif
+
 # Chain commands
 # ──────────────────────────────────────────────────────────────────────────────
-ifdef $(SYSTEM_WINDOWS)
+ifeq (T,$(SYSTEM_WINDOWS))
 CMD_DELIM 	:= &
 else
 CMD_DELIM	:= ;
@@ -149,15 +161,20 @@ CC_FLAGS	:= -g -O2 -std=c99 -Wall $(CC_ENV_FLAGS) -I$(HEADER_DIR)
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
-LD_FLAGS	:= -no_pie
+LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
 LD_LIB_FLAGS	:= -lpthread -lc
+
+ifeq (T,$(SYSTEM_OSX))
+LD_FLAGS	+= -macosx_version_min 10.11
+endif
+
 # Make Directory
 # ──────────────────────────────────────────────────────────────────────────────
 MKDIR	    	:= mkdir
 MKDIR_FLAGS 	:= $(EMPTY)
 # Cleaner
 # ──────────────────────────────────────────────────────────────────────────────
-ifdef $(SYSTEM_WINDOWS)
+ifeq (T,$(SYSTEM_WINDOWS))
 RM		:= del
 RM_FLAGS	:= /F /Q
 else
@@ -186,7 +203,7 @@ UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
 # ─────────────── run all tests ────────────────────────────────────────────────
 TEST_FILES_GLOB	:= $(call TEST_BINARY_PATH,*)
-ifdef $(SYSTEM_WINDOWS)
+ifeq (T,$(SYSTEM_WINDOWS))
 RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
 
 else
@@ -202,29 +219,38 @@ TARGETS			+= $(UNITY_OBJ)					\
 			   $(TEST_RUNNER_SOURCE_DIR)
 
 
-# mysql_seed (entry point)
+
+# mysql_seed_cli
 # ──────────────────────────────────────────────────────────────────────────────
-PROJECT_SRC 		:= $(call SOURCE_PATH,$(PROJECT))
-PROJECT_HDR		:= $(call HEADER_PATH,$(PROJECT))
-PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
-PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
+CLI_SRC 		:= $(call MODULE_SOURCE_PATH,cli)
+CLI_HDR			:= $(call MODULE_HEADER_PATH,cli)
+CLI_OBJ 		:= $(call MODULE_OBJECT_PATH,cli)
+CLI_TEST_SRC		:= $(call TEST_SOURCE_PATH,cli)
+CLI_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,cli)
+CLI_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,cli)
+CLI_TRNR_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,cli)
+CLI_TEST_OBJ		:= $(call TEST_OBJECT_PATH,cli)
+CLI_TEST_BIN		:= $(call TEST_BINARY_PATH,cli)
 # ─────────────── target prequisites ───────────────────────────────────────────
-PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
-			   $(CREATE_OBJ) 				\
-			   $(RUN_OBJ) 					\
-			   $(EXIT_OBJ) 					\
-			   $(COUNT_STRING_OBJ) 				\
-			   $(LOG_OBJ) 					\
-			   $(PARALLEL_OBJ)				\
-			   $(UTILS_OBJ)
-PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
-			   $(PROJECT_HDR) 				\
-			   $(CREATE_HDR) 				\
-			   $(RUN_HDR) 					\
-			   $(EXIT_HDR)
+CLI_OBJ_PREQS		:= $(CLI_SRC) 					\
+			   $(CLI_HDR)
+CLI_TRNR_SRC_PREQS	:= $(CLI_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+CLI_TEST_OBJ_PREQS	:= $(CLI_TEST_SRC)				\
+			   $(CLI_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+CLI_TRNR_OBJ_PREQS	:= $(CLI_TRNR_SRC)				\
+			   $(CLI_TEST_OBJ_PREQS)
+CLI_TEST_BIN_PREQS	:= $(CLI_TRNR_OBJ)				\
+			   $(CLI_TEST_OBJ)				\
+			   $(CLI_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TARGETS			+= $(PROJECT_OBJ)				\
-			   $(PROJECT_BIN)
+TEST_BINARIES		+= $(CLI_TEST_BIN)
+TARGETS			+= $(CLI_OBJ)					\
+			   $(CLI_TRNR_SRC)				\
+			   $(CLI_TRNR_OBJ)				\
+			   $(CLI_TEST_OBJ)				\
+			   $(CLI_TEST_BIN)
 
 
 # mysql_seed_mode
@@ -469,7 +495,30 @@ TARGETS			+= $(UTILS_OBJ)					\
 			   $(UTILS_TEST_BIN)
 
 
-$(info $(TARGETS))
+# mysql_seed (entry point)
+# ──────────────────────────────────────────────────────────────────────────────
+PROJECT_SRC 		:= $(call SOURCE_PATH,$(PROJECT))
+PROJECT_HDR		:= $(call HEADER_PATH,$(PROJECT))
+PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
+PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
+# ─────────────── target prequisites ───────────────────────────────────────────
+PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
+			   $(CLI_OBJ) 					\
+			   $(CREATE_OBJ) 				\
+			   $(RUN_OBJ) 					\
+			   $(EXIT_OBJ) 					\
+			   $(COUNT_STRING_OBJ) 				\
+			   $(LOG_OBJ) 					\
+			   $(PARALLEL_OBJ)				\
+			   $(UTILS_OBJ)
+PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
+			   $(PROJECT_HDR) 				\
+			   $(CLI_HDR)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TARGETS			+= $(PROJECT_OBJ)				\
+			   $(PROJECT_BIN)
+
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -508,6 +557,11 @@ $(PROJECT_BIN): $(PROJECT_BIN_PREQS)
 $(PROJECT_OBJ): $(PROJECT_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make mysql_seed_cli object
+# ──────────────────────────────────────────────────────────────────────────────
+$(CLI_OBJ): $(CLI_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make mysql_seed_create object
 # ──────────────────────────────────────────────────────────────────────────────
 $(CREATE_OBJ): $(CREATE_OBJ_PREQS)
@@ -544,6 +598,7 @@ $(UTILS_OBJ): $(UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 
+
 ## MAKE UNITY TEST FRAMEWORK
 # ══════════════════════════════════════════════════════════════════════════════
 # make unity object
@@ -557,8 +612,29 @@ $(TEST_RUNNER_SOURCE_DIR):
 	$(MKDIR) $(MKDIR_FLAGS) $@
 
 
+
 ## MAKE UNIT TESTS
 # ══════════════════════════════════════════════════════════════════════════════
+# for mysql_seed_cli
+# make:
+# 	mysql_seed_cli_test		binary,
+# 	mysql_seed_cli_test_runner 	object,
+# 	mysql_seed_cli_test		object, and
+# 	mysql_seed_cli_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(CLI_TEST_BIN): $(CLI_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+
+$(CLI_TRNR_OBJ): $(CLI_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(CLI_TEST_OBJ): $(CLI_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(CLI_TRNR_SRC): $(CLI_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
 # for mysql_seed_create
 # make:
 # 	mysql_seed_create_test		binary,
@@ -569,10 +645,10 @@ $(TEST_RUNNER_SOURCE_DIR):
 $(CREATE_TEST_BIN): $(CREATE_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(CREATE_TRNR_OBJ): $(CREATE_TEST_TRNR_PREQS)
+$(CREATE_TRNR_OBJ): $(CREATE_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(CREATE_TEST_OBJ): $(CREATE_TEST_TEST_PREQS)
+$(CREATE_TEST_OBJ): $(CREATE_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(CREATE_TRNR_SRC): $(CREATE_TRNR_SRC_PREQS)
@@ -589,10 +665,10 @@ $(CREATE_TRNR_SRC): $(CREATE_TRNR_SRC_PREQS)
 $(RUN_TEST_BIN): $(RUN_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(RUN_TRNR_OBJ): $(RUN_TEST_TRNR_PREQS)
+$(RUN_TRNR_OBJ): $(RUN_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(RUN_TEST_OBJ): $(RUN_TEST_TEST_PREQS)
+$(RUN_TEST_OBJ): $(RUN_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(RUN_TRNR_SRC): $(RUN_TRNR_SRC_PREQS)
@@ -609,10 +685,10 @@ $(RUN_TRNR_SRC): $(RUN_TRNR_SRC_PREQS)
 $(EXIT_TEST_BIN): $(EXIT_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(EXIT_TRNR_OBJ): $(EXIT_TEST_TRNR_PREQS)
+$(EXIT_TRNR_OBJ): $(EXIT_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(EXIT_TEST_OBJ): $(EXIT_TEST_TEST_PREQS)
+$(EXIT_TEST_OBJ): $(EXIT_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
@@ -629,10 +705,10 @@ $(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
 $(COUNT_STRING_TEST_BIN): $(COUNT_STRING_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(COUNT_STRING_TRNR_OBJ): $(COUNT_STRING_TEST_TRNR_PREQS)
+$(COUNT_STRING_TRNR_OBJ): $(COUNT_STRING_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(COUNT_STRING_TEST_OBJ): $(COUNT_STRING_TEST_TEST_PREQS)
+$(COUNT_STRING_TEST_OBJ): $(COUNT_STRING_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(COUNT_STRING_TRNR_SRC): $(COUNT_STRING_TRNR_SRC_PREQS)
@@ -649,10 +725,10 @@ $(COUNT_STRING_TRNR_SRC): $(COUNT_STRING_TRNR_SRC_PREQS)
 $(LOG_TEST_BIN): $(LOG_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(LOG_TRNR_OBJ): $(LOG_TEST_TRNR_PREQS)
+$(LOG_TRNR_OBJ): $(LOG_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(LOG_TEST_OBJ): $(LOG_TEST_TEST_PREQS)
+$(LOG_TEST_OBJ): $(LOG_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(LOG_TRNR_SRC): $(LOG_TRNR_SRC_PREQS)
@@ -669,10 +745,10 @@ $(LOG_TRNR_SRC): $(LOG_TRNR_SRC_PREQS)
 $(PARALLEL_TEST_BIN): $(PARALLEL_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(PARALLEL_TRNR_OBJ): $(PARALLEL_TEST_TRNR_PREQS)
+$(PARALLEL_TRNR_OBJ): $(PARALLEL_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(PARALLEL_TEST_OBJ): $(PARALLEL_TEST_TEST_PREQS)
+$(PARALLEL_TEST_OBJ): $(PARALLEL_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(PARALLEL_TRNR_SRC): $(PARALLEL_TRNR_SRC_PREQS)
@@ -689,10 +765,10 @@ $(PARALLEL_TRNR_SRC): $(PARALLEL_TRNR_SRC_PREQS)
 $(UTILS_TEST_BIN): $(UTILS_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-$(UTILS_TRNR_OBJ): $(UTILS_TEST_TRNR_PREQS)
+$(UTILS_TRNR_OBJ): $(UTILS_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(UTILS_TEST_OBJ): $(UTILS_TEST_TEST_PREQS)
+$(UTILS_TEST_OBJ): $(UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(UTILS_TRNR_SRC): $(UTILS_TRNR_SRC_PREQS)

@@ -87,14 +87,13 @@ seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
 	seed_log_append_string(ERROR_INVALID_OPTION);
 
 
-	ptr = put_string_length(ptr,
-				option,
-				OPTION_MAX_LENGTH);
+	seed_log_append_string_length(option,
+				      OPTION_MAX_LENGTH);
 
-	PUTS_CLOSE(ptr);
+	seed_log_append_string("\n\n");
 
 	seed_exit_spec_set_failure(spec,
-				    buffer);
+				   seed_log_buffer_ptr());
 }
 
 inline void

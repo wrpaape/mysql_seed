@@ -29,7 +29,7 @@
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef (DIGIT_COUNT_MAX)
+#ifdef DIGIT_COUNT_MAX
 extern size_t ten_pow_map[DIGIT_COUNT_MAX + 1u];
 #endif	/* ifdef (DIGIT_COUNT_MAX) */
 
@@ -54,7 +54,7 @@ do {				\
 
 /* helper functions
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef (DIGIT_COUNT_MAX)
+#ifdef DIGIT_COUNT_MAX
 inline unsigned int
 digit_count(size_t n)
 {
@@ -174,7 +174,7 @@ inline char *
 put_digits(char *restrict buffer,
 	   size_t n)
 {
-#ifdef (DIGIT_COUNT_MAX)
+#ifdef DIGIT_COUNT_MAX
 	char *const restrict end_ptr = buffer + digit_count(n);
 
 	do_put_digits(end_ptr - 1l,
@@ -194,7 +194,7 @@ put_digits_length(char *restrict buffer,
 		  size_t n,
 		  const size_t length)
 {
-#ifdef (DIGIT_COUNT_MAX)
+#ifdef DIGIT_COUNT_MAX
 
 	if (length == 0lu)
 		return buffer;

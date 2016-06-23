@@ -1,6 +1,6 @@
 #include "mysql_seed_utils.h"
 
-#ifdef (DIGIT_COUNT_MAX)
+#ifdef DIGIT_COUNT_MAX
 size_t ten_pow_map[DIGIT_COUNT_MAX + 1u] = {
 	[ 0] = 1lu,
 	[ 1] = 10lu,

@@ -4,12 +4,13 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <pthread.h>	/* pthread API */
+#include <errno.h>	/* error codes, errno */
 #include <string.h>	/* memcpy */
-#include <bool.h>	/* bool */
+#include <stdbool.h>	/* bool */
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
-typedef SeedMutex pthread_mutex_t;
+typedef pthread_mutex_t SeedMutex;
 
 
 /* helper macros
@@ -27,13 +28,13 @@ inline void
 seed_mutex_init(SeedMutex *const restrict lock)
 {
 	memcpy(lock,
-	       seed_lock_prototype,
+	       &seed_lock_prototype,
 	       sizeof(seed_lock_prototype));
 }
 
 inline bool
 seed_mutex_lock(SeedMutex *const lock,
-		char *const *restrict message_ptr)
+		char *restrict *const restrict message_ptr)
 {
 	switch (pthread_mutex_lock(lock)) {
 	case 0:
@@ -61,7 +62,7 @@ seed_mutex_lock(SeedMutex *const lock,
 
 inline bool
 seed_mutex_unlock(SeedMutex *const lock,
-		  char *const *restrict message_ptr)
+		  char *restrict *const restrict message_ptr)
 {
 	switch (pthread_mutex_unlock(lock)) {
 	case 0:
