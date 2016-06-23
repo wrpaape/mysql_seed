@@ -5,6 +5,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
+#include <stdlib.h>		/* malloc, free */
 #include "mysql_seed_log.h"	/* seed_log, string utils */
 
 /* error flags

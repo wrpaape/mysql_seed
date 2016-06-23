@@ -29,7 +29,7 @@ extern struct SeedLog seed_log;
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
-#define LOG_BUFFER_LAST (LOG_BUFFER_LENGTH - 1lu)
+#define LOG_BUFFER_LAST (LOG_BUFFER_LENGTH - 1)
 #define SEED_LOG_INIT()							\
 do {									\
 	seed_log.current_ptr = &seed_log.buffer[0];			\
