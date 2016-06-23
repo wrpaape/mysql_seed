@@ -7,6 +7,20 @@
 # ══════════════════════════════════════════════════════════════════════════════
 #
 #
+## MISC
+# ══════════════════════════════════════════════════════════════════════════════
+# String Utils
+# ──────────────────────────────────────────────────────────────────────────────
+EMPTY	       :=
+SPACE	       := $(EMPTY) $(EMPTY)
+TAB	       := $(EMPTY)	$(EMPTY)
+TRIM		= $(subst $(SPACE),$(EMPTY),$1)
+define NEWLINE :=
+
+
+endef
+
+
 # SYSTEM CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 # taken from user 'Trevor Robinson''s response to stackoverflow question:
@@ -60,7 +74,7 @@ endif
 
 # DIRECTORY CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
-PATH_JOIN	 	 = $(subst $(SPACE),$(PATH_DELIM),$(strip $1))
+PATH_JOIN		 = $(subst $(SPACE),$(PATH_DELIM),$(strip $1))
 
 PROJECT 		:= mysql_seed
 PROJECT_ROOT		:= ..
@@ -68,12 +82,60 @@ SOURCE_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) src)
 HEADER_DIR		:= $(SOURCE_DIR)
 OBJECT_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) obj)
 BINARY_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) bin)
-TEST_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) test)
-TEST_RUNNER_DIR		:= $(call PATH_JOIN,$(TEST_DIR) test_runners)
-UNITY_DIR		:= $(call PATH_JOIN,$(TEST_DIR) unity)
-UNITY_SOURCE_DIR	:= $(call PATH_JOIN,$(UNITY_DIR) src)
+TEST_SOURCE_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) test)
+TEST_HEADER_DIR		:= $(TEST_SOURCE_DIR)
+TEST_RUNNER_SOURCE_DIR	:= $(call PATH_JOIN,$(TEST_SOURCE_DIR) test_runners)
+TEST_OBJECT_DIR		:= $(OBJECT_DIR)
+TEST_RUNNER_OBJECT_DIR	:= $(TEST_OBJECT_DIR)
+TEST_BINARY_DIR		:= $(TEST_SOURCE_DIR)
+UNITY_ROOT		:= $(call PATH_JOIN,$(TEST_SOURCE_DIR) unity)
+UNITY_SOURCE_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) src)
 UNITY_HEADER_DIR	:= $(UNITY_SOURCE_DIR)
-UNITY_AUTO_DIR  	:= $(call PATH_JOIN,$(UNITY_DIR) auto)
+UNITY_OBJECT_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) obj)
+UNITY_AUTO_DIR  	:= $(call PATH_JOIN,$(UNITY_ROOT) auto)
+
+
+# PATH CONFIG
+# ══════════════════════════════════════════════════════════════════════════════
+FILE_PATH			= $(call PATH_JOIN,$1 $(call TRIM,$2))
+SCRIPT_FILE_PATH		= $(call FILE_PATH,$1,$2.rb)
+SOURCE_FILE_PATH		= $(call FILE_PATH,$1,$2.c)
+HEADER_FILE_PATH		= $(call FILE_PATH,$1,$2.h)
+OBJECT_FILE_PATH		= $(call FILE_PATH,$1,$2.o)
+BINARY_FILE_PATH		= $(call FILE_PATH,$1,$2)
+
+# Project
+# ─────────────── source ───────────────────────────────────────────────────────
+SOURCE_PATH			= $(call SOURCE_FILE_PATH,$(SOURCE_DIR),$1)# implementation
+HEADER_PATH			= $(call HEADER_FILE_PATH,$(HEADER_DIR),$1)# interface
+# ─────────────── build ────────────────────────────────────────────────────────
+OBJECT_PATH   			= $(call OBJECT_FILE_PATH,$(OBJECT_DIR),$1)# object files
+BINARY_PATH 			= $(call BINARY_FILE_PATH,$(BINARY_DIR),$1)# binary executable output
+
+# Project Module
+# ─────────────── source ───────────────────────────────────────────────────────
+MODULE_SOURCE_PATH		= $(call SOURCE_PATH,$(PROJECT)_$1)# implementation
+MODULE_HEADER_PATH		= $(call HEADER_PATH,$(PROJECT)_$1)# interface
+# ─────────────── build ────────────────────────────────────────────────────────
+MODULE_OBJECT_PATH   		= $(call OBJECT_PATH,$(PROJECT)_$1)# object files
+
+# Module Testing
+# ─────────────── source ───────────────────────────────────────────────────────
+TEST_SOURCE_PATH		= $(call SOURCE_FILE_PATH,$(TEST_SOURCE_DIR),$(PROJECT)_$1_test)# Unity unit test implementation
+TEST_HEADER_PATH		= $(call HEADER_FILE_PATH,$(TEST_HEADER_DIR),$(PROJECT)_$1_test)# Unity unit test interface
+TEST_RUNNER_SOURCE_PATH		= $(call SOURCE_FILE_PATH,$(TEST_RUNNER_SOURCE_DIR),$(PROJECT)_$1_test_runner)# Unity test runners
+# ─────────────── build ────────────────────────────────────────────────────────
+TEST_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(TEST_OBJECT_DIR),$(PROJECT)_$1_test)# Unity unit test object files
+TEST_RUNNER_OBJECT_PATH		= $(call OBJECT_FILE_PATH,$(TEST_RUNNER_OBJECT_DIR),$(PROJECT)_$1_test_runner)# Unity test runner object files
+TEST_BINARY_PATH 		= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),$(PROJECT)_$1_test)# binary executable output
+
+# Unity Test Framework
+# ─────────────── source ───────────────────────────────────────────────────────
+UNITY_SOURCE_PATH		= $(call SOURCE_FILE_PATH,$(UNITY_SOURCE_DIR),$1)# Unity framework implementation
+UNITY_HEADER_PATH		= $(call HEADER_FILE_PATH,$(UNITY_HEADER_DIR),$1)# Unity framework interface
+# ─────────────── build ────────────────────────────────────────────────────────
+UNITY_SCRIPT_PATH		= $(call SCRIPT_FILE_PATH,$(UNITY_AUTO_DIR),$1)# Unity framework scripts
+UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity framework object files
 
 
 
@@ -109,57 +171,6 @@ RUBY_FLAGS	:= $(EMPTY)
 
 
 
-# PATH CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
-# Project File
-# ──────────────────────────────────────────────────────────────────────────────
-PROJECT_FILE			= $(call PATH_JOIN,$1 $(call TRIM,$(PROJECT)$2$3))
-# Project Module
-# ─────────────── source ───────────────────────────────────────────────────────
-HEADER_PATH			= $(call PROJECT_FILE,$(HEADER_DIR),$1,.h)# interface
-SOURCE_PATH			= $(call PROJECT_FILE,$(SOURCE_DIR),$1,.c)# implementation
-# ─────────────── build ────────────────────────────────────────────────────────
-OBJECT_PATH   			= $(call PROJECT_FILE,$(OBJECT_DIR),$1,.o)# object files
-BINARY_PATH 			= $(call PROJECT_FILE,$(BINARY_DIR),$1,$(EMPTY))# binary executable output
-# Module Testing
-# ─────────────── scripts ──────────────────────────────────────────────────────
-UNITY_AUTO_PATH			= $(call PATH_JOIN,$(UNITY_AUTO_DIR)$1.rb)
-# ─────────────── source ───────────────────────────────────────────────────────
-UNITY_SOURCE_PATH		= $(call PATH_JOIN,$(UNITY_SOURCE_DIR)$1.c)
-UNITY_HEADER_PATH		= $(call PATH_JOIN,$(UNITY_HEADER_DIR)$1.h)
-TEST_SOURCE_PATH		= $(call PROJECT_FILE,$(TEST_DIR),$1,_test.c)# Unity unit tests
-TEST_RUNNER_SOURCE_PATH		= $(call PROJECT_FILE,$(TEST_RUNNER_DIR),$1,_test_runner.c)# Unity test runners
-# ─────────────── build ────────────────────────────────────────────────────────
-UNITY_OBJECT_PATH 		= $(call PROJECT_FILE,$(OBJECT_DIR),$1,.o)# Unity framework object files
-TEST_OBJECT_PATH 		= $(call PROJECT_FILE,$(OBJECT_DIR),$1,_test.o)# Unity unit test object files
-TEST_RUNNER_OBJECT_PATH		= $(call PROJECT_FILE,$(OBJECT_DIR),$1,_test_runner.o)# Unity test runner object files
-TEST_BINARY_PATH 		= $(call PROJECT_FILE,$(TEST_DIR),$1,_test)# binary executable output
-
-
-## MISC
-# ══════════════════════════════════════════════════════════════════════════════
-# String Utils
-# ──────────────────────────────────────────────────────────────────────────────
-EMPTY	:=
-SPACE	:= $(EMPTY) $(EMPTY)
-TAB	:= $(EMPTY)	$(EMPTY)
-TRIM	 = $(subst $(SPACE),$(EMPTY),$1)
-define NEWLINE :=
-
-
-endef
-# Run all Tests
-# ──────────────────────────────────────────────────────────────────────────────
-TEST_FILES_GLOB	:= $(call TEST_BINARY_PATH,*)
-
-ifdef $(SYSTEM_WINDOWS)
-RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
-
-else
-RUN_ALL_TESTS	:= for test in $(TEST_FILES_GLOB); do "./$$test"; done
-endif
-
-
 
 ## PROJECT COMPONENTS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -170,9 +181,17 @@ UNITY_HDR 		:= $(call UNITY_HEADER_PATH,unity)
 UNITY_CONFIG_HDR 	:= $(call UNITY_HEADER_PATH,unity_config)
 UNITY_INTERNALS_HDR 	:= $(call UNITY_HEADER_PATH,unity_internals)
 UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
-UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_AUTO_PATH,generate_test_runner)
+UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_SCRIPT_PATH,generate_test_runner)
 UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
+# ─────────────── run all tests ────────────────────────────────────────────────
+TEST_FILES_GLOB	:= $(call TEST_BINARY_PATH,*)
+ifdef $(SYSTEM_WINDOWS)
+RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
+
+else
+RUN_ALL_TESTS	:= for test in $(TEST_FILES_GLOB); do "./$$test"; done
+endif
 # ─────────────── target prequisites ───────────────────────────────────────────
 UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
 			   $(UNITY_HDR)					\
@@ -180,15 +199,15 @@ UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
 			   $(UNITY_CONFIG_HDR)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TARGETS			+= $(UNITY_OBJ)					\
-			   $(TEST_RUNNER_DIR)
+			   $(TEST_RUNNER_SOURCE_DIR)
 
 
 # mysql_seed (entry point)
 # ──────────────────────────────────────────────────────────────────────────────
-PROJECT_SRC 		:= $(call SOURCE_PATH,$(EMPTY))
-PROJECT_HDR		:= $(call HEADER_PATH,$(EMPTY))
-PROJECT_OBJ 		:= $(call OBJECT_PATH,$(EMPTY))
-PROJECT_BIN 		:= $(call BINARY_PATH,$(EMPTY))
+PROJECT_SRC 		:= $(call SOURCE_PATH,$(PROJECT))
+PROJECT_HDR		:= $(call HEADER_PATH,$(PROJECT))
+PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
+PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
 # ─────────────── target prequisites ───────────────────────────────────────────
 PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 			   $(CREATE_OBJ) 				\
@@ -210,14 +229,14 @@ TARGETS			+= $(PROJECT_OBJ)				\
 
 # mysql_seed_mode
 # ──────────────────────────────────────────────────────────────────────────────
-MODE_HDR		:= $(call HEADER_PATH,mode)
+MODE_HDR		:= $(call MODULE_HEADER_PATH,mode)
 
 
 # mysql_seed_create
 # ──────────────────────────────────────────────────────────────────────────────
-CREATE_SRC 		:= $(call SOURCE_PATH,create)
-CREATE_HDR		:= $(call HEADER_PATH,create)
-CREATE_OBJ 		:= $(call OBJECT_PATH,create)
+CREATE_SRC 		:= $(call MODULE_SOURCE_PATH,create)
+CREATE_HDR		:= $(call MODULE_HEADER_PATH,create)
+CREATE_OBJ 		:= $(call MODULE_OBJECT_PATH,create)
 CREATE_TEST_SRC		:= $(call TEST_SOURCE_PATH,create)
 CREATE_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,create)
 CREATE_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,create)
@@ -229,7 +248,7 @@ CREATE_OBJ_PREQS	:= $(CREATE_SRC) 				\
 			   $(CREATE_HDR) 				\
 			   $(MODE_HDR)
 CREATE_TRNR_SRC_PREQS	:= $(CREATE_TEST_SRC)				\
-			   $(TEST_RUNNER_DIR)
+			   $(TEST_RUNNER_SOURCE_DIR)
 CREATE_TEST_OBJ_PREQS	:= $(CREATE_TEST_SRC)				\
 			   $(CREATE_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
@@ -249,9 +268,9 @@ TARGETS			+= $(CREATE_OBJ)				\
 
 # mysql_seed_run
 # ──────────────────────────────────────────────────────────────────────────────
-RUN_SRC 		:= $(call SOURCE_PATH,run)
-RUN_HDR			:= $(call HEADER_PATH,run)
-RUN_OBJ 		:= $(call OBJECT_PATH,run)
+RUN_SRC 		:= $(call MODULE_SOURCE_PATH,run)
+RUN_HDR			:= $(call MODULE_HEADER_PATH,run)
+RUN_OBJ 		:= $(call MODULE_OBJECT_PATH,run)
 RUN_TEST_SRC		:= $(call TEST_SOURCE_PATH,run)
 RUN_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,run)
 RUN_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,run)
@@ -262,8 +281,8 @@ RUN_TEST_BIN		:= $(call TEST_BINARY_PATH,run)
 RUN_OBJ_PREQS		:= $(RUN_SRC) 					\
 			   $(RUN_HDR) 					\
 			   $(MODE_HDR)
-RUN_TRNR_SRC_PREQS	:= $(RUN_TEST_SRC)
-			   $(TEST_RUNNER_DIR)
+RUN_TRNR_SRC_PREQS	:= $(RUN_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
 RUN_TEST_OBJ_PREQS	:= $(RUN_TEST_SRC)				\
 			   $(RUN_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
@@ -283,9 +302,9 @@ TARGETS			+= $(RUN_OBJ)					\
 
 # mysql_seed_exit
 # ──────────────────────────────────────────────────────────────────────────────
-EXIT_SRC 		:= $(call SOURCE_PATH,exit)
-EXIT_HDR		:= $(call HEADER_PATH,exit)
-EXIT_OBJ 		:= $(call OBJECT_PATH,exit)
+EXIT_SRC 		:= $(call MODULE_SOURCE_PATH,exit)
+EXIT_HDR		:= $(call MODULE_HEADER_PATH,exit)
+EXIT_OBJ 		:= $(call MODULE_OBJECT_PATH,exit)
 EXIT_TEST_SRC		:= $(call TEST_SOURCE_PATH,exit)
 EXIT_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,exit)
 EXIT_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,exit)
@@ -296,8 +315,8 @@ EXIT_TEST_BIN		:= $(call TEST_BINARY_PATH,exit)
 EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
 			   $(EXIT_HDR) 					\
 			   $(MODE_HDR)
-EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)
-			   $(TEST_RUNNER_DIR)
+EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
 EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
 			   $(EXIT_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
@@ -317,9 +336,9 @@ TARGETS			+= $(EXIT_OBJ)					\
 
 # mysql_seed_count_string
 # ──────────────────────────────────────────────────────────────────────────────
-COUNT_STRING_SRC 	:= $(call SOURCE_PATH,count_string)
-COUNT_STRING_HDR	:= $(call HEADER_PATH,count_string)
-COUNT_STRING_OBJ 	:= $(call OBJECT_PATH,count_string)
+COUNT_STRING_SRC 	:= $(call MODULE_SOURCE_PATH,count_string)
+COUNT_STRING_HDR	:= $(call MODULE_HEADER_PATH,count_string)
+COUNT_STRING_OBJ 	:= $(call MODULE_OBJECT_PATH,count_string)
 COUNT_STRING_TEST_SRC	:= $(call TEST_SOURCE_PATH,count_string)
 COUNT_STRING_TRNR_SRC	:= $(call TEST_RUNNER_SOURCE_PATH,count_string)
 COUNT_STRING_TEST_OBJ	:= $(call TEST_RUNNER_OBJECT_PATH,count_string)
@@ -330,8 +349,8 @@ COUNT_STRING_TEST_BIN	:= $(call TEST_BINARY_PATH,count_string)
 COUNT_STRING_OBJ_PREQS		:= $(COUNT_STRING_SRC) 			\
 				   $(COUNT_STRING_HDR) 			\
 				   $(LOG_HDR)
-COUNT_STRING_TRNR_SRC_PREQS	:= $(COUNT_STRING_TEST_SRC)
-			   	   $(TEST_RUNNER_DIR)
+COUNT_STRING_TRNR_SRC_PREQS	:= $(COUNT_STRING_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
 COUNT_STRING_TEST_OBJ_PREQS	:= $(COUNT_STRING_TEST_SRC)		\
 			   	   $(COUNT_STRING_OBJ_PREQS) 		\
 			   	   $(UNITY_OBJ_PREQS)
@@ -351,9 +370,9 @@ TARGETS			+= $(COUNT_STRING_OBJ)				\
 
 # mysql_seed_log
 # ──────────────────────────────────────────────────────────────────────────────
-LOG_SRC 		:= $(call SOURCE_PATH,log)
-LOG_HDR			:= $(call HEADER_PATH,log)
-LOG_OBJ 		:= $(call OBJECT_PATH,log)
+LOG_SRC 		:= $(call MODULE_SOURCE_PATH,log)
+LOG_HDR			:= $(call MODULE_HEADER_PATH,log)
+LOG_OBJ 		:= $(call MODULE_OBJECT_PATH,log)
 LOG_TEST_SRC		:= $(call TEST_SOURCE_PATH,log)
 LOG_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,log)
 LOG_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,log)
@@ -365,8 +384,8 @@ LOG_OBJ_PREQS		:= $(LOG_SRC) 					\
 			   $(LOG_HDR) 					\
 			   $(UTILS_HDR)					\
 			   $(PARALLEL_HDR)
-LOG_TRNR_SRC_PREQS	:= $(LOG_TEST_SRC)
-			   $(TEST_RUNNER_DIR)
+LOG_TRNR_SRC_PREQS	:= $(LOG_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
 LOG_TEST_OBJ_PREQS	:= $(LOG_TEST_SRC)				\
 			   $(LOG_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
@@ -386,9 +405,9 @@ TARGETS			+= $(LOG_OBJ)					\
 
 # mysql_seed_parallel
 # ──────────────────────────────────────────────────────────────────────────────
-PARALLEL_SRC 		:= $(call SOURCE_PATH,parallel)
-PARALLEL_HDR		:= $(call HEADER_PATH,parallel)
-PARALLEL_OBJ 		:= $(call OBJECT_PATH,parallel)
+PARALLEL_SRC 		:= $(call MODULE_SOURCE_PATH,parallel)
+PARALLEL_HDR		:= $(call MODULE_HEADER_PATH,parallel)
+PARALLEL_OBJ 		:= $(call MODULE_OBJECT_PATH,parallel)
 PARALLEL_TEST_SRC	:= $(call TEST_SOURCE_PATH,parallel)
 PARALLEL_TRNR_SRC	:= $(call TEST_RUNNER_SOURCE_PATH,parallel)
 PARALLEL_TEST_OBJ	:= $(call TEST_RUNNER_OBJECT_PATH,parallel)
@@ -398,8 +417,8 @@ PARALLEL_TEST_BIN	:= $(call TEST_BINARY_PATH,parallel)
 # ─────────────── target prequisites ───────────────────────────────────────────
 PARALLEL_OBJ_PREQS	:= $(PARALLEL_SRC) 				\
 			   $(PARALLEL_HDR)
-PARALLEL_TRNR_SRC_PREQS	:= $(PARALLEL_TEST_SRC)
-			   $(TEST_RUNNER_DIR)
+PARALLEL_TRNR_SRC_PREQS	:= $(PARALLEL_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
 PARALLEL_TEST_OBJ_PREQS	:= $(PARALLEL_TEST_SRC)				\
 			   $(PARALLEL_OBJ_PREQS) 			\
 			   $(UNITY_OBJ_PREQS)
@@ -419,9 +438,9 @@ TARGETS			+= $(PARALLEL_OBJ)				\
 
 # mysql_seed_utils
 # ──────────────────────────────────────────────────────────────────────────────
-UTILS_SRC 		:= $(call SOURCE_PATH,utils)
-UTILS_HDR		:= $(call HEADER_PATH,utils)
-UTILS_OBJ 		:= $(call OBJECT_PATH,utils)
+UTILS_SRC 		:= $(call MODULE_SOURCE_PATH,utils)
+UTILS_HDR		:= $(call MODULE_HEADER_PATH,utils)
+UTILS_OBJ 		:= $(call MODULE_OBJECT_PATH,utils)
 UTILS_TEST_SRC		:= $(call TEST_SOURCE_PATH,utils)
 UTILS_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,utils)
 UTILS_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,utils)
@@ -431,8 +450,8 @@ UTILS_TEST_BIN		:= $(call TEST_BINARY_PATH,utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 UTILS_OBJ_PREQS		:= $(UTILS_SRC) 				\
 			   $(UTILS_HDR)
-UTILS_TRNR_SRC_PREQS	:= $(UTILS_TEST_SRC)
-			   $(TEST_RUNNER_DIR)
+UTILS_TRNR_SRC_PREQS	:= $(UTILS_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
 UTILS_TEST_OBJ_PREQS	:= $(UTILS_TEST_SRC)				\
 			   $(UTILS_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
@@ -449,6 +468,8 @@ TARGETS			+= $(UTILS_OBJ)					\
 			   $(UTILS_TEST_OBJ)				\
 			   $(UTILS_TEST_BIN)
 
+
+$(info $(TARGETS))
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -523,14 +544,21 @@ $(UTILS_OBJ): $(UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 
+## MAKE UNITY TEST FRAMEWORK
+# ══════════════════════════════════════════════════════════════════════════════
+# make unity object
+# ──────────────────────────────────────────────────────────────────────────────
+$(UNITY_OBJ): $(UNITY_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+# make test_runners directory
+# ──────────────────────────────────────────────────────────────────────────────
+$(TEST_RUNNER_SOURCE_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
+
 
 ## MAKE UNIT TESTS
 # ══════════════════════════════════════════════════════════════════════════════
-# make test_runners directory
-# ──────────────────────────────────────────────────────────────────────────────
-$(TEST_RUNNER_DIR):
-	$(MKDIR) $(MKDIR_FLAGS) $@
-
 # for mysql_seed_create
 # make:
 # 	mysql_seed_create_test		binary,
