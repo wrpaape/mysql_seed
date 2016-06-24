@@ -8,18 +8,57 @@
 #include <string.h>	/* memcpy */
 #include <stdbool.h>	/* bool */
 
+#define SEED_WORKERS_MAX 4u
+
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 typedef pthread_mutex_t SeedMutex;
+typedef pthread_t SeedThread;
+
+
+struct SeedWorker {
+	SeedThread thread;
+	unsigned int key;
+	struct SeedWorker *prev;
+	struct SeedWorker *next;
+};
+
+struct SeedWorkerQueue {
+	SeedMutex lock;
+	struct SeedWorker *head;
+	struct SeedWorker **last;
+};
+
+struct SeedWorkerMap {
+	SeedMutex lock;
+	struct SeedWorker workers[SEED_WORKERS_MAX];
+};
+
+struct SeedWorkerSupervisor {
+	struct SeedWorkerQueue idle;
+	struct SeedWorkerQueue active;
+	struct SeedWorkerMap map;
+};
 
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
 #define SEED_LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 
+
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 extern const SeedMutex seed_lock_prototype;
+
+extern SeedWorkerSupervisor supervisor;
+
+
+/* initialize
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+seed_worker_supervisor_init(void) __attribute__((constructor));
+
+
 
 
 /* SeedMutex operations
