@@ -1,7 +1,18 @@
 #include "mysql_seed_exit.h"
 
+/* 'SeedModeHandler' dispatch function
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+seed_exit(const union SeedModeSpec *const restrict mode_spec)
+{
+	seed_exit_spec_exit(&mode_spec->exit);
+}
+
 /* extern inline function declarations
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+seed_exit_spec_exit(const union SeedExitSpec *const restrict spec);
+
 extern inline void
 seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
 		   const int status,
@@ -29,15 +40,3 @@ extern inline void
 seed_exit_spec_set_help_run(struct SeedExitSpec *const restrict spec);
 
 
-/* function defsetions
- *─────────────────────────────────────────────────────────────────────────── */
-void
-seed_exit(const union SeedModeSpec *const restrict mode_spec)
-{
-	const struct SeedExitSpec *const restrict spec = &mode_spec->exit;
-
-	fputs(spec->message,
-	      spec->stream);
-
-	exit(spec->status);
-}

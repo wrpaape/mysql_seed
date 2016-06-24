@@ -54,8 +54,18 @@ ERROR_HEADER("invalid option: ")
 /* 'SeedModeHandler' dispatch function
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_exit(const union SeedModeSpec *const restrict mode_spec);
+seed_exit(const union SeedModeSpec *const restrict mode_spec)
+__attribute__((noreturn));
 
+
+inline void
+seed_exit_spec_exit(const union SeedExitSpec *const restrict spec)
+{
+	fputs(spec->message,
+	      spec->stream);
+
+	exit(spec->status);
+}
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */

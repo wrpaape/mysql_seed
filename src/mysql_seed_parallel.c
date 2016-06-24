@@ -9,31 +9,48 @@ WORKER->NEXT = NEXT
 
 const SeedMutex seed_lock_prototype = SEED_MUTEX_INITIALIZER;
 
-struct SeedWorkerSupervisor supervisor = {
+struct SeedSupervisor supervisor = {
 	.dead = { .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL },
 	.live = { .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL },
-	.map = {
-		.lock	 = SEED_MUTEX_INITIALIZER,
-		.workers = {
-			[ 0u] = { .id  =  0u, .prev = NULL, .next = NULL },
-			[ 1u] = { .id  =  1u, .prev = NULL, .next = NULL },
-			[ 2u] = { .id  =  2u, .prev = NULL, .next = NULL },
-			[ 3u] = { .id  =  3u, .prev = NULL, .next = NULL },
-			[ 4u] = { .id  =  4u, .prev = NULL, .next = NULL },
-			[ 5u] = { .id  =  5u, .prev = NULL, .next = NULL },
-			[ 6u] = { .id  =  6u, .prev = NULL, .next = NULL },
-			[ 7u] = { .id  =  7u, .prev = NULL, .next = NULL },
-			[ 8u] = { .id  =  8u, .prev = NULL, .next = NULL },
-			[ 9u] = { .id  =  9u, .prev = NULL, .next = NULL },
-			[10u] = { .id  = 10u, .prev = NULL, .next = NULL },
-			[11u] = { .id  = 11u, .prev = NULL, .next = NULL },
-			[12u] = { .id  = 12u, .prev = NULL, .next = NULL },
-			[13u] = { .id  = 13u, .prev = NULL, .next = NULL },
-			[14u] = { .id  = 14u, .prev = NULL, .next = NULL },
-			[15u] = { .id  = 15u, .prev = NULL, .next = NULL }
-		}
+	.workers = {
+		[ 0u] = { .id  =  0u, .prev = NULL, .next = NULL },
+		[ 1u] = { .id  =  1u, .prev = NULL, .next = NULL },
+		[ 2u] = { .id  =  2u, .prev = NULL, .next = NULL },
+		[ 3u] = { .id  =  3u, .prev = NULL, .next = NULL },
+		[ 4u] = { .id  =  4u, .prev = NULL, .next = NULL },
+		[ 5u] = { .id  =  5u, .prev = NULL, .next = NULL },
+		[ 6u] = { .id  =  6u, .prev = NULL, .next = NULL },
+		[ 7u] = { .id  =  7u, .prev = NULL, .next = NULL },
+		[ 8u] = { .id  =  8u, .prev = NULL, .next = NULL },
+		[ 9u] = { .id  =  9u, .prev = NULL, .next = NULL },
+		[10u] = { .id  = 10u, .prev = NULL, .next = NULL },
+		[11u] = { .id  = 11u, .prev = NULL, .next = NULL },
+		[12u] = { .id  = 12u, .prev = NULL, .next = NULL },
+		[13u] = { .id  = 13u, .prev = NULL, .next = NULL },
+		[14u] = { .id  = 14u, .prev = NULL, .next = NULL },
+		[15u] = { .id  = 15u, .prev = NULL, .next = NULL }
 	}
 };
+
+/* SeedThread operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+seed_thread_create(SeedThread *const restrict thread,
+		   SeedWorkerRoutine *const routine,
+		   void *arg,
+		   char *restrict *const restrict message_ptr);
+
+extern inline void
+seed_thread_handle_create(SeedThread *const restrict thread,
+			  SeedWorkerRoutine *const routine,
+			  void *arg);
+
+extern inline bool
+seed_thread_cancel(SeedThread *const restrict thread,
+		   char *restrict *const restrict message_ptr);
+
+inline void
+seed_thread_handle_cancel(SeedThread *const restrict thread);
 
 
 /* SeedMutex operations
@@ -56,10 +73,70 @@ extern inline void
 seed_mutex_handle_unlock(SeedMutex *const restrict lock);
 
 
-/* SeedWorkerSupervisor operations
+/* SeedWorkerQueue operations
+ *─────────────────────────────────────────────────────────────────────────── */
+/* LIFO push */
+extern inline void
+worker_queue_push(struct SeedWorkerQueue *const restrict queue,
+		  struct SeedWorker *const restrict worker);
+
+extern inline void
+worker_queue_handle_push(struct SeedWorkerQueue *const restrict queue,
+			 struct SeedWorker *const restrict worker);
+
+/* LIFO pop */
+extern inline struct SeedWorker *
+worker_queue_pop(struct SeedWorkerQueue *const restrict queue);
+
+extern inline struct SeedWorker *
+worker_queue_handle_pop(struct SeedWorkerQueue *const restrict queue);
+
+/* random access delete */
+extern inline void
+worker_queue_remove(struct SeedWorkerQueue *const restrict queue,
+		    struct SeedWorker *const restrict worker);
+
+extern inline void
+worker_queue_handle_remove(struct SeedWorkerQueue *const restrict queue,
+			   struct SeedWorker *const restrict worker);
+
+/* SeedWorker operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline struct SeedWorker *
+seed_worker_fetch(const SeedWorkerID id);
+
+extern inline void
+seed_worker_try_open(const SeedWorkerID id,
+		     SeedWorkerCleanUp *const clean_up,
+		     void *const arg);
+
+extern inline void
+seed_worker_try_close(void);
+
+extern inline void
+seed_worker_exit_clean_up(void *);
+
+
+void *
+seed_worker_start_routine(void *worker)
+{
+	pthread_cleanup_push(&seed_worker_exit_clean_up,
+			     worker);
+
+	  return ((struct SeedWorker const *restrict)
+		  worker)->routine(((struct SeedWorker const *restrict)
+				    worker)->arg)
+}
+
+extern inline SeedWorkerID
+seed_worker_start(SeedWorkerRoutine *const routine,
+		  void *arg);
+
+
+/* SeedSupervisor operations
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_worker_supervisor_init(void)
+seed_supervisor_init(void)
 {
 	struct SeedWorker *const restrict worker0  = &supervisor.map.workers[0];
 	struct SeedWorker *const restrict worker1  = worker0  + 1l;
@@ -95,22 +172,29 @@ seed_worker_supervisor_init(void)
 	SEED_WORKER_LINK(worker14, worker13, worker15);
 	SEED_WORKER_LINK(worker15, worker14, NULL);
 
-	supervisor.idle.head = worker0;
-	supervisor.idle.last = worker15;
+	supervisor.dead.head = worker0;
+	supervisor.dead.last = worker15;
 }
 
 void
-worker_supervisor_exit(const char *restrict failure)
+seed_supervisor_exit(const char *restrict failure)
 {
-	/* TODO */
+	struct SeedWorker *restrict worker;
+	struct SeedExitSpec spec;
+
+	(void) pthread_mutex_lock(&supervisor.live.lock);
+
+	while (1) {
+		worker = worker_queue_pop(&supervisor.live);
+
+		if (worker == NULL)
+			break;
+
+		(void) pthread_cancel(worker->thread);
+	}
+
+	seed_exit_spec_set_failure(&spec,
+				   failure);
+
+	seed_exit_spec_exit(&spec);
 }
-
-
-/* SeedWorkerQueue LIFO operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-worker_queue_push(struct SeedWorkerQueue *const restrict queue,
-		  struct SeedWorker *const restrict worker);
-
-extern inline struct SeedWorker *
-worker_queue_pop(struct SeedWorkerQueue *const restrict queue);

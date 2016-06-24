@@ -41,7 +41,8 @@ do {									\
 /* initialize, reset
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_log_init(void) __attribute__((constructor));
+seed_log_init(void)
+__attribute__((constructor));
 
 inline void
 seed_log_reset(void)

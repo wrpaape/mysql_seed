@@ -3,24 +3,35 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <pthread.h>	/* pthread API */
-#include <errno.h>	/* error codes, errno */
-#include <string.h>	/* memcpy */
-#include <stdbool.h>	/* bool */
+#include <pthread.h>		/* pthread API */
+#include <errno.h>		/* error codes, errno */
+#include <limits.h>		/* PTHREAD_THREADS_MAX */
+#include <string.h>		/* memcpy */
+#include <stdbool.h>		/* bool */
+#include "mysql_seed_exit.h"	/* SeedExitSpec */
 
 #define SEED_WORKERS_MAX 16u
+#define SEED_THREADS_MAX PTHREAD_THREADS_MAX
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 typedef pthread_mutex_t SeedMutex;
-typedef pthread_t SeedThread;
-typedef unsigned int SeedWorkerID;
-typedef void *SeedWorkerRoutine(void *);
 
+typedef pthread_t SeedThread;
+
+typedef unsigned int SeedWorkerID;
+
+typedef void *
+SeedWorkerRoutine(void *);
+
+typedef void
+SeedWorkerTryCatch(void *);
 
 struct SeedWorker {
-	SeedThread thread;
 	SeedWorkerID id;
+	SeedThread thread;
+	SeedWorkerRoutine *routine;
+	void *arg;
 	const struct SeedWorker *prev;
 	const struct SeedWorker *next;
 };
@@ -31,15 +42,11 @@ struct SeedWorkerQueue {
 	const struct SeedWorker *restrict last;
 };
 
-struct SeedWorkerMap {
-	SeedMutex lock;
-	struct SeedWorker workers[SEED_WORKERS_MAX];
-};
 
-struct SeedWorkerSupervisor {
+struct SeedSupervisor {
 	struct SeedWorkerQueue dead;
 	struct SeedWorkerQueue live;
-	struct SeedWorkerMap map;
+	struct SeedWorker workers[SEED_WORKERS_MAX];
 };
 
 
@@ -52,7 +59,84 @@ struct SeedWorkerSupervisor {
  *─────────────────────────────────────────────────────────────────────────── */
 extern const SeedMutex seed_lock_prototype;
 
-extern SeedWorkerSupervisor supervisor;
+extern SeedSupervisor supervisor;
+
+/* SeedThread operations
+ *─────────────────────────────────────────────────────────────────────────── */
+inline bool
+seed_thread_create(SeedThread *const restrict thread,
+		   SeedWorkerRoutine *const routine,
+		   void *arg,
+		   char *restrict *const restrict message_ptr)
+{
+	switch (pthread_create(thread,
+			       NULL,
+			       routine,
+			       arg)) {
+	case 0:
+		return true;
+
+	case EAGAIN:
+		*message_ptr = "seed_thread_create failure:\n"
+			       "The system lacked the necessary resources to "
+			       "create another thread, or the system-imposed "
+			       "limit on the total number of threads in a "
+			       "process, ('SEED_THREADS_MAX' = "
+			       #SEED_THREADS_MAX "), would be exceeded.\n";
+		return false;
+
+	default:
+		*message_ptr = "seed_thread_create failure:\n"
+			       "unknown\n";
+		return false;
+	}
+}
+
+inline void
+seed_thread_handle_create(SeedThread *const restrict thread,
+			  SeedWorkerRoutine *const routine,
+			  void *arg)
+{
+	const char *restrict failure;
+
+	if (!seed_thread_create(thread,
+				routine,
+				arg,
+				&failure))
+		seed_supervisor_exit(failure);
+}
+
+
+inline bool
+seed_thread_cancel(SeedThread *const restrict thread,
+		   char *restrict *const restrict message_ptr)
+{
+	switch (pthread_cancel(thread)) {
+	case 0:
+		return true;
+
+	case ESRCH:
+		*message_ptr = "seed_thread_cancel failure:\n"
+			       "No thread could be found corresponding to that "
+			       "specified by the given SeedThread 'thread'\n";
+		return false;
+
+	default:
+		*message_ptr = "seed_thread_cancel failure:\n"
+			       "unknown\n";
+		return false;
+	}
+}
+
+inline void
+seed_thread_handle_cancel(SeedThread *const restrict thread)
+{
+	const char *restrict failure;
+
+	if (!seed_thread_cancel(thread,
+				&failure))
+		seed_supervisor_exit(failure);
+}
 
 
 
@@ -129,7 +213,7 @@ seed_mutex_handle_lock(SeedMutex *const restrict lock)
 
 	if (!seed_mutex_lock(lock,
 			       &failure))
-		worker_supervisor_exit(failure);
+		seed_supervisor_exit(failure);
 }
 
 inline void
@@ -139,18 +223,17 @@ seed_mutex_handle_unlock(SeedMutex *const restrict lock)
 
 	if (!seed_mutex_unlock(lock,
 			       &failure))
-		worker_supervisor_exit(failure);
+		seed_supervisor_exit(failure);
 }
 
 
-/* SeedWorkerQueue LIFO operations
+/* SeedWorkerQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
+/* LIFO push */
 inline void
 worker_queue_push(struct SeedWorkerQueue *const restrict queue,
 		  struct SeedWorker *const restrict worker)
 {
-	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
-
 	worker->next = NULL;
 
 	if (queue->last == NULL) {
@@ -163,15 +246,25 @@ worker_queue_push(struct SeedWorkerQueue *const restrict queue,
 	}
 
 	queue->last = worker;
+}
+
+inline void
+worker_queue_handle_push(struct SeedWorkerQueue *const restrict queue,
+			 struct SeedWorker *const restrict worker)
+{
+	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+
+	worker_queue_push(queue,
+			  worker);
 
 	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
 }
 
+
+/* LIFO pop */
 inline struct SeedWorker *
 worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
 {
-	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
-
 	const struct SeedWorker *const restrict worker = queue->head;
 
 	if (worker == NULL)
@@ -184,20 +277,124 @@ worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
 	else
 		queue->head->prev = NULL;
 
+	return worker;
+}
+
+inline struct SeedWorker *
+worker_queue_handle_pop(struct SeedWorkerQueue *const restrict queue)
+{
+	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+
+	const struct SeedWorker *const restrict
+	worker = worker_queue_pop(queue);
+
 	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
 
 	return worker;
 }
 
+/* random access delete */
+inline void
+worker_queue_remove(struct SeedWorkerQueue *const restrict queue,
+		    struct SeedWorker *const restrict worker)
+{
+	if (worker->prev == NULL) {
+		if (worker->next == NULL) {
+			queue->head = NULL;
+			queue->last = NULL;
+		} else {
+			worker->next->prev = NULL;
+			queue->head	   = worker->next;
+		}
+	} else {
+		worker->prev->next = worker->next;
 
-/* SeedWorkerSupervisor operations
+		if (worker->next == NULL)
+			queue->last	   = worker->prev;
+		else
+			worker->next->prev = worker->prev;
+	}
+}
+
+inline void
+worker_queue_handle_remove(struct SeedWorkerQueue *const restrict queue,
+			   struct SeedWorker *const restrict worker)
+{
+	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+
+	worker_queue_remove(queue,
+			    worker);
+
+	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+}
+
+/* SeedWorker operations
+ *─────────────────────────────────────────────────────────────────────────── */
+inline struct SeedWorker *
+seed_worker_fetch(const SeedWorkerID id)
+{
+	return &supervisor.workers[id];
+}
+
+inline void
+seed_worker_try_open(SeedWorkerTryCatch *const catch_try,
+		     void *const arg)
+{
+	pthread_cleanup_push(catch_try,
+			     arg);
+}
+
+inline void
+seed_worker_try_close(void)
+{
+	pthread_cleanup_pop(0);
+}
+
+inline void
+seed_worker_exit_clean_up(void *)
+{
+	worker_queue_handle_remove(&supervisor.live,
+				   (struct SeedWorker const *restrict) worker);
+
+	worker_queue_handle_push(&supervisor.dead,
+				 (struct SeedWorker const *restrict) worker);
+}
+
+void *
+seed_worker_start_routine(void *worker);
+
+
+inline SeedWorkerID
+seed_worker_start(SeedWorkerRoutine *const routine,
+		  void *arg)
+{
+	struct SeedWorker *const restrict
+	worker = worker_queue_handle_pop(&supervisor.dead);
+
+	const SeedWorkerID id = worker->id;
+
+	worker->routine = routine;
+	worker->arg	= arg;
+
+	seed_thread_handle_create(worker->thread,
+				  &seed_worker_start_routine)
+
+	return id;
+}
+
+
+
+/* SeedSupervisor operations
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_worker_supervisor_init(void) __attribute__((constructor));
+seed_supervisor_init(void)
+__attribute__((constructor));
+
+
+
 
 void
-worker_supervisor_exit(const char *restrict failure) __attribute__((noreturn));
-
-
+seed_supervisor_exit(const char *restrict failure)
+__attribute__((noreturn));
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_PARALLEL_H_ */
