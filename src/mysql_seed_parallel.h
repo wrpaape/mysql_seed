@@ -8,17 +8,19 @@
 #include <string.h>	/* memcpy */
 #include <stdbool.h>	/* bool */
 
-#define SEED_WORKERS_MAX 4u
+#define SEED_WORKERS_MAX 16u
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 typedef pthread_mutex_t SeedMutex;
 typedef pthread_t SeedThread;
+typedef unsigned int SeedWorkerID;
+typedef void *SeedWorkerRoutine(void *);
 
 
 struct SeedWorker {
 	SeedThread thread;
-	unsigned int key;
+	SeedWorkerID id;
 	const struct SeedWorker *prev;
 	const struct SeedWorker *next;
 };
@@ -35,15 +37,15 @@ struct SeedWorkerMap {
 };
 
 struct SeedWorkerSupervisor {
-	struct SeedWorkerQueue idle;
-	struct SeedWorkerQueue active;
+	struct SeedWorkerQueue dead;
+	struct SeedWorkerQueue live;
 	struct SeedWorkerMap map;
 };
 
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
-#define SEED_LOCK_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#define SEED_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 
 
 /* global variables
