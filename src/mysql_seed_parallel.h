@@ -19,14 +19,14 @@ typedef pthread_t SeedThread;
 struct SeedWorker {
 	SeedThread thread;
 	unsigned int key;
-	struct SeedWorker *prev;
-	struct SeedWorker *next;
+	const struct SeedWorker *prev;
+	const struct SeedWorker *next;
 };
 
 struct SeedWorkerQueue {
 	SeedMutex lock;
-	struct SeedWorker *head;
-	struct SeedWorker **last;
+	const struct SeedWorker *restrict head;
+	const struct SeedWorker *restrict last;
 };
 
 struct SeedWorkerMap {
@@ -51,12 +51,6 @@ struct SeedWorkerSupervisor {
 extern const SeedMutex seed_lock_prototype;
 
 extern SeedWorkerSupervisor supervisor;
-
-
-/* initialize
- *─────────────────────────────────────────────────────────────────────────── */
-void
-seed_worker_supervisor_init(void) __attribute__((constructor));
 
 
 
@@ -101,7 +95,7 @@ seed_mutex_lock(SeedMutex *const lock,
 
 inline bool
 seed_mutex_unlock(SeedMutex *const lock,
-		  char *restrict *const restrict message_ptr)
+		  const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_mutex_unlock(lock)) {
 	case 0:
@@ -125,5 +119,83 @@ seed_mutex_unlock(SeedMutex *const lock,
 		return false;
 	}
 }
+
+inline void
+seed_mutex_handle_lock(SeedMutex *const restrict lock)
+{
+	const char *restrict failure;
+
+	if (!seed_mutex_lock(lock,
+			       &failure))
+		worker_supervisor_exit(failure);
+}
+
+inline void
+seed_mutex_handle_unlock(SeedMutex *const restrict lock)
+{
+	const char *restrict failure;
+
+	if (!seed_mutex_unlock(lock,
+			       &failure))
+		worker_supervisor_exit(failure);
+}
+
+
+/* SeedWorkerQueue LIFO operations
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+worker_queue_push(struct SeedWorkerQueue *const restrict queue,
+		  struct SeedWorker *const restrict worker)
+{
+	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+
+	worker->next = NULL;
+
+	if (queue->last == NULL) {
+		queue->head  = worker;
+		worker->prev = NULL;
+		worker->next = NULL;
+	} else {
+		worker->prev	  = queue->last;
+		queue->last->next = worker;
+	}
+
+	queue->last = worker;
+
+	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+}
+
+inline struct SeedWorker *
+worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
+{
+	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+
+	const struct SeedWorker *const restrict worker = queue->head;
+
+	if (worker == NULL)
+		return NULL;
+
+	queue->head = worker->next;
+
+	if (queue->head == NULL)
+		queue->last = NULL
+	else
+		queue->head->prev = NULL;
+
+	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+
+	return worker;
+}
+
+
+/* SeedWorkerSupervisor operations
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+seed_worker_supervisor_init(void) __attribute__((constructor));
+
+void
+worker_supervisor_exit(const char *restrict failure) __attribute__((noreturn));
+
+
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_PARALLEL_H_ */
