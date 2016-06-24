@@ -8,10 +8,17 @@ seed_exit(const union SeedModeSpec *const restrict mode_spec)
 	seed_exit_spec_exit(&mode_spec->exit);
 }
 
+void
+seed_exit_spec_exit(const struct SeedExitSpec *const restrict spec)
+{
+	fputs(spec->message,
+	      spec->stream);
+
+	exit(spec->status);
+}
+
 /* extern inline function declarations
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-seed_exit_spec_exit(const union SeedExitSpec *const restrict spec);
 
 extern inline void
 seed_exit_spec_set(struct SeedExitSpec *const restrict spec,
@@ -38,5 +45,3 @@ seed_exit_spec_set_help_create(struct SeedExitSpec *const restrict spec);
 
 extern inline void
 seed_exit_spec_set_help_run(struct SeedExitSpec *const restrict spec);
-
-

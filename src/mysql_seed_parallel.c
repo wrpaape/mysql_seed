@@ -38,7 +38,7 @@ extern inline bool
 seed_thread_create(SeedThread *const restrict thread,
 		   SeedWorkerRoutine *const routine,
 		   void *arg,
-		   char *restrict *const restrict message_ptr);
+		   const char *restrict *const restrict message_ptr);
 
 extern inline void
 seed_thread_handle_create(SeedThread *const restrict thread,
@@ -46,11 +46,11 @@ seed_thread_handle_create(SeedThread *const restrict thread,
 			  void *arg);
 
 extern inline bool
-seed_thread_cancel(SeedThread *const restrict thread,
-		   char *restrict *const restrict message_ptr);
+seed_thread_cancel(SeedThread thread,
+		   const char *restrict *const restrict message_ptr);
 
-inline void
-seed_thread_handle_cancel(SeedThread *const restrict thread);
+extern inline void
+seed_thread_handle_cancel(SeedThread thread);
 
 
 /* SeedMutex operations
@@ -60,7 +60,7 @@ seed_mutex_init(SeedMutex *const restrict lock);
 
 extern inline bool
 seed_mutex_lock(SeedMutex *const lock,
-		char *const *restrict message_ptr);
+		const char *const *restrict message_ptr);
 
 extern inline bool
 seed_mutex_unlock(SeedMutex *const lock,
@@ -105,23 +105,15 @@ worker_queue_handle_remove(struct SeedWorkerQueue *const restrict queue,
 extern inline struct SeedWorker *
 seed_worker_fetch(const SeedWorkerID id);
 
-extern inline void
-seed_worker_try_open(const SeedWorkerID id,
-		     SeedWorkerCleanUp *const clean_up,
-		     void *const arg);
 
 extern inline void
-seed_worker_try_close(void);
-
-extern inline void
-seed_worker_exit_clean_up(void *);
+seed_worker_exit_clean_up(void *worker);
 
 
 void *
 seed_worker_start_routine(void *worker)
 {
-	pthread_cleanup_push(&seed_worker_exit_clean_up,
-			     worker);
+	/* TODO: pthread_key instead of clean_up_push */
 
 	  return ((struct SeedWorker const *restrict)
 		  worker)->routine(((struct SeedWorker const *restrict)

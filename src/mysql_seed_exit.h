@@ -58,14 +58,9 @@ seed_exit(const union SeedModeSpec *const restrict mode_spec)
 __attribute__((noreturn));
 
 
-inline void
-seed_exit_spec_exit(const union SeedExitSpec *const restrict spec)
-{
-	fputs(spec->message,
-	      spec->stream);
-
-	exit(spec->status);
-}
+void
+seed_exit_spec_exit(const struct SeedExitSpec *const restrict spec)
+__attribute__((noreturn));
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */

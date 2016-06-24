@@ -32,14 +32,14 @@ struct SeedWorker {
 	SeedThread thread;
 	SeedWorkerRoutine *routine;
 	void *arg;
-	const struct SeedWorker *prev;
-	const struct SeedWorker *next;
+	struct SeedWorker *prev;
+	struct SeedWorker *next;
 };
 
 struct SeedWorkerQueue {
 	SeedMutex lock;
-	const struct SeedWorker *restrict head;
-	const struct SeedWorker *restrict last;
+	struct SeedWorker *restrict head;
+	struct SeedWorker *restrict last;
 };
 
 
@@ -59,7 +59,19 @@ struct SeedSupervisor {
  *─────────────────────────────────────────────────────────────────────────── */
 extern const SeedMutex seed_lock_prototype;
 
-extern SeedSupervisor supervisor;
+extern struct SeedSupervisor supervisor;
+
+
+/* SeedSupervisor operations
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+seed_supervisor_init(void)
+__attribute__((constructor));
+
+void
+seed_supervisor_exit(const char *restrict failure)
+__attribute__((noreturn));
+
 
 /* SeedThread operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -67,7 +79,7 @@ inline bool
 seed_thread_create(SeedThread *const restrict thread,
 		   SeedWorkerRoutine *const routine,
 		   void *arg,
-		   char *restrict *const restrict message_ptr)
+		   const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_create(thread,
 			       NULL,
@@ -81,8 +93,8 @@ seed_thread_create(SeedThread *const restrict thread,
 			       "The system lacked the necessary resources to "
 			       "create another thread, or the system-imposed "
 			       "limit on the total number of threads in a "
-			       "process, ('SEED_THREADS_MAX' = "
-			       #SEED_THREADS_MAX "), would be exceeded.\n";
+			       "process, 'SEED_THREADS_MAX', would be exceeded."
+			       "\n";
 		return false;
 
 	default:
@@ -91,6 +103,7 @@ seed_thread_create(SeedThread *const restrict thread,
 		return false;
 	}
 }
+
 
 inline void
 seed_thread_handle_create(SeedThread *const restrict thread,
@@ -108,8 +121,8 @@ seed_thread_handle_create(SeedThread *const restrict thread,
 
 
 inline bool
-seed_thread_cancel(SeedThread *const restrict thread,
-		   char *restrict *const restrict message_ptr)
+seed_thread_cancel(SeedThread thread,
+		   const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_cancel(thread)) {
 	case 0:
@@ -129,7 +142,7 @@ seed_thread_cancel(SeedThread *const restrict thread,
 }
 
 inline void
-seed_thread_handle_cancel(SeedThread *const restrict thread)
+seed_thread_handle_cancel(SeedThread thread)
 {
 	const char *restrict failure;
 
@@ -153,7 +166,7 @@ seed_mutex_init(SeedMutex *const restrict lock)
 
 inline bool
 seed_mutex_lock(SeedMutex *const lock,
-		char *restrict *const restrict message_ptr)
+		const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_mutex_lock(lock)) {
 	case 0:
@@ -252,12 +265,12 @@ inline void
 worker_queue_handle_push(struct SeedWorkerQueue *const restrict queue,
 			 struct SeedWorker *const restrict worker)
 {
-	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+	seed_mutex_handle_lock(&queue->lock);	/* exit on lock failure */
 
 	worker_queue_push(queue,
 			  worker);
 
-	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+	seed_mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
 }
 
 
@@ -265,7 +278,7 @@ worker_queue_handle_push(struct SeedWorkerQueue *const restrict queue,
 inline struct SeedWorker *
 worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
 {
-	const struct SeedWorker *const restrict worker = queue->head;
+	struct SeedWorker *const restrict worker = queue->head;
 
 	if (worker == NULL)
 		return NULL;
@@ -273,7 +286,7 @@ worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
 	queue->head = worker->next;
 
 	if (queue->head == NULL)
-		queue->last = NULL
+		queue->last = NULL;
 	else
 		queue->head->prev = NULL;
 
@@ -283,12 +296,11 @@ worker_queue_pop(struct SeedWorkerQueue *const restrict queue)
 inline struct SeedWorker *
 worker_queue_handle_pop(struct SeedWorkerQueue *const restrict queue)
 {
-	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+	seed_mutex_handle_lock(&queue->lock);	/* exit on lock failure */
 
-	const struct SeedWorker *const restrict
-	worker = worker_queue_pop(queue);
+	struct SeedWorker *const restrict worker = worker_queue_pop(queue);
 
-	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+	seed_mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
 
 	return worker;
 }
@@ -320,12 +332,12 @@ inline void
 worker_queue_handle_remove(struct SeedWorkerQueue *const restrict queue,
 			   struct SeedWorker *const restrict worker)
 {
-	seed_mutex_handle_lock(queue->lock);	/* exit on lock failure */
+	seed_mutex_handle_lock(&queue->lock);	/* exit on lock failure */
 
 	worker_queue_remove(queue,
 			    worker);
 
-	seed_mutex_handle_unlock(queue->lock);	/* exit on unlock failure */
+	seed_mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
 }
 
 /* SeedWorker operations
@@ -336,29 +348,34 @@ seed_worker_fetch(const SeedWorkerID id)
 	return &supervisor.workers[id];
 }
 
-inline void
-seed_worker_try_open(SeedWorkerTryCatch *const catch_try,
-		     void *const arg)
-{
-	pthread_cleanup_push(catch_try,
-			     arg);
-}
+
+/* apply 'ARG' to 'CATCH_TRY' if exit in block */
+#define seed_worker_try_open(CATCH_TRY, ARG)		\
+pthread_cleanup_push(CATCH_TRY, ARG)
+
+#define seed_worker_try_close()				\
+pthread_cleanup_pop(0)
+
+
+/* apply 'ARG' to 'CATCH_ENSURE' if exit in block or upon completing block */
+#define seed_worker_ensure_open(CATCH_ENSURE, ARG)	\
+pthread_cleanup_push(CATCH_ENSURE, ARG)
+
+#define seed_worker_ensure_close()			\
+pthread_cleanup_pop(1)
+
 
 inline void
-seed_worker_try_close(void)
-{
-	pthread_cleanup_pop(0);
-}
-
-inline void
-seed_worker_exit_clean_up(void *)
+seed_worker_exit_clean_up(void *worker)
 {
 	worker_queue_handle_remove(&supervisor.live,
-				   (struct SeedWorker const *restrict) worker);
+				   (struct SeedWorker *const restrict) worker);
 
 	worker_queue_handle_push(&supervisor.dead,
-				 (struct SeedWorker const *restrict) worker);
+				 (struct SeedWorker *const restrict) worker);
 }
+
+
 
 void *
 seed_worker_start_routine(void *worker);
@@ -376,25 +393,12 @@ seed_worker_start(SeedWorkerRoutine *const routine,
 	worker->routine = routine;
 	worker->arg	= arg;
 
-	seed_thread_handle_create(worker->thread,
-				  &seed_worker_start_routine)
+	seed_thread_handle_create(&worker->thread,
+				  &seed_worker_start_routine,
+				  worker);
 
 	return id;
 }
 
-
-
-/* SeedSupervisor operations
- *─────────────────────────────────────────────────────────────────────────── */
-void
-seed_supervisor_init(void)
-__attribute__((constructor));
-
-
-
-
-void
-seed_supervisor_exit(const char *restrict failure)
-__attribute__((noreturn));
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_PARALLEL_H_ */
