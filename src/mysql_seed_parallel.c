@@ -52,6 +52,24 @@ seed_thread_cancel(SeedThread thread,
 extern inline void
 seed_thread_handle_cancel(SeedThread thread);
 
+/* SeedThreadKey operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+seed_thread_key_create(SeedThreadKey *const key,
+		       SeedWorkerHandle *const handle,
+		       const char *restrict *const restrict message_ptr);
+
+extern inline void
+seed_thread_key_handle_create(SeedThreadKey *const key,
+			      SeedWorkerHandle *const handle);
+
+extern inline bool
+seed_thread_key_delete(SeedThreadkey key,
+		       const char *restrict *const restrict message_ptr);
+
+extern inline void
+seed_thread_key_handle_delete(SeedThreadKey key);
+
 
 /* SeedMutex operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -107,17 +125,21 @@ seed_worker_fetch(const SeedWorkerID id);
 
 
 extern inline void
-seed_worker_exit_clean_up(void *worker);
+seed_worker_exit_clean_up(void *arg);
 
 
 void *
-seed_worker_start_routine(void *worker)
+seed_worker_start_routine(void *arg)
 {
 	/* TODO: pthread_key instead of clean_up_push */
 
-	  return ((struct SeedWorker const *restrict)
-		  worker)->routine(((struct SeedWorker const *restrict)
-				    worker)->arg)
+	struct SeedWorker *const restrict
+	worker = (struct SeedWorker *const restrict) arg;
+
+	seed_thread_key_handle_create(&worker->key,
+				      &seed_worker_exit_clean_up);
+
+	return worker->routine(worker->arg);
 }
 
 extern inline SeedWorkerID

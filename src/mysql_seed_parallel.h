@@ -11,7 +11,16 @@
 #include "mysql_seed_exit.h"	/* SeedExitSpec */
 
 #define SEED_WORKERS_MAX 16u
-#define SEED_THREADS_MAX PTHREAD_THREADS_MAX
+
+#ifdef PTHREAD_THREADS_MAX
+#	define SEED_THREADS_MAX PTHREAD_THREADS_MAX
+#	define SEED_THREADS_MAX_STRING #PTHREAD_THREADS_MAX
+#endif	/* ifdef PTHREADS_THREADS_MAX */
+
+#ifdef PTHREAD_KEYS_MAX
+#	define SEED_THREAD_KEYS_MAX PTHREAD_KEYS_MAX
+#	define SEED_THREAD_KEYS_MAX_STRING #PTHREAD_KEYS_MAX
+#endif	/* ifdef PTHREADS_THREADS_MAX */
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -19,16 +28,19 @@ typedef pthread_mutex_t SeedMutex;
 
 typedef pthread_t SeedThread;
 
+typedef pthread_key_t SeedThreadKey;
+
 typedef unsigned int SeedWorkerID;
 
 typedef void *
 SeedWorkerRoutine(void *);
 
 typedef void
-SeedWorkerTryCatch(void *);
+SeedWorkerHandle(void *);
 
 struct SeedWorker {
 	SeedWorkerID id;
+	SeedThreadKey key;
 	SeedThread thread;
 	SeedWorkerRoutine *routine;
 	void *arg;
@@ -90,16 +102,20 @@ seed_thread_create(SeedThread *const restrict thread,
 
 	case EAGAIN:
 		*message_ptr = "seed_thread_create failure:\n"
-			       "The system lacked the necessary resources to "
-			       "create another thread, or the system-imposed "
+			       "\tThe system lacked the necessary resources to "
+			       "create another thread"
+#ifdef SEED_THREADS_MAX
+			       ", or the system-imposed "
 			       "limit on the total number of threads in a "
-			       "process, 'SEED_THREADS_MAX', would be exceeded."
-			       "\n";
+			       "process, ('SEED_THREADS_MAX' = "
+			       #SEED_THREADS_MAX_STRING "), would be exceeded"
+#endif /* ifdef SEED_THREADS_MAX */
+			       ".\n";
 		return false;
 
 	default:
 		*message_ptr = "seed_thread_create failure:\n"
-			       "unknown\n";
+			       "\tunknown\n";
 		return false;
 	}
 }
@@ -130,13 +146,13 @@ seed_thread_cancel(SeedThread thread,
 
 	case ESRCH:
 		*message_ptr = "seed_thread_cancel failure:\n"
-			       "No thread could be found corresponding to that "
+			       "\tNo thread could be found corresponding to that "
 			       "specified by the given SeedThread 'thread'\n";
 		return false;
 
 	default:
 		*message_ptr = "seed_thread_cancel failure:\n"
-			       "unknown\n";
+			       "\tunknown\n";
 		return false;
 	}
 }
@@ -151,6 +167,85 @@ seed_thread_handle_cancel(SeedThread thread)
 		seed_supervisor_exit(failure);
 }
 
+
+inline bool
+seed_thread_key_create(SeedThreadKey *const key,
+		       SeedWorkerHandle *const handle,
+		       const char *restrict *const restrict message_ptr)
+{
+	switch (pthread_key_create(key,
+				   handle)) {
+	case 0:
+		return true;
+
+	case EAGAIN:
+		*message_ptr = "seed_thread_key_create failure:\n"
+			       "\tThe system lacked the necessary resources to"
+			       " create another thread-specific data key"
+#ifdef SEED_THREAD_KEYS_MAX
+			       ", or the system-imposed limit on the total "
+			       "number of keys per process, ('"
+			       "SEED_THREAD_KEYS_MAX' = "
+			       #SEED_THREAD_KEYS_MAX_STRING "), would be "
+			       "exceeded"
+#endif /* ifdef SEED_THREAD_KEYS_MAX */
+			       ".\n";
+		return false;
+
+	case ENOMEM:
+		*message_ptr = "seed_thread_key_create failure:\n"
+			       "\tInsufficient memory exists to create "
+			       "SeedThreadKey, 'key'.\n";
+		return false;
+
+	default:
+		*message_ptr = "seed_thread_key_create failure:\n"
+			       "\tunknown\n";
+		return false;
+	}
+}
+
+inline void
+seed_thread_key_handle_create(SeedThreadKey *const key,
+			      SeedWorkerHandle *const handle)
+{
+	const char *restrict failure;
+
+	if (!seed_thread_key_create(key,
+				    handle,
+				    &failure))
+		seed_supervisor_exit(failure);
+}
+
+inline bool
+seed_thread_key_delete(SeedThreadkey key,
+		       const char *restrict *const restrict message_ptr)
+{
+	switch (pthread_key_delete(key)) {
+	case 0:
+		return true;
+
+	case EINVAL:
+		*message_ptr = "seed_thread_key_delete failure:\n"
+			       "\tthe value of SeedThread 'key' is invalid.\n";
+		return false;
+
+	default:
+		*message_ptr = "seed_thread_key_delete failure:\n"
+			       "\tunknown\n";
+		return false;
+	}
+}
+
+inline void
+seed_thread_key_handle_delete(SeedThreadKey key)
+{
+	const char *restrict failure;
+
+	if (!seed_thread_key_delete(key,
+				    &failure))
+		seed_supervisor_exit(failure);
+}
 
 
 
@@ -349,36 +444,41 @@ seed_worker_fetch(const SeedWorkerID id)
 }
 
 
-/* apply 'ARG' to 'CATCH_TRY' if exit in block */
-#define seed_worker_try_open(CATCH_TRY, ARG)		\
-pthread_cleanup_push(CATCH_TRY, ARG)
+/* apply 'ARG' to 'CATCH_ROUTINE' if exit in block */
+#define seed_worker_try_catch_open(CATCH_ROUTINE, ARG)		\
+pthread_cleanup_push(CATCH_ROUTINE, ARG)
 
-#define seed_worker_try_close()				\
+#define seed_worker_try_catch_close()				\
 pthread_cleanup_pop(0)
 
 
-/* apply 'ARG' to 'CATCH_ENSURE' if exit in block or upon completing block */
-#define seed_worker_ensure_open(CATCH_ENSURE, ARG)	\
-pthread_cleanup_push(CATCH_ENSURE, ARG)
+/* apply 'ARG' to 'ENSURE_ROUTINE' if exit in block or upon completing block */
+#define seed_worker_try_ensure_open(ENSURE_ROUTINE, ARG)	\
+pthread_cleanup_push(ENSURE_ROUTINE, ARG)
 
-#define seed_worker_ensure_close()			\
+#define seed_worker_try_ensure_close()				\
 pthread_cleanup_pop(1)
 
 
 inline void
-seed_worker_exit_clean_up(void *worker)
+seed_worker_exit_clean_up(void *arg)
 {
+	struct SeedWorker *const restrict
+	worker = (struct SeedWorker *const restrict) arg;
+
+	seed_thread_key_handle_delete(worker->key);
+
 	worker_queue_handle_remove(&supervisor.live,
-				   (struct SeedWorker *const restrict) worker);
+				    worker);
 
 	worker_queue_handle_push(&supervisor.dead,
-				 (struct SeedWorker *const restrict) worker);
+				 worker);
 }
 
 
 
 void *
-seed_worker_start_routine(void *worker);
+seed_worker_start_routine(void *arg);
 
 
 inline SeedWorkerID
@@ -390,6 +490,7 @@ seed_worker_start(SeedWorkerRoutine *const routine,
 
 	const SeedWorkerID id = worker->id;
 
+	worker->key	= (SeedThreadKey) worker;
 	worker->routine = routine;
 	worker->arg	= arg;
 
