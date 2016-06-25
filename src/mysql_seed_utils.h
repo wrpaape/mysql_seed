@@ -4,7 +4,8 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stddef.h>	/* size_t, ssize_t */
+#include <stddef.h>	/* size_t */
+#include <unistd.h>	/* ssize_t */
 #include <stdint.h>	/* SIZE_MAX, UINT16/32/64_MAX */
 #include <stdbool.h>	/* bool */
 

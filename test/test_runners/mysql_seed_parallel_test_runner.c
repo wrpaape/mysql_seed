@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "mysql_seed_cli.h"
+#include "mysql_seed_parallel.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_mysql_seed_cli(void);
+extern void test_mysql_seed_parallel(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/mysql_seed_cli_test.c");
-  RUN_TEST(test_mysql_seed_cli, 12);
+  UnityBegin("../test/mysql_seed_parallel_test.c");
+  RUN_TEST(test_mysql_seed_parallel, 12);
 
   return (UnityEnd());
 }
