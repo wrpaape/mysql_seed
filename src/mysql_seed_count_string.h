@@ -153,24 +153,24 @@ count_string_log_alloc_failure(const size_t upto,
 inline void
 count_string_init(char *const restrict string,
 		  const struct CountStringSpec *const restrict spec,
-		  size_t upto);
+		  size_t upto)
 {
-	*ptr = '\0';
-	--ptr;
+	/* *ptr = '\0'; */
+	/* --ptr; */
 
-	switch (count_string_digit_count(upto)) {
-#if (UPTO_MAX_DIGIT_COUNT == 8u)
-	case 8u:
-	case 7u:
-	case 6u:
-	case 5u:
-#endif /* if (UPTO_MAX_DIGIT_COUNT == 8u) */
-	case 4u:
-	case 3u:
-	case 2u:
-	case 1u:
-	default:
-	}
+	/* switch (count_string_digit_count(upto)) { */
+/* #if (UPTO_MAX_DIGIT_COUNT == 8u) */
+	/* case 8u: */
+	/* case 7u: */
+	/* case 6u: */
+	/* case 5u: */
+/* #endif /1* if (UPTO_MAX_DIGIT_COUNT == 8u) *1/ */
+	/* case 4u: */
+	/* case 3u: */
+	/* case 2u: */
+	/* case 1u: */
+	/* default: */
+	/* } */
 }
 
 
@@ -180,7 +180,8 @@ inline char *
 count_string_create(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
-		count_string_log_alloc_failure("'UPTO_MAX' exceeded\n")
+		count_string_log_alloc_failure(upto,
+					       "'UPTO_MAX' exceeded\n");
 		return NULL;
 	}
 
@@ -194,12 +195,14 @@ count_string_create(const size_t upto)
 
 
 	if (string == NULL) {
-		count_string_log_alloc_failure("malloc failure (out of memory)\n")
+		count_string_log_alloc_failure(upto,
+					       "malloc failure (out of memory)\n");
 		return NULL;
 	}
 
-	count_string_put_digits(string,
-				upto);
+	count_string_init(string,
+			  &spec,
+			  upto);
 
 	return string;
 }

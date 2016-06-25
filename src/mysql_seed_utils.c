@@ -46,7 +46,7 @@ put_digits(char *restrict buffer,
 extern inline char *
 put_digits_length(char *restrict buffer,
 		  size_t n,
-		  const size_t length);
+		  const unsigned int length);
 
 extern inline char *
 put_digits_until(char *restrict buffer,
@@ -60,7 +60,7 @@ put_number(char *restrict buffer,
 extern inline char *
 put_number_length(char *restrict buffer,
 		  ssize_t n,
-		  const size_t length);
+		  unsigned int length);
 
 extern inline char *
 put_number_until(char *restrict buffer,

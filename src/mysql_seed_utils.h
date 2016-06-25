@@ -22,10 +22,6 @@
 #	include <stdio.h>	/* sprintf */
 #endif	/* if (SIZE_MAX == UINT64_MAX) */
 
-/* typedefs
- *─────────────────────────────────────────────────────────────────────────── */
-typedef Word unsigned long int;
-
 /* constants
  *─────────────────────────────────────────────────────────────────────────── */
 /* UINT16_MAX = 65535			(5  digits) */
@@ -181,7 +177,7 @@ put_digits(char *restrict buffer,
 inline char *
 put_digits_length(char *restrict buffer,
 		  size_t n,
-		  const size_t length)
+		  const unsigned int length)
 {
 #ifdef DIGIT_COUNT_MAX
 
@@ -192,7 +188,7 @@ put_digits_length(char *restrict buffer,
 
 	char *restrict end_ptr;
 
-	if (((size_t) count_digits) > length) {
+	if (count_digits > length) {
 
 		end_ptr = buffer + length;
 
@@ -207,10 +203,10 @@ put_digits_length(char *restrict buffer,
 
 	return end_ptr;
 #else
-	const size_t count_digits = (size_t) snprintf(buffer,
-						      length,
-						      "%zu",
-						      n);
+	const unsigned int count_digits = snprintf(buffer,
+						   length,
+						   "%zu",
+						   n);
 
 	return buffer + ((count_digits > length)
 			 ? length
@@ -227,7 +223,7 @@ put_digits_until(char *restrict buffer,
 	     ? end_ptr
 	     : put_digits_length(buffer,
 				 n,
-				 buffer - end_ptr);
+				 end_ptr - buffer);
 }
 
 inline char *
@@ -246,19 +242,20 @@ put_number(char *restrict buffer,
 inline char *
 put_number_length(char *restrict buffer,
 		  ssize_t n,
-		  const size_t length)
+		  unsigned int length)
 {
-	if (length == 0lu)
+	if (length == 0u)
 		return buffer;
 
 	if (n < 0l) {
 		PUT_CHAR(buffer, '-');
+		--length;
 		n = -n;
 	}
 
 	return put_digits_length(buffer,
 				 n,
-				 length - 1lu);
+				 length);
 }
 
 inline char *
@@ -270,7 +267,7 @@ put_number_until(char *restrict buffer,
 	     ? end_ptr
 	     : put_number_length(buffer,
 				 n,
-				 buffer - end_ptr);
+				 end_ptr - buffer);
 }
 
 

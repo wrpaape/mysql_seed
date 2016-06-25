@@ -201,6 +201,7 @@ UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
 UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_SCRIPT_PATH,generate_test_runner)
 UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
+UNITY_LD_LIB_FLAGS	:= -lm
 # ─────────────── run all tests ────────────────────────────────────────────────
 TEST_FILES_GLOB	:= $(call TEST_BINARY_PATH,*)
 ifeq (T,$(SYSTEM_WINDOWS))
@@ -658,7 +659,7 @@ $(TEST_RUNNER_SOURCE_DIR):
 # 	mysql_seed_cli_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(CLI_TEST_BIN): $(CLI_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(CLI_TRNR_OBJ): $(CLI_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -678,7 +679,7 @@ $(CLI_TRNR_SRC): $(CLI_TRNR_SRC_PREQS)
 # 	mysql_seed_create_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(CREATE_TEST_BIN): $(CREATE_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(CREATE_TRNR_OBJ): $(CREATE_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -698,7 +699,7 @@ $(CREATE_TRNR_SRC): $(CREATE_TRNR_SRC_PREQS)
 # 	mysql_seed_run_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(RUN_TEST_BIN): $(RUN_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(RUN_TRNR_OBJ): $(RUN_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -718,7 +719,7 @@ $(RUN_TRNR_SRC): $(RUN_TRNR_SRC_PREQS)
 # 	mysql_seed_exit_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(EXIT_TEST_BIN): $(EXIT_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(EXIT_TRNR_OBJ): $(EXIT_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -738,7 +739,7 @@ $(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
 # 	mysql_seed_count_string_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(COUNT_STRING_TEST_BIN): $(COUNT_STRING_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(COUNT_STRING_TRNR_OBJ): $(COUNT_STRING_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -758,7 +759,7 @@ $(COUNT_STRING_TRNR_SRC): $(COUNT_STRING_TRNR_SRC_PREQS)
 # 	mysql_seed_log_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(LOG_TEST_BIN): $(LOG_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(LOG_TRNR_OBJ): $(LOG_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -778,7 +779,7 @@ $(LOG_TRNR_SRC): $(LOG_TRNR_SRC_PREQS)
 # 	mysql_seed_parallel_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(PARALLEL_TEST_BIN): $(PARALLEL_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(PARALLEL_TRNR_OBJ): $(PARALLEL_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
@@ -798,7 +799,7 @@ $(PARALLEL_TRNR_SRC): $(PARALLEL_TRNR_SRC_PREQS)
 # 	mysql_seed_utils_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(UTILS_TEST_BIN): $(UTILS_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
 $(UTILS_TRNR_OBJ): $(UTILS_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
