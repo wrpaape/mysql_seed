@@ -2,24 +2,8 @@
 
 
 
-struct CountString *
-count_string_create(const size_t upto)
-{
-
-	struct CountString *restrict string;
-
-	const enum CountStringAllocateFlag
-	csa_status = count_string_allocate(&string,
-					   upto);
-
-	if (csa_status != CSA_SUCCESS) {
-		log_csa_failure(csa_status,
-				upto);
-		return NULL;
-	}
-
-	return string;
-}
+extern inline struct CountString *
+count_string_create(const size_t upto);
 
 extern inline void
 count_string_destroy(struct CountString *restrict string);
@@ -67,16 +51,16 @@ count_string_allocate(struct CountString *restrict *const restrict string,
 	if (upto > UPTO_MAX)
 		return CSA_FAILURE_UPTO_MAX_EXCEEDED;
 
-	const size_t size_digits = sizeof(char) * count_string_char_count(upto);
+	const size_t count_chars = sizeof(char) * count_string_char_count(upto);
 
-	*string = malloc(sizeof(struct CountString) + size_digits);
+	*string = malloc(sizeof(struct CountString)
+			 + (sizeof(char) * count_chars));
 
 	if ((*string) == NULL)
 		return CSA_FAILURE_OUT_OF_MEMORY;
 
 	(*string)->digits      = (char *restrict) ((*string) + 1l);
-	(*string)->size_digits = size_digits;
-	(*string)->upto	       = upto;
+	(*string)->count_chars = count_chars;
 
 	return CSA_SUCCESS;
 }
