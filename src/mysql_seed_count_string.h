@@ -34,81 +34,100 @@
 #endif	/*  if (UPTO_MAX >= 9999999lu) */
 
 
+/* struct declarations
+ *─────────────────────────────────────────────────────────────────────────── */
+struct CountStringSpec {
+	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
+	size_t base_upto;	/* 10^mag_upto */
+	size_t size_until_base;	/* sizeof("1", "2", ... "base - 1") */
+	size_t size_upto_upto;	/* sizeof("1", "2", ... "upto") */
+};
+
 
 
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
-/* count of decimal digits of 'n' when '0 <= n <= UPTO_MAX' */
-inline unsigned int
-count_string_digit_count(const size_t n)
-{
-#if (UPTO_MAX == 99999999lu)
-	if (n < 10000lu) {
-#endif	/*  if (UPTO_MAX == 9999999lu) */
-		if (n < 100lu) {
-			return (n < 10lu)	? 1u : 2u;
-		} else {
-			return (n < 1000lu)	? 3u : 4u;
-		}
-#if (UPTO_MAX == 99999999lu)
-	} else {
-		if (n < 1000000lu) {
-			return (n < 100000lu)   ? 5u : 6u;
-		} else {
-			return (n < 10000000lu) ? 7u : 8u;
-		}
-	}
-#endif	/*  if (UPTO_MAX == 9999999lu) */
-}
-
 /* count of chars required for "1", "2", ... "upto" null-terminated ascii
  * strings plus a final '\0' character to indicate end */
-inline size_t
-count_string_char_count(const size_t upto)
+inline void
+count_string_spec_init(struct CountStringSpec *const restrict spec,
+		       const size_t upto)
 {
 #if (UPTO_MAX == 99999999lu)
 	if (upto < 10000lu) {
 #endif	/*  if (UPTO_MAX == 9999999lu) */
 		if (upto < 100lu) {
-			return (upto < 10lu)
-			     ? (upto * 2lu) + 1lu
-			     : (upto * 3lu) + 1lu + SIZE_1_9;
+			if (upto < 10lu) {
+				spec->mag_upto	      = 0u;
+				spec->base_upto	      = 1lu;
+				spec->size_until_base = 0lu;
+				spec->size_upto_upto  = 2lu * upto;
+			} else {
+				spec->mag_upto	      = 1u;
+				spec->base_upto	      = 10lu;
+				spec->size_until_base = SIZE_1_9;
+				spec->size_upto_upto  = SIZE_1_9
+						      + (3lu
+							 * (upto - 9lu));
+			}
 		} else {
-			return (upto < 1000lu)
-			     ? (upto * 4lu) + 1lu + SIZE_1_99
-			     : (upto * 5lu) + 1lu + SIZE_1_999;
+			if (upto < 1000lu) {
+				spec->mag_upto	      = 2u;
+				spec->base_upto	      = 100lu;
+				spec->size_until_base = SIZE_1_99;
+				spec->size_upto_upto  = SIZE_1_99
+						      + (4lu
+							 * (upto - 99lu));
+			} else {
+				spec->mag_upto	      = 3u;
+				spec->base_upto	      = 1000lu;
+				spec->size_until_base = SIZE_1_999;
+				spec->size_upto_upto  = SIZE_1_999
+						      + (5lu
+							 * (upto - 999lu));
+			}
 		}
 #if (UPTO_MAX == 99999999lu)
 	} else {
 		if (upto < 1000000lu) {
-			return (upto < 100000lu)
-			     ? (upto * 6lu) + 1lu + SIZE_1_9999
-			     : (upto * 7lu) + 1lu + SIZE_1_99999;
+			if (upto < 100000lu) {
+				spec->mag_upto	      = 4u;
+				spec->base_upto	      = 10000lu;
+				spec->size_until_base = SIZE_1_9999;
+				spec->size_upto_upto  = SIZE_1_9999
+						      + (6lu
+							 * (upto - 9999lu));
+			} else {
+				spec->mag_upto	      = 5u;
+				spec->base_upto	      = 100000lu;
+				spec->size_until_base = SIZE_1_99999;
+				spec->size_upto_upto  = SIZE_1_99999
+						      + (7lu
+							 * (upto - 99999lu));
+			}
 		} else {
-			return (upto < 10000000lu)
-			     ? (upto * 8lu) + 1lu + SIZE_1_999999
-			     : (upto * 9lu) + 1lu + SIZE_1_9999999;
+			if (upto < 10000000lu) {
+				spec->mag_upto	      = 6u;
+				spec->base_upto	      = 1000000lu;
+				spec->size_until_base = SIZE_1_999999;
+				spec->size_upto_upto  = SIZE_1_999999
+						      + (8lu
+							 * (upto - 999999lu));
+			} else {
+				spec->mag_upto	      = 7u;
+				spec->base_upto	      = 10000000lu;
+				spec->size_until_base = SIZE_1_9999999;
+				spec->size_upto_upto  = SIZE_1_9999999
+						      + (9lu
+							 * (upto - 9999999lu));
+			}
 		}
 	}
 #endif	/*  if (UPTO_MAX == 9999999lu) */
 }
 
 
-
-/* allocates space for ascending string of strings of ascii numbers, 'string' */
-inline enum CountStringAllocStatus
-count_string_alloc(char *restrict *const restrict string,
-		      const size_t upto)
-{
-	if (upto > UPTO_MAX)
-		return CSA_FAILURE_UPTO_MAX_EXCEEDED;
-
-
-	return ((*string) == NULL)
-	     ? CSA_FAILURE_OUT_OF_MEMORY
-	     : CSA_SUCCESS;
-}
 
 inline void
 count_string_log_alloc_failure(const size_t upto,
@@ -131,9 +150,10 @@ count_string_log_alloc_failure(const size_t upto,
 	seed_log_handle_unlock();
 }
 
-inline char *
-count_string_put_digits(char *restrict ptr,
-			size_t upto);
+inline void
+count_string_init(char *const restrict string,
+		  const struct CountStringSpec *const restrict spec,
+		  size_t upto);
 {
 	*ptr = '\0';
 	--ptr;
@@ -164,8 +184,13 @@ count_string_create(const size_t upto)
 		return NULL;
 	}
 
-	char *const restrict string = malloc(sizeof(char)
-					     * count_string_char_count(upto));
+	struct CountStringSpec spec;
+
+	count_string_spec_init(&spec,
+			       upto);
+
+	/* + 1 for final null byte */
+	char *const restrict string = malloc(spec.size_upto_upto + 1lu);
 
 
 	if (string == NULL) {
@@ -173,16 +198,10 @@ count_string_create(const size_t upto)
 		return NULL;
 	}
 
-	const enum CountStringAllocStatus status = count_string_alloc(&string,
-								      upto);
-	if (csa_status != CSA_SUCCESS) {
-		log_csa_failure(status,
+	count_string_put_digits(string,
 				upto);
-		return NULL;
-	}
 
-	return count_string_put_digits(string,
-				       upto);
+	return string;
 }
 
 
