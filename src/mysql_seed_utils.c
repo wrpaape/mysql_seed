@@ -1,22 +1,22 @@
 #include "mysql_seed_utils.h"
 
 #ifdef DIGIT_COUNT_MAX
-size_t ten_pow_map[DIGIT_COUNT_MAX + 1u] = {
+size_t ten_pow_map[DIGIT_COUNT_MAX] = {
 	[ 0] = 1lu,
 	[ 1] = 10lu,
 	[ 2] = 100lu,
 	[ 3] = 1000lu,
-	[ 4] = 10000lu,
-	[ 5] = 100000lu
+	[ 4] = 10000lu
 #	if (DIGIT_COUNT_MAX > 5u)
-		       ,
+		      ,
+	[ 5] = 100000lu,
 	[ 6] = 1000000lu,
 	[ 7] = 10000000lu,
 	[ 8] = 100000000lu,
-	[ 9] = 1000000000lu,
-	[10] = 10000000000lu
+	[ 9] = 1000000000lu
 #		if (DIGIT_COUNT_MAX > 10u)
-			    ,
+			   ,
+	[10] = 10000000000lu,
 	[11] = 100000000000lu,
 	[12] = 1000000000000lu,
 	[13] = 10000000000000lu,
@@ -25,8 +25,7 @@ size_t ten_pow_map[DIGIT_COUNT_MAX + 1u] = {
 	[16] = 10000000000000000lu,
 	[17] = 100000000000000000lu,
 	[18] = 1000000000000000000lu,
-	[19] = 10000000000000000000lu,
-	[20] = 100000000000000000000lu
+	[19] = 10000000000000000000lu
 #		endif /* if (DIGIT_COUNT_MAX > 10u) */
 #	endif /* if (DIGIT_COUNT_MAX > 5u) */
 };

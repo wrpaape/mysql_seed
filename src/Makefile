@@ -218,6 +218,11 @@ UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
 TARGETS			+= $(UNITY_OBJ)					\
 			   $(TEST_RUNNER_SOURCE_DIR)
 
+# independent headers
+# ──────────────────────────────────────────────────────────────────────────────
+MODE_HDR		:= $(call MODULE_HEADER_PATH,mode)
+STRING_MACROS_HDR	:= $(call MODULE_HEADER_PATH,string_macros)
+
 
 # mysql_seed_utils
 # ──────────────────────────────────────────────────────────────────────────────
@@ -232,7 +237,8 @@ UTILS_TEST_OBJ		:= $(call TEST_OBJECT_PATH,utils)
 UTILS_TEST_BIN		:= $(call TEST_BINARY_PATH,utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 UTILS_OBJ_PREQS		:= $(UTILS_SRC) 				\
-			   $(UTILS_HDR)
+			   $(UTILS_HDR)					\
+			   $(STRING_MACROS_HDR)
 UTILS_TRNR_SRC_PREQS	:= $(UTILS_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 UTILS_TEST_OBJ_PREQS	:= $(UTILS_TEST_SRC)				\
@@ -253,6 +259,43 @@ TARGETS			+= $(UTILS_OBJ)					\
 			   $(UTILS_TEST_BIN)
 
 
+
+# mysql_seed_exit
+# ──────────────────────────────────────────────────────────────────────────────
+EXIT_SRC 		:= $(call MODULE_SOURCE_PATH,exit)
+EXIT_HDR		:= $(call MODULE_HEADER_PATH,exit)
+EXIT_OBJ 		:= $(call MODULE_OBJECT_PATH,exit)
+EXIT_TEST_SRC		:= $(call TEST_SOURCE_PATH,exit)
+EXIT_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,exit)
+EXIT_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,exit)
+EXIT_TRNR_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,exit)
+EXIT_TEST_OBJ		:= $(call TEST_OBJECT_PATH,exit)
+EXIT_TEST_BIN		:= $(call TEST_BINARY_PATH,exit)
+# ─────────────── target prequisites ───────────────────────────────────────────
+EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
+			   $(EXIT_HDR) 					\
+			   $(MODE_HDR) 					\
+			   $(STRING_MACROS_HDR)
+EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
+			   $(EXIT_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+EXIT_TRNR_OBJ_PREQS	:= $(EXIT_TRNR_SRC)				\
+			   $(EXIT_TEST_OBJ_PREQS)
+EXIT_TEST_BIN_PREQS	:= $(EXIT_TRNR_OBJ)				\
+			   $(EXIT_TEST_OBJ)				\
+			   $(EXIT_OBJ)					\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(EXIT_TEST_BIN)
+TARGETS			+= $(EXIT_OBJ)					\
+			   $(EXIT_TRNR_SRC)				\
+			   $(EXIT_TRNR_OBJ)				\
+			   $(EXIT_TEST_OBJ)				\
+			   $(EXIT_TEST_BIN)
+
+
 # mysql_seed_parallel
 # ──────────────────────────────────────────────────────────────────────────────
 PARALLEL_SRC 		:= $(call MODULE_SOURCE_PATH,parallel)
@@ -266,7 +309,8 @@ PARALLEL_TEST_OBJ	:= $(call TEST_OBJECT_PATH,parallel)
 PARALLEL_TEST_BIN	:= $(call TEST_BINARY_PATH,parallel)
 # ─────────────── target prequisites ───────────────────────────────────────────
 PARALLEL_OBJ_PREQS	:= $(PARALLEL_SRC) 				\
-			   $(PARALLEL_HDR)
+			   $(PARALLEL_HDR)				\
+			   $(EXIT_HDR)
 PARALLEL_TRNR_SRC_PREQS	:= $(PARALLEL_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 PARALLEL_TEST_OBJ_PREQS	:= $(PARALLEL_TEST_SRC)				\
@@ -277,6 +321,7 @@ PARALLEL_TRNR_OBJ_PREQS	:= $(PARALLEL_TRNR_SRC)				\
 PARALLEL_TEST_BIN_PREQS	:= $(PARALLEL_TRNR_OBJ)				\
 			   $(PARALLEL_TEST_OBJ)				\
 			   $(PARALLEL_OBJ)				\
+			   $(EXIT_OBJ)					\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(PARALLEL_TEST_BIN)
@@ -302,8 +347,8 @@ LOG_TEST_BIN		:= $(call TEST_BINARY_PATH,log)
 # ─────────────── target prequisites ───────────────────────────────────────────
 LOG_OBJ_PREQS		:= $(LOG_SRC) 					\
 			   $(LOG_HDR) 					\
-			   $(UTILS_HDR)					\
-			   $(PARALLEL_HDR)
+			   $(PARALLEL_HDR)				\
+			   $(UTILS_HDR)
 LOG_TRNR_SRC_PREQS	:= $(LOG_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 LOG_TEST_OBJ_PREQS	:= $(LOG_TEST_SRC)				\
@@ -315,6 +360,8 @@ LOG_TEST_BIN_PREQS	:= $(LOG_TRNR_OBJ)				\
 			   $(LOG_TEST_OBJ)				\
 			   $(LOG_OBJ)					\
 			   $(PARALLEL_OBJ)				\
+			   $(EXIT_OBJ)					\
+			   $(UTILS_OBJ)					\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(LOG_TEST_BIN)
@@ -324,11 +371,6 @@ TARGETS			+= $(LOG_OBJ)					\
 			   $(LOG_TEST_OBJ)				\
 			   $(LOG_TEST_BIN)
 
-
-
-# mysql_seed_mode
-# ──────────────────────────────────────────────────────────────────────────────
-MODE_HDR		:= $(call MODULE_HEADER_PATH,mode)
 
 
 # mysql_seed_create
@@ -401,42 +443,6 @@ TARGETS			+= $(RUN_OBJ)					\
 			   $(RUN_TEST_BIN)
 
 
-# mysql_seed_exit
-# ──────────────────────────────────────────────────────────────────────────────
-EXIT_SRC 		:= $(call MODULE_SOURCE_PATH,exit)
-EXIT_HDR		:= $(call MODULE_HEADER_PATH,exit)
-EXIT_OBJ 		:= $(call MODULE_OBJECT_PATH,exit)
-EXIT_TEST_SRC		:= $(call TEST_SOURCE_PATH,exit)
-EXIT_TRNR_SRC		:= $(call TEST_RUNNER_SOURCE_PATH,exit)
-EXIT_TEST_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,exit)
-EXIT_TRNR_OBJ		:= $(call TEST_RUNNER_OBJECT_PATH,exit)
-EXIT_TEST_OBJ		:= $(call TEST_OBJECT_PATH,exit)
-EXIT_TEST_BIN		:= $(call TEST_BINARY_PATH,exit)
-# ─────────────── target prequisites ───────────────────────────────────────────
-EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
-			   $(EXIT_HDR) 					\
-			   $(LOG_HDR) 					\
-			   $(MODE_HDR)
-EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
-			   $(EXIT_OBJ_PREQS) 				\
-			   $(UNITY_OBJ_PREQS)
-EXIT_TRNR_OBJ_PREQS	:= $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TEST_OBJ_PREQS)
-EXIT_TEST_BIN_PREQS	:= $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_OBJ)					\
-			   $(LOG_OBJ)					\
-			   $(PARALLEL_OBJ)				\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(EXIT_TEST_BIN)
-TARGETS			+= $(EXIT_OBJ)					\
-			   $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_TEST_BIN)
 
 
 # mysql_seed_count_string
@@ -464,6 +470,10 @@ COUNT_STRING_TRNR_OBJ_PREQS	:= $(COUNT_STRING_TRNR_SRC)		\
 COUNT_STRING_TEST_BIN_PREQS	:= $(COUNT_STRING_TRNR_OBJ)		\
 			   	   $(COUNT_STRING_TEST_OBJ)		\
 			   	   $(COUNT_STRING_OBJ)			\
+			   	   $(LOG_OBJ)				\
+			   	   $(PARALLEL_OBJ)			\
+			   	   $(EXIT_OBJ)				\
+			   	   $(UTILS_OBJ)				\
 			           $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(COUNT_STRING_TEST_BIN)
@@ -505,9 +515,10 @@ CLI_TEST_BIN_PREQS	:= $(CLI_TRNR_OBJ)				\
 			   $(CLI_OBJ)					\
 			   $(CREATE_OBJ)				\
 			   $(RUN_OBJ)					\
-			   $(EXIT_OBJ)					\
 			   $(LOG_OBJ)					\
 			   $(PARALLEL_OBJ)				\
+			   $(EXIT_OBJ)					\
+			   $(UTILS_OBJ)					\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(CLI_TEST_BIN)
@@ -530,10 +541,10 @@ PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 			   $(CLI_OBJ) 					\
 			   $(CREATE_OBJ) 				\
 			   $(RUN_OBJ) 					\
-			   $(EXIT_OBJ) 					\
 			   $(COUNT_STRING_OBJ) 				\
 			   $(LOG_OBJ) 					\
 			   $(PARALLEL_OBJ)				\
+			   $(EXIT_OBJ) 					\
 			   $(UTILS_OBJ)
 PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
 			   $(PROJECT_HDR) 				\

@@ -8,12 +8,10 @@
 #include <limits.h>		/* PTHREAD_THREADS_MAX */
 #include <string.h>		/* memcpy */
 #include <stdbool.h>		/* bool */
-#include "mysql_seed_exit.h"	/* SeedExitSpec */
+#include "mysql_seed_exit.h"	/* SeedExitSpec, string helper macros */
 
 #define SEED_WORKERS_MAX 16u
 
-#define STRINGIFY(X) #X
-#define EXPAND_STRINGIFY(X) STRINGIFY(X)
 
 #ifdef PTHREAD_THREADS_MAX
 #	define SEED_THREADS_MAX PTHREAD_THREADS_MAX

@@ -3,8 +3,8 @@
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
 #define SEED_WORKER_LINK(WORKER, PREV, NEXT)		\
-WORKER->PREV = PREV;					\
-WORKER->NEXT = NEXT
+WORKER->prev = PREV;					\
+WORKER->next = NEXT
 
 
 const SeedMutex seed_lock_prototype = SEED_MUTEX_INITIALIZER;
@@ -78,7 +78,7 @@ seed_mutex_init(SeedMutex *const restrict lock);
 
 extern inline bool
 seed_mutex_lock(SeedMutex *const lock,
-		const char *const *restrict message_ptr);
+		const char *restrict *restrict message_ptr);
 
 extern inline bool
 seed_mutex_unlock(SeedMutex *const lock,
@@ -152,7 +152,7 @@ seed_worker_start(SeedWorkerRoutine *const routine,
 void
 seed_supervisor_init(void)
 {
-	struct SeedWorker *const restrict worker0  = &supervisor.map.workers[0];
+	struct SeedWorker *const restrict worker0  = &supervisor.workers[0];
 	struct SeedWorker *const restrict worker1  = worker0  + 1l;
 	struct SeedWorker *const restrict worker2  = worker1  + 1l;
 	struct SeedWorker *const restrict worker3  = worker2  + 1l;

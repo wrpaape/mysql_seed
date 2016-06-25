@@ -31,10 +31,6 @@ seed_exit_spec_set_failure(struct SeedExitSpec *const restrict spec,
 			   const char *const restrict reason);
 
 extern inline void
-seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
-				  const char *const restrict option);
-
-extern inline void
 seed_exit_spec_set_help(struct SeedExitSpec *const restrict spec,
 			const char *const restrict message);
 extern inline void

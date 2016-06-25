@@ -6,23 +6,27 @@
 #include "mysql_seed_create.h"	/* CreateSpec */
 #include "mysql_seed_run.h"	/* RunSpec */
 #include "mysql_seed_exit.h"	/* ExitSpec, seed_exit_spec_set_<X> */
-
+#include "mysql_seed_log.h"	/* seed_log */
 
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
+#define MESSAGE_BUFFER_LENGTH 512lu
 #define OPTION_MAX_LENGTH 128lu
 
-/* #define DEFAULT_USER_COUNT 25000 */
 
-inline void
-seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
-				  const char *const restrict option)
-{
-	mode->handle = &seed_exit;
-	seed_exit_spec_set_invalid_option(&mode->spec.exit,
-					  option);
-}
+/* error messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define ERROR_HEADER(STRING) ANSI_BRIGHT ANSI_RED STRING ANSI_RESET
+
+#define ERROR_NO_INPUT_MESSAGE					\
+ERROR_HEADER("missing input options\n")
+
+#define ERROR_INVALID_OPTION					\
+ERROR_HEADER("invalid option: ")
+
+
+/* #define DEFAULT_USER_COUNT 25000 */
 
 inline void
 seed_mode_set_exit_failure(struct SeedMode *const restrict mode,
@@ -31,6 +35,26 @@ seed_mode_set_exit_failure(struct SeedMode *const restrict mode,
 	mode->handle = &seed_exit;
 	seed_exit_spec_set_failure(&mode->spec.exit,
 				   reason);
+}
+
+inline void
+seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
+				  const char *const restrict option)
+{
+	seed_mode_set_exit_failure(mode,
+				   seed_log_buffer_ptr());
+
+	seed_log_handle_lock();
+
+	seed_log_append_string(ERROR_INVALID_OPTION);
+
+
+	seed_log_append_string_length(option,
+				      OPTION_MAX_LENGTH);
+
+	seed_log_append_string("\n\n");
+
+	seed_log_handle_unlock();
 }
 
 

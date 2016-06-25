@@ -4,10 +4,11 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stddef.h>	/* size_t */
-#include <unistd.h>	/* ssize_t */
-#include <stdint.h>	/* SIZE_MAX, UINT16/32/64_MAX */
-#include <stdbool.h>	/* bool */
+#include <stddef.h>			/* size_t */
+#include <unistd.h>			/* ssize_t */
+#include <stdint.h>			/* SIZE_MAX, UINT16/32/64_MAX */
+#include <stdbool.h>			/* bool */
+#include "mysql_seed_string_macros.h"	/* string helper macros */
 
 #undef DIGIT_COUNT_MAX
 
@@ -31,25 +32,9 @@
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 #ifdef DIGIT_COUNT_MAX
-extern size_t ten_pow_map[DIGIT_COUNT_MAX + 1u];
+extern size_t ten_pow_map[DIGIT_COUNT_MAX];
 #endif	/* ifdef (DIGIT_COUNT_MAX) */
 
-
-/* helper macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define ASCII_DIGIT(DIGIT) ((char) (((unsigned int) (DIGIT)) | 48u))
-
-#define PUT_CHAR(PTR, CHAR)	\
-do {				\
-	*(PTR) = CHAR;		\
-	++(PTR);		\
-} while (0)
-
-#define PUTS_CLOSE(PTR)		\
-do {				\
-	PUT_CHAR(PTR, '\n');	\
-	PUT_CHAR(PTR, '\0');	\
-} while (0)
 
 
 

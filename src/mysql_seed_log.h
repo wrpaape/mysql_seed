@@ -83,6 +83,32 @@ seed_log_remaining_characters(void)
 	return seed_log.end_ptr - seed_log.current_ptr;
 }
 
+inline bool
+seed_log_lock(const char *restrict *const restrict message_ptr)
+{
+	return seed_mutex_lock(&seed_log.lock,
+			       message_ptr);
+}
+
+inline void
+seed_log_handle_lock(void)
+{
+	seed_mutex_handle_lock(&seed_log.lock);
+}
+
+inline bool
+seed_log_unlock(const char *restrict *const restrict message_ptr)
+{
+	return seed_mutex_unlock(&seed_log.lock,
+				 message_ptr);
+}
+
+inline void
+seed_log_handle_unlock(void)
+{
+	seed_mutex_handle_unlock(&seed_log.lock);
+}
+
 
 /* mutator functions
  *─────────────────────────────────────────────────────────────────────────── */

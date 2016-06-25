@@ -3,28 +3,14 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stdlib.h>		/* exit */
-#include "mysql_seed_log.h"	/* seed_log, string utils */
-#include "mysql_seed_mode.h"	/* <stdio.h>, SeedExitSpec, SeedModeSpec */
+#include <stdlib.h>			/* exit */
+#include "mysql_seed_mode.h"		/* <stdio.h>, SeedExitSpec, SeedModeSpec */
+#include "mysql_seed_string_macros.h"	/* string helper macros */
 
-
-/* cap reads on input strings
+/* ANSI escape macros
  *─────────────────────────────────────────────────────────────────────────── */
-#define MESSAGE_BUFFER_LENGTH 512lu
-#define OPTION_MAX_LENGTH 128lu
-
-
-/* ANSI escape sequences
- *─────────────────────────────────────────────────────────────────────────── */
-#define ANSI_BRIGHT "\e[1m"
-#define ANSI_RED "\e[31m"
-#define ANSI_RESET "\e[0m"
-#define ANSI_UNDERLINE "\e[4m"
-#define ANSI_NO_UNDERLINE "\e[24m"
-
 #define UNDERLINE(STRING) ANSI_UNDERLINE STRING ANSI_NO_UNDERLINE
 #define BRIGHTEN(STRING)  ANSI_BRIGHT    STRING ANSI_RESET
-
 
 /* help messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -40,15 +26,6 @@ UNDERLINE("OPTIONS:") "\n"					\
 
 #define HELP_RUN_MESSAGE "BOOGITY BOO"
 
-/* error messages
- *─────────────────────────────────────────────────────────────────────────── */
-#define ERROR_HEADER(STRING) ANSI_BRIGHT ANSI_RED STRING ANSI_RESET
-
-#define ERROR_NO_INPUT_MESSAGE					\
-ERROR_HEADER("missing input options\n")
-
-#define ERROR_INVALID_OPTION					\
-ERROR_HEADER("invalid option: ")
 
 
 /* 'SeedModeHandler' dispatch function
@@ -85,21 +62,6 @@ seed_exit_spec_set_failure(struct SeedExitSpec *const restrict spec,
 			    reason);
 }
 
-inline void
-seed_exit_spec_set_invalid_option(struct SeedExitSpec *const restrict spec,
-				  const char *const restrict option)
-{
-	seed_log_append_string(ERROR_INVALID_OPTION);
-
-
-	seed_log_append_string_length(option,
-				      OPTION_MAX_LENGTH);
-
-	seed_log_append_string("\n\n");
-
-	seed_exit_spec_set_failure(spec,
-				   seed_log_buffer_ptr());
-}
 
 inline void
 seed_exit_spec_set_help(struct SeedExitSpec *const restrict spec,
