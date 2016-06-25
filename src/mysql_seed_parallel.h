@@ -12,14 +12,17 @@
 
 #define SEED_WORKERS_MAX 16u
 
+#define STRINGIFY(X) #X
+#define EXPAND_STRINGIFY(X) STRINGIFY(X)
+
 #ifdef PTHREAD_THREADS_MAX
 #	define SEED_THREADS_MAX PTHREAD_THREADS_MAX
-#	define SEED_THREADS_MAX_STRING #PTHREAD_THREADS_MAX
+#	define SEED_THREADS_MAX_STRING EXPAND_STRINGIFY(PTHREAD_THREADS_MAX)
 #endif	/* ifdef PTHREADS_THREADS_MAX */
 
 #ifdef PTHREAD_KEYS_MAX
 #	define SEED_THREAD_KEYS_MAX PTHREAD_KEYS_MAX
-#	define SEED_THREAD_KEYS_MAX_STRING #PTHREAD_KEYS_MAX
+#	define SEED_THREAD_KEYS_MAX_STRING EXPAND_STRINGIFY(PTHREAD_KEYS_MAX)
 #endif	/* ifdef PTHREADS_THREADS_MAX */
 
 /* typedefs
@@ -36,7 +39,7 @@ typedef void *
 SeedWorkerRoutine(void *);
 
 typedef void
-SeedWorkerHandle(void *);
+SeedWorkerHandler(void *);
 
 struct SeedWorker {
 	SeedWorkerID id;
@@ -108,7 +111,7 @@ seed_thread_create(SeedThread *const restrict thread,
 			       ", or the system-imposed "
 			       "limit on the total number of threads in a "
 			       "process, ('SEED_THREADS_MAX' = "
-			       #SEED_THREADS_MAX_STRING "), would be exceeded"
+			       SEED_THREADS_MAX_STRING "), would be exceeded"
 #endif /* ifdef SEED_THREADS_MAX */
 			       ".\n";
 		return false;
@@ -170,7 +173,7 @@ seed_thread_handle_cancel(SeedThread thread)
 
 inline bool
 seed_thread_key_create(SeedThreadKey *const key,
-		       SeedWorkerHandle *const handle,
+		       SeedWorkerHandler *const handle,
 		       const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_key_create(key,
@@ -186,7 +189,7 @@ seed_thread_key_create(SeedThreadKey *const key,
 			       ", or the system-imposed limit on the total "
 			       "number of keys per process, ('"
 			       "SEED_THREAD_KEYS_MAX' = "
-			       #SEED_THREAD_KEYS_MAX_STRING "), would be "
+			       SEED_THREAD_KEYS_MAX_STRING "), would be "
 			       "exceeded"
 #endif /* ifdef SEED_THREAD_KEYS_MAX */
 			       ".\n";
@@ -207,7 +210,7 @@ seed_thread_key_create(SeedThreadKey *const key,
 
 inline void
 seed_thread_key_handle_create(SeedThreadKey *const key,
-			      SeedWorkerHandle *const handle)
+			      SeedWorkerHandler *const handle)
 {
 	const char *restrict failure;
 
@@ -218,7 +221,7 @@ seed_thread_key_handle_create(SeedThreadKey *const key,
 }
 
 inline bool
-seed_thread_key_delete(SeedThreadkey key,
+seed_thread_key_delete(SeedThreadKey key,
 		       const char *restrict *const restrict message_ptr)
 {
 	switch (pthread_key_delete(key)) {
@@ -269,7 +272,7 @@ seed_mutex_lock(SeedMutex *const lock,
 
 	case EDEADLK:
 		*message_ptr = "seed_mutex_lock failure:\n"
-			       "A deadlock would occur if the thread blocked "
+			       "\tA deadlock would occur if the thread blocked "
 			       "waiting for SeedMutex 'lock'.";
 		return false;
 
@@ -282,7 +285,7 @@ seed_mutex_lock(SeedMutex *const lock,
 
 	default:
 		*message_ptr = "seed_mutex_lock failure:\n"
-			       "unknown\n";
+			       "\tunknown\n";
 		return false;
 	}
 }
@@ -309,7 +312,7 @@ seed_mutex_unlock(SeedMutex *const lock,
 
 	default:
 		*message_ptr = "seed_mutex_unlock failure:\n"
-			       "unknown\n";
+			       "\tunknown\n";
 		return false;
 	}
 }

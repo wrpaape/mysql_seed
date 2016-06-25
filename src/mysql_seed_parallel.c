@@ -56,15 +56,15 @@ seed_thread_handle_cancel(SeedThread thread);
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
 seed_thread_key_create(SeedThreadKey *const key,
-		       SeedWorkerHandle *const handle,
+		       SeedWorkerHandler *const handle,
 		       const char *restrict *const restrict message_ptr);
 
 extern inline void
 seed_thread_key_handle_create(SeedThreadKey *const key,
-			      SeedWorkerHandle *const handle);
+			      SeedWorkerHandler *const handle);
 
 extern inline bool
-seed_thread_key_delete(SeedThreadkey key,
+seed_thread_key_delete(SeedThreadKey key,
 		       const char *restrict *const restrict message_ptr);
 
 extern inline void
