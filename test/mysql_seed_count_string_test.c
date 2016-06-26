@@ -12,16 +12,16 @@ void tearDown(void)
 inline void
 test_assert_spec_fields_equal(struct CountStringSpec *const restrict spec,
 			      const unsigned int mag_upto_expected,
-			      const size_t size_1_upto_expected)
+			      const size_t size_digits_expected)
 {
 	TEST_ASSERT_EQUAL_UINT_MESSAGE(mag_upto_expected,
 				       spec->mag_upto,
 				       "spec->mag_upto != mag_upto_expected");
 
 
-	TEST_ASSERT_EQUAL_UINT_MESSAGE(size_1_upto_expected,
-				       spec->size_1_upto,
-				       "spec->size_1_upto != size_1_upto_expected");
+	TEST_ASSERT_EQUAL_UINT_MESSAGE(size_digits_expected,
+				       spec->size_digits,
+				       "spec->size_digits != size_digits_expected");
 }
 
 void test_count_string_spec_init(void)
@@ -79,30 +79,31 @@ void test_count_string_increment_buffer(void)
 
 void test_count_string_init(void)
 {
-	char buffer[512];
+	char *buffer[64];
 
-	char *restrict ptr;
+	char *restrict *const ptr = &buffer[0];
 
-	ptr = &buffer[0];
 
 	count_string_init(ptr,
 			  0,
 			  3);
 
 
-	TEST_ASSERT_EQUAL_STRING("1", ptr);
+	TEST_ASSERT_EQUAL_STRING("1", ptr[0]);
 
-	ptr += sizeof("1");
+	TEST_ASSERT_EQUAL_STRING("2", ptr[1]);
 
-	TEST_ASSERT_EQUAL_STRING("2", ptr);
+	TEST_ASSERT_EQUAL_STRING("3", ptr[2]);
 
-	ptr += sizeof("2");
+	TEST_ASSERT_NULL(ptr[3]);
+}
 
-	TEST_ASSERT_EQUAL_STRING("3", ptr);
+void test_count_string_create(void)
+{
 
-	ptr += sizeof("3");
+	/* char *restrict count_string = count_string_create(2500); */
 
-	TEST_ASSERT_EQUAL_STRING("",  ptr);
+
 }
 
 

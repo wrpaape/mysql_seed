@@ -31,6 +31,7 @@ extern void test_count_string_spec_init(void);
 extern void test_count_string_alloc_failure(void);
 extern void test_count_string_increment_buffer(void);
 extern void test_count_string_init(void);
+extern void test_count_string_create(void);
 
 
 //=======Test Reset Option=====
@@ -50,6 +51,7 @@ int main(void)
   RUN_TEST(test_count_string_alloc_failure, 46);
   RUN_TEST(test_count_string_increment_buffer, 65);
   RUN_TEST(test_count_string_init, 80);
+  RUN_TEST(test_count_string_create, 101);
 
   return (UnityEnd());
 }

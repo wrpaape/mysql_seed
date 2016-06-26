@@ -75,7 +75,7 @@ union DigitsPointer {
 
 struct CountStringSpec {
 	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
-	size_t size_1_upto;	/* sizeof("1", "2", ... "upto") */
+	size_t size_digits;	/* sizeof("1", "2", ... "upto") */
 };
 
 /* macro constants
@@ -88,10 +88,10 @@ struct CountStringSpec {
 #define MAG_1_MAX		99lu
 #define MAG_2_MAX		999lu
 #define MAG_3_MAX		9999lu
-#define OFF_LO_MAG_0		0l
-#define OFF_LO_MAG_1		1l
-#define OFF_LO_MAG_2		2l
-#define OFF_LO_MAG_3		3l
+#define OFF_MAG_0_MIN		0l
+#define OFF_MAG_1_MIN		MAG_0_MAX
+#define OFF_MAG_2_MIN		MAG_1_MAX
+#define OFF_MAG_3_MIN		MAG_2_MAX
 #define SIZE_MAG_0_STR		2lu
 #define SIZE_MAG_1_STR		3lu
 #define SIZE_MAG_2_STR		4lu
@@ -111,10 +111,10 @@ struct CountStringSpec {
 #	define MAG_5_MAX	999999lu
 #	define MAG_6_MAX	9999999lu
 #	define MAG_7_MAX	99999999lu
-#	define OFF_LO_MAG_4	4l
-#	define OFF_LO_MAG_5	5l
-#	define OFF_LO_MAG_6	6l
-#	define OFF_LO_MAG_7	7l
+#	define OFF_MAG_4_MIN	MAG_3_MAX
+#	define OFF_MAG_5_MIN	MAG_4_MAX
+#	define OFF_MAG_6_MIN	MAG_5_MAX
+#	define OFF_MAG_7_MIN	MAG_6_MAX
 #	define SIZE_MAG_4_STR	6lu
 #	define SIZE_MAG_5_STR	7lu
 #	define SIZE_MAG_6_STR	8lu
@@ -160,22 +160,22 @@ count_string_spec_init(struct CountStringSpec *const restrict spec,
 		if (upto < MAG_2_MIN) {
 			if (upto < MAG_1_MIN) {
 				spec->mag_upto	  = 0u;
-				spec->size_1_upto = SIZE_MAG_0_STR * upto;
+				spec->size_digits = SIZE_MAG_0_STR * upto;
 			} else {
 				spec->mag_upto	  = 1u;
-				spec->size_1_upto = SIZE_MAG_0_1_STR
+				spec->size_digits = SIZE_MAG_0_1_STR
 						  + (SIZE_MAG_1_STR
 						     * (upto - MAG_0_MAX));
 			}
 		} else {
 			if (upto < MAG_3_MIN) {
 				spec->mag_upto	  = 2u;
-				spec->size_1_upto = SIZE_MAG_0_2_STR
+				spec->size_digits = SIZE_MAG_0_2_STR
 						  + (SIZE_MAG_2_STR
 						     * (upto - MAG_1_MAX));
 			} else {
 				spec->mag_upto	  = 3u;
-				spec->size_1_upto = SIZE_MAG_0_3_STR
+				spec->size_digits = SIZE_MAG_0_3_STR
 						  + (SIZE_MAG_3_STR
 						     * (upto - MAG_2_MAX));
 			}
@@ -185,24 +185,24 @@ count_string_spec_init(struct CountStringSpec *const restrict spec,
 		if (upto < MAG_6_MIN) {
 			if (upto < MAG_5_MIN) {
 				spec->mag_upto	  = 4u;
-				spec->size_1_upto = SIZE_MAG_0_4_STR
+				spec->size_digits = SIZE_MAG_0_4_STR
 						  + (SIZE_MAG_4_STR
 						     * (upto - MAG_3_MAX));
 			} else {
 				spec->mag_upto	  = 5u;
-				spec->size_1_upto = SIZE_MAG_0_5_STR
+				spec->size_digits = SIZE_MAG_0_5_STR
 						  + (SIZE_MAG_5_STR
 						     * (upto - MAG_4_MAX));
 			}
 		} else {
 			if (upto < MAG_7_MIN) {
 				spec->mag_upto	  = 6u;
-				spec->size_1_upto = SIZE_MAG_0_6_STR
+				spec->size_digits = SIZE_MAG_0_6_STR
 						  + (SIZE_MAG_6_STR
 						     * (upto - MAG_5_MAX));
 			} else {
 				spec->mag_upto	  = 7u;
-				spec->size_1_upto = SIZE_MAG_0_7_STR
+				spec->size_digits = SIZE_MAG_0_7_STR
 						  + (SIZE_MAG_7_STR
 						     * (upto - MAG_6_MAX));
 			}
@@ -245,15 +245,87 @@ count_buffer_increment(char *restrict digit)
 }
 
 
-void
-count_string_init(char *const restrict string,
+
+#define SET_RANGE_DIGITS_MAG_UPTO(MAG)					\
+do {									\
+	string_ptr	       = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
+	digits_ptr.string      = digits + SIZE_MAG_0_ ## MAG ## _STR;	\
+	digits_buf.mag_ ## MAG = mag_ ## MAG ##_min_string;		\
+	counter		       = MAG_ ## MAG ## _MIN;			\
+	while (1) {							\
+		*string_ptr = digits_ptr.string;			\
+		*(digits_ptr.mag_ ## MAG) = digits_buf.mag_ ## MAG;	\
+		if (counter == upto)					\
+			break;						\
+		++counter;						\
+		++(digits_ptr.mag_ ## MAG);				\
+		++string_ptr;						\
+		count_buffer_increment(active);				\
+	}								\
+} while (0)
+
+inline void
+count_string_init(char *restrict *const string_ptrs,
 		  const unsigned int mag_upto,
-		  size_t upto);
+		  size_t upto)
+{
+	union DigitsBuffer digits_buf;
+	union DigitsPointer digits_ptr;
+	size_t counter;
+	char *restrict active;
+	char *restrict *string_ptr;
+
+	/* separate 'upto' x string pointers from 'digits' with 'NULL' */
+	string_ptr  = string_ptrs + upto;
+	*string_ptr = NULL;
+
+	/* point digits after NULL terminator */
+	char *const restrict digits = (char *const restrict) (string_ptr + 1l);
+
+	/* point 'active' at one's digit */
+	active = &digits_buf.string[mag_upto];
+
+
+	switch (mag_upto) {
+#ifdef LARGE_UPTO_MAX
+	case 7u:
+		SET_RANGE_DIGITS_MAG_UPTO(7);
+		--active;
+		upto = MAG_6_MAX;
+	case 6u:
+		SET_RANGE_DIGITS_MAG_UPTO(6);
+		--active;
+		upto = MAG_5_MAX;
+	case 5u:
+		SET_RANGE_DIGITS_MAG_UPTO(5);
+		--active;
+		upto = MAG_4_MAX;
+	case 4u:
+		SET_RANGE_DIGITS_MAG_UPTO(4);
+		--active;
+		upto = MAG_3_MAX;
+#endif /* ifdef LARGE_UPTO_MAX */
+	case 3u:
+		SET_RANGE_DIGITS_MAG_UPTO(3);
+		--active;
+		upto = MAG_2_MAX;
+	case 2u:
+		SET_RANGE_DIGITS_MAG_UPTO(2);
+		--active;
+		upto = MAG_1_MAX;
+	case 1u:
+		SET_RANGE_DIGITS_MAG_UPTO(1);
+		--active;
+		upto = MAG_0_MAX;
+	default:
+		SET_RANGE_DIGITS_MAG_UPTO(0);
+	}
+}
 
 
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
-inline char *
+inline char *restrict *
 count_string_create(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
@@ -267,23 +339,21 @@ count_string_create(const size_t upto)
 	count_string_spec_init(&spec,
 			       upto);
 
-	/* + 1 for final null byte */
-	char *const restrict string = malloc(spec.size_1_upto + 1lu);
-
-
-	if (string == NULL) {
+	/* 'upto' + 1 (NULL terminated) pointers + 'size_digits' ascii chars */
+	char *restrict *const string_ptrs = malloc((sizeof(char *)
+						    * (upto + 1lu))
+						   + spec.size_digits);
+	if (string_ptrs == NULL) {
 		count_string_log_alloc_failure(upto,
 					       MALLOC_FAILURE_MESSAGE);
 		return NULL;
 	}
 
-	count_string_init(string,
+	count_string_init(string_ptrs,
 			  spec.mag_upto,
 			  upto);
 
-	string[spec.size_1_upto] = '\0';
-
-	return string;
+	return string_ptrs;
 }
 
 
