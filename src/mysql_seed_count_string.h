@@ -11,36 +11,53 @@
 #if (SIZE_MAX < UINT32_MAX)
 #	define UPTO_MAX 9999lu
 #	define UPTO_MAX_DIGIT_COUNT 4u
-#	define BASE_MAG_NULL_PAD
+#	define MAG_NULL_PAD
 #else
 #	define UPTO_MAX 99999999lu
 #	define UPTO_MAX_DIGIT_COUNT 8u
-#	define BASE_MAG_NULL_PAD "\0\0\0\0"
+#	define MAG_NULL_PAD "\0\0\0\0"
 #endif /* if (SIZE_MAX < UINT32_MAX) */
 
-#define SIZE_1_9		18lu	   /* (1 digit  + '\0') * 9 */
-#define SIZE_10_99		270lu	   /* (2 digits + '\0') * 90 */
-#define SIZE_100_999		3600lu	   /* (3 digits + '\0') * 900 */
-#define SIZE_1_99		(SIZE_1_9	+ SIZE_10_99)
-#define SIZE_1_999		(SIZE_1_99	+ SIZE_100_999)
-#define BASE_MAG_0	"1\0\0\0"	BASE_MAG_NULL_PAD
-#define BASE_MAG_1	"10\0\0"	BASE_MAG_NULL_PAD
-#define BASE_MAG_2	"100\0"		BASE_MAG_NULL_PAD
-#define BASE_MAG_3	"1000"		BASE_MAG_NULL_PAD
+#define MAG_0_MIN		1lu
+#define MAG_1_MIN		10lu
+#define MAG_2_MIN		100lu
+#define MAG_3_MIN		1000lu
+#define MAG_0_MAX		9lu
+#define MAG_1_MAX		99lu
+#define MAG_2_MAX		999lu
+#define MAG_3_MAX		9999lu
+#define MAG_0_MIN_STR		"1\0\0\0"	MAG_NULL_PAD
+#define MAG_1_MIN_STR		"10\0\0"	MAG_NULL_PAD
+#define MAG_2_MIN_STR		"100\0"		MAG_NULL_PAD
+#define MAG_3_MIN_STR		"1000"		MAG_NULL_PAD
+#define SIZE_MAG_0_0		0lu	   /* empty */
+#define SIZE_MAG_0_1		18lu	   /* (1 digit  + '\0') * 9 */
+#define SIZE_MAG_1_2		270lu	   /* (2 digits + '\0') * 90 */
+#define SIZE_MAG_2_3		3600lu	   /* (3 digits + '\0') * 900 */
+#define SIZE_MAG_0_2		(SIZE_MAG_0_1	+ SIZE_MAG_1_2)
+#define SIZE_MAG_0_3		(SIZE_MAG_0_2	+ SIZE_MAG_2_3)
 
 #if (UPTO_MAX == 99999999lu)
-#define SIZE_1000_9999		45000lu	   /* (3 digits + '\0') * 9000 */
-#define SIZE_10000_99999	540000lu   /* (4 digits + '\0') * 90000 */
-#define SIZE_100000_999999	6300000lu  /* (5 digits + '\0') * 900000 */
-#define SIZE_1000000_9999999	72000000lu /* (6 digits + '\0') * 9000000 */
-#define SIZE_1_9999		(SIZE_1_999	+ SIZE_1000_9999)
-#define SIZE_1_99999		(SIZE_1_9999	+ SIZE_10000_99999)
-#define SIZE_1_999999		(SIZE_1_99999	+ SIZE_100000_999999)
-#define SIZE_1_9999999		(SIZE_1_999999	+ SIZE_1000000_9999999)
-#define BASE_MAG_4	"10000\0\0\0"
-#define BASE_MAG_5	"100000\0\0"
-#define BASE_MAG_6	"1000000\0"
-#define BASE_MAG_7	"10000000"
+#	define MAG_4_MIN	10000lu
+#	define MAG_5_MIN	100000lu
+#	define MAG_6_MIN	1000000lu
+#	define MAG_7_MIN	10000000lu
+#	define MAG_4_MAX	99999lu
+#	define MAG_5_MAX	999999lu
+#	define MAG_6_MAX	9999999lu
+#	define MAG_7_MAX	99999999lu
+#	define MAG_4_MIN_STR	"10000\0\0\0"
+#	define MAG_5_MIN_STR	"100000\0\0"
+#	define MAG_6_MIN_STR	"1000000\0"
+#	define MAG_7_MIN_STR	"10000000"
+#	define SIZE_MAG_3_4	45000lu	   /* (3 digits + '\0') * 9000 */
+#	define SIZE_MAG_4_5	540000lu   /* (4 digits + '\0') * 90000 */
+#	define SIZE_MAG_5_6	6300000lu  /* (5 digits + '\0') * 900000 */
+#	define SIZE_MAG_6_7	72000000lu /* (6 digits + '\0') * 9000000 */
+#	define SIZE_MAG_0_4	(SIZE_MAG_0_3	+ SIZE_MAG_3_4)
+#	define SIZE_MAG_0_5	(SIZE_MAG_0_4	+ SIZE_MAG_4_5)
+#	define SIZE_MAG_0_6	(SIZE_MAG_0_5	+ SIZE_MAG_5_6)
+#	define SIZE_MAG_0_7	(SIZE_MAG_0_6	+ SIZE_MAG_6_7)
 #endif	/*  if (UPTO_MAX >= 9999999lu) */
 
 
@@ -71,7 +88,6 @@ union DigitsBuffer {
 };
 
 union DigitsPointer {
-	union DigitsBuffer *restrict buffer;
 	char *restrict string;
 #if (UPTO_MAX_DIGIT_COUNT == 8u)
 	CharBuff9 *restrict mag_7;
@@ -87,10 +103,7 @@ union DigitsPointer {
 
 struct CountStringSpec {
 	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
-	size_t base_mag;	/* 10^mag_upto */
-	size_t size_until_base;	/* sizeof("1", "2", ... "base - 1") */
-	size_t size_upto_upto;	/* sizeof("1", "2", ... "upto") */
-	const union DigitsBuffer *restrict base_string; /* "base_mag" */
+	size_t size_1_upto;	/* sizeof("1", "2", ... "upto") */
 };
 
 
@@ -105,96 +118,98 @@ count_string_spec_init(struct CountStringSpec *const restrict spec,
 		       const size_t upto)
 {
 #if (UPTO_MAX == 99999999lu)
-	if (upto < 10000lu) {
+	if (upto < MAG_4_MIN) {
 #endif	/*  if (UPTO_MAX == 9999999lu) */
-		if (upto < 100lu) {
-			if (upto < 10lu) {
+		if (upto < MAG_2_MIN) {
+			if (upto < MAG_1_MIN) {
 				spec->mag_upto	      = 0u;
-				spec->base_mag	      = 1lu;
-				spec->size_until_base = 0lu;
-				spec->size_upto_upto  = 2lu * upto;
+				spec->base_mag	      = MAG_0_MIN;
+				spec->size_until_base = SIZE_MAG_0_0;
+				spec->size_1_upto  = upto * 2lu;
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_0;
+						        MAG_0_MIN_STR;
 			} else {
 				spec->mag_upto	      = 1u;
-				spec->base_mag	      = 10lu;
-				spec->size_until_base = SIZE_1_9;
-				spec->size_upto_upto  = SIZE_1_9
-						      + (3lu
-							 * (upto - 9lu));
+				spec->base_mag	      = MAG_1_MIN;
+				spec->size_until_base = SIZE_MAG_0_1;
+				spec->size_1_upto  = SIZE_MAG_0_1
+						      + ((upto - MAG_0_MAX)
+							 * 3lu);
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_1;
+						        MAG_1_MIN_STR;
 			}
 		} else {
-			if (upto < 1000lu) {
+			if (upto < MAG_3_MIN) {
 				spec->mag_upto	      = 2u;
-				spec->base_mag	      = 100lu;
-				spec->size_until_base = SIZE_1_99;
-				spec->size_upto_upto  = SIZE_1_99
+				spec->base_mag	      = MAG_2_MIN;
+				spec->size_until_base = SIZE_MAG_0_2;
+				spec->size_1_upto  = SIZE_MAG_0_2
+						      + ((upto - MAG_1_MAX)
+							 * 4lu);
 						      + (4lu
 							 * (upto - 99lu));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_2;
+						        MAG_2_MIN_STR;
 			} else {
 				spec->mag_upto	      = 3u;
-				spec->base_mag	      = 1000lu;
-				spec->size_until_base = SIZE_1_999;
-				spec->size_upto_upto  = SIZE_1_999
+				spec->base_mag	      = MAG_3_MIN;
+				spec->size_until_base = SIZE_MAG_0_3;
+				spec->size_1_upto  = SIZE_MAG_0_3
 						      + (5lu
-							 * (upto - 999lu));
+							 * (upto - MAG_2_MAX));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_3;
+						        MAG_3_MIN_STR;
 			}
 		}
 #if (UPTO_MAX == 99999999lu)
 	} else {
-		if (upto < 1000000lu) {
-			if (upto < 100000lu) {
+		if (upto < MAG_6_MIN) {
+			if (upto < MAG_5_MIN) {
 				spec->mag_upto	      = 4u;
-				spec->base_mag	      = 10000lu;
-				spec->size_until_base = SIZE_1_9999;
-				spec->size_upto_upto  = SIZE_1_9999
+				spec->base_mag	      = MAG_4_MIN;
+				spec->size_until_base = SIZE_MAG_0_4;
+				spec->size_1_upto  = SIZE_MAG_0_4
 						      + (6lu
 							 * (upto - 9999lu));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_4;
+						        MAG_4_MIN_STR;
 			} else {
 				spec->mag_upto	      = 5u;
-				spec->base_mag	      = 100000lu;
-				spec->size_until_base = SIZE_1_99999;
-				spec->size_upto_upto  = SIZE_1_99999
+				spec->base_mag	      = MAG_5_MIN;
+				spec->size_until_base = SIZE_MAG_0_5;
+				spec->size_1_upto  = SIZE_MAG_0_5
 						      + (7lu
 							 * (upto - 99999lu));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_5;
+						        MAG_5_MIN_STR;
 			}
 		} else {
-			if (upto < 10000000lu) {
+			if (upto < MAG_7_MIN) {
 				spec->mag_upto	      = 6u;
-				spec->base_mag	      = 1000000lu;
-				spec->size_until_base = SIZE_1_999999;
-				spec->size_upto_upto  = SIZE_1_999999
+				spec->base_mag	      = MAG_6_MIN;
+				spec->size_until_base = SIZE_MAG_0_6;
+				spec->size_1_upto  = SIZE_MAG_0_6
 						      + (8lu
 							 * (upto - 999999lu));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_6;
+						        MAG_6_MIN_STR;
 			} else {
 				spec->mag_upto	      = 7u;
-				spec->base_mag	      = 10000000lu;
-				spec->size_until_base = SIZE_1_9999999;
-				spec->size_upto_upto  = SIZE_1_9999999
+				spec->base_mag	      = MAG_7_MIN;
+				spec->size_until_base = SIZE_MAG_0_7;
+				spec->size_1_upto  = SIZE_MAG_0_7
 						      + (9lu
 							 * (upto - 9999999lu));
 				spec->base_string     = (const union
 							 DigitsBuffer *restrict)
-						        BASE_MAG_7;
+						        MAG_7_MIN_STR;
 			}
 		}
 	}
@@ -222,42 +237,25 @@ count_string_log_alloc_failure(const size_t upto,
 }
 
 inline void
-count_string_init(char *const restrict string,
-		  const struct CountStringSpec *const restrict spec,
-		  size_t upto)
+count_string_update_buffer(char *restrict digit)
 {
-	char *restrict active;
-	union DigitsBuffer buffer;
-	union DigitsPointer pointer;
+	while (1) {
+		++(*digit);
 
-	buffer = *(spec->base_string);
+		if ((*digit) < ':') /* digit is in '0' ... '9' */
+			return;
 
-	pointer.string = string + spec->size_until_base;
+		*digit = '0';
 
-	active = pointer.string + spec->mag_upto;
-
-	switch (spec->mag_upto) {
-#if (UPTO_MAX_DIGIT_COUNT == 8u)
-	case 7u:
-
-		while (1) {
-
-
-		
-		}
-
-	case 6u:
-	case 5u:
-	case 4u:
-#endif /* if (UPTO_MAX_DIGIT_COUNT == 8u) */
-	case 3u:
-	case 2u:
-	case 1u:
-	default:
-		/* string[spec->size_upto_upto] = '\0'; */
-		return;
+		--digit;
 	}
 }
+
+void
+count_string_init(char *const restrict string,
+		  const struct CountStringSpec *const restrict spec,
+		  size_t upto);
+
 
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -276,7 +274,7 @@ count_string_create(const size_t upto)
 			       upto);
 
 	/* + 1 for final null byte */
-	char *const restrict string = malloc(spec.size_upto_upto + 1lu);
+	char *const restrict string = malloc(spec.size_1_upto + 1lu);
 
 
 	if (string == NULL) {
