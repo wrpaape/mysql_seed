@@ -61,3 +61,50 @@ void test_count_string_alloc_failure(void)
 
 	seed_log_reset();
 }
+
+void test_count_string_increment_buffer(void)
+{
+	char digits[5] = "8998";
+
+	count_buffer_increment(&digits[3]);
+
+	TEST_ASSERT_EQUAL_STRING("8999",
+				 &digits[0]);
+
+	count_buffer_increment(&digits[3]);
+
+	TEST_ASSERT_EQUAL_STRING("9000",
+				 &digits[0]);
+}
+
+void test_count_string_init(void)
+{
+	char buffer[512];
+
+	char *restrict ptr;
+
+	ptr = &buffer[0];
+
+	count_string_init(ptr,
+			  0,
+			  3);
+
+
+	TEST_ASSERT_EQUAL_STRING("1", ptr);
+
+	ptr += sizeof("1");
+
+	TEST_ASSERT_EQUAL_STRING("2", ptr);
+
+	ptr += sizeof("2");
+
+	TEST_ASSERT_EQUAL_STRING("3", ptr);
+
+	ptr += sizeof("3");
+
+	TEST_ASSERT_EQUAL_STRING("",  ptr);
+}
+
+
+
+

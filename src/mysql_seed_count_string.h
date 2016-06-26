@@ -96,10 +96,6 @@ struct CountStringSpec {
 #define SIZE_MAG_1_STR		3lu
 #define SIZE_MAG_2_STR		4lu
 #define SIZE_MAG_3_STR		5lu
-#define MAG_0_MIN_STR		((Mag0String *restrict) "1")
-#define MAG_1_MIN_STR		((Mag1String *restrict) "10")
-#define MAG_2_MIN_STR		((Mag2String *restrict) "100")
-#define MAG_3_MIN_STR		((Mag3String *restrict) "1000")
 #define SIZE_MAG_0_0_STR	0lu	   /* empty */
 #define SIZE_MAG_0_1_STR	18lu	   /* (1 digit  + '\0') * 9 */
 #define SIZE_MAG_1_2_STR	270lu	   /* (2 digits + '\0') * 90 */
@@ -123,10 +119,6 @@ struct CountStringSpec {
 #	define SIZE_MAG_5_STR	7lu
 #	define SIZE_MAG_6_STR	8lu
 #	define SIZE_MAG_7_STR	9lu
-#	define MAG_4_MIN_STR	((Mag4String *restrict) "10000")
-#	define MAG_5_MIN_STR	((Mag5String *restrict) "100000")
-#	define MAG_6_MIN_STR	((Mag6String *restrict) "1000000")
-#	define MAG_7_MIN_STR	((Mag7String *restrict) "10000000")
 #	define SIZE_MAG_3_4_STR	45000lu	   /* (3 digits + '\0') * 9000 */
 #	define SIZE_MAG_4_5_STR	540000lu   /* (4 digits + '\0') * 90000 */
 #	define SIZE_MAG_5_6_STR	6300000lu  /* (5 digits + '\0') * 900000 */
@@ -140,15 +132,15 @@ struct CountStringSpec {
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-extern const Mag0String *const restrict mag_0_min_string;
-extern const Mag1String *const restrict mag_1_min_string;
-extern const Mag2String *const restrict mag_2_min_string;
-extern const Mag3String *const restrict mag_3_min_string;
+extern const Mag0String mag_0_min_string;
+extern const Mag1String mag_1_min_string;
+extern const Mag2String mag_2_min_string;
+extern const Mag3String mag_3_min_string;
 #ifdef LARGE_UPTO_MAX
-extern const Mag4String *const restrict mag_4_min_string;
-extern const Mag5String *const restrict mag_5_min_string;
-extern const Mag6String *const restrict mag_6_min_string;
-extern const Mag7String *const restrict mag_7_min_string;
+extern const Mag4String mag_4_min_string;
+extern const Mag5String mag_5_min_string;
+extern const Mag6String mag_6_min_string;
+extern const Mag7String mag_7_min_string;
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
 
@@ -240,18 +232,16 @@ count_string_log_alloc_failure(const size_t upto,
 }
 
 inline void
-count_string_increment_buffer(char *restrict digit)
+count_buffer_increment(char *restrict digit)
 {
-	while (1) {
-		++(*digit);
-
-		if ((*digit) < ':') /* digit is in '0' ... '9' */
-			return;
-
+	while ((*digit) == '9') {
 		*digit = '0';
-
 		--digit;
 	}
+
+	/* digit is in '0' ... '9' */
+	++(*digit);
+	return;
 }
 
 
