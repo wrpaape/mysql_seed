@@ -248,26 +248,20 @@ count_buffer_increment(char *restrict digit)
 
 #define SET_RANGE_DIGITS_MAG_UPTO(MAG)					\
 do {									\
+	string_ptr	       = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
 	digits_ptr.string      = digits + SIZE_MAG_0_ ## MAG ## _STR;	\
 	digits_buf.mag_ ## MAG = mag_ ## MAG ##_min_string;		\
+	counter		       = MAG_ ## MAG ## _MIN;			\
 	while (1) {							\
-		*current_ptr = digits_ptr.string;			\
+		*string_ptr = digits_ptr.string;			\
 		*(digits_ptr.mag_ ## MAG) = digits_buf.mag_ ## MAG;	\
-		if (current_ptr == upto_ptr)				\
+		if (counter == upto)					\
 			break;						\
-		++current_ptr;						\
+		++string_ptr;						\
 		++(digits_ptr.mag_ ## MAG);				\
+		++counter;						\
 		count_buffer_increment(active);				\
 	}								\
-} while (0)
-
-#define SET_RANGE_DIGITS_MAG_UPTO_GT_0(MAG)				\
-do {									\
-		from_ptr    = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
-		current_ptr = from_ptr;					\
-		SET_RANGE_DIGITS_MAG_UPTO(7);				\
-		upto_ptr = from_ptr;					\
-		--active;						\
 } while (0)
 
 inline void
@@ -278,8 +272,7 @@ count_string_init(char *restrict *const string_ptrs,
 	union DigitsBuffer digits_buf;
 	union DigitsPointer digits_ptr;
 	char *restrict active;
-	char *restrict *current_ptr;
-	char *restrict *from_ptr;
+	char *restrict *string_ptr;
 	char *restrict *upto_ptr;
 
 	/* separate 'upto' x string pointers from 'digits' with 'NULL' */
@@ -296,22 +289,35 @@ count_string_init(char *restrict *const string_ptrs,
 	switch (mag_upto) {
 #ifdef LARGE_UPTO_MAX
 	case 7u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(7);
+		SET_RANGE_DIGITS_MAG_UPTO(7);
+		--active;
+		upto_ptr = string_ptrs + MAG_6_MAX;
 	case 6u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(6);
+		SET_RANGE_DIGITS_MAG_UPTO(6);
+		--active;
+		upto_ptr = string_ptrs + MAG_6_MAX;
 	case 5u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(5);
+		SET_RANGE_DIGITS_MAG_UPTO(5);
+		--active;
+		upto_ptr = string_ptrs + MAG_6_MAX;
 	case 4u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(4);
+		SET_RANGE_DIGITS_MAG_UPTO(4);
+		--active;
+		upto_ptr = string_ptrs + MAG_3_MAX;
 #endif /* ifdef LARGE_UPTO_MAX */
 	case 3u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(3);
+		SET_RANGE_DIGITS_MAG_UPTO(3);
+		--active;
+		upto_ptr = string_ptrs + MAG_2_MAX;
 	case 2u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(2);
+		SET_RANGE_DIGITS_MAG_UPTO(2);
+		--active;
+		upto_ptr = string_ptrs + MAG_1_MAX;
 	case 1u:
-		SET_RANGE_DIGITS_MAG_UPTO_GT_0(1);
+		SET_RANGE_DIGITS_MAG_UPTO(1);
+		--active;
+		upto_ptr = string_ptrs + MAG_0_MAX;
 	default:
-		current_ptr = string_ptrs;
 		SET_RANGE_DIGITS_MAG_UPTO(0);
 	}
 }

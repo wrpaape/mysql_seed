@@ -27,7 +27,7 @@ const Mag7String mag_7_min_string = { "10000000" };
 extern inline void
 count_string_init(char *restrict *const string_ptrs,
 		  const unsigned int mag_upto,
-		  size_t upto);
+		  const size_t upto)
 
 extern inline char *restrict *
 count_string_create(const size_t upto);
