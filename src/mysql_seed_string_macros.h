@@ -1,26 +1,6 @@
 #ifndef MYSQL_SEED_MYSQL_SEED_STRING_MACROS_H_
 #define MYSQL_SEED_MYSQL_SEED_STRING_MACROS_H_
 
-/* copy string of a fixed size
- *─────────────────────────────────────────────────────────────────────────── */
-typedef char CharBuff1;
-typedef struct CharBuff2  { char chars[ 2] } CharBuff2;
-typedef struct CharBuff3  { char chars[ 3] } CharBuff3;
-typedef struct CharBuff4  { char chars[ 4] } CharBuff4;
-typedef struct CharBuff5  { char chars[ 5] } CharBuff5;
-typedef struct CharBuff6  { char chars[ 6] } CharBuff6;
-typedef struct CharBuff7  { char chars[ 7] } CharBuff7;
-typedef struct CharBuff8  { char chars[ 8] } CharBuff8;
-typedef struct CharBuff9  { char chars[ 9] } CharBuff9;
-typedef struct CharBuff10 { char chars[10] } CharBuff10;
-typedef struct CharBuff11 { char chars[11] } CharBuff11;
-typedef struct CharBuff12 { char chars[12] } CharBuff12;
-typedef struct CharBuff13 { char chars[13] } CharBuff13;
-typedef struct CharBuff14 { char chars[14] } CharBuff14;
-typedef struct CharBuff15 { char chars[15] } CharBuff15;
-typedef struct CharBuff16 { char chars[16] } CharBuff16;
-
-
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
 #define STRINGIFY(X) #X
