@@ -51,7 +51,7 @@ int main(void)
   RUN_TEST(test_count_string_alloc_failure, 46);
   RUN_TEST(test_count_string_increment_buffer, 65);
   RUN_TEST(test_count_string_init, 80);
-  RUN_TEST(test_count_string_create, 101);
+  RUN_TEST(test_count_string_create, 97);
 
   return (UnityEnd());
 }

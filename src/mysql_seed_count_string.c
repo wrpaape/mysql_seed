@@ -29,5 +29,5 @@ count_string_init(char *restrict *const string_ptrs,
 		  const unsigned int mag_upto,
 		  const size_t upto);
 
-extern inline char *restrict *
+extern inline char **
 count_string_create(const size_t upto);

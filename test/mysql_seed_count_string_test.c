@@ -83,11 +83,7 @@ void test_count_string_init(void)
 
 	char *restrict *const ptr = &buffer[0];
 
-
-	count_string_init(ptr,
-			  0,
-			  3);
-
+	count_string_init(ptr, 0, 3);
 
 	TEST_ASSERT_EQUAL_STRING("1", ptr[0]);
 
@@ -101,9 +97,19 @@ void test_count_string_init(void)
 void test_count_string_create(void)
 {
 
-	/* char *restrict count_string = count_string_create(2500); */
+	char buffer[16];
+	char **const restrict count_string = count_string_create(500lu);
 
+	TEST_ASSERT_NOT_NULL(count_string);
+	TEST_ASSERT_NULL(count_string[500lu]);
 
+	for (unsigned int i = 0u, j = 1u; j < 500u; i = j, ++j) {
+		TEST_ASSERT_NOT_NULL(count_string[i]);
+		sprintf(&buffer[0], "%u", j);
+		TEST_ASSERT_EQUAL_STRING(&buffer[0], count_string[i]);
+	}
+
+	free(count_string);
 }
 
 

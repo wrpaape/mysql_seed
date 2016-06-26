@@ -265,7 +265,7 @@ do {									\
 do {									\
 		from_ptr    = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
 		current_ptr = from_ptr;					\
-		SET_RANGE_DIGITS_MAG_UPTO(7);				\
+		SET_RANGE_DIGITS_MAG_UPTO(MAG);				\
 		upto_ptr    = from_ptr;					\
 		--active;						\
 } while (0)
@@ -319,7 +319,7 @@ count_string_init(char *restrict *const string_ptrs,
 
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
-inline char *restrict *
+inline char **
 count_string_create(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
@@ -334,9 +334,9 @@ count_string_create(const size_t upto)
 			       upto);
 
 	/* 'upto' + 1 (NULL terminated) pointers + 'size_digits' ascii chars */
-	char *restrict *const string_ptrs = malloc((sizeof(char *)
-						    * (upto + 1lu))
-						   + spec.size_digits);
+	char **const string_ptrs = malloc((sizeof(char *)
+					   * (upto + 1lu))
+					  + spec.size_digits);
 	if (string_ptrs == NULL) {
 		count_string_log_alloc_failure(upto,
 					       MALLOC_FAILURE_MESSAGE);
