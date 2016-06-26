@@ -17,8 +17,6 @@
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define ERROR_HEADER(STRING) ANSI_BRIGHT ANSI_RED STRING ANSI_RESET
-
 #define ERROR_NO_INPUT_MESSAGE					\
 ERROR_HEADER("missing input options\n")
 

@@ -7,11 +7,6 @@
 #include "mysql_seed_mode.h"		/* <stdio.h>, SeedExitSpec, SeedModeSpec */
 #include "mysql_seed_string_macros.h"	/* string helper macros */
 
-/* ANSI escape macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define UNDERLINE(STRING) ANSI_UNDERLINE STRING ANSI_NO_UNDERLINE
-#define BRIGHTEN(STRING)  ANSI_BRIGHT    STRING ANSI_RESET
-
 /* help messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define HELP_USAGE_MESSAGE					\

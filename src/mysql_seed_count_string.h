@@ -33,6 +33,14 @@
 #define SIZE_1_9999999		(SIZE_1_999999	+ SIZE_1000000_9999999)
 #endif	/*  if (UPTO_MAX >= 9999999lu) */
 
+#define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
+#define MALLOC_FAILURE_MESSAGE		  "malloc failure (out of memory)\n"
+
+#define CS_ALLOC_FAILURE_MESSAGE_BEGIN				\
+"failed to allocate count string memory for 'upto' of "
+
+#define CS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
+" ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
 /* struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -41,6 +49,63 @@ struct CountStringSpec {
 	size_t base_upto;	/* 10^mag_upto */
 	size_t size_until_base;	/* sizeof("1", "2", ... "base - 1") */
 	size_t size_upto_upto;	/* sizeof("1", "2", ... "upto") */
+};
+
+
+
+
+/* #if (CHAR_BIT < 7) */
+/* #error "incompatible 'char' ('CHAR_BIT' = " EXPAND_STRINGIFY(CHAR_BIT) ")" */
+/* #endif */
+
+/* #if	(ULONG_MAX < UINT64_MAX) */
+/* typedef uint_fast32_t Word; */
+/* #define WORD_MAX UINT_FAST32_MAX */
+/* #define WORD_WIDTH 4 */
+
+/* #else */
+
+/* typedef uint_fast64_t Word; */
+/* #define WORD_MAX UINT_FAST64_MAX */
+/* #define WORD_WIDTH 8 */
+/* #endif /1* if (ULONG_MAX < UINT64_MAX) *1/ */
+
+
+union DigitsBuffer {
+	char string[UPTO_MAX_DIGIT_COUNT + 1u];
+#if (UPTO_MAX_DIGIT_COUNT > 4u)
+	CharBuff9 width_9;
+	CharBuff8 width_8;
+	CharBuff7 width_7;
+	CharBuff6 width_6;
+#endif /* if (UPTO_MAX_DIGIT_COUNT > 4u) */
+	CharBuff5 width_5;
+	CharBuff4 width_4;
+	CharBuff3 width_3;
+	CharBuff2 width_2;
+};
+
+union DigitsPointer {
+	char string[UPTO_MAX_DIGIT_COUNT + 1u];
+#if (UPTO_MAX_DIGIT_COUNT > 4u)
+	CharBuff9 *restrict width_9;
+	CharBuff8 *restrict width_8;
+	CharBuff7 *restrict width_7;
+	CharBuff6 *restrict width_6;
+#endif /* if (UPTO_MAX_DIGIT_COUNT > 4u) */
+	CharBuff5 *restrict width_5;
+	CharBuff4 *restrict width_4;
+	CharBuff3 *restrict width_3;
+	CharBuff2 *restrict width_2;
+};
+
+
+
+
+struct CountStringBuilder {
+	union DigitsBuffer buffer;
+	union DigitsPointer pointer;
+	char *restrict active;
 };
 
 
@@ -136,14 +201,11 @@ count_string_log_alloc_failure(const size_t upto,
 
 	seed_log_handle_lock();
 
-	seed_log_append_string("failed to allocate count string memory for "
-			       "'upto' of ");
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_BEGIN);
 
 	seed_log_append_digits(upto);
 
-	seed_log_append_string(" ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX)
-			       ")\n"
-			       "reason:\n\t");
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE);
 
 	seed_log_append_string(failure);
 
@@ -155,24 +217,28 @@ count_string_init(char *const restrict string,
 		  const struct CountStringSpec *const restrict spec,
 		  size_t upto)
 {
+	char *restrict ptr;
+
+	ptr = string[spec->size_until_base];
+
 	/* *ptr = '\0'; */
 	/* --ptr; */
 
-	/* switch (count_string_digit_count(upto)) { */
-/* #if (UPTO_MAX_DIGIT_COUNT == 8u) */
-	/* case 8u: */
-	/* case 7u: */
-	/* case 6u: */
-	/* case 5u: */
-/* #endif /1* if (UPTO_MAX_DIGIT_COUNT == 8u) *1/ */
-	/* case 4u: */
-	/* case 3u: */
-	/* case 2u: */
-	/* case 1u: */
-	/* default: */
-	/* } */
+	switch (spec->mag_upto) {
+#if (UPTO_MAX_DIGIT_COUNT == 8u)
+	case 7u:
+	case 6u:
+	case 5u:
+	case 4u:
+#endif /* if (UPTO_MAX_DIGIT_COUNT == 8u) */
+	case 3u:
+	case 2u:
+	case 1u:
+	default:
+		/* string[spec->size_upto_upto] = '\0'; */
+		return;
+	}
 }
-
 
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -181,7 +247,7 @@ count_string_create(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
 		count_string_log_alloc_failure(upto,
-					       "'UPTO_MAX' exceeded\n");
+					       UPTO_MAX_EXCEEDED_FAILURE_MESSAGE);
 		return NULL;
 	}
 
@@ -196,7 +262,7 @@ count_string_create(const size_t upto)
 
 	if (string == NULL) {
 		count_string_log_alloc_failure(upto,
-					       "malloc failure (out of memory)\n");
+					       MALLOC_FAILURE_MESSAGE);
 		return NULL;
 	}
 
