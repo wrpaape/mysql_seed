@@ -9,54 +9,77 @@ count_string_log_alloc_failure(const size_t upto,
 			       const char *const restrict failure);
 
 extern inline void
-count_string_update_buffer(char *restrict digit);
+count_string_increment_buffer(char *restrict digit);
 
+/* global variables
+ *─────────────────────────────────────────────────────────────────────────── */
+const Mag0String *const restrict mag_0_min_string = (Mag0String *) "1";
+const Mag1String *const restrict mag_1_min_string = (Mag1String *) "10";
+const Mag2String *const restrict mag_2_min_string = (Mag2String *) "100";
+const Mag3String *const restrict mag_3_min_string = (Mag3String *) "1000";
+#ifdef LARGE_UPTO_MAX
+const Mag4String *const restrict mag_4_min_string = (Mag4String *) "10000";
+const Mag5String *const restrict mag_5_min_string = (Mag5String *) "100000";
+const Mag6String *const restrict mag_6_min_string = (Mag6String *) "1000000";
+const Mag7String *const restrict mag_7_min_string = (Mag7String *) "10000000";
+#endif	/*  ifdef LARGE_UPTO_MAX */
+
+#define SET_RANGE_DIGITS_MAG_UPTO(MAG_UPTO)				\
+do {									\
+	buffer.mag_ ## MAG_UPTO = *(mag_ ## MAG_UPTO ##_min_string);	\
+	string_ptr.string = string					\
+			  + SIZE_MAG_0_ ## MAG_UPTO ## _STR;		\
+	active		  = string_ptr.string				\
+			  + OFF_LO_MAG_ ## MAG_UPTO;			\
+	counter		  = MAG_ ## MAG_UPTO ## _MIN;			\
+	while (1) {							\
+		*(string_ptr.mag_					\
+		  ## MAG_UPTO) = buffer.mag_ ## MAG_UPTO;		\
+		++(string_ptr.mag_ ## MAG_UPTO);			\
+		if (counter == upto)					\
+			break;						\
+		++counter;						\
+		count_string_increment_buffer(active);			\
+	}								\
+} while (0)
+
+void
 count_string_init(char *const restrict string,
-		  const struct CountStringSpec *const restrict spec,
+		  const unsigned int mag_upto,
 		  size_t upto)
 {
 	union DigitsBuffer buffer;
-	union DigitsBuffer *const restrict buffer_ptr = &buffer;
 	union DigitsPointer string_ptr;
 	char *restrict active;
 	size_t counter;
 
-	buffer	       = *(spec->base_string);
 
-	switch (spec->mag_upto) {
-#if (UPTO_MAX_DIGIT_COUNT == 8u)
+	switch (mag_upto) {
+#ifdef LARGE_UPTO_MAX
 	case 7u:
-		*(buffer_ptr.string) = MAG_7_MIN_STR
-		string_ptr.string = string + SIZE_1_
-		active	       = string_ptr.string + 7l;
-		counter	       = MAG_7_MIN;
-
-		while (1) {
-			*(string_ptr.mag_7) = buffer.mag_7;
-
-			++(string_ptr.mag_7);
-
-			if (counter == upto)
-				break;
-
-			++counter;
-
-			count_string_update_buffer(active);
-		}
-
-		counter = BASE_MAG_6;
-		upto	= BASE_MAG_7 - 1lu;
-
+		SET_RANGE_DIGITS_MAG_UPTO(7);
+		upto = MAG_6_MAX;
 	case 6u:
+		SET_RANGE_DIGITS_MAG_UPTO(6);
+		upto = MAG_5_MAX;
 	case 5u:
+		SET_RANGE_DIGITS_MAG_UPTO(5);
+		upto = MAG_4_MAX;
 	case 4u:
-#endif /* if (UPTO_MAX_DIGIT_COUNT == 8u) */
+		SET_RANGE_DIGITS_MAG_UPTO(4);
+		upto = MAG_3_MAX;
+#endif /* ifdef LARGE_UPTO_MAX */
 	case 3u:
+		SET_RANGE_DIGITS_MAG_UPTO(3);
+		upto = MAG_2_MAX;
 	case 2u:
+		SET_RANGE_DIGITS_MAG_UPTO(2);
+		upto = MAG_1_MAX;
 	case 1u:
+		SET_RANGE_DIGITS_MAG_UPTO(1);
+		upto = MAG_0_MAX;
 	default:
-		/* string[spec->size_1_upto] = '\0'; */
-		return;
+		SET_RANGE_DIGITS_MAG_UPTO(0);
 	}
 }
 

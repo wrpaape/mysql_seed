@@ -27,7 +27,8 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_mysql_seed_count_string(void);
+extern void test_count_string_spec_init(void);
+extern void test_count_string_alloc_failure(void);
 
 
 //=======Test Reset Option=====
@@ -43,7 +44,8 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/mysql_seed_count_string_test.c");
-  RUN_TEST(test_mysql_seed_count_string, 12);
+  RUN_TEST(test_count_string_spec_init, 27);
+  RUN_TEST(test_count_string_alloc_failure, 46);
 
   return (UnityEnd());
 }
