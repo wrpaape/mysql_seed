@@ -251,11 +251,11 @@ do {									\
 	digits_ptr.string      = digits + SIZE_MAG_0_ ## MAG ## _STR;	\
 	digits_buf.mag_ ## MAG = mag_ ## MAG ##_min_string;		\
 	while (1) {							\
-		*current_ptr = digits_ptr.string;			\
 		*(digits_ptr.mag_ ## MAG) = digits_buf.mag_ ## MAG;	\
+		*current_ptr = digits_ptr.string;			\
+		++current_ptr;						\
 		if (current_ptr == upto_ptr)				\
 			break;						\
-		++current_ptr;						\
 		++(digits_ptr.mag_ ## MAG);				\
 		count_buffer_increment(active);				\
 	}								\
@@ -266,7 +266,7 @@ do {									\
 		from_ptr    = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
 		current_ptr = from_ptr;					\
 		SET_RANGE_DIGITS_MAG_UPTO(7);				\
-		upto_ptr = from_ptr;					\
+		upto_ptr    = from_ptr;					\
 		--active;						\
 } while (0)
 
