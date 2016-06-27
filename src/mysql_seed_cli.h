@@ -55,6 +55,22 @@ seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
 	seed_log_handle_unlock();
 }
 
+#define CASE_SHORT_OPT(CHAR, HANDLE_MATCH, HANDLE_NOMATCH)	\
+case CHAR:							\
+	if (opt[2] == '\0') {					\
+		HANDLE_MATCH;					\
+		return;						\
+	}							\
+	HANDLE_NOMATCH
+
+#define CASE_LONG_OPT(FIRST, REM, HANDLE_MATCH, HANDLE_NOMATCH)	\
+case FIRST:							\
+	if (strings_equal(REM,					\
+			  &opt[3])) {				\
+		HANDLE_MATCH;					\
+		return;						\
+	}							\
+	HANDLE_NOMATCH
 
 inline void
 seed_mode_set_exit_help(struct SeedMode *const restrict mode,
@@ -66,55 +82,32 @@ seed_mode_set_exit_help(struct SeedMode *const restrict mode,
 	if (argc == 2)
 		goto HELP_USAGE;
 
-	const char *const restrict help_option = argv[2];
+	const char *const restrict opt = argv[2];
 
-	switch (help_option[1]) {
-	case '-':
-		break;
-
-	case 'c':
-		if (help_option[2] == '\0') {
-			seed_exit_spec_set_help_create(&mode->spec.exit);
-			return;
-		}
-
+	if (opt[0] != '-')
 		goto HELP_USAGE;
 
-	case 'r':
-		if (help_option[2] == '\0') {
-			seed_exit_spec_set_help_run(&mode->spec.exit);
-			return;
-		}
-
-		/* fall through */
-
-	default:
-		goto HELP_USAGE;
+	/* parse short option */
+	switch (opt[1]) {
+	case '-': break;	/* parse long option */
+	CASE_SHORT_OPT('c',
+		       seed_exit_spec_set_help_create(&mode->spec.exit),
+		       goto HELP_USAGE);
+	CASE_SHORT_OPT('r',
+		       seed_exit_spec_set_help_run(&mode->spec.exit),
+		       goto HELP_USAGE);
+	default: goto HELP_USAGE;
 	}
 
-
-
 	/* parse long option */
-	switch (help_option[2]) {
-	case 'c':
-		if (strings_equal("reate",
-				  &help_option[3])) {
-
-			seed_exit_spec_set_help_create(&mode->spec.exit);
-			return;
-		}
-
-		goto HELP_USAGE;
-
-	case 'r':
-		if (strings_equal("un",
-				  &help_option[3])) {
-
-			seed_exit_spec_set_help_run(&mode->spec.exit);
-			return;
-		}
-
-		/* fall through */
+	switch (opt[2]) {
+	CASE_LONG_OPT('c', "reate",
+		      seed_exit_spec_set_help_create(&mode->spec.exit),
+		      break);
+	CASE_LONG_OPT('r', "un",
+		      seed_exit_spec_set_help_run(&mode->spec.exit),
+		      break);
+	default: break;		/* do nothing */
 	}
 
 HELP_USAGE:

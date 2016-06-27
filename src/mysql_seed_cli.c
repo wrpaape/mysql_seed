@@ -29,84 +29,41 @@ seed_cli_parse_input(struct SeedMode *const restrict mode,
 		return;
 	}
 
-	const char *const restrict option = argv[1];
+	const char *const restrict opt = argv[1];
 
-	if (option[0] != '-')
+	if (opt[0] != '-')
 		goto EXIT_INVALID_OPTION;
 
-
-	switch (option[1]) {
-	case '-':
-		break;
-	case 'c':
-		if (option[2] == '\0') {
-			/* TODO: dispatch 'create' mode */
-			return;
-		}
-
-		goto EXIT_INVALID_OPTION;
-
-
-	case 'h':
-		if (option[2] == '\0') {
-			seed_mode_set_exit_help(mode,
-						argc,
-						argv);
-			return;
-		}
-
-		goto EXIT_INVALID_OPTION;
-
-
-	case 'r':
-		if (option[2] == '\0') {
-			/* TODO: dispatch 'run' mode */
-			return;
-		}
-
-		/* fall through */
-
-	default:
-		goto EXIT_INVALID_OPTION;
+	/* parse short option */
+	switch (opt[1]) {
+	case '-': break;	/* parse long option */
+	CASE_SHORT_OPT('c',
+		       puts("TODO: dispatch 'create' mode"),
+		       goto EXIT_INVALID_OPTION);
+	CASE_SHORT_OPT('h',
+		       seed_mode_set_exit_help(mode, argc, argv),
+		       goto EXIT_INVALID_OPTION);
+	CASE_SHORT_OPT('r',
+		       puts("TODO: dispatch 'run' mode"),
+		       goto EXIT_INVALID_OPTION);
+	default: goto EXIT_INVALID_OPTION;
 	}
 
-
 	/* parse long option */
-	switch (option[2]) {
-	case 'c':
-		if (strings_equal("reate",
-				  &option[3])) {
-			/* TODO: dispatch 'create' mode */
-			return;
-		}
-
-		goto EXIT_INVALID_OPTION;
-
-
-	case 'h':
-		if (strings_equal("elp",
-				  &option[3])) {
-
-			seed_mode_set_exit_help(mode,
-						argc,
-						argv);
-			return;
-		}
-
-		goto EXIT_INVALID_OPTION;
-
-
-	case 'r':
-		if (strings_equal("un",
-				  &option[3])) {
-			/* TODO: dispatch 'run' mode */
-			return;
-		}
-
-		/* fall through */
+	switch (opt[2]) {
+	CASE_LONG_OPT('c', "reate",
+		       puts("TODO: dispatch 'create' mode"),
+		       break);
+	CASE_LONG_OPT('h', "elp",
+		       seed_mode_set_exit_help(mode, argc, argv),
+		       break);
+	CASE_LONG_OPT('r', "un",
+		       puts("TODO: dispatch 'run' mode"),
+		       break);
+	default: break;		/* do nothing */
 	}
 
 EXIT_INVALID_OPTION:
 	seed_mode_set_exit_invalid_option(mode,
-					  option);
+					  opt);
 }
