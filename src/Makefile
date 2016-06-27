@@ -220,7 +220,7 @@ UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
 UNITY_LD_LIB_FLAGS	:= -lm
 # ─────────────── run all tests ────────────────────────────────────────────────
-TEST_FILES_GLOB	:= $(call PROJECT_TEST_BINARY_PATH,*)
+TEST_FILES_GLOB	:= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),*_test)
 ifeq (T,$(SYSTEM_WINDOWS))
 RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
 
@@ -776,7 +776,7 @@ all: $(TARGETS)
 
 # run all unit tests
 # ──────────────────────────────────────────────────────────────────────────────
-test: $(TEST_BINARIES)
+run_tests: $(TEST_BINARIES)
 	$(RUN_ALL_TESTS)
 
 # remove all targets

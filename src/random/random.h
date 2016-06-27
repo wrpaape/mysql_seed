@@ -141,9 +141,4 @@ inline rint_t *create_random_int_array_in_range(const size_t length,
 	return array;
 }
 
-
-#ifdef __cplusplus /* close 'extern "C" {' */
-}
-#endif
-
 #endif /* ifndef RANDOM_RANDOM_IMP_H_ */

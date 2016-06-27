@@ -22,6 +22,8 @@
 
 
 
+/* failure messages
+ *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 #define MALLOC_FAILURE_MESSAGE		  "malloc failure (out of memory)\n"
 
@@ -31,9 +33,9 @@
 #define CS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
+
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
-
 #ifdef LARGE_UPTO_MAX
 typedef CharBuffer9 Mag7String;
 typedef CharBuffer8 Mag6String;
@@ -217,7 +219,6 @@ inline void
 count_string_log_alloc_failure(const size_t upto,
 			       const char *const restrict failure)
 {
-
 	seed_log_handle_lock();
 
 	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_BEGIN);
@@ -286,7 +287,7 @@ count_string_init(char *restrict *const string_ptrs,
 	upto_ptr  = string_ptrs + upto;
 	*upto_ptr = NULL;
 
-	/* point digits after NULL terminator */
+	/* point 'digits' after NULL terminator */
 	char *const restrict digits = (char *const restrict) (upto_ptr + 1l);
 
 	/* point 'active' at one's digit */
@@ -334,8 +335,7 @@ count_string_create(const size_t upto)
 			       upto);
 
 	/* 'upto' + 1 (NULL terminated) pointers + 'size_digits' ascii chars */
-	char **const string_ptrs = malloc((sizeof(char *)
-					   * (upto + 1lu))
+	char **const string_ptrs = malloc((sizeof(char *) * (upto + 1lu))
 					  + spec.size_digits);
 	if (string_ptrs == NULL) {
 		count_string_log_alloc_failure(upto,
