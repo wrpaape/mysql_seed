@@ -9,7 +9,8 @@ void tearDown(void)
 {
 }
 
-void testy_testy(void)
+void test_gen_first_names(void)
 {
-	TEST_IGNORE();
+	for (char **names = gen_first_names(10lu); (*names) != NULL; ++names)
+		puts(*names);
 }

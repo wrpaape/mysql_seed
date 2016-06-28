@@ -27,7 +27,7 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void testy_testy(void);
+extern void test_gen_first_names(void);
 
 
 //=======Test Reset Option=====
@@ -43,7 +43,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/gen_gen_names_test.c");
-  RUN_TEST(testy_testy, 12);
+  RUN_TEST(test_gen_first_names, 12);
 
   return (UnityEnd());
 }

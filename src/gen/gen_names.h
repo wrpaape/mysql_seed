@@ -72,10 +72,9 @@ single_names_init(char *restrict *const name_ptrs_base,
 		  size_t count)
 {
 	/* start 'names' after NULL terminator */
-	char *const restrict names_base = (char *restrict) (name_ptrs_base
-							    + count);
+	char *const restrict *name_ptrs_end = name_ptrs_base + count;
 	char *restrict *name_ptrs = name_ptrs_base;
-	char *restrict names	  = names_base;
+	char *restrict names	  = (char *restrict) (name_ptrs_end + 1l);
 
 	while (1) {
 		*name_ptrs = names;
@@ -86,7 +85,7 @@ single_names_init(char *restrict *const name_ptrs_base,
 
 		++name_ptrs;
 
-		if (((void *) name_ptrs) == ((void *) names_base)) {
+		if (((void *) name_ptrs) == ((void *) name_ptrs_end)) {
 			*name_ptrs = NULL;
 			return ((void *) names) - ((void *) name_ptrs_base);
 		}
