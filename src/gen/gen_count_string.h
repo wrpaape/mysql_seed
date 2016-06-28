@@ -81,10 +81,11 @@ struct CountStringSpec {
 };
 
 struct CountString {
+	size_t upto;
 	bool incomplete;	/* flipped false once 'pointers' are set */
 	char **pointers;	/* digit pointers */
-	SeedThreadCond ready;	/* broadcasted once 'pointers' are set */
-	SeedMutex ready_lock;	/* condition lock */
+	SeedThreadCond done;	/* broadcasted once 'pointers' are set */
+	SeedMutex processing;	/* condition lock */
 };
 
 /* macro constants
@@ -362,13 +363,13 @@ count_string_handle_get(void)
 {
 	if (count_string.incomplete) {
 
-		seed_mutex_handle_lock(&count_string.ready_lock);
+		seed_mutex_handle_lock(&count_string.processing);
 
-		seed_thread_cond_handle_await_span(&count_string.ready,
-						   &count_string.ready_lock,
+		seed_thread_cond_handle_await_span(&count_string.done,
+						   &count_string.processing,
 						   &count_string_await_span);
 
-		seed_mutex_handle_unlock(&count_string.ready_lock);
+		seed_mutex_handle_unlock(&count_string.processing);
 	}
 
 	if (count_string.pointers == NULL)
@@ -377,11 +378,15 @@ count_string_handle_get(void)
 	return count_string.pointers;
 }
 
-inline void
-count_string_init(void)
-{
-		seed_mutex_handle_lock(&count_string.ready_lock);
+void
+count_string_do_init(void *arg);
 
+inline void
+count_string_init(const size_t upto)
+{
+	count_string.upto = upto;
+	seed_worker_start_independent(&count_string_do_init,
+				      NULL);
 }
 
 

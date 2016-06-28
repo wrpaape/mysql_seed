@@ -29,17 +29,26 @@ typedef pthread_key_t SeedThreadKey;
 typedef unsigned int SeedWorkerID;
 
 typedef void *
-SeedWorkerRoutine(void *);
+AwaitableRoutine(void *);
 
 typedef void
-SeedWorkerHandler(void *);
+IndependentRoutine(void *);
+
+union SeedWorkerRoutine {
+	AwaitableRoutine *awaitable;
+	IndependentRoutine *independent;
+};
+
 
 struct SeedWorker {
 	SeedWorkerID id;
-	SeedThreadKey key;
 	SeedThread thread;
-	SeedWorkerRoutine *routine;
+	SeedThreadKey key;
+	SeedThreadCond done;
+	SeedMutex processing;
+	union SeedWorkerRoutine routine;
 	void *arg;
+	void *result;
 	struct SeedWorker *prev;
 	struct SeedWorker *next;
 };
@@ -205,7 +214,7 @@ __attribute__((noreturn));
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
 seed_thread_create(SeedThread *const restrict thread,
-		   SeedWorkerRoutine *const routine,
+		   AwaitableRoutine *const routine,
 		   void *arg,
 		   const char *restrict *const restrict message_ptr)
 {
@@ -238,7 +247,7 @@ seed_thread_create(SeedThread *const restrict thread,
 
 inline void
 seed_thread_handle_create(SeedThread *const restrict thread,
-			  SeedWorkerRoutine *const routine,
+			  AwaitableRoutine *const routine,
 			  void *arg)
 {
 	const char *restrict failure;
@@ -285,7 +294,7 @@ seed_thread_handle_cancel(SeedThread thread)
 
 inline bool
 seed_thread_key_create(SeedThreadKey *const key,
-		       SeedWorkerHandler *const handle,
+		       IndependentRoutine *const handle,
 		       const char *restrict *const restrict message_ptr)
 {
 	switch (seed_thread_key_create_imp(key,
@@ -322,7 +331,7 @@ seed_thread_key_create(SeedThreadKey *const key,
 
 inline void
 seed_thread_key_handle_create(SeedThreadKey *const key,
-			      SeedWorkerHandler *const handle)
+			      IndependentRoutine *const handle)
 {
 	const char *restrict failure;
 
@@ -875,7 +884,7 @@ seed_worker_exit_clean_up(void *arg)
 	seed_thread_key_handle_delete(worker->key);
 
 	worker_queue_handle_remove(&supervisor.live,
-				    worker);
+				   worker);
 
 	worker_queue_handle_push(&supervisor.dead,
 				 worker);
@@ -884,27 +893,51 @@ seed_worker_exit_clean_up(void *arg)
 
 
 void *
-seed_worker_start_routine(void *arg);
+seed_worker_do_awaitable(void *arg);
 
 
 inline SeedWorkerID
-seed_worker_start(SeedWorkerRoutine *const routine,
-		  void *arg)
+seed_worker_start_awaitable(AwaitableRoutine *const routine,
+			    void *arg)
 {
 	struct SeedWorker *const restrict
 	worker = worker_queue_handle_pop(&supervisor.dead);
 
 	const SeedWorkerID id = worker->id;
 
-	worker->key	= (SeedThreadKey) worker;
-	worker->routine = routine;
-	worker->arg	= arg;
+	worker->key		  = (SeedThreadKey) worker;
+	worker->routine.awaitable = routine;
+	worker->arg		  = arg;
 
 	seed_thread_handle_create(&worker->thread,
-				  &seed_worker_start_routine,
+				  &seed_worker_do_awaitable,
 				  worker);
 
+	worker_queue_handle_push(&supervisor.live,
+				 worker);
+
 	return id;
+}
+void *
+seed_worker_do_independent(void *arg);
+
+inline void
+seed_worker_start_independent(IndependentRoutine *const routine,
+			      void *arg)
+{
+	struct SeedWorker *const restrict
+	worker = worker_queue_handle_pop(&supervisor.dead);
+
+	worker->key		    = (SeedThreadKey) worker;
+	worker->routine.independent = routine;
+	worker->arg		    = arg;
+
+	seed_thread_handle_create(&worker->thread,
+				  &seed_worker_do_independent,
+				  worker);
+
+	worker_queue_handle_push(&supervisor.live,
+				 worker);
 }
 
 

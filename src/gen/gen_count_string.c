@@ -14,10 +14,11 @@ const Mag7String mag_7_min_string = { "10000000" };
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
 struct CountString count_string = {
+	.upto	    = 0lu,
 	.incomplete = true,
 	.pointers   = NULL,
-	.ready	    = SEED_THREAD_COND_INITIALIZER,
-	.ready_lock = SEED_MUTEX_INITIALIZER
+	.done	    = SEED_THREAD_COND_INITIALIZER,
+	.processing = SEED_MUTEX_INITIALIZER
 };
 
 /* 100 ms */
@@ -45,3 +46,23 @@ count_string_pointers_init(char *restrict *const string_ptrs,
 
 extern inline char **
 count_string_pointers_create(const size_t upto);
+
+void
+count_string_do_init(void *arg)
+{
+	seed_worker_try_catch_open(&free,
+				   count_string.pointers);
+
+	count_string.pointers = count_string_pointers_create(count_string.upto);
+
+	count_string.incomplete = false;
+
+	seed_thread_cond_handle_broadcast(&count_string.done);
+
+	seed_mutex_handle_unlock(&count_string.processing);
+
+	seed_worker_try_catch_close();
+}
+
+extern inline void
+count_string_init(const size_t upto);

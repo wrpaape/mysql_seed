@@ -61,13 +61,13 @@ seed_supervisor_exit(const char *restrict failure)
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
 seed_thread_create(SeedThread *const restrict thread,
-		   SeedWorkerRoutine *const routine,
+		   AwaitableRoutine *const routine,
 		   void *arg,
 		   const char *restrict *const restrict message_ptr);
 
 extern inline void
 seed_thread_handle_create(SeedThread *const restrict thread,
-			  SeedWorkerRoutine *const routine,
+			  AwaitableRoutine *const routine,
 			  void *arg);
 
 extern inline bool
@@ -100,12 +100,12 @@ seed_thread_attr_handle_set_detach_state(SeedThreadAttr *const restrict attr,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
 seed_thread_key_create(SeedThreadKey *const key,
-		       SeedWorkerHandler *const handle,
+		       IndependentRoutine *const handle,
 		       const char *restrict *const restrict message_ptr);
 
 extern inline void
 seed_thread_key_handle_create(SeedThreadKey *const key,
-			      SeedWorkerHandler *const handle);
+			      IndependentRoutine *const handle);
 
 extern inline bool
 seed_thread_key_delete(SeedThreadKey key,
@@ -222,7 +222,31 @@ seed_worker_exit_clean_up(void *arg);
 
 
 void *
-seed_worker_start_routine(void *arg)
+seed_worker_do_awaitable(void *arg)
+{
+	struct SeedWorker *const restrict
+	worker = (struct SeedWorker *const restrict) arg;
+
+	seed_mutex_handle_lock(&worker->processing);
+
+	seed_thread_key_handle_create(&worker->key,
+				      &seed_worker_exit_clean_up);
+
+	worker->result = worker->routine.awaitable(worker->arg);
+
+	seed_thread_cond_handle_signal(&worker->done);
+
+	seed_mutex_handle_unlock(&worker->processing);
+
+	return NULL;
+}
+
+extern inline SeedWorkerID
+seed_worker_start_awaitable(AwaitableRoutine *const routine,
+			    void *arg);
+
+void *
+seed_worker_do_independent(void *arg)
 {
 	struct SeedWorker *const restrict
 	worker = (struct SeedWorker *const restrict) arg;
@@ -230,12 +254,14 @@ seed_worker_start_routine(void *arg)
 	seed_thread_key_handle_create(&worker->key,
 				      &seed_worker_exit_clean_up);
 
-	return worker->routine(worker->arg);
+	worker->routine.independent(worker->arg);
+
+	return NULL;
 }
 
-extern inline SeedWorkerID
-seed_worker_start(SeedWorkerRoutine *const routine,
-		  void *arg);
+inline void
+seed_worker_start_independent(IndependentRoutine *const routine,
+			      void *arg);
 
 
 
@@ -252,6 +278,5 @@ void
 seed_parallel_stop(void)
 {
 	seed_thread_attr_prototype_destroy();
-
 }
 
