@@ -420,6 +420,9 @@ const struct NameMap last_name_map = {
 	.i_last = LAST_NAMES_COUNT - 1lu
 };
 
+extern inline char *
+put_random_initial(char *restrict string);
+
 extern inline const char *
 name_map_sample(const struct NameMap *const restrict map);
 
@@ -430,3 +433,9 @@ single_names_init(char *restrict *const name_ptrs_base,
 
 extern inline char **
 gen_first_names(const size_t count);
+
+extern inline char **
+gen_last_names(const size_t count);
+
+extern inline char **
+gen_full_names(const size_t count);
