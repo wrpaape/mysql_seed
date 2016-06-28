@@ -25,15 +25,14 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 
-#define CS_ALLOC_FAILURE_MESSAGE_BEGIN				\
+#define CS_ALLOC_FAILURE_MESSAGE_BEGIN					\
 "\n\nfailed to allocate count string memory for 'upto' of "
 
-#define CS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
+#define CS_ALLOC_FAILURE_MESSAGE_MIDDLE					\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
-#define CS_GET_FAILURE_MESSAGE
-"\n\n\n'count_string'"
-" ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
+#define CS_INIT_FAILURE_MESSAGE						\
+"\n\nfailed to retrieve 'count_string'\nreason:\n\tgeneration failure\n"
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -82,9 +81,10 @@ struct CountStringSpec {
 };
 
 struct CountString {
-	SeedMutex lock;
-	SeedCondition ready;	/* flag set once 'pointers' have been set */
+	bool incomplete;	/* flipped false once 'pointers' are set */
 	char **pointers;	/* digit pointers */
+	SeedThreadCond ready;	/* broadcasted once 'pointers' are set */
+	SeedMutex ready_lock;	/* condition lock */
 };
 
 /* macro constants
@@ -153,7 +153,7 @@ extern const Mag7String mag_7_min_string;
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
 extern struct CountString count_string;
-
+extern const struct timespec count_string_await_span;
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -279,9 +279,9 @@ do {									\
 } while (0)
 
 inline void
-count_string_init(char *restrict *const string_ptrs,
-		  const unsigned int mag_upto,
-		  const size_t upto)
+count_string_pointers_init(char *restrict *const string_ptrs,
+			   const unsigned int mag_upto,
+			   const size_t upto)
 {
 	union DigitsBuffer digits_buf;
 	union DigitsPointer digits_ptr;
@@ -328,7 +328,7 @@ count_string_init(char *restrict *const string_ptrs,
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline char **
-gen_count_string(const size_t upto)
+count_string_pointers_create(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
 		count_string_log_alloc_failure(upto,
@@ -350,26 +350,39 @@ gen_count_string(const size_t upto)
 		return NULL;
 	}
 
-	count_string_init(string_ptrs,
-			  spec.mag_upto,
-			  upto);
+	count_string_pointers_init(string_ptrs,
+				   spec.mag_upto,
+				   upto);
 
 	return string_ptrs;
 }
 
-/* inline char ** */
-/* count_string_handle_get(void) */
-/* { */
-/* 	if (!count_string.ready) { */
+inline char **
+count_string_handle_get(void)
+{
+	if (count_string.incomplete) {
 
+		seed_mutex_handle_lock(&count_string.ready_lock);
 
-/* 		if (count_string.pointers == NULL) */
-/* 			seed_supervisor_exit() */
+		seed_thread_cond_handle_await_span(&count_string.ready,
+						   &count_string.ready_lock,
+						   &count_string_await_span);
 
-/* 	} */
+		seed_mutex_handle_unlock(&count_string.ready_lock);
+	}
 
-/* 	__builtin_unreachable(); */
-/* } */
+	if (count_string.pointers == NULL)
+		seed_supervisor_exit(CS_INIT_FAILURE_MESSAGE);
+
+	return count_string.pointers;
+}
+
+inline void
+count_string_init(void)
+{
+		seed_mutex_handle_lock(&count_string.ready_lock);
+
+}
 
 
 #endif	/* MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */

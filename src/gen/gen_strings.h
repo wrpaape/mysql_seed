@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdlib.h>		/* malloc, free */
-#include "mysql_seed_log.h"	/* seed_log, string utils */
+#include "mysql_seed_log.h"	/* seed_log, seed_parallel, string utils */
 
 
 /* failure messages
@@ -31,7 +31,7 @@
 " bytes to an actual size of "
 
 #define GS_REALLOC_FAILURE_MESSAGE_END					\
-" bytes"
+" bytes\n"
 
 
 inline void

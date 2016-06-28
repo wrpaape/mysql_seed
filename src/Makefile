@@ -57,21 +57,21 @@ else
                 SYS_ENV_FLAGS 	:= -DOSX
         endif
 
-        UNAME_P := $(shell uname -p)
+        UNAME_M := $(shell uname -m)
 
-        ifeq      (x86_64,$(UNAME_P))
+        ifeq      (x86_64,$(UNAME_M))
                 ARCH_X86_64	:= T
                 SYS_ARCH_FLAG	:= -arch x86_64
                 SYS_ENV_FLAGS	+= -DAMD_64
 
-        else ifneq (,$(filter %86,$(UNAME_P)))
+        else ifneq (,$(filter %86,$(UNAME_M)))
                 ARCH_I386	:= T
                 SYS_ARCH_FLAG	:= -arch i386
                 SYS_ENV_FLAGS 	+= -DIA_32
 
-        else ifneq (,$(filter arm%,$(UNAME_P)))
+        else ifneq (,$(filter arm%,$(UNAME_M)))
 
-                ifneq (,$(filter %32%,$(UNAME_P)))
+                ifneq (,$(filter %32%,$(UNAME_M)))
                         ARCH_ARM_32	:= T
                         SYS_ARCH_FLAG	:= -arch AArch32
                         SYS_ENV_FLAGS 	+= -DARM_32
@@ -226,7 +226,7 @@ UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity fra
 # ──────────────────────────────────────────────────────────────────────────────
 CC		:= gcc
 CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ $(SYS_ENV_FLAGS)
-CC_FLAGS	:= -g -O2 -std=c99 -Wall $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
+CC_FLAGS	:= -g -O2 -std=c99 -Wall -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
@@ -327,6 +327,38 @@ TARGETS			+= $(UTILS_UTILS_OBJ)				\
 			   $(UTILS_UTILS_TEST_OBJ)			\
 			   $(UTILS_UTILS_TEST_BIN)
 
+# time/time_utils
+# ──────────────────────────────────────────────────────────────────────────────
+TIME_TIME_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,time time_utils)
+TIME_TIME_UTILS_HDR		:= $(call HELPER_HEADER_PATH,time time_utils)
+TIME_TIME_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,time time_utils)
+TIME_TIME_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,time time_utils)
+TIME_TIME_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,time time_utils)
+TIME_TIME_UTILS_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,time time_utils)
+TIME_TIME_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,time time_utils)
+TIME_TIME_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,time time_utils)
+TIME_TIME_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,time time_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+TIME_TIME_UTILS_OBJ_PREQS	:= $(TIME_TIME_UTILS_SRC) 		\
+			   	   $(TIME_TIME_UTILS_HDR)
+TIME_TIME_UTILS_TRNR_SRC_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
+				   $(TEST_RUNNER_SOURCE_DIR)
+TIME_TIME_UTILS_TEST_OBJ_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
+			   	   $(TIME_TIME_UTILS_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+TIME_TIME_UTILS_TRNR_OBJ_PREQS	:= $(TIME_TIME_UTILS_TRNR_SRC)		\
+			   	   $(TIME_TIME_UTILS_TEST_OBJ_PREQS)
+TIME_TIME_UTILS_TEST_BIN_PREQS	:= $(TIME_TIME_UTILS_TRNR_OBJ)		\
+				   $(TIME_TIME_UTILS_TEST_OBJ)		\
+			   	   $(TIME_TIME_UTILS_OBJ)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(TIME_TIME_UTILS_TEST_BIN)
+TARGETS			+= $(TIME_TIME_UTILS_OBJ)			\
+			   $(TIME_TIME_UTILS_TRNR_SRC)			\
+			   $(TIME_TIME_UTILS_TRNR_OBJ)			\
+			   $(TIME_TIME_UTILS_TEST_OBJ)			\
+			   $(TIME_TIME_UTILS_TEST_BIN)
 
 # memory/memory_utils
 # ──────────────────────────────────────────────────────────────────────────────
@@ -578,6 +610,7 @@ PARALLEL_TEST_BIN_PREQS	:= $(PARALLEL_TRNR_OBJ)				\
 			   $(PARALLEL_TEST_OBJ)				\
 			   $(PARALLEL_OBJ)				\
 			   $(EXIT_OBJ)					\
+			   $(TIME_TIME_UTILS_OBJ)			\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(PARALLEL_TEST_BIN)
@@ -617,6 +650,7 @@ LOG_TEST_BIN_PREQS	:= $(LOG_TRNR_OBJ)				\
 			   $(LOG_OBJ)					\
 			   $(PARALLEL_OBJ)				\
 			   $(EXIT_OBJ)					\
+			   $(TIME_TIME_UTILS_OBJ)			\
 			   $(UTILS_OBJ)					\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
@@ -658,6 +692,7 @@ GEN_GEN_STRINGS_TEST_BIN_PREQS	:= $(GEN_GEN_STRINGS_TRNR_OBJ)		\
 			   	   $(LOG_OBJ)				\
 			   	   $(PARALLEL_OBJ)			\
 			   	   $(EXIT_OBJ)				\
+			   	   $(TIME_TIME_UTILS_OBJ)		\
 			   	   $(UTILS_OBJ)				\
 			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
@@ -699,6 +734,7 @@ GEN_GEN_NAMES_TEST_BIN_PREQS	:= $(GEN_GEN_NAMES_TRNR_OBJ)		\
 			   	   $(LOG_OBJ)				\
 			   	   $(PARALLEL_OBJ)			\
 			   	   $(EXIT_OBJ)				\
+			   	   $(TIME_TIME_UTILS_OBJ)		\
 			   	   $(UTILS_OBJ)				\
 			   	   $(RANDOM_RANDOM_OBJ)			\
 			   	   $(RANDOM_PCG_BASIC_OBJ)		\
@@ -744,6 +780,7 @@ GEN_GEN_COUNT_STRING_TEST_BIN_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_OBJ)	\
 			   	   	   $(LOG_OBJ)				\
 			   	   	   $(PARALLEL_OBJ)			\
 			   	   	   $(EXIT_OBJ)				\
+			   	   	   $(TIME_TIME_UTILS_OBJ)		\
 			   	   	   $(UTILS_OBJ)				\
 			           	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
@@ -857,6 +894,7 @@ CLI_TEST_BIN_PREQS	:= $(CLI_TRNR_OBJ)				\
 			   $(LOG_OBJ)					\
 			   $(PARALLEL_OBJ)				\
 			   $(EXIT_OBJ)					\
+			   $(TIME_TIME_UTILS_OBJ)			\
 			   $(UTILS_OBJ)					\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
@@ -880,11 +918,20 @@ PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 			   $(CLI_OBJ) 					\
 			   $(CREATE_OBJ) 				\
 			   $(RUN_OBJ) 					\
-			   $(GEN_COUNT_STRING_OBJ) 				\
+			   $(GEN_GEN_COUNT_STRING_OBJ) 			\
+			   $(GEN_GEN_NAMES_OBJ) 			\
+			   $(GEN_GEN_STRINGS_OBJ) 			\
 			   $(LOG_OBJ) 					\
 			   $(PARALLEL_OBJ)				\
 			   $(EXIT_OBJ) 					\
-			   $(UTILS_OBJ)
+			   $(UTILS_OBJ)					\
+			   $(RANDOM_RANDOM_OBJ)				\
+			   $(RANDOM_PCG_BASIC_OBJ)			\
+			   $(MEMORY_MEMORY_SWAP_OBJ)			\
+			   $(MEMORY_MEMORY_UTILS_OBJ)			\
+			   $(TIME_TIME_UTILS_OBJ)			\
+			   $(UTILS_UTILS_OBJ)
+
 PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
 			   $(PROJECT_HDR) 				\
 			   $(CLI_HDR)
@@ -999,6 +1046,11 @@ $(MEMORY_MEMORY_SWAP_OBJ): $(MEMORY_MEMORY_SWAP_OBJ_PREQS)
 # make memory/memory_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(MEMORY_MEMORY_UTILS_OBJ): $(MEMORY_MEMORY_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make time/time_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(TIME_TIME_UTILS_OBJ): $(TIME_TIME_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make utils/utils object
@@ -1286,7 +1338,6 @@ $(MEMORY_MEMORY_SWAP_TRNR_SRC): $(MEMORY_MEMORY_SWAP_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-
 # for memory/memory_utils
 # make:
 # 	memory_memory_utils_test		binary,
@@ -1304,6 +1355,26 @@ $(MEMORY_MEMORY_UTILS_TEST_OBJ): $(MEMORY_MEMORY_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(MEMORY_MEMORY_UTILS_TRNR_SRC): $(MEMORY_MEMORY_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for time/time_utils
+# make:
+# 	time_time_utils_test		binary,
+# 	time_time_utils_test_runner 	object,
+# 	time_time_utils_test		object, and
+# 	time_time_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(TIME_TIME_UTILS_TEST_BIN): $(TIME_TIME_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(TIME_TIME_UTILS_TRNR_OBJ): $(TIME_TIME_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(TIME_TIME_UTILS_TEST_OBJ): $(TIME_TIME_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(TIME_TIME_UTILS_TRNR_SRC): $(TIME_TIME_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

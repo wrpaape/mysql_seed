@@ -1,13 +1,9 @@
 #include "mysql_seed_parallel.h"
 
-/* helper macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define SEED_WORKER_LINK(WORKER, PREV, NEXT)		\
-WORKER->prev = PREV;					\
-WORKER->next = NEXT
 
-
-const SeedMutex seed_lock_prototype = SEED_MUTEX_INITIALIZER;
+const SeedMutex seed_mutex_prototype		= SEED_MUTEX_INITIALIZER;
+const SeedThreadCond seed_thread_cond_prototype = SEED_THREAD_COND_INITIALIZER;
+SeedThreadAttr seed_thread_attr_prototype;
 
 struct SeedSupervisor supervisor = {
 	.dead = { .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL },
@@ -32,6 +28,35 @@ struct SeedSupervisor supervisor = {
 	}
 };
 
+/* SeedSupervisor operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+seed_supervisor_init(void);
+
+void
+seed_supervisor_exit(const char *restrict failure)
+{
+	struct SeedWorker *restrict worker;
+	struct SeedExitSpec spec;
+
+	(void) seed_mutex_lock_imp(&supervisor.live.lock);
+
+	while (1) {
+		worker = worker_queue_pop(&supervisor.live);
+
+		if (worker == NULL)
+			break;
+
+		(void) seed_thread_cancel_imp(worker->thread);
+	}
+
+	seed_exit_spec_set_failure(&spec,
+				   failure);
+
+	seed_exit_spec_exit(&spec);
+}
+
+
 /* SeedThread operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
@@ -52,29 +77,51 @@ seed_thread_cancel(SeedThread thread,
 extern inline void
 seed_thread_handle_cancel(SeedThread thread);
 
-/* SeedKey operations
+
+/* SeedThreadAttr operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-seed_key_create(SeedKey *const key,
-		SeedWorkerHandler *const handle,
-		const char *restrict *const restrict message_ptr);
+seed_thread_attr_init(SeedThreadAttr *const restrict attr,
+		      const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_key_handle_create(SeedKey *const key,
-		       SeedWorkerHandler *const handle);
+seed_thread_attr_handle_init(SeedThreadAttr *const restrict attr);
 
 extern inline bool
-seed_key_delete(SeedKey key,
-		const char *restrict *const restrict message_ptr);
+seed_thread_attr_set_detach_state(SeedThreadAttr *const restrict attr,
+				  const int state,
+				  const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_key_handle_delete(SeedKey key);
+seed_thread_attr_handle_set_detach_state(SeedThreadAttr *const restrict attr,
+					 const int state);
+
+/* SeedThreadKey operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+seed_thread_key_create(SeedThreadKey *const key,
+		       SeedWorkerHandler *const handle,
+		       const char *restrict *const restrict message_ptr);
+
+extern inline void
+seed_thread_key_handle_create(SeedThreadKey *const key,
+			      SeedWorkerHandler *const handle);
+
+extern inline bool
+seed_thread_key_delete(SeedThreadKey key,
+		       const char *restrict *const restrict message_ptr);
+
+extern inline void
+seed_thread_key_handle_delete(SeedThreadKey key);
 
 
 /* SeedMutex operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 seed_mutex_init(SeedMutex *const restrict lock);
+
+extern inline void
+seed_mutex_handle_init(SeedMutex *const restrict lock);
 
 extern inline bool
 seed_mutex_lock(SeedMutex *const lock,
@@ -90,6 +137,52 @@ seed_mutex_handle_lock(SeedMutex *const restrict lock);
 extern inline void
 seed_mutex_handle_unlock(SeedMutex *const restrict lock);
 
+
+/* SeedThreadCond operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+seed_thread_cond_init(SeedThreadCond *const restrict cond);
+
+extern inline void
+seed_thread_cond_handle_init(SeedThreadCond *const restrict cond);
+
+extern inline bool
+seed_thread_cond_signal(SeedThreadCond *const restrict cond,
+		      const char *restrict *const restrict message_ptr);
+extern inline void
+seed_thread_cond_handle_signal(SeedThreadCond *const restrict cond);
+
+extern inline bool
+seed_thread_cond_broadcast(SeedThreadCond *const restrict cond,
+			 const char *restrict *const restrict message_ptr);
+extern inline void
+seed_thread_cond_handle_broadcast(SeedThreadCond *const restrict cond);
+
+extern inline bool
+seed_thread_cond_await(SeedThreadCond *const restrict cond,
+		     SeedMutex *const restrict lock,
+		     const char *restrict *const restrict message_ptr);
+extern inline void
+seed_thread_cond_handle_await(SeedThreadCond *const restrict cond,
+			    SeedMutex *const restrict lock);
+extern inline bool
+seed_thread_cond_await_limit(SeedThreadCond *const restrict cond,
+			   SeedMutex *const restrict lock,
+			   const struct timespec *const restrict limit,
+			   const char *restrict *const restrict message_ptr);
+extern inline void
+seed_thread_cond_handle_await_limit(SeedThreadCond *const restrict cond,
+				  SeedMutex *const restrict lock,
+				  const struct timespec *const restrict limit);
+extern inline bool
+seed_thread_cond_await_span(SeedThreadCond *const restrict cond,
+			  SeedMutex *const restrict lock,
+			  const struct timespec *const restrict span,
+			  const char *restrict *const restrict message_ptr);
+extern inline void
+seed_thread_cond_handle_await_span(SeedThreadCond *const restrict cond,
+				   SeedMutex *const restrict lock,
+				   const struct timespec *const restrict span);
 
 /* SeedWorkerQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -134,8 +227,8 @@ seed_worker_start_routine(void *arg)
 	struct SeedWorker *const restrict
 	worker = (struct SeedWorker *const restrict) arg;
 
-	seed_key_handle_create(&worker->key,
-			       &seed_worker_exit_clean_up);
+	seed_thread_key_handle_create(&worker->key,
+				      &seed_worker_exit_clean_up);
 
 	return worker->routine(worker->arg);
 }
@@ -145,68 +238,20 @@ seed_worker_start(SeedWorkerRoutine *const routine,
 		  void *arg);
 
 
-/* SeedSupervisor operations
+
+/* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_supervisor_init(void)
+seed_parallel_start(void)
 {
-	struct SeedWorker *const restrict worker0  = &supervisor.workers[0];
-	struct SeedWorker *const restrict worker1  = worker0  + 1l;
-	struct SeedWorker *const restrict worker2  = worker1  + 1l;
-	struct SeedWorker *const restrict worker3  = worker2  + 1l;
-	struct SeedWorker *const restrict worker4  = worker3  + 1l;
-	struct SeedWorker *const restrict worker5  = worker4  + 1l;
-	struct SeedWorker *const restrict worker6  = worker5  + 1l;
-	struct SeedWorker *const restrict worker7  = worker6  + 1l;
-	struct SeedWorker *const restrict worker8  = worker7  + 1l;
-	struct SeedWorker *const restrict worker9  = worker8  + 1l;
-	struct SeedWorker *const restrict worker10 = worker9  + 1l;
-	struct SeedWorker *const restrict worker11 = worker10 + 1l;
-	struct SeedWorker *const restrict worker12 = worker11 + 1l;
-	struct SeedWorker *const restrict worker13 = worker12 + 1l;
-	struct SeedWorker *const restrict worker14 = worker13 + 1l;
-	struct SeedWorker *const restrict worker15 = worker14 + 1l;
-
-	SEED_WORKER_LINK(worker0,  NULL,     worker1);
-	SEED_WORKER_LINK(worker1,  worker0,  worker2);
-	SEED_WORKER_LINK(worker2,  worker1,  worker3);
-	SEED_WORKER_LINK(worker3,  worker2,  worker4);
-	SEED_WORKER_LINK(worker4,  worker3,  worker5);
-	SEED_WORKER_LINK(worker5,  worker4,  worker6);
-	SEED_WORKER_LINK(worker6,  worker5,  worker7);
-	SEED_WORKER_LINK(worker7,  worker6,  worker8);
-	SEED_WORKER_LINK(worker8,  worker7,  worker9);
-	SEED_WORKER_LINK(worker9,  worker8,  worker10);
-	SEED_WORKER_LINK(worker10, worker9,  worker11);
-	SEED_WORKER_LINK(worker11, worker10, worker12);
-	SEED_WORKER_LINK(worker12, worker11, worker13);
-	SEED_WORKER_LINK(worker13, worker12, worker14);
-	SEED_WORKER_LINK(worker14, worker13, worker15);
-	SEED_WORKER_LINK(worker15, worker14, NULL);
-
-	supervisor.dead.head = worker0;
-	supervisor.dead.last = worker15;
+	seed_supervisor_init();
+	seed_thread_attr_prototype_init();
 }
 
 void
-seed_supervisor_exit(const char *restrict failure)
+seed_parallel_stop(void)
 {
-	struct SeedWorker *restrict worker;
-	struct SeedExitSpec spec;
+	seed_thread_attr_prototype_destroy();
 
-	(void) seed_mutex_lock_implementation(&supervisor.live.lock);
-
-	while (1) {
-		worker = worker_queue_pop(&supervisor.live);
-
-		if (worker == NULL)
-			break;
-
-		(void) seed_thread_cancel_implementation(worker->thread);
-	}
-
-	seed_exit_spec_set_failure(&spec,
-				   failure);
-
-	seed_exit_spec_exit(&spec);
 }
+

@@ -53,7 +53,7 @@ seed_log_reset(void)
 
 	SEED_LOG_INIT();
 
-	seed_mutex_init(&seed_log.lock);
+	seed_mutex_handle_init(&seed_log.lock);
 }
 
 
