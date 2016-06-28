@@ -55,20 +55,20 @@ seed_thread_handle_cancel(SeedThread thread);
 /* SeedThreadKey operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-seed_thread_key_create(SeedThreadKey *const key,
-		       SeedWorkerHandler *const handle,
-		       const char *restrict *const restrict message_ptr);
+seed_key_create(SeedThreadKey *const key,
+		SeedWorkerHandler *const handle,
+		const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_thread_key_handle_create(SeedThreadKey *const key,
-			      SeedWorkerHandler *const handle);
+seed_key_handle_create(SeedThreadKey *const key,
+		       SeedWorkerHandler *const handle);
 
 extern inline bool
-seed_thread_key_delete(SeedThreadKey key,
-		       const char *restrict *const restrict message_ptr);
+seed_key_delete(SeedThreadKey key,
+		const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_thread_key_handle_delete(SeedThreadKey key);
+seed_key_handle_delete(SeedThreadKey key);
 
 
 /* SeedMutex operations
@@ -131,13 +131,11 @@ seed_worker_exit_clean_up(void *arg);
 void *
 seed_worker_start_routine(void *arg)
 {
-	/* TODO: pthread_key instead of clean_up_push */
-
 	struct SeedWorker *const restrict
 	worker = (struct SeedWorker *const restrict) arg;
 
-	seed_thread_key_handle_create(&worker->key,
-				      &seed_worker_exit_clean_up);
+	seed_key_handle_create(&worker->key,
+			       &seed_worker_exit_clean_up);
 
 	return worker->routine(worker->arg);
 }
@@ -196,7 +194,7 @@ seed_supervisor_exit(const char *restrict failure)
 	struct SeedWorker *restrict worker;
 	struct SeedExitSpec spec;
 
-	(void) pthread_mutex_lock(&supervisor.live.lock);
+	(void) seed_mutex_lock_implementation(&supervisor.live.lock);
 
 	while (1) {
 		worker = worker_queue_pop(&supervisor.live);
@@ -204,7 +202,7 @@ seed_supervisor_exit(const char *restrict failure)
 		if (worker == NULL)
 			break;
 
-		(void) pthread_cancel(worker->thread);
+		(void) seed_thread_cancel_implementation(worker->thread);
 	}
 
 	seed_exit_spec_set_failure(&spec,

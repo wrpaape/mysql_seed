@@ -13,7 +13,7 @@
 "malloc failure (out of memory)\n"
 
 #define GS_ALLOC_FAILURE_MESSAGE_BEGIN					\
-"failed to allocate string memory for 'count' of "
+"\n\nfailed to allocate string memory for 'count' of "
 
 #define GS_ALLOC_FAILURE_MESSAGE_MIDDLE_1				\
 " and an estimated size of "

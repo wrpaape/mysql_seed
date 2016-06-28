@@ -26,11 +26,14 @@
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 
 #define CS_ALLOC_FAILURE_MESSAGE_BEGIN				\
-"failed to allocate count string memory for 'upto' of "
+"\n\nfailed to allocate count string memory for 'upto' of "
 
 #define CS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
+#define CS_GET_FAILURE_MESSAGE
+"\n\n\n'count_string'"
+" ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -76,6 +79,12 @@ union DigitsPointer {
 struct CountStringSpec {
 	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
 	size_t size_digits;	/* sizeof("1", "2", ... "upto") */
+};
+
+struct CountString {
+	SeedMutex lock;
+	SeedCondition ready;	/* flag set once 'pointers' have been set */
+	char **pointers;	/* digit pointers */
 };
 
 /* macro constants
@@ -143,7 +152,7 @@ extern const Mag6String mag_6_min_string;
 extern const Mag7String mag_7_min_string;
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
-
+extern struct CountString count_string;
 
 
 /* misc helper functions
@@ -347,6 +356,20 @@ gen_count_string(const size_t upto)
 
 	return string_ptrs;
 }
+
+/* inline char ** */
+/* count_string_handle_get(void) */
+/* { */
+/* 	if (!count_string.ready) { */
+
+
+/* 		if (count_string.pointers == NULL) */
+/* 			seed_supervisor_exit() */
+
+/* 	} */
+
+/* 	__builtin_unreachable(); */
+/* } */
 
 
 #endif	/* MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */
