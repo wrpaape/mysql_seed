@@ -138,7 +138,7 @@ seed_thread_create(SeedThread *const restrict thread,
 		return true;
 
 	case EAGAIN:
-		*message_ptr = "seed_thread_create failure:\n"
+		*message_ptr = "\n\nseed_thread_create failure:\n"
 			       "\tThe system lacked the necessary resources to "
 			       "create another thread"
 #ifdef SEED_THREADS_MAX
@@ -151,7 +151,7 @@ seed_thread_create(SeedThread *const restrict thread,
 		return false;
 
 	default:
-		*message_ptr = "seed_thread_create failure:\n"
+		*message_ptr = "\n\nseed_thread_create failure:\n"
 			       "\tunknown\n";
 		return false;
 	}
@@ -182,13 +182,13 @@ seed_thread_cancel(SeedThread thread,
 		return true;
 
 	case ESRCH:
-		*message_ptr = "seed_thread_cancel failure:\n"
+		*message_ptr = "\n\nseed_thread_cancel failure:\n"
 			       "\tNo thread could be found corresponding to that "
 			       "specified by the given SeedThread 'thread'\n";
 		return false;
 
 	default:
-		*message_ptr = "seed_thread_cancel failure:\n"
+		*message_ptr = "\n\nseed_thread_cancel failure:\n"
 			       "\tunknown\n";
 		return false;
 	}
@@ -216,7 +216,7 @@ seed_key_create(SeedKey *const key,
 		return true;
 
 	case EAGAIN:
-		*message_ptr = "seed_key_create failure:\n"
+		*message_ptr = "\n\nseed_key_create failure:\n"
 			       "\tThe system lacked the necessary resources to"
 			       " create another thread-specific data key"
 #ifdef SEED_THREAD_KEYS_MAX
@@ -230,13 +230,13 @@ seed_key_create(SeedKey *const key,
 		return false;
 
 	case ENOMEM:
-		*message_ptr = "seed_key_create failure:\n"
+		*message_ptr = "\n\nseed_key_create failure:\n"
 			       "\tInsufficient memory exists to create "
 			       "SeedKey, 'key'.\n";
 		return false;
 
 	default:
-		*message_ptr = "seed_key_create failure:\n"
+		*message_ptr = "\n\nseed_key_create failure:\n"
 			       "\tunknown\n";
 		return false;
 	}
@@ -263,12 +263,12 @@ seed_key_delete(SeedKey key,
 		return true;
 
 	case EINVAL:
-		*message_ptr = "seed_key_delete failure:\n"
+		*message_ptr = "\n\nseed_key_delete failure:\n"
 			       "\tthe value of SeedThread 'key' is invalid.\n";
 		return false;
 
 	default:
-		*message_ptr = "seed_key_delete failure:\n"
+		*message_ptr = "\n\nseed_key_delete failure:\n"
 			       "\tunknown\n";
 		return false;
 	}
@@ -303,20 +303,20 @@ seed_mutex_lock(SeedMutex *const lock,
 		return true;
 
 	case EDEADLK:
-		*message_ptr = "seed_mutex_lock failure:\n"
+		*message_ptr = "\n\nseed_mutex_lock failure:\n"
 			       "\tA deadlock would occur if the thread blocked "
 			       "waiting for SeedMutex 'lock'.";
 		return false;
 
 	case EINVAL:
-		*message_ptr = "seed_mutex_lock failure:\n"
+		*message_ptr = "\n\nseed_mutex_lock failure:\n"
 			       "\tThe value specified by SeedMutex 'lock' is "
 			       "invalid.\n";
 		return false;
 
 
 	default:
-		*message_ptr = "seed_mutex_lock failure:\n"
+		*message_ptr = "\n\nseed_mutex_lock failure:\n"
 			       "\tunknown\n";
 		return false;
 	}
@@ -331,19 +331,19 @@ seed_mutex_unlock(SeedMutex *const lock,
 		return true;
 
 	case EINVAL:
-		*message_ptr = "seed_mutex_unlock failure:\n"
+		*message_ptr = "\n\nseed_mutex_unlock failure:\n"
 			       "\tThe value specified by SeedMutex 'lock' is "
 			       "invalid.\n";
 		return false;
 
 	case EPERM:
-		*message_ptr = "seed_mutex_unlock failure:\n"
+		*message_ptr = "\n\nseed_mutex_unlock failure:\n"
 			       "\tThe current thread does not hold a lock on "
 			       "SeedMutex 'lock'.\n";
 		return false;
 
 	default:
-		*message_ptr = "seed_mutex_unlock failure:\n"
+		*message_ptr = "\n\nseed_mutex_unlock failure:\n"
 			       "\tunknown\n";
 		return false;
 	}

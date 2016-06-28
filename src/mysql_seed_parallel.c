@@ -52,23 +52,23 @@ seed_thread_cancel(SeedThread thread,
 extern inline void
 seed_thread_handle_cancel(SeedThread thread);
 
-/* SeedThreadKey operations
+/* SeedKey operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-seed_key_create(SeedThreadKey *const key,
+seed_key_create(SeedKey *const key,
 		SeedWorkerHandler *const handle,
 		const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_key_handle_create(SeedThreadKey *const key,
+seed_key_handle_create(SeedKey *const key,
 		       SeedWorkerHandler *const handle);
 
 extern inline bool
-seed_key_delete(SeedThreadKey key,
+seed_key_delete(SeedKey key,
 		const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_key_handle_delete(SeedThreadKey key);
+seed_key_handle_delete(SeedKey key);
 
 
 /* SeedMutex operations

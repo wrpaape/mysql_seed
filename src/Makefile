@@ -26,7 +26,7 @@ endef
 
 # SYSTEM CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
-# taken from user 'Trevor Robinson''s response to stackoverflow question:
+# extended from user 'Trevor Robinson''s response to stackoverflow question:
 #
 # 	http://stackoverflow.com/questions/714100/os-detecting-makefile
 
@@ -36,52 +36,62 @@ ifeq ($(OS),Windows_NT)
         SYS_ENV_FLAGS 	:= -DWIN32
 
         ifeq      (AMD64,$(PROCESSOR_ARCHITECTURE))
+                ARCH_X86_64	:= T
                 SYS_ARCH_FLAG	:= -arch x86_64
-                SYS_ENV_FLAGS	+= -DAMD64
+                SYS_ENV_FLAGS	+= -DAMD_64
+
         else ifeq (x86,$(PROCESSOR_ARCHITECTURE))
+                ARCH_I386	:= T
                 SYS_ARCH_FLAG	:= -arch i386
-                SYS_ENV_FLAGS	+= -DIA32
+                SYS_ENV_FLAGS	+= -DIA_32
         endif
 else
         UNAME_S := $(shell uname -s)
+
         ifeq      ($(UNAME_S),Linux)
                 SYSTEM_LINUX 	:= T
                 SYS_ENV_FLAGS 	:= -DLINUX
+
         else ifeq ($(UNAME_S),Darwin)
                 SYSTEM_OSX 	:= T
                 SYS_ENV_FLAGS 	:= -DOSX
         endif
 
         UNAME_P := $(shell uname -p)
+
         ifeq      (x86_64,$(UNAME_P))
-                SYS_ARCH_FLAG	:= -arch i386
-                SYS_ENV_FLAGS	+= -DAMD64
-        else ifneq (,$(filter %86,$(UNAME_P)))
+                ARCH_X86_64	:= T
                 SYS_ARCH_FLAG	:= -arch x86_64
-                SYS_ENV_FLAGS 	+= -DIA32
+                SYS_ENV_FLAGS	+= -DAMD_64
+
+        else ifneq (,$(filter %86,$(UNAME_P)))
+                ARCH_I386	:= T
+                SYS_ARCH_FLAG	:= -arch i386
+                SYS_ENV_FLAGS 	+= -DIA_32
+
         else ifneq (,$(filter arm%,$(UNAME_P)))
-                SYS_ARCH_FLAG	:= -arch AArch64
-                SYS_ENV_FLAGS 	+= -DARM
+
+                ifneq (,$(filter %32%,$(UNAME_P)))
+                        ARCH_ARM_32	:= T
+                        SYS_ARCH_FLAG	:= -arch AArch32
+                        SYS_ENV_FLAGS 	+= -DARM_32
+                else
+                        ARCH_ARM_64	:= T
+                        SYS_ARCH_FLAG	:= -arch AArch64
+                        SYS_ENV_FLAGS 	+= -DARM_64
+                endif
         endif
 endif
 
-
-# Path delimiter
+# Path delimiter and chain commands token
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq (T,$(SYSTEM_WINDOWS))
-PATH_DELIM	:= \\
+PATH_DELIM		:= \\
+CMD_DELIM 		:= &
 else
-PATH_DELIM	:= /
+PATH_DELIM		:= /
+CMD_DELIM 		:= ;
 endif
-
-# Chain commands
-# ──────────────────────────────────────────────────────────────────────────────
-ifeq (T,$(SYSTEM_WINDOWS))
-CMD_DELIM 	:= &
-else
-CMD_DELIM	:= ;
-endif
-
 
 
 
@@ -106,6 +116,27 @@ UNITY_SOURCE_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) src)
 UNITY_HEADER_DIR	:= $(UNITY_SOURCE_DIR)
 UNITY_OBJECT_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) obj)
 UNITY_AUTO_DIR  	:= $(call PATH_JOIN,$(UNITY_ROOT) auto)
+
+# 'windows' directory, library flags
+# ──────────────────────────────────────────────────────────────────────────────
+ifeq (T,$(SYSTEM_WINDOWS))
+        WINDOWS_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) windows)
+        THREADS_DIR		:= $(call PATH_JOIN,$(WINDOWS_DIR) pthreads_win32)
+        THREADS_INC_DIR		:= $(call PATH_JOIN,$(THREADS_DIR) include)
+        THREADS_LIB_ROOT	:= $(call PATH_JOIN,$(THREADS_DIR) dll)
+
+        ifeq (T, ARCH_X86_64)
+                        THREADS_LIB_DIR := $(call PATH_JOIN,$(THREADS_LIB_ROOT) x64)
+        else
+                        THREADS_LIB_DIR := $(call PATH_JOIN,$(THREADS_LIB_ROOT) x86)
+        endif
+
+        THREADS_LIB_FLAG	:= -L$(THREADS_LIB_DIR) -lpthreadGC2.dll
+        THREADS_INC_FLAG	:= -I$(THREADS_INC_DIR)
+else
+        THREADS_LIB_FLAG	:= -lpthread
+        THREADS_INC_FLAG	:= $(EMPTY)
+endif
 
 
 # PATH CONFIG
@@ -195,12 +226,12 @@ UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity fra
 # ──────────────────────────────────────────────────────────────────────────────
 CC		:= gcc
 CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ $(SYS_ENV_FLAGS)
-CC_FLAGS	:= -g -O2 -std=c99 -Wall $(CC_ENV_FLAGS) -I$(HEADER_DIR)
+CC_FLAGS	:= -g -O2 -std=c99 -Wall $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
 LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
-LD_LIB_FLAGS	:= -lpthread -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) -lc
 
 ifeq (T,$(SYSTEM_OSX))
 LD_FLAGS	+= -macosx_version_min 10.11
