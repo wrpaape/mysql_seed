@@ -22,16 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "mysql_seed_count_string.h"
+#include "gen/gen_names.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_count_string_spec_init(void);
-extern void test_count_string_alloc_failure(void);
-extern void test_count_string_increment_buffer(void);
-extern void test_count_string_init(void);
-extern void test_count_string_create(void);
+extern void testy_testy(void);
 
 
 //=======Test Reset Option=====
@@ -46,12 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/mysql_seed_count_string_test.c");
-  RUN_TEST(test_count_string_spec_init, 27);
-  RUN_TEST(test_count_string_alloc_failure, 46);
-  RUN_TEST(test_count_string_increment_buffer, 65);
-  RUN_TEST(test_count_string_init, 80);
-  RUN_TEST(test_count_string_create, 97);
+  UnityBegin("../test/gen_gen_names_test.c");
+  RUN_TEST(testy_testy, 12);
 
   return (UnityEnd());
 }

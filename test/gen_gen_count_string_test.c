@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "mysql_seed_count_string.h"
+#include "gen/gen_count_string.h"
 
 void setUp(void)
 {
@@ -47,7 +47,7 @@ void test_count_string_alloc_failure(void)
 {
 	char failure[128];
 
-	TEST_ASSERT_NULL(count_string_create(UPTO_MAX + 1lu));
+	TEST_ASSERT_NULL(gen_count_string(UPTO_MAX + 1lu));
 
 	sprintf(&failure[0],
 		CS_ALLOC_FAILURE_MESSAGE_BEGIN
@@ -94,11 +94,11 @@ void test_count_string_init(void)
 	TEST_ASSERT_NULL(ptr[3]);
 }
 
-void test_count_string_create(void)
+void test_gen_count_string(void)
 {
 
 	char buffer[16];
-	char **const restrict count_string = count_string_create(500lu);
+	char **const restrict count_string = gen_count_string(500lu);
 
 	TEST_ASSERT_NOT_NULL(count_string);
 	TEST_ASSERT_NULL(count_string[500lu]);

@@ -1,7 +1,5 @@
-#include "generate/name_map.h"
+#include "gen/gen_names.h"
 
-extern inline char *
-name_map_sample(const struct NameMap *const restrict map);
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -421,3 +419,14 @@ const struct NameMap last_name_map = {
 	.names  = &last_names[0],
 	.i_last = LAST_NAMES_COUNT - 1lu
 };
+
+extern inline const char *
+name_map_sample(const struct NameMap *const restrict map);
+
+extern inline size_t
+single_names_init(char *restrict *const name_ptrs_base,
+		  const struct NameMap *const restrict map,
+		  size_t count);
+
+extern inline char **
+gen_first_names(const size_t count);

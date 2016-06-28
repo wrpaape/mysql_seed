@@ -1,4 +1,4 @@
-#include "mysql_seed_count_string.h"
+#include "gen/gen_count_string.h"
 
 extern inline void
 count_string_spec_init(struct CountStringSpec *const restrict spec,
@@ -30,4 +30,4 @@ count_string_init(char *restrict *const string_ptrs,
 		  const size_t upto);
 
 extern inline char **
-count_string_create(const size_t upto);
+gen_count_string(const size_t upto);

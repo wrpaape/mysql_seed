@@ -1,12 +1,11 @@
-#ifndef MYSQL_SEED_MYSQL_SEED_COUNT_STRING_H_
-#define MYSQL_SEED_MYSQL_SEED_COUNT_STRING_H_
+#ifndef MYSQL_SEED_GEN_GEN_COUNT_STRING_H_
+#define MYSQL_SEED_GEN_GEN_COUNT_STRING_H_
 
 #define DEFAULT_USER_COUNT 25000
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stdlib.h>		/* malloc, free */
-#include "mysql_seed_log.h"	/* seed_log, string utils */
+#include "gen/gen_strings.h"	/* string utils, log */
 
 #if (SIZE_MAX < UINT32_MAX)
 #	define UPTO_MAX 9999lu
@@ -25,7 +24,6 @@
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
-#define MALLOC_FAILURE_MESSAGE		  "malloc failure (out of memory)\n"
 
 #define CS_ALLOC_FAILURE_MESSAGE_BEGIN				\
 "failed to allocate count string memory for 'upto' of "
@@ -321,7 +319,7 @@ count_string_init(char *restrict *const string_ptrs,
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline char **
-count_string_create(const size_t upto)
+gen_count_string(const size_t upto)
 {
 	if (upto > UPTO_MAX) {
 		count_string_log_alloc_failure(upto,
@@ -351,4 +349,4 @@ count_string_create(const size_t upto)
 }
 
 
-#endif	/* MYSQL_SEED_MYSQL_SEED_COUNT_STRING_H_ */
+#endif	/* MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */
