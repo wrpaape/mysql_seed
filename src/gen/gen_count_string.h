@@ -1,12 +1,13 @@
 #ifndef MYSQL_SEED_GEN_GEN_COUNT_STRING_H_
 #define MYSQL_SEED_GEN_GEN_COUNT_STRING_H_
 
-#define DEFAULT_USER_COUNT 25000
-
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "gen/gen_strings.h"	/* string utils, log, parallelization utils */
 
+
+/* macro constants
+ *─────────────────────────────────────────────────────────────────────────── */
 #if (SIZE_MAX < UINT32_MAX)
 #	define UPTO_MAX 9999lu
 #	define MAG_UPTO_MAX 3u
@@ -18,7 +19,6 @@
 #	define SIZE_UPTO_MAX_STR 9u
 #	define LARGE_UPTO_MAX
 #endif /* if (SIZE_MAX < UINT32_MAX) */
-
 
 
 /* failure messages
@@ -164,9 +164,9 @@ inline void
 count_string_spec_init(struct CountStringSpec *const restrict spec,
 		       const size_t upto)
 {
-#if (UPTO_MAX == 99999999lu)
+#ifdef LARGE_UPTO_MAX
 	if (upto < MAG_4_MIN) {
-#endif	/*  if (UPTO_MAX == 9999999lu) */
+#endif	/*  ifdef LARGE_UPTO_MAX */
 		if (upto < MAG_2_MIN) {
 			if (upto < MAG_1_MIN) {
 				spec->mag_upto	  = 0u;
@@ -190,7 +190,7 @@ count_string_spec_init(struct CountStringSpec *const restrict spec,
 						     * (upto - MAG_2_MAX));
 			}
 		}
-#if (UPTO_MAX == 99999999lu)
+#ifdef LARGE_UPTO_MAX
 	} else {
 		if (upto < MAG_6_MIN) {
 			if (upto < MAG_5_MIN) {
@@ -218,7 +218,7 @@ count_string_spec_init(struct CountStringSpec *const restrict spec,
 			}
 		}
 	}
-#endif	/*  if (UPTO_MAX == 9999999lu) */
+#endif	/*  ifdef LARGE_UPTO_MAX */
 }
 
 
@@ -396,4 +396,4 @@ count_string_destroy(void)
 }
 
 
-#endif	/* MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */
+#endif	/* ifndef MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */

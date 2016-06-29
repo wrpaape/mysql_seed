@@ -71,9 +71,6 @@ extern inline char *
 put_string(char *restrict buffer,
 	   const char *restrict string);
 
-extern inline size_t
-string_length(const char *const restrict string);
-
 extern inline char *
 put_string_length(char *restrict buffer,
 		  const char *restrict string,
@@ -87,3 +84,11 @@ put_string_until(char *restrict buffer,
 extern inline bool
 strings_equal(const char *restrict string1,
 	      const char *restrict string2);
+
+extern inline size_t
+string_length(const char *const restrict string);
+
+extern inline ssize_t
+string_length_limit(const char *const restrict string,
+		    ssize_t limit);
+

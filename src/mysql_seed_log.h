@@ -8,9 +8,9 @@
 #include "mysql_seed_parallel.h"	/* SeedMutex, parallelization utils  */
 
 
-/* cap log length
+/* cap log buffer at 16kb
  *─────────────────────────────────────────────────────────────────────────── */
-#define LOG_BUFFER_LENGTH 1024lu
+#define LOG_BUFFER_LENGTH 16384lu
 
 /* declarations
  *─────────────────────────────────────────────────────────────────────────── */

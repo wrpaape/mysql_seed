@@ -305,17 +305,6 @@ put_string(char *restrict buffer,
 	return buffer;
 }
 
-inline size_t
-string_length(const char *const restrict string)
-{
-	register const char *restrict ptr = string;
-
-	while (*ptr != '\0')
-		++ptr;
-
-	return ptr - string;
-}
-
 
 inline char *
 put_string_length(char *restrict buffer,
@@ -359,6 +348,35 @@ strings_equal(const char *restrict string1,
 
 		++string1;
 		++string2;
+	}
+}
+
+inline size_t
+string_length(const char *const restrict string)
+{
+	register const char *restrict ptr = string;
+
+	while (*ptr != '\0')
+		++ptr;
+
+	return ptr - string;
+}
+
+inline ssize_t
+string_length_limit(const char *const restrict string,
+		    ssize_t limit)
+{
+	const char *restrict ptr = string;
+
+	while (1) {
+		if (limit < 0l)
+			return limit;
+
+		if ((*ptr) == '\0')
+			return ptr - string;
+
+		++ptr;
+		--limit;
 	}
 }
 
