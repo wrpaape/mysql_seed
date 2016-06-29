@@ -16,13 +16,20 @@ struct SeedLog seed_log = {
 /* initialize, reset
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_log_init(void)
+seed_log_start(void)
 {
 	SEED_LOG_INIT();
 }
 
 extern inline void
 seed_log_reset(void);
+
+void
+seed_log_stop(void)
+{
+	fputs(&seed_log.buffer[0],
+	      stdout);
+}
 
 
 /* accesor functions

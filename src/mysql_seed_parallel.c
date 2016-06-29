@@ -1,30 +1,44 @@
 #include "mysql_seed_parallel.h"
 
+/* global variables
+ *─────────────────────────────────────────────────────────────────────────── */
+#define SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(ID)	\
+[ID] = {						\
+	.id  =  ID,					\
+	.done = SEED_THREAD_COND_INITIALIZER,		\
+	.processing = SEED_MUTEX_INITIALIZER,		\
+	.prev = NULL,					\
+	.next = NULL					\
+}
+
+#define SEED_SUPERVISOR_WORKER_QUEUE_STATIC_INITIALIZER		\
+{ .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL }
 
 const SeedMutex seed_mutex_prototype		= SEED_MUTEX_INITIALIZER;
 const SeedThreadCond seed_thread_cond_prototype = SEED_THREAD_COND_INITIALIZER;
 SeedThreadAttr seed_thread_attr_prototype;
 
 struct SeedSupervisor supervisor = {
-	.dead = { .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL },
-	.live = { .lock = SEED_MUTEX_INITIALIZER, .head = NULL, .last = NULL },
+	.dead	 = SEED_SUPERVISOR_WORKER_QUEUE_STATIC_INITIALIZER,
+	.busy	 = SEED_SUPERVISOR_WORKER_QUEUE_STATIC_INITIALIZER,
+	.done	 = SEED_SUPERVISOR_WORKER_QUEUE_STATIC_INITIALIZER,
 	.workers = {
-		[ 0u] = { .id  =  0u, .prev = NULL, .next = NULL },
-		[ 1u] = { .id  =  1u, .prev = NULL, .next = NULL },
-		[ 2u] = { .id  =  2u, .prev = NULL, .next = NULL },
-		[ 3u] = { .id  =  3u, .prev = NULL, .next = NULL },
-		[ 4u] = { .id  =  4u, .prev = NULL, .next = NULL },
-		[ 5u] = { .id  =  5u, .prev = NULL, .next = NULL },
-		[ 6u] = { .id  =  6u, .prev = NULL, .next = NULL },
-		[ 7u] = { .id  =  7u, .prev = NULL, .next = NULL },
-		[ 8u] = { .id  =  8u, .prev = NULL, .next = NULL },
-		[ 9u] = { .id  =  9u, .prev = NULL, .next = NULL },
-		[10u] = { .id  = 10u, .prev = NULL, .next = NULL },
-		[11u] = { .id  = 11u, .prev = NULL, .next = NULL },
-		[12u] = { .id  = 12u, .prev = NULL, .next = NULL },
-		[13u] = { .id  = 13u, .prev = NULL, .next = NULL },
-		[14u] = { .id  = 14u, .prev = NULL, .next = NULL },
-		[15u] = { .id  = 15u, .prev = NULL, .next = NULL }
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 0u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 1u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 2u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 3u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 4u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 5u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 6u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 7u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 8u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER( 9u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(10u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(11u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(12u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(13u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(14u),
+		SEED_SUPERVISOR_WORKER_STATIC_INITIALIZER(15u)
 	}
 };
 
@@ -39,16 +53,22 @@ seed_supervisor_exit(const char *restrict failure)
 	struct SeedWorker *restrict worker;
 	struct SeedExitSpec spec;
 
-	(void) seed_mutex_lock_imp(&supervisor.live.lock);
+	(void) seed_mutex_lock_imp(&supervisor.done.lock);
+	(void) seed_mutex_lock_imp(&supervisor.dead.lock);
+	(void) seed_mutex_lock_imp(&supervisor.busy.lock);
 
 	while (1) {
-		worker = worker_queue_pop(&supervisor.live);
+		worker = worker_queue_pop(&supervisor.busy);
 
 		if (worker == NULL)
 			break;
 
 		(void) seed_thread_cancel_imp(worker->thread);
 	}
+
+	(void) seed_mutex_unlock_imp(&supervisor.busy.lock);
+	(void) seed_mutex_unlock_imp(&supervisor.dead.lock);
+	(void) seed_mutex_unlock_imp(&supervisor.done.lock);
 
 	seed_exit_spec_set_failure(&spec,
 				   failure);
@@ -218,7 +238,7 @@ seed_worker_fetch(const SeedWorkerID id);
 
 
 extern inline void
-seed_worker_exit_clean_up(void *arg);
+seed_worker_exit_cleanup(void *arg);
 
 
 void *
@@ -230,9 +250,17 @@ seed_worker_do_awaitable(void *arg)
 	seed_mutex_handle_lock(&worker->processing);
 
 	seed_thread_key_handle_create(&worker->key,
-				      &seed_worker_exit_clean_up);
+				      &seed_worker_exit_cleanup);
 
 	worker->result = worker->routine.awaitable(worker->arg);
+
+	seed_thread_key_handle_delete(worker->key);
+
+	worker_queue_handle_remove(&supervisor.busy,
+				   worker);
+
+	worker_queue_handle_push(&supervisor.done,
+				 worker);
 
 	seed_thread_cond_handle_signal(&worker->done);
 
@@ -242,7 +270,7 @@ seed_worker_do_awaitable(void *arg)
 }
 
 extern inline SeedWorkerID
-seed_worker_start_awaitable(AwaitableRoutine *const routine,
+seed_worker_spawn_awaitable(AwaitableRoutine *const routine,
 			    void *arg);
 
 void *
@@ -252,17 +280,35 @@ seed_worker_do_independent(void *arg)
 	worker = (struct SeedWorker *const restrict) arg;
 
 	seed_thread_key_handle_create(&worker->key,
-				      &seed_worker_exit_clean_up);
+				      &seed_worker_exit_cleanup);
 
 	worker->routine.independent(worker->arg);
+
+	seed_thread_key_handle_delete(worker->key);
+
+	worker_queue_handle_remove(&supervisor.busy,
+				   worker);
+
+	worker_queue_handle_push(&supervisor.dead,
+				 worker);
 
 	return NULL;
 }
 
-inline void
-seed_worker_start_independent(IndependentRoutine *const routine,
+extern inline void
+seed_worker_spawn_independent(IndependentRoutine *const routine,
 			      void *arg);
 
+inline void *
+seed_worker_await(const SeedWorkerID id);
+
+inline void *
+seed_worker_await_limit(const SeedWorkerID id,
+			const struct timespec *const restrict limit);
+
+inline void *
+seed_worker_await_span(const SeedWorkerID id,
+		       const struct timespec *const restrict span);
 
 
 /* Constructors, Destructors

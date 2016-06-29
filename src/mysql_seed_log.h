@@ -38,10 +38,10 @@ do {									\
 
 
 
-/* initialize, reset
+/* initialize, reset, destroy
  *─────────────────────────────────────────────────────────────────────────── */
 void
-seed_log_init(void)
+seed_log_start(void)
 __attribute__((constructor));
 
 inline void
@@ -55,6 +55,10 @@ seed_log_reset(void)
 
 	seed_mutex_handle_init(&seed_log.lock);
 }
+
+void
+seed_log_stop(void)
+__attribute__((destructor));
 
 
 /* accesor functions

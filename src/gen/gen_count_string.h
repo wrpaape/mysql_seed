@@ -5,7 +5,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "gen/gen_strings.h"	/* string utils, log */
+#include "gen/gen_strings.h"	/* string utils, log, parallelization utils */
 
 #if (SIZE_MAX < UINT32_MAX)
 #	define UPTO_MAX 9999lu
@@ -385,7 +385,7 @@ inline void
 count_string_init(const size_t upto)
 {
 	count_string.upto = upto;
-	seed_worker_start_independent(&count_string_do_init,
+	seed_worker_spawn_independent(&count_string_do_init,
 				      NULL);
 }
 

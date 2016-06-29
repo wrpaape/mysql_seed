@@ -13,6 +13,12 @@
 
 #define SEED_WORKERS_MAX 16u
 
+/* failure messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define SEED_WORKER_SPAWN_FAILURE_MESSAGE				\
+"\n\nfailed to spawn new seed worker\nreason:\n"			\
+"\t'SEED_WORKERS_MAX' (" EXPAND_STRINGIFY(SEED_WORKERS_MAX) ") "	\
+"exceeded\n"
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -62,7 +68,8 @@ struct SeedWorkerQueue {
 
 struct SeedSupervisor {
 	struct SeedWorkerQueue dead;
-	struct SeedWorkerQueue live;
+	struct SeedWorkerQueue busy;
+	struct SeedWorkerQueue done;
 	struct SeedWorker workers[SEED_WORKERS_MAX];
 };
 
@@ -876,14 +883,14 @@ seed_worker_try_ensure_close_imp()
 
 
 inline void
-seed_worker_exit_clean_up(void *arg)
+seed_worker_exit_cleanup(void *arg)
 {
 	struct SeedWorker *const restrict
 	worker = (struct SeedWorker *const restrict) arg;
 
 	seed_thread_key_handle_delete(worker->key);
 
-	worker_queue_handle_remove(&supervisor.live,
+	worker_queue_handle_remove(&supervisor.busy,
 				   worker);
 
 	worker_queue_handle_push(&supervisor.dead,
@@ -891,17 +898,19 @@ seed_worker_exit_clean_up(void *arg)
 }
 
 
-
 void *
 seed_worker_do_awaitable(void *arg);
 
 
 inline SeedWorkerID
-seed_worker_start_awaitable(AwaitableRoutine *const routine,
+seed_worker_spawn_awaitable(AwaitableRoutine *const routine,
 			    void *arg)
 {
 	struct SeedWorker *const restrict
 	worker = worker_queue_handle_pop(&supervisor.dead);
+
+	if (worker == NULL)
+		seed_supervisor_exit(SEED_WORKER_SPAWN_FAILURE_MESSAGE);
 
 	const SeedWorkerID id = worker->id;
 
@@ -913,20 +922,24 @@ seed_worker_start_awaitable(AwaitableRoutine *const routine,
 				  &seed_worker_do_awaitable,
 				  worker);
 
-	worker_queue_handle_push(&supervisor.live,
+	worker_queue_handle_push(&supervisor.busy,
 				 worker);
 
 	return id;
 }
+
 void *
 seed_worker_do_independent(void *arg);
 
 inline void
-seed_worker_start_independent(IndependentRoutine *const routine,
+seed_worker_spawn_independent(IndependentRoutine *const routine,
 			      void *arg)
 {
 	struct SeedWorker *const restrict
 	worker = worker_queue_handle_pop(&supervisor.dead);
+
+	if (worker == NULL)
+		seed_supervisor_exit(SEED_WORKER_SPAWN_FAILURE_MESSAGE);
 
 	worker->key		    = (SeedThreadKey) worker;
 	worker->routine.independent = routine;
@@ -936,10 +949,88 @@ seed_worker_start_independent(IndependentRoutine *const routine,
 				  &seed_worker_do_independent,
 				  worker);
 
-	worker_queue_handle_push(&supervisor.live,
+	worker_queue_handle_push(&supervisor.busy,
 				 worker);
 }
 
+
+
+inline void *
+seed_worker_await(const SeedWorkerID id)
+{
+
+
+	struct SeedWorker *const restrict worker = seed_worker_fetch(id);
+
+	seed_mutex_handle_lock(&worker->processing);
+
+	seed_thread_cond_handle_await(&worker->done,
+				      &worker->processing);
+
+	void *const restrict result = worker->result;
+
+	seed_mutex_handle_unlock(&worker->processing);
+
+	worker_queue_handle_remove(&supervisor.done,
+				   worker);
+
+	worker_queue_handle_push(&supervisor.dead,
+				 worker);
+
+	return result;
+}
+
+inline void *
+seed_worker_await_limit(const SeedWorkerID id,
+			const struct timespec *const restrict limit)
+{
+
+
+	struct SeedWorker *const restrict worker = seed_worker_fetch(id);
+
+	seed_mutex_handle_lock(&worker->processing);
+
+	seed_thread_cond_handle_await_limit(&worker->done,
+					    &worker->processing,
+					    limit);
+
+	void *const restrict result = worker->result;
+
+	seed_mutex_handle_unlock(&worker->processing);
+
+	worker_queue_handle_remove(&supervisor.done,
+				   worker);
+
+	worker_queue_handle_push(&supervisor.dead,
+				 worker);
+
+	return result;
+}
+
+inline void *
+seed_worker_await_span(const SeedWorkerID id,
+		       const struct timespec *const restrict span)
+{
+	struct SeedWorker *const restrict worker = seed_worker_fetch(id);
+
+	seed_mutex_handle_lock(&worker->processing);
+
+	seed_thread_cond_handle_await_span(&worker->done,
+					   &worker->processing,
+					   span);
+
+	void *const restrict result = worker->result;
+
+	seed_mutex_handle_unlock(&worker->processing);
+
+	worker_queue_handle_remove(&supervisor.done,
+				   worker);
+
+	worker_queue_handle_push(&supervisor.dead,
+				 worker);
+
+	return result;
+}
 
 
 
