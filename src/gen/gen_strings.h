@@ -33,6 +33,13 @@
 #define GS_REALLOC_FAILURE_MESSAGE_END					\
 " bytes\n"
 
+/* struct declarations, typedefs
+ *─────────────────────────────────────────────────────────────────────────── */
+struct StringTuple {
+	const char *restrict string;
+	ssize_t length;
+};
+
 
 inline void
 gen_strings_log_alloc_failure(const size_t count,

@@ -25,13 +25,13 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 
-#define CS_ALLOC_FAILURE_MESSAGE_BEGIN					\
+#define GCS_ALLOC_FAILURE_MESSAGE_BEGIN					\
 "\n\nfailed to allocate count string memory for 'upto' of "
 
-#define CS_ALLOC_FAILURE_MESSAGE_MIDDLE					\
+#define GCS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
-#define CS_INIT_FAILURE_MESSAGE						\
+#define GCS_INIT_FAILURE_MESSAGE					\
 "\n\nfailed to retrieve 'count_string'\nreason:\n\tgeneration failure\n"
 
 /* struct declarations, typedefs
@@ -229,11 +229,11 @@ count_string_log_alloc_failure(const size_t upto,
 {
 	seed_log_handle_lock();
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_BEGIN);
+	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_BEGIN);
 
 	seed_log_append_digits(upto);
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE);
+	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_MIDDLE);
 
 	seed_log_append_string(failure);
 
@@ -373,7 +373,7 @@ count_string_get(void)
 	}
 
 	if (count_string.pointers == NULL)
-		seed_supervisor_exit(CS_INIT_FAILURE_MESSAGE);
+		seed_supervisor_exit(GCS_INIT_FAILURE_MESSAGE);
 
 	return count_string.pointers;
 }

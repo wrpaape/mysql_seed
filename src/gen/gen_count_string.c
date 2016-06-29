@@ -56,6 +56,8 @@ count_string_do_init(void *arg)
 	seed_worker_try_catch_open(&free,
 				   count_string.pointers);
 
+	seed_mutex_handle_lock(&count_string.processing);
+
 	count_string.pointers = count_string_pointers_create(count_string.upto);
 
 	count_string.incomplete = false;
