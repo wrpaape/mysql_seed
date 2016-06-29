@@ -40,6 +40,11 @@ struct StringTuple {
 	size_t length;
 };
 
+struct StringBuffer {
+	const char *restrict string;
+	size_t size;
+}
+
 
 inline void
 string_tuple_init(struct StringTuple *const restrict tuple,
@@ -49,22 +54,6 @@ string_tuple_init(struct StringTuple *const restrict tuple,
 	tuple->length = string_length(string);
 }
 
-inline bool
-string_tuple_init_limit(struct StringTuple *const restrict tuple,
-			const char *const restrict string,
-			const ssize_t limit)
-{
-	const ssize_t length = string_length_limit(string,
-						   limit);
-
-	if (length < 0l)
-		return false;
-
-	tuple->string = string;
-	tuple->length = (size_t) length;
-
-	return true;
-}
 
 
 inline void

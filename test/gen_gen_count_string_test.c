@@ -57,9 +57,9 @@ void test_count_string_alloc_failure(void)
 	TEST_ASSERT_NULL(string.pointers);
 
 	sprintf(&failure[0],
-		GCS_ALLOC_FAILURE_MESSAGE_BEGIN
+		GCS_ALLOC_FAILURE_MESSAGE_1
 		"%zu"
-		GCS_ALLOC_FAILURE_MESSAGE_MIDDLE
+		GCS_ALLOC_FAILURE_MESSAGE_2
 		UPTO_MAX_EXCEEDED_FAILURE_MESSAGE,
 		UPTO_MAX + 1lu);
 

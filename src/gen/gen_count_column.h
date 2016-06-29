@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_GEN_GEN_COUNT_COL_H_
-#define MYSQL_SEED_GEN_GEN_COUNT_COL_H_
+#ifndef MYSQL_SEED_GEN_GEN_COUNT_COLUMN_H_
+#define MYSQL_SEED_GEN_GEN_COUNT_COLUMN_H_
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
@@ -38,10 +38,12 @@
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 struct CountColumn {
-	char *column;
-	struct CountString *string;
-	struct StringTuple field;
-	struct StringTuple base;
+	struct CountString *count_string;
+	char *field;
+	char *base;
+	char *rows;
+	size_t size;
+	struct StringTuple rows;
 };
 
 /* misc helper functions
@@ -84,6 +86,7 @@ count_column_size_count_string(const size_t upto)
 	}
 #endif	/*  ifdef LARGE_UPTO_MAX */
 }
+
 
 inline SeedWorkerID
 count_column_init(struct CountColumn *const restrict column,
@@ -129,4 +132,4 @@ count_column_log_alloc_failure(struct CountColumn *const restrict column,
 	seed_log_handle_unlock();
 }
 
-#endif	/* ifndef MYSQL_SEED_GEN_GEN_COUNT_COL_H_ */
+#endif	/* ifndef MYSQL_SEED_GEN_GEN_COUNT_COLUMN_H_ */
