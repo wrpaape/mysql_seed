@@ -56,6 +56,7 @@ struct SeedWorker {
 	SeedThreadKey key;
 	SeedThreadCond done;
 	SeedMutex processing;
+	bool busy;
 	union SeedWorkerRoutine routine;
 	void *arg;
 	void *result;
@@ -725,7 +726,7 @@ seed_thread_cond_await(SeedThreadCond *const restrict cond,
 
 inline void
 seed_thread_cond_handle_await(SeedThreadCond *const restrict cond,
-			    SeedMutex *const restrict lock)
+			      SeedMutex *const restrict lock)
 {
 	const char *restrict failure;
 
@@ -969,8 +970,7 @@ seed_worker_spawn_awaitable(AwaitableRoutine *const routine,
 	if (worker == NULL)
 		seed_supervisor_exit(SEED_WORKER_SPAWN_FAILURE_MESSAGE);
 
-	const SeedWorkerID id = worker->id;
-
+	worker->busy		  = true;
 	worker->key		  = (SeedThreadKey) worker;
 	worker->routine.awaitable = routine;
 	worker->arg		  = arg;
@@ -982,7 +982,7 @@ seed_worker_spawn_awaitable(AwaitableRoutine *const routine,
 	worker_queue_handle_push(&supervisor.busy,
 				 worker);
 
-	return id;
+	return worker->id;
 }
 
 void *
@@ -1021,8 +1021,9 @@ seed_worker_await(const SeedWorkerID id)
 
 	seed_mutex_handle_lock(&worker->processing);
 
-	seed_thread_cond_handle_await(&worker->done,
-				      &worker->processing);
+	while (worker->busy)
+		seed_thread_cond_handle_await(&worker->done,
+					      &worker->processing);
 
 	void *const restrict result = worker->result;
 
@@ -1047,9 +1048,10 @@ seed_worker_await_limit(const SeedWorkerID id,
 
 	seed_mutex_handle_lock(&worker->processing);
 
-	seed_thread_cond_handle_await_limit(&worker->done,
-					    &worker->processing,
-					    limit);
+	while (worker->busy)
+		seed_thread_cond_handle_await_limit(&worker->done,
+						    &worker->processing,
+						    limit);
 
 	void *const restrict result = worker->result;
 
@@ -1072,9 +1074,10 @@ seed_worker_await_span(const SeedWorkerID id,
 
 	seed_mutex_handle_lock(&worker->processing);
 
-	seed_thread_cond_handle_await_span(&worker->done,
-					   &worker->processing,
-					   span);
+	while (worker->busy)
+		seed_thread_cond_handle_await_span(&worker->done,
+						   &worker->processing,
+						   span);
 
 	void *const restrict result = worker->result;
 

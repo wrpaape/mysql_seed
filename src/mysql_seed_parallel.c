@@ -254,6 +254,8 @@ seed_worker_do_awaitable(void *arg)
 
 	worker->result = worker->routine.awaitable(worker->arg);
 
+	worker->busy = false;
+
 	seed_thread_key_handle_delete(worker->key);
 
 	worker_queue_handle_remove(&supervisor.busy,
@@ -262,9 +264,9 @@ seed_worker_do_awaitable(void *arg)
 	worker_queue_handle_push(&supervisor.done,
 				 worker);
 
-	seed_thread_cond_handle_signal(&worker->done);
-
 	seed_mutex_handle_unlock(&worker->processing);
+
+	seed_thread_cond_handle_signal(&worker->done);
 
 	return NULL;
 }

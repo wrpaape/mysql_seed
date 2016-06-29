@@ -360,16 +360,16 @@ count_string_init_internals(struct CountString *const restrict string)
 inline char **
 count_string_get(void)
 {
-	if (count_string.incomplete) {
+	seed_mutex_handle_lock(&count_string.processing);
 
-		seed_mutex_handle_lock(&count_string.processing);
-
+	while (count_string.incomplete) {
 		seed_thread_cond_handle_await_span(&count_string.done,
 						   &count_string.processing,
 						   &count_string_await_span);
 
-		seed_mutex_handle_unlock(&count_string.processing);
 	}
+
+	seed_mutex_handle_unlock(&count_string.processing);
 
 	if (count_string.pointers == NULL)
 		seed_supervisor_exit(GCS_INIT_FAILURE_MESSAGE);

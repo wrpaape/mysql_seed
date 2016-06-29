@@ -48,7 +48,7 @@ extern inline void
 count_string_init_internals(struct CountString *const restrict string);
 
 extern inline char **
-count_string_get(void);
+count_string_get(struct CountString *const restrict string);
 
 void
 count_string_do_init(void *arg)
@@ -65,9 +65,9 @@ count_string_do_init(void *arg)
 
 	string->incomplete = false;
 
-	seed_thread_cond_handle_broadcast(&string->done);
-
 	seed_mutex_handle_unlock(&string->processing);
+
+	seed_thread_cond_handle_broadcast(&string->done);
 
 	seed_worker_try_catch_close();
 }
