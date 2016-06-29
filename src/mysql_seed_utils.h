@@ -48,6 +48,11 @@ typedef struct CharBuffer14 { char chars[14]; } CharBuffer14;
 typedef struct CharBuffer15 { char chars[15]; } CharBuffer15;
 typedef struct CharBuffer16 { char chars[16]; } CharBuffer16;
 
+struct StringBuffer {
+	const char *restrict string;
+	size_t size;
+};
+
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -374,6 +379,31 @@ string_length_limit(const char *const restrict string,
 
 		if ((*ptr) == '\0')
 			return ptr - string;
+
+		++ptr;
+		--limit;
+	}
+}
+
+inline size_t
+string_size(const char *const restrict string)
+{
+	return string_length(string) + 1lu;
+}
+
+/* returns size_t b/c string must be at least 1 byte, so 0 signals error */
+inline size_t
+string_size_limit(const char *const restrict string,
+		  size_t limit)
+{
+	const char *restrict ptr = string;
+
+	while (1) {
+		if (limit == 0lu)
+			return 0lu;
+
+		if ((*ptr) == '\0')
+			return ptr - string + 1lu;
 
 		++ptr;
 		--limit;

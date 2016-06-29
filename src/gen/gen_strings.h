@@ -33,28 +33,6 @@
 #define GS_REALLOC_FAILURE_MESSAGE_4					\
 " bytes\n"
 
-/* struct declarations, typedefs
- *─────────────────────────────────────────────────────────────────────────── */
-struct StringTuple {
-	const char *restrict string;
-	size_t length;
-};
-
-struct StringBuffer {
-	const char *restrict string;
-	size_t size;
-}
-
-
-inline void
-string_tuple_init(struct StringTuple *const restrict tuple,
-		  const char *const restrict string)
-{
-	tuple->string = string;
-	tuple->length = string_length(string);
-}
-
-
 
 inline void
 gen_strings_log_alloc_failure(const size_t count,

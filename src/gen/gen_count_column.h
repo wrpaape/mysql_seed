@@ -42,8 +42,7 @@ struct CountColumn {
 	char *field;
 	char *base;
 	char *rows;
-	size_t size;
-	struct StringTuple rows;
+	struct StringBuffer rows; /* pointer to StringBuffer returned */
 };
 
 /* misc helper functions
@@ -94,8 +93,7 @@ count_column_init(struct CountColumn *const restrict column,
 		  const char *const restrict field_string,
 		  const char *const restrict base_string)
 {
-	string->incomplete = true;
-	string->upto	   = upto;
+	column->count_string = count_string;
 
 	return seed_worker_spawn_awaitable(&count_column_do_init,
 					   string);

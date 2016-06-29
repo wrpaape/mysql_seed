@@ -92,3 +92,9 @@ extern inline ssize_t
 string_length_limit(const char *const restrict string,
 		    ssize_t limit);
 
+extern inline size_t
+string_size(const char *const restrict string);
+
+extern inline size_t
+string_size_limit(const char *const restrict string,
+		  size_t limit);
