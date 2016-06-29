@@ -75,16 +75,13 @@ union DigitsPointer {
 	Mag0String *restrict mag_0;
 };
 
-struct CountStringSpec {
-};
-
 struct CountString {
-	size_t upto;
-	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
-	size_t size_digits;	/* sizeof("1", "2", ... "upto") */
 	bool incomplete;	/* flipped false once 'pointers' are set */
+	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
+	size_t upto;		/* final and max stringified number */
+	size_t size_digits;	/* sizeof("1", "2", ... "$(upto)") */
+	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
 	char **pointers;	/* digit pointers */
-	char *digits;		/* "1", "2", "3", ... */
 	SeedThreadCond done;	/* broadcasted once 'pointers' are set */
 	SeedMutex processing;	/* condition lock */
 };
@@ -154,67 +151,73 @@ extern const Mag6String mag_6_min_string;
 extern const Mag7String mag_7_min_string;
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
-extern struct CountString count_string;
-extern const struct timespec count_string_await_span;
+extern const struct timespec cs_await_span;
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
 /* count of chars required for "1", "2", ... "upto" null-terminated ascii
  * strings plus a final '\0' character to indicate end */
 inline void
-count_string_size(struct CountString *const restrict string)
+count_string_size_internals(struct CountString *const restrict string)
 {
 #ifdef LARGE_UPTO_MAX
 	if (string->upto < MAG_4_MIN) {
 #endif	/*  ifdef LARGE_UPTO_MAX */
 		if (string->upto < MAG_2_MIN) {
 			if (string->upto < MAG_1_MIN) {
-				string->mag_upto	  = 0u;
-				string->size_digits = SIZE_MAG_0_STR * string->upto;
+				string->mag_upto    = 0u;
+				string->size_digits = SIZE_MAG_0_STR
+						    * string->upto;
 			} else {
-				string->mag_upto	  = 1u;
+				string->mag_upto    = 1u;
 				string->size_digits = SIZE_MAG_0_1_STR
-						  + (SIZE_MAG_1_STR
-						     * (string->upto - MAG_0_MAX));
+						    + (SIZE_MAG_1_STR
+						       * (string->upto
+							  - MAG_0_MAX));
 			}
 		} else {
 			if (string->upto < MAG_3_MIN) {
-				string->mag_upto	  = 2u;
+				string->mag_upto    = 2u;
 				string->size_digits = SIZE_MAG_0_2_STR
-						  + (SIZE_MAG_2_STR
-						     * (string->upto - MAG_1_MAX));
+						    + (SIZE_MAG_2_STR
+						     * (string->upto
+							- MAG_1_MAX));
 			} else {
-				string->mag_upto	  = 3u;
+				string->mag_upto    = 3u;
 				string->size_digits = SIZE_MAG_0_3_STR
-						  + (SIZE_MAG_3_STR
-						     * (string->upto - MAG_2_MAX));
+						    + (SIZE_MAG_3_STR
+						       * (string->upto
+							  - MAG_2_MAX));
 			}
 		}
 #ifdef LARGE_UPTO_MAX
 	} else {
 		if (string->upto < MAG_6_MIN) {
 			if (string->upto < MAG_5_MIN) {
-				string->mag_upto	  = 4u;
+				string->mag_upto    = 4u;
 				string->size_digits = SIZE_MAG_0_4_STR
-						  + (SIZE_MAG_4_STR
+						    + (SIZE_MAG_4_STR
 						     * (string->upto - MAG_3_MAX));
 			} else {
-				string->mag_upto	  = 5u;
+				string->mag_upto    = 5u;
 				string->size_digits = SIZE_MAG_0_5_STR
-						  + (SIZE_MAG_5_STR
-						     * (string->upto - MAG_4_MAX));
+						    + (SIZE_MAG_5_STR
+						     * (string->upto
+							- MAG_4_MAX));
 			}
 		} else {
 			if (string->upto < MAG_7_MIN) {
 				string->mag_upto    = 6u;
 				string->size_digits = SIZE_MAG_0_6_STR
-						  + (SIZE_MAG_6_STR
-						     * (string->upto - MAG_5_MAX));
+						    + (SIZE_MAG_6_STR
+						     * (string->upto
+							- MAG_5_MAX));
 			} else {
-				string->mag_upto	  = 7u;
+				string->mag_upto    = 7u;
 				string->size_digits = SIZE_MAG_0_7_STR
-						  + (SIZE_MAG_7_STR
-						     * (string->upto - MAG_6_MAX));
+						    + (SIZE_MAG_7_STR
+						       * (string->upto
+							  - MAG_6_MAX));
 			}
 		}
 	}
@@ -263,7 +266,7 @@ do {									\
 		*(digits_ptr.mag_ ## MAG) = digits_buf.mag_ ## MAG;	\
 		*current_ptr = digits_ptr.string;			\
 		++current_ptr;						\
-		if (current_ptr == upto_ptr)				\
+		if (current_ptr == until_ptr)				\
 			break;						\
 		++(digits_ptr.mag_ ## MAG);				\
 		count_buffer_increment(active);				\
@@ -272,37 +275,37 @@ do {									\
 
 #define SET_RANGE_DIGITS_MAG_UPTO_GT_0(MAG)				\
 do {									\
-		from_ptr    = string_ptrs + OFF_MAG_ ## MAG ## _MIN;	\
+		from_ptr    = pointers + OFF_MAG_ ## MAG ## _MIN;	\
 		current_ptr = from_ptr;					\
 		SET_RANGE_DIGITS_MAG_UPTO(MAG);				\
-		upto_ptr    = from_ptr;					\
+		until_ptr   = from_ptr;					\
 		--active;						\
 } while (0)
 
 inline void
-count_string_pointers_init(char *restrict *const string_ptrs,
-			   const unsigned int mag_upto,
-			   const size_t upto)
+count_string_set_internals(struct CountString *const restrict string)
 {
 	union DigitsBuffer digits_buf;
 	union DigitsPointer digits_ptr;
 	char *restrict active;
-	char *restrict *current_ptr;
 	char *restrict *from_ptr;
-	char *restrict *upto_ptr;
+	char *restrict *current_ptr;
+	char *restrict *until_ptr;
 
-	/* separate 'upto' x string pointers from 'digits' with 'NULL' */
-	upto_ptr  = string_ptrs + upto;
-	*upto_ptr = NULL;
+	char *restrict *const restrict pointers = string->pointers;
 
-	/* point 'digits' after NULL terminator */
-	char *const restrict digits = (char *const restrict) (upto_ptr + 1l);
+	/* point string buffer 'digits' after 'upto' x string pointers */
+	until_ptr = pointers + string->upto;
+
+	char *const restrict digits = (char *) until_ptr;
+
+	string->digits = digits;
 
 	/* point 'active' at one's digit */
-	active = &digits_buf.string[mag_upto];
+	active = &digits_buf.string[string->mag_upto];
 
 
-	switch (mag_upto) {
+	switch (string->mag_upto) {
 #ifdef LARGE_UPTO_MAX
 	case 7u:
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(7);
@@ -320,65 +323,69 @@ count_string_pointers_init(char *restrict *const string_ptrs,
 	case 1u:
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(1);
 	default:
-		current_ptr = string_ptrs;
+		current_ptr = pointers;
 		SET_RANGE_DIGITS_MAG_UPTO(0);
 	}
 }
 
 
-/* top-level functions
- *─────────────────────────────────────────────────────────────────────────── */
 inline void
 count_string_init_internals(struct CountString *const restrict string)
 {
-	if (upto > UPTO_MAX) {
-		count_string_log_alloc_failure(upto,
+	if (string->upto > UPTO_MAX) {
+		count_string_log_alloc_failure(string->upto,
 					       UPTO_MAX_EXCEEDED_FAILURE_MESSAGE);
-		return NULL;
+		string->pointers = NULL;
+		return;
 	}
 
+	count_string_size_internals(string);
 
-	count_string_spec_init(&spec,
-			       upto);
+	seed_worker_try_catch_open(free,
+				   string->pointers);
 
-	/* 'upto' + 1 (NULL terminated) pointers + 'size_digits' ascii chars */
-	char **const string_ptrs = malloc((sizeof(char *) * (upto + 1lu))
-					  + spec.size_digits);
-	if (string_ptrs == NULL) {
-		count_string_log_alloc_failure(upto,
+	/* 'upto' pointers + 'size_digits' ascii chars */
+	string->pointers = malloc((sizeof(char *) * string->upto)
+				  + string->size_digits);
+
+
+	if (string->pointers == NULL)
+		count_string_log_alloc_failure(string->upto,
 					       MALLOC_FAILURE_MESSAGE);
-		return NULL;
-	}
+	else
+		count_string_set_internals(string);
 
-	count_string_pointers_init(string_ptrs,
-				   spec.mag_upto,
-				   upto);
-
-	return string_ptrs;
+	seed_worker_try_catch_close();
 }
 
-inline char **
-count_string_get(void)
+/* top-level functions
+ *─────────────────────────────────────────────────────────────────────────── */
+
+inline void
+count_string_free_internals(struct CountString *const restrict string)
 {
-	seed_mutex_handle_lock(&count_string.processing);
-
-	while (count_string.incomplete) {
-		seed_thread_cond_handle_await_span(&count_string.done,
-						   &count_string.processing,
-						   &count_string_await_span);
-
-	}
-
-	seed_mutex_handle_unlock(&count_string.processing);
-
-	if (count_string.pointers == NULL)
-		seed_supervisor_exit(GCS_INIT_FAILURE_MESSAGE);
-
-	return count_string.pointers;
+	free(string->pointers);
 }
 
 void
 count_string_do_init(void *arg);
+
+
+inline void
+count_string_await(struct CountString *const restrict string)
+{
+	if (string->incomplete) {
+		seed_mutex_handle_lock(&string->processing);
+
+		while (string->incomplete)
+			seed_thread_cond_handle_await_span(&string->done,
+							   &string->processing,
+							   &cs_await_span);
+
+		seed_mutex_handle_unlock(&string->processing);
+	}
+}
+
 
 inline void
 count_string_init(struct CountString *const restrict string,
@@ -387,19 +394,11 @@ count_string_init(struct CountString *const restrict string,
 	string->incomplete = true;
 	string->upto	   = upto;
 
-	seed_cond_handle_init(&string->done);
+	seed_thread_cond_handle_init(&string->done);
 	seed_mutex_handle_init(&string->processing);
-
-
 
 	seed_worker_spawn_independent(&count_string_do_init,
 				      string);
-}
-
-inline void
-count_string_destroy(struct CountString *const restrict string)
-{
-	free(count_string);
 }
 
 

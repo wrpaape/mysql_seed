@@ -4,7 +4,6 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <pthread.h>		/* threads API */
-#include <semaphore.h>		/* sem_t, 'sem_X' semaphore API */
 #include <errno.h>		/* error codes, errno */
 #include <limits.h>		/* PTHREAD_THREADS_MAX */
 #include <string.h>		/* memcpy */
@@ -35,9 +34,6 @@ typedef pthread_key_t SeedThreadKey;
 
 typedef unsigned int SeedWorkerID;
 
-typedef sem_t SeedSem;
-
-
 typedef void *
 AwaitableRoutine(void *);
 
@@ -48,7 +44,6 @@ union SeedWorkerRoutine {
 	AwaitableRoutine *awaitable;
 	IndependentRoutine *independent;
 };
-
 
 struct SeedWorker {
 	SeedWorkerID id;
@@ -110,12 +105,6 @@ pthread_mutex_unlock(MUTEX)
 
 #define seed_mutex_init_imp(MUTEX)				\
 memcpy(MUTEX, &seed_mutex_prototype, sizeof(seed_mutex_prototype))
-
-#define seed_sem_wait_imp(SEM)					\
-sem_wait(SEM)
-
-#define seed_sem_post_imp(SEM)					\
-sem_post(SEM)
 
 #define seed_thread_attr_init_imp(ATTR)				\
 pthread_attr_init(ATTR)
@@ -479,52 +468,6 @@ seed_mutex_handle_unlock(SeedMutex *const restrict lock)
 			       &failure))
 		seed_supervisor_exit(failure);
 }
-
-/* SeedSem operations
- *─────────────────────────────────────────────────────────────────────────── */
-
-inline bool
-seed_sem_wait(SeedSem *const restrict sem,
-	      const char *restrict *const restrict message_ptr)
-{
-	if (seed_sem_wait_imp(sem) == 0)
-		return true;
-
-	switch (errno) {
-
-	case EDEADLK:
-		*message_ptr = "\n\nseed_sem_wait failure:\n"
-			       "\tA deadlock was detected.\n";
-		return false;
-
-	case EINTR:
-		*message_ptr = "\n\nseed_sem_wait failure:\n"
-			       "\tThe call was interrupted by a signal"
-			       "\n";
-		return false;
-
-	case EINVAL:
-		*message_ptr = "\n\nseed_sem_wait failure:\n"
-			       "\t'sem' is not a valid SeedSem\n";
-		return false;
-
-	default:
-		*message_ptr = "\n\nseed_sem_wait failure:\n"
-			       "\tunknown\n";
-		return false;
-	}
-}
-
-inline void
-seed_sem_handle_wait(SeedSem *const restrict sem)
-{
-	const char *restrict failure;
-
-	if (!seed_sem_wait(sem,
-			   &failure))
-		seed_supervisor_exit(failure);
-}
-
 
 
 /* SeedThreadAttr operations
