@@ -121,11 +121,11 @@ void test_count_string_init(void)
 	struct CountString string;
 
 	count_string_init(&string,
-			  500lu);
+			  150000lu);
 
 	TEST_ASSERT_TRUE(string.incomplete);
 
-	TEST_ASSERT_EQUAL_UINT(500lu, string.upto);
+	TEST_ASSERT_EQUAL_UINT(150000lu, string.upto);
 
 	count_string_await(&string);
 

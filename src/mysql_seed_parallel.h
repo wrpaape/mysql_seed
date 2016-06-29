@@ -646,8 +646,8 @@ seed_thread_cond_handle_broadcast(SeedThreadCond *const restrict cond)
 
 inline bool
 seed_thread_cond_await(SeedThreadCond *const restrict cond,
-		     SeedMutex *const restrict lock,
-		     const char *restrict *const restrict message_ptr)
+		       SeedMutex *const restrict lock,
+		       const char *restrict *const restrict message_ptr)
 {
 	switch (seed_thread_cond_await_imp(cond,
 					   lock)) {
@@ -681,9 +681,9 @@ seed_thread_cond_handle_await(SeedThreadCond *const restrict cond,
 
 inline bool
 seed_thread_cond_await_limit(SeedThreadCond *const restrict cond,
-			   SeedMutex *const restrict lock,
-			   const struct timespec *const restrict limit,
-			   const char *restrict *const restrict message_ptr)
+			     SeedMutex *const restrict lock,
+			     const struct timespec *const restrict limit,
+			     const char *restrict *const restrict message_ptr)
 {
 	switch (seed_thread_cond_await_limit_imp(cond,
 						 lock,
@@ -718,9 +718,9 @@ seed_thread_cond_handle_await_limit(SeedThreadCond *const restrict cond,
 	const char *restrict failure;
 
 	if (!seed_thread_cond_await_limit(cond,
-					lock,
-					limit,
-					&failure))
+					  lock,
+					  limit,
+					  &failure))
 		seed_supervisor_exit(failure);
 }
 
@@ -736,9 +736,9 @@ seed_thread_cond_await_span(SeedThreadCond *const restrict cond,
 			    span);
 
 	return seed_thread_cond_await_limit(cond,
-					  lock,
-					  &limit,
-					  message_ptr);
+					    lock,
+					    &limit,
+					    message_ptr);
 }
 
 inline void

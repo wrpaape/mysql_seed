@@ -13,10 +13,10 @@ const Mag6String mag_6_min_string = { "1000000" };
 const Mag7String mag_7_min_string = { "10000000" };
 #endif	/*  ifdef LARGE_UPTO_MAX */
 
-/* 100 ms */
+/* 10 ms */
 const struct timespec cs_await_span = {
 	.tv_sec  = 0,
-	.tv_nsec = 100000000ll
+	.tv_nsec = 10000000l
 };
 
 extern inline void
