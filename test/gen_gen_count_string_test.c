@@ -10,35 +10,36 @@ void tearDown(void)
 }
 
 inline void
-test_assert_spec_fields_equal(struct CountStringSpec *const restrict spec,
+test_assert_size_fields_equal(struct CountString *const restrict string,
 			      const unsigned int mag_upto_expected,
 			      const size_t size_digits_expected)
 {
 	TEST_ASSERT_EQUAL_UINT_MESSAGE(mag_upto_expected,
-				       spec->mag_upto,
-				       "spec->mag_upto != mag_upto_expected");
+				       string->mag_upto,
+				       "string->mag_upto != mag_upto_expected");
 
 
 	TEST_ASSERT_EQUAL_UINT_MESSAGE(size_digits_expected,
-				       spec->size_digits,
-				       "spec->size_digits != size_digits_expected");
+				       string->size_digits,
+				       "string->size_digits != size_digits_expected");
 }
 
-void test_count_string_spec_init(void)
+void test_count_string_size_internals(void)
 {
-	struct CountStringSpec spec;
+	struct CountString string;
 
-	count_string_spec_init(&spec,
-			       3lu);
+	string.upto = 3lu;
 
-	test_assert_spec_fields_equal(&spec,
+	count_string_size_internals(&string);
+
+	test_assert_size_fields_equal(&string,
 				      0u,
 				      sizeof("1") + sizeof("2") + sizeof("3"));
+	string.upto = 25000lu;
 
-	count_string_spec_init(&spec,
-			       25000lu);
+	count_string_size_internals(&string);
 
-	test_assert_spec_fields_equal(&spec,
+	test_assert_size_fields_equal(&string,
 				      4u,
 				      SIZE_MAG_0_4_STR + (15001lu * 6lu));
 }
@@ -47,12 +48,18 @@ void test_count_string_alloc_failure(void)
 {
 	char failure[128];
 
-	TEST_ASSERT_NULL(count_string_pointers_create(UPTO_MAX + 1lu));
+	struct CountString string;
+
+	string.upto = UPTO_MAX + 1lu;
+
+	count_string_init_internals(&string);
+
+	TEST_ASSERT_NULL(string.pointers);
 
 	sprintf(&failure[0],
-		CS_ALLOC_FAILURE_MESSAGE_BEGIN
+		GCS_ALLOC_FAILURE_MESSAGE_BEGIN
 		"%zu"
-		CS_ALLOC_FAILURE_MESSAGE_MIDDLE
+		GCS_ALLOC_FAILURE_MESSAGE_MIDDLE
 		UPTO_MAX_EXCEEDED_FAILURE_MESSAGE,
 		UPTO_MAX + 1lu);
 
@@ -77,62 +84,55 @@ void test_count_string_increment_buffer(void)
 				 &digits[0]);
 }
 
-void test_count_string_pointers_init(void)
+void test_count_string_set_internals(void)
 {
 	char *buffer[64];
+	struct CountString string;
 
-	char *restrict *const ptr = &buffer[0];
+	string.upto	= 3lu;
+	string.mag_upto	= 0u;
+	string.pointers = &buffer[0];
 
-	count_string_pointers_init(ptr, 0, 3);
+	count_string_set_internals(&string);
 
-	TEST_ASSERT_EQUAL_STRING("1", ptr[0]);
+	TEST_ASSERT_EQUAL_STRING("1", string.pointers[0]);
 
-	TEST_ASSERT_EQUAL_STRING("2", ptr[1]);
+	TEST_ASSERT_EQUAL_STRING("2", string.pointers[1]);
 
-	TEST_ASSERT_EQUAL_STRING("3", ptr[2]);
-
-	TEST_ASSERT_NULL(ptr[3]);
+	TEST_ASSERT_EQUAL_STRING("3", string.pointers[2]);
 }
 
-void test_assert_count_string_pointers(char **const restrict string_ptrs,
+void test_assert_count_string_pointers(char **const restrict pointers,
 				       const size_t upto)
 {
 	char buffer[16];
 
-	TEST_ASSERT_NOT_NULL(string_ptrs);
-	TEST_ASSERT_NULL(string_ptrs[upto]);
+	TEST_ASSERT_NOT_NULL(pointers);
 
 	for (unsigned int i = 0u, j = 1u; j < upto; i = j, ++j) {
-		TEST_ASSERT_NOT_NULL(string_ptrs[i]);
+		TEST_ASSERT_NOT_NULL(pointers[i]);
 		sprintf(&buffer[0], "%u", j);
-		TEST_ASSERT_EQUAL_STRING(&buffer[0], string_ptrs[i]);
+		TEST_ASSERT_EQUAL_STRING(&buffer[0], pointers[i]);
 	}
-}
-
-void test_count_string_pointers_create(void)
-{
-	char **const restrict string_ptrs = count_string_pointers_create(500lu);
-
-	test_assert_count_string_pointers(string_ptrs,
-					  500lu);
-	free(string_ptrs);
 }
 
 void test_count_string_init(void)
 {
-	TEST_ASSERT_TRUE(count_string.incomplete);
-	TEST_ASSERT_NULL(count_string.pointers);
+	struct CountString string;
 
-	TEST_ASSERT_EQUAL_UINT(0lu, count_string.upto);
+	count_string_init(&string,
+			  500lu);
 
-	count_string_init(100lu);
+	TEST_ASSERT_TRUE(string.incomplete);
 
-	TEST_ASSERT_EQUAL_UINT(100lu, count_string.upto);
+	TEST_ASSERT_EQUAL_UINT(500lu, string.upto);
 
-	char **const restrict string_ptrs = count_string_get();
+	count_string_await(&string);
 
-	test_assert_count_string_pointers(string_ptrs,
-					  count_string.upto);
+	TEST_ASSERT_FALSE(string.incomplete);
 
-	count_string_destroy();
+	test_assert_count_string_pointers(string.pointers,
+					  string.upto);
+
+	count_string_free_internals(&string);
 }

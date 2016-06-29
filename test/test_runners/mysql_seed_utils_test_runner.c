@@ -28,6 +28,7 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
+extern void test_string_length(void);
 extern void test_put_string(void);
 extern void test_ten_pow_map(void);
 extern void test_digit_count(void);
@@ -47,10 +48,11 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/mysql_seed_utils_test.c");
-  RUN_TEST(test_put_string, 13);
-  RUN_TEST(test_ten_pow_map, 73);
-  RUN_TEST(test_digit_count, 81);
-  RUN_TEST(test_put_number, 89);
+  RUN_TEST(test_string_length, 13);
+  RUN_TEST(test_put_string, 27);
+  RUN_TEST(test_ten_pow_map, 87);
+  RUN_TEST(test_digit_count, 95);
+  RUN_TEST(test_put_number, 103);
 
   return (UnityEnd());
 }

@@ -10,6 +10,20 @@ void tearDown(void)
 {
 }
 
+void test_string_length(void)
+{
+	TEST_ASSERT_EQUAL_UINT(0lu, string_length(""));
+	TEST_ASSERT_EQUAL_UINT(4lu, string_length("ooga"));
+
+	TEST_ASSERT_EQUAL_INT(0l,   string_length_limit("", 0l));
+	TEST_ASSERT_EQUAL_INT(0l,   string_length_limit("", 1l));
+	TEST_ASSERT_EQUAL_INT(4l,   string_length_limit("ooga", 10l));
+
+	TEST_ASSERT_TRUE(string_length_limit("",     -1l) < 0l);
+	TEST_ASSERT_TRUE(string_length_limit("ooga", -1l) < 0l);
+	TEST_ASSERT_TRUE(string_length_limit("ooga", -123l) < 0l);
+}
+
 void test_put_string(void)
 {
 	char buffer[10];
