@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "gen/gen_count_string.h"	/* count_string, parallel utils */
+#include "gen/gen_count_string.h"	/* CountString, parallelization utils */
 
 
 /* macro constants
@@ -16,30 +16,30 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 
-#define GCC_ALLOC_FAILURE_MESSAGE_BEGIN					\
+#define GCC_ALLOC_FAILURE_MESSAGE_1					\
 "\n\nfailed to allocate memory for count column having 'field' of "
 
-#define GCC_ALLOC_FAILURE_MESSAGE_MIDDLE_1				\
+#define GCC_ALLOC_FAILURE_MESSAGE_2					\
 " with string length, 'field_length', of "
 
-#define GCC_ALLOC_FAILURE_MESSAGE_MIDDLE_2				\
+#define GCC_ALLOC_FAILURE_MESSAGE_3					\
 " ('FIELD_LENGTH_MAX' = " EXPAND_STRINGIFY(BASE_LENGTH_MAX) ", 'base' of "
 
-#define GCC_ALLOC_FAILURE_MESSAGE_MIDDLE_3				\
+#define GCC_ALLOC_FAILURE_MESSAGE_4					\
 " with string length, 'base_length', of "
 
-#define GCC_ALLOC_FAILURE_MESSAGE_MIDDLE_4				\
+#define GCC_ALLOC_FAILURE_MESSAGE_5					\
 " ('BASE_LENGTH_MAX' = " EXPAND_STRINGIFY(BASE_LENGTH_MAX) ", and 'upto' of "
 
-#define GCC_ALLOC_FAILURE_MESSAGE_MIDDLE_5				\
+#define GCC_ALLOC_FAILURE_MESSAGE_6					\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 struct CountColumn {
-	size_t upto;
-	const char *column;
+	char *column;
+	struct CountString *string;
 	struct StringTuple field;
 	struct StringTuple base;
 };
@@ -85,29 +85,42 @@ count_column_size_count_string(const size_t upto)
 #endif	/*  ifdef LARGE_UPTO_MAX */
 }
 
+inline SeedWorkerID
+count_column_init(struct CountColumn *const restrict column,
+		  struct CountString *const restrict count_string,
+		  const char *const restrict field_string,
+		  const char *const restrict base_string)
+{
+	string->incomplete = true;
+	string->upto	   = upto;
+
+	return seed_worker_spawn_awaitable(&count_column_do_init,
+					   string);
+}
+
 inline void
 count_column_log_alloc_failure(struct CountColumn *const restrict column,
 			       const char *const restrict failure)
 {
 	seed_log_handle_lock();
 
-	seed_log_append_string(GCC_ALLOC_FAILURE_MESSAGE_BEGIN);
+	seed_log_append_string(GCC_ALLOC_FAILURE_MESSAGE_1);
 
 	seed_log_append_string(column->field.string);
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE_1);
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_2);
 
 	seed_log_append_digits(column->field.length);
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE_2);
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_3);
 
 	seed_log_append_string(column->base.string);
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE_3);
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_4);
 
 	seed_log_append_digits(column->base.length);
 
-	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_MIDDLE_4);
+	seed_log_append_string(CS_ALLOC_FAILURE_MESSAGE_5);
 
 	seed_log_append_digits(column->upto);
 

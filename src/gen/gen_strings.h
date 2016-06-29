@@ -12,33 +12,59 @@
 #define MALLOC_FAILURE_MESSAGE						\
 "malloc failure (out of memory)\n"
 
-#define GS_ALLOC_FAILURE_MESSAGE_BEGIN					\
+#define GS_ALLOC_FAILURE_MESSAGE_1					\
 "\n\nfailed to allocate string memory for 'count' of "
 
-#define GS_ALLOC_FAILURE_MESSAGE_MIDDLE_1				\
+#define GS_ALLOC_FAILURE_MESSAGE_2					\
 " and an estimated size of "
 
-#define GS_ALLOC_FAILURE_MESSAGE_MIDDLE_2				\
+#define GS_ALLOC_FAILURE_MESSAGE_3					\
 " bytes\nreason:\n\t"
 
-#define GS_REALLOC_FAILURE_MESSAGE_BEGIN				\
+#define GS_REALLOC_FAILURE_MESSAGE_1					\
 "failed to reallocate string memory for 'count' of "
 
-#define GS_REALLOC_FAILURE_MESSAGE_MIDDLE_1				\
+#define GS_REALLOC_FAILURE_MESSAGE_2					\
 " from an estimated size of "
 
-#define GS_REALLOC_FAILURE_MESSAGE_MIDDLE_2				\
+#define GS_REALLOC_FAILURE_MESSAGE_3					\
 " bytes to an actual size of "
 
-#define GS_REALLOC_FAILURE_MESSAGE_END					\
+#define GS_REALLOC_FAILURE_MESSAGE_4					\
 " bytes\n"
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 struct StringTuple {
 	const char *restrict string;
-	ssize_t length;
+	size_t length;
 };
+
+
+inline void
+string_tuple_init(struct StringTuple *const restrict tuple,
+		  const char *const restrict string)
+{
+	tuple->string = string;
+	tuple->length = string_length(string);
+}
+
+inline bool
+string_tuple_init_limit(struct StringTuple *const restrict tuple,
+			const char *const restrict string,
+			const ssize_t limit)
+{
+	const ssize_t length = string_length_limit(string,
+						   limit);
+
+	if (length < 0l)
+		return false;
+
+	tuple->string = string;
+	tuple->length = (size_t) length;
+
+	return true;
+}
 
 
 inline void
@@ -48,15 +74,15 @@ gen_strings_log_alloc_failure(const size_t count,
 {
 	seed_log_handle_lock();
 
-	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_BEGIN);
+	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_1);
 
 	seed_log_append_digits(count);
 
-	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_MIDDLE_1);
+	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_2);
 
 	seed_log_append_digits(size_est);
 
-	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_MIDDLE_2);
+	seed_log_append_string(GS_ALLOC_FAILURE_MESSAGE_3);
 
 	seed_log_append_string(failure);
 
@@ -70,19 +96,19 @@ gen_strings_log_realloc_failure(const size_t count,
 {
 	seed_log_handle_lock();
 
-	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_BEGIN);
+	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_1);
 
 	seed_log_append_digits(count);
 
-	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_MIDDLE_1);
+	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_2);
 
 	seed_log_append_digits(size_est);
 
-	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_MIDDLE_2);
+	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_3);
 
 	seed_log_append_digits(size_act);
 
-	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_END);
+	seed_log_append_string(GS_REALLOC_FAILURE_MESSAGE_4);
 
 	seed_log_handle_unlock();
 }

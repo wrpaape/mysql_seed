@@ -25,10 +25,10 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
 
-#define GCS_ALLOC_FAILURE_MESSAGE_BEGIN					\
+#define GCS_ALLOC_FAILURE_MESSAGE_1					\
 "\n\nfailed to allocate count string memory for 'upto' of "
 
-#define GCS_ALLOC_FAILURE_MESSAGE_MIDDLE				\
+#define GCS_ALLOC_FAILURE_MESSAGE_2				\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
 #define GCS_INIT_FAILURE_MESSAGE					\
@@ -232,11 +232,11 @@ count_string_log_alloc_failure(const size_t upto,
 {
 	seed_log_handle_lock();
 
-	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_BEGIN);
+	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_1);
 
 	seed_log_append_digits(upto);
 
-	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_MIDDLE);
+	seed_log_append_string(GCS_ALLOC_FAILURE_MESSAGE_2);
 
 	seed_log_append_string(failure);
 
@@ -400,6 +400,5 @@ count_string_init(struct CountString *const restrict string,
 	seed_worker_spawn_independent(&count_string_do_init,
 				      string);
 }
-
 
 #endif	/* ifndef MYSQL_SEED_GEN_GEN_COUNT_STRING_H_ */
