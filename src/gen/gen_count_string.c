@@ -47,6 +47,9 @@ count_string_pointers_init(char *restrict *const string_ptrs,
 extern inline char **
 count_string_pointers_create(const size_t upto);
 
+extern inline char **
+count_string_get(void);
+
 void
 count_string_do_init(void *arg)
 {
@@ -66,3 +69,6 @@ count_string_do_init(void *arg)
 
 extern inline void
 count_string_init(const size_t upto);
+
+extern inline void
+count_string_destroy(void);

@@ -22,17 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "gen/gen_count_string.h"
+#include "time/time_utils.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_count_string_spec_init(void);
-extern void test_count_string_alloc_failure(void);
-extern void test_count_string_increment_buffer(void);
-extern void test_count_string_pointers_init(void);
-extern void test_count_string_pointers_create(void);
-extern void test_count_string_init(void);
+extern void test_time_utils(void);
 
 
 //=======Test Reset Option=====
@@ -47,13 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/gen_gen_count_string_test.c");
-  RUN_TEST(test_count_string_spec_init, 27);
-  RUN_TEST(test_count_string_alloc_failure, 46);
-  RUN_TEST(test_count_string_increment_buffer, 65);
-  RUN_TEST(test_count_string_pointers_init, 80);
-  RUN_TEST(test_count_string_pointers_create, 112);
-  RUN_TEST(test_count_string_init, 121);
+  UnityBegin("../test/time_time_utils_test.c");
+  RUN_TEST(test_time_utils, 12);
 
   return (UnityEnd());
 }

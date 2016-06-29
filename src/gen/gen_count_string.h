@@ -359,7 +359,7 @@ count_string_pointers_create(const size_t upto)
 }
 
 inline char **
-count_string_handle_get(void)
+count_string_get(void)
 {
 	if (count_string.incomplete) {
 
@@ -387,6 +387,12 @@ count_string_init(const size_t upto)
 	count_string.upto = upto;
 	seed_worker_spawn_independent(&count_string_do_init,
 				      NULL);
+}
+
+inline void
+count_string_destroy(void)
+{
+	free(count_string.pointers);
 }
 
 

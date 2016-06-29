@@ -47,7 +47,7 @@ void test_count_string_alloc_failure(void)
 {
 	char failure[128];
 
-	TEST_ASSERT_NULL(gen_count_string(UPTO_MAX + 1lu));
+	TEST_ASSERT_NULL(count_string_pointers_create(UPTO_MAX + 1lu));
 
 	sprintf(&failure[0],
 		CS_ALLOC_FAILURE_MESSAGE_BEGIN
@@ -77,13 +77,13 @@ void test_count_string_increment_buffer(void)
 				 &digits[0]);
 }
 
-void test_count_string_init(void)
+void test_count_string_pointers_init(void)
 {
 	char *buffer[64];
 
 	char *restrict *const ptr = &buffer[0];
 
-	count_string_init(ptr, 0, 3);
+	count_string_pointers_init(ptr, 0, 3);
 
 	TEST_ASSERT_EQUAL_STRING("1", ptr[0]);
 
@@ -94,24 +94,45 @@ void test_count_string_init(void)
 	TEST_ASSERT_NULL(ptr[3]);
 }
 
-void test_gen_count_string(void)
+void test_assert_count_string_pointers(char **const restrict string_ptrs,
+				       const size_t upto)
 {
-
 	char buffer[16];
-	char **const restrict count_string = gen_count_string(500lu);
 
-	TEST_ASSERT_NOT_NULL(count_string);
-	TEST_ASSERT_NULL(count_string[500lu]);
+	TEST_ASSERT_NOT_NULL(string_ptrs);
+	TEST_ASSERT_NULL(string_ptrs[upto]);
 
-	for (unsigned int i = 0u, j = 1u; j < 500u; i = j, ++j) {
-		TEST_ASSERT_NOT_NULL(count_string[i]);
+	for (unsigned int i = 0u, j = 1u; j < upto; i = j, ++j) {
+		TEST_ASSERT_NOT_NULL(string_ptrs[i]);
 		sprintf(&buffer[0], "%u", j);
-		TEST_ASSERT_EQUAL_STRING(&buffer[0], count_string[i]);
+		TEST_ASSERT_EQUAL_STRING(&buffer[0], string_ptrs[i]);
 	}
-
-	free(count_string);
 }
 
+void test_count_string_pointers_create(void)
+{
+	char **const restrict string_ptrs = count_string_pointers_create(500lu);
 
+	test_assert_count_string_pointers(string_ptrs,
+					  500lu);
+	free(string_ptrs);
+}
 
+void test_count_string_init(void)
+{
+	TEST_ASSERT_TRUE(count_string.incomplete);
+	TEST_ASSERT_NULL(count_string.pointers);
 
+	TEST_ASSERT_EQUAL_UINT(0lu, count_string.upto);
+
+	count_string_init(100lu);
+
+	TEST_ASSERT_EQUAL_UINT(100lu, count_string.upto);
+
+	char **const restrict string_ptrs = count_string_get();
+
+	test_assert_count_string_pointers(string_ptrs,
+					  count_string.upto);
+
+	count_string_destroy();
+}
