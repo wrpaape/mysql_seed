@@ -76,14 +76,15 @@ union DigitsPointer {
 };
 
 struct CountStringSpec {
-	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
-	size_t size_digits;	/* sizeof("1", "2", ... "upto") */
 };
 
 struct CountString {
 	size_t upto;
+	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
+	size_t size_digits;	/* sizeof("1", "2", ... "upto") */
 	bool incomplete;	/* flipped false once 'pointers' are set */
 	char **pointers;	/* digit pointers */
+	char *digits;		/* "1", "2", "3", ... */
 	SeedThreadCond done;	/* broadcasted once 'pointers' are set */
 	SeedMutex processing;	/* condition lock */
 };
@@ -161,60 +162,59 @@ extern const struct timespec count_string_await_span;
 /* count of chars required for "1", "2", ... "upto" null-terminated ascii
  * strings plus a final '\0' character to indicate end */
 inline void
-count_string_spec_init(struct CountStringSpec *const restrict spec,
-		       const size_t upto)
+count_string_size(struct CountString *const restrict string)
 {
 #ifdef LARGE_UPTO_MAX
-	if (upto < MAG_4_MIN) {
+	if (string->upto < MAG_4_MIN) {
 #endif	/*  ifdef LARGE_UPTO_MAX */
-		if (upto < MAG_2_MIN) {
-			if (upto < MAG_1_MIN) {
-				spec->mag_upto	  = 0u;
-				spec->size_digits = SIZE_MAG_0_STR * upto;
+		if (string->upto < MAG_2_MIN) {
+			if (string->upto < MAG_1_MIN) {
+				string->mag_upto	  = 0u;
+				string->size_digits = SIZE_MAG_0_STR * string->upto;
 			} else {
-				spec->mag_upto	  = 1u;
-				spec->size_digits = SIZE_MAG_0_1_STR
+				string->mag_upto	  = 1u;
+				string->size_digits = SIZE_MAG_0_1_STR
 						  + (SIZE_MAG_1_STR
-						     * (upto - MAG_0_MAX));
+						     * (string->upto - MAG_0_MAX));
 			}
 		} else {
-			if (upto < MAG_3_MIN) {
-				spec->mag_upto	  = 2u;
-				spec->size_digits = SIZE_MAG_0_2_STR
+			if (string->upto < MAG_3_MIN) {
+				string->mag_upto	  = 2u;
+				string->size_digits = SIZE_MAG_0_2_STR
 						  + (SIZE_MAG_2_STR
-						     * (upto - MAG_1_MAX));
+						     * (string->upto - MAG_1_MAX));
 			} else {
-				spec->mag_upto	  = 3u;
-				spec->size_digits = SIZE_MAG_0_3_STR
+				string->mag_upto	  = 3u;
+				string->size_digits = SIZE_MAG_0_3_STR
 						  + (SIZE_MAG_3_STR
-						     * (upto - MAG_2_MAX));
+						     * (string->upto - MAG_2_MAX));
 			}
 		}
 #ifdef LARGE_UPTO_MAX
 	} else {
-		if (upto < MAG_6_MIN) {
-			if (upto < MAG_5_MIN) {
-				spec->mag_upto	  = 4u;
-				spec->size_digits = SIZE_MAG_0_4_STR
+		if (string->upto < MAG_6_MIN) {
+			if (string->upto < MAG_5_MIN) {
+				string->mag_upto	  = 4u;
+				string->size_digits = SIZE_MAG_0_4_STR
 						  + (SIZE_MAG_4_STR
-						     * (upto - MAG_3_MAX));
+						     * (string->upto - MAG_3_MAX));
 			} else {
-				spec->mag_upto	  = 5u;
-				spec->size_digits = SIZE_MAG_0_5_STR
+				string->mag_upto	  = 5u;
+				string->size_digits = SIZE_MAG_0_5_STR
 						  + (SIZE_MAG_5_STR
-						     * (upto - MAG_4_MAX));
+						     * (string->upto - MAG_4_MAX));
 			}
 		} else {
-			if (upto < MAG_7_MIN) {
-				spec->mag_upto	  = 6u;
-				spec->size_digits = SIZE_MAG_0_6_STR
+			if (string->upto < MAG_7_MIN) {
+				string->mag_upto    = 6u;
+				string->size_digits = SIZE_MAG_0_6_STR
 						  + (SIZE_MAG_6_STR
-						     * (upto - MAG_5_MAX));
+						     * (string->upto - MAG_5_MAX));
 			} else {
-				spec->mag_upto	  = 7u;
-				spec->size_digits = SIZE_MAG_0_7_STR
+				string->mag_upto	  = 7u;
+				string->size_digits = SIZE_MAG_0_7_STR
 						  + (SIZE_MAG_7_STR
-						     * (upto - MAG_6_MAX));
+						     * (string->upto - MAG_6_MAX));
 			}
 		}
 	}
@@ -328,8 +328,8 @@ count_string_pointers_init(char *restrict *const string_ptrs,
 
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
-inline char **
-count_string_pointers_create(const size_t upto)
+inline void
+count_string_init_internals(struct CountString *const restrict string)
 {
 	if (upto > UPTO_MAX) {
 		count_string_log_alloc_failure(upto,
@@ -337,7 +337,6 @@ count_string_pointers_create(const size_t upto)
 		return NULL;
 	}
 
-	struct CountStringSpec spec;
 
 	count_string_spec_init(&spec,
 			       upto);
@@ -382,17 +381,25 @@ void
 count_string_do_init(void *arg);
 
 inline void
-count_string_init(const size_t upto)
+count_string_init(struct CountString *const restrict string,
+		  const size_t upto)
 {
-	count_string.upto = upto;
+	string->incomplete = true;
+	string->upto	   = upto;
+
+	seed_cond_handle_init(&string->done);
+	seed_mutex_handle_init(&string->processing);
+
+
+
 	seed_worker_spawn_independent(&count_string_do_init,
-				      NULL);
+				      string);
 }
 
 inline void
-count_string_destroy(void)
+count_string_destroy(struct CountString *const restrict string)
 {
-	free(count_string.pointers);
+	free(count_string);
 }
 
 

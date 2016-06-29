@@ -15,7 +15,7 @@ const Mag7String mag_7_min_string = { "10000000" };
 
 struct CountString count_string = {
 	.upto	    = 0lu,
-	.incomplete = true,
+	.incomplete = true
 	.pointers   = NULL,
 	.done	    = SEED_THREAD_COND_INITIALIZER,
 	.processing = SEED_MUTEX_INITIALIZER
@@ -44,8 +44,8 @@ count_string_pointers_init(char *restrict *const string_ptrs,
 			   const unsigned int mag_upto,
 			   const size_t upto);
 
-extern inline char **
-count_string_pointers_create(const size_t upto);
+extern inline void
+count_string_init_internals(struct CountString *const restrict string);
 
 extern inline char **
 count_string_get(void);
@@ -53,18 +53,21 @@ count_string_get(void);
 void
 count_string_do_init(void *arg)
 {
+	struct CountString *const restrict
+	string = (struct CountString *const restrict) arg;
+
 	seed_worker_try_catch_open(&free,
-				   count_string.pointers);
+				   string->pointers);
 
-	seed_mutex_handle_lock(&count_string.processing);
+	seed_mutex_handle_lock(&string->processing);
 
-	count_string.pointers = count_string_pointers_create(count_string.upto);
+	string->pointers = count_string_init_internals(string);
 
-	count_string.incomplete = false;
+	string->incomplete = false;
 
-	seed_thread_cond_handle_broadcast(&count_string.done);
+	seed_thread_cond_handle_broadcast(&string->done);
 
-	seed_mutex_handle_unlock(&count_string.processing);
+	seed_mutex_handle_unlock(&string->processing);
 
 	seed_worker_try_catch_close();
 }
@@ -73,4 +76,4 @@ extern inline void
 count_string_init(const size_t upto);
 
 extern inline void
-count_string_destroy(void);
+count_string_destroy(struct CountString *const restrict string);
