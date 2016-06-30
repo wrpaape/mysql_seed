@@ -51,7 +51,7 @@ put_digits_length(char *restrict buffer,
 extern inline char *
 put_digits_until(char *restrict buffer,
 		 const size_t n,
-		 char *const restrict end_ptr);
+		 char *const restrict until_ptr);
 
 extern inline char *
 put_number(char *restrict buffer,
@@ -65,7 +65,7 @@ put_number_length(char *restrict buffer,
 extern inline char *
 put_number_until(char *restrict buffer,
 		 const ssize_t n,
-		 char *const restrict end_ptr);
+		 char *const restrict until_ptr);
 
 extern inline char *
 put_string(char *restrict buffer,
@@ -79,7 +79,7 @@ put_string_length(char *restrict buffer,
 extern inline char *
 put_string_until(char *restrict buffer,
 		 const char *restrict string,
-		 char *const restrict end_ptr);
+		 char *const restrict until_ptr);
 
 extern inline bool
 strings_equal(const char *restrict string1,
