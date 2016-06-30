@@ -1,4 +1,4 @@
-#include "threads/threads.h"
+#include "thread/thread.h"
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -33,7 +33,7 @@ extern inline void
 thread_create_handle_cl(Thread *const restrict thread,
 			ThreadRoutine *const routine,
 			void *routine_arg,
-			ThreadHandlerClosure *const restrict handler_cl);
+			ThreadHandlerClosure *const restrict cl);
 
 /* thread_create_cl */
 extern inline bool
@@ -185,67 +185,186 @@ thread_attr_destroy_handle_cl(ThreadAttr *const restrict attr,
 
 /* Mutex operations
  *─────────────────────────────────────────────────────────────────────────── */
+/* mutex_init */
 extern inline void
 mutex_init(Mutex *const restrict lock);
 
+/* mutex_lock */
 extern inline bool
-mutex_lock(Mutex *const lock,
-		const char *restrict *restrict failure);
-
-inline void
-mutex_lock_ignore(Mutex *const lock);
-
-extern inline bool
-mutex_try_lock(Mutex *const lock,
-		    const char *restrict *const restrict failure);
-
+mutex_lock(Mutex *const lock);
 extern inline void
-mutex_try_lock_ignore(Mutex *const lock);
-
+mutex_lock_muffle(Mutex *const lock);
 extern inline bool
-mutex_unlock(Mutex *const lock,
-		  const char *restrict *const restrict failure);
+mutex_lock_report(Mutex *const lock,
+		  const char *restrict *restrict failure);
+extern inline void
+mutex_lock_handle(Mutex *const lock,
+		  ThreadHandler *const handle,
+		  void *arg);
+extern inline void
+mutex_lock_handle_cl(Mutex *const lock,
+		     ThreadHandlerClosure *const restrict cl);
 
-inline void
-mutex_unlock_ignore(Mutex *const lock);
+/* mutex_try_lock */
+extern inline bool
+mutex_try_lock(Mutex *const lock);
+extern inline void
+mutex_try_lock_muffle(Mutex *const lock);
+extern inline enum ThreadFlag
+mutex_try_lock_report(Mutex *const lock,
+		      const char *restrict *const restrict failure);
+extern inline bool
+mutex_try_lock_handle(Mutex *const lock,
+		      ThreadHandler *const handle,
+		      void *arg);
+extern inline bool
+mutex_try_lock_handle_cl(Mutex *const lock,
+			 ThreadHandlerClosure *const restrict cl);
+
+/* mutex_unlock */
+extern inline bool
+mutex_unlock(Mutex *const lock);
+extern inline void
+mutex_unlock_muffle(Mutex *const lock);
+extern inline bool
+mutex_unlock_report(Mutex *const lock,
+		    const char *restrict *const restrict failure);
+extern inline void
+mutex_unlock_handle(Mutex *const lock,
+		    ThreadHandler *const handle,
+		    void *arg);
+extern inline void
+mutex_unlock_handle_cl(Mutex *const lock,
+		       ThreadHandlerClosure *const restrict cl);
 
 
 /* ThreadCond operations
  *─────────────────────────────────────────────────────────────────────────── */
+/* thread_cond_init */
 extern inline void
 thread_cond_init(ThreadCond *const restrict cond);
 
+/* thread_cond_signal */
 extern inline bool
-thread_cond_signal(ThreadCond *const restrict cond,
-		      const char *restrict *const restrict failure);
-
+thread_cond_signal(ThreadCond *const restrict cond);
 extern inline bool
-thread_cond_broadcast(ThreadCond *const restrict cond,
-			   const char *restrict *const restrict failure);
+thread_cond_signal_muffle(ThreadCond *const restrict cond);
+extern inline bool
+thread_cond_signal_report(ThreadCond *const restrict cond,
+			  const char *restrict *const restrict failure);
+extern inline void
+thread_cond_signal_handle(ThreadCond *const restrict cond,
+			  ThreadHandler *const handle,
+			  void *arg);
+extern inline void
+thread_cond_signal_handle_cl(ThreadCond *const restrict cond,
+			     ThreadHandlerClosure *const restrict cl);
 
+
+/* thread_cond_broadcast */
+extern inline bool
+thread_cond_broadcast(ThreadCond *const restrict cond);
+extern inline void
+thread_cond_broadcast_muffle(ThreadCond *const restrict cond);
+extern inline bool
+thread_cond_broadcast_report(ThreadCond *const restrict cond,
+			     const char *restrict *const restrict failure);
+extern inline void
+thread_cond_broadcast_handle(ThreadCond *const restrict cond,
+			     ThreadHandler *const handle,
+			     void *arg);
+extern inline void
+thread_cond_broadcast_handle_cl(ThreadCond *const restrict cond,
+				ThreadHandlerClosure *const restrict cl);
+
+/* thread_cond_await */
 extern inline bool
 thread_cond_await(ThreadCond *const restrict cond,
-		       Mutex *const restrict lock,
-		       const char *restrict *const restrict failure);
+		  Mutex *const restrict lock);
+extern inline void
+thread_cond_await_muffle(ThreadCond *const restrict cond,
+			 Mutex *const restrict lock);
+extern inline bool
+thread_cond_await_report(ThreadCond *const restrict cond,
+			 Mutex *const restrict lock,
+			 const char *restrict *const restrict failure);
+extern inline void
+thread_cond_await_handle(ThreadCond *const restrict cond,
+			 Mutex *const restrict lock,
+			 ThreadHandler *const handle,
+			 void *arg);
+extern inline void
+thread_cond_await_handle_cl(ThreadCond *const restrict cond,
+			    Mutex *const restrict lock,
+			    ThreadHandlerClosure *const restrict cl);
 
+/* thread_cond_await_limit */
 extern inline bool
 thread_cond_await_limit(ThreadCond *const restrict cond,
-			     Mutex *const restrict lock,
-			     const struct timespec *const restrict limit,
-			     const char *restrict *const restrict failure);
+			Mutex *const restrict lock,
+			const struct timespec *const restrict limit);
+extern inline void
+thread_cond_await_limit_muffle(ThreadCond *const restrict cond,
+			       Mutex *const restrict lock,
+			       const struct timespec *const restrict limit);
+extern inline bool
+thread_cond_await_limit_report(ThreadCond *const restrict cond,
+			       Mutex *const restrict lock,
+			       const struct timespec *const restrict limit,
+			       const char *restrict *const restrict failure);
+extern inline void
+thread_cond_await_limit_handle(ThreadCond *const restrict cond,
+			       Mutex *const restrict lock,
+			       const struct timespec *const restrict limit,
+			       ThreadHandler *const handle,
+			       void *arg);
+extern inline void
+thread_cond_await_limit_handle_cl(ThreadCond *const restrict cond,
+				  Mutex *const restrict lock,
+				  const struct timespec *const restrict limit,
+				  ThreadHandlerClosure *const restrict cl);
 
+/* thread_cond_await_span */
 extern inline bool
 thread_cond_await_span(ThreadCond *const restrict cond,
-			    Mutex *const restrict lock,
-			    const struct timespec *const restrict span,
-			    const char *restrict *const restrict failure);
+		       Mutex *const restrict lock,
+		       const struct timespec *const restrict span);
+extern inline void
+thread_cond_await_span_muffle(ThreadCond *const restrict cond,
+			      Mutex *const restrict lock,
+			      const struct timespec *const restrict span);
+extern inline bool
+thread_cond_await_span_report(ThreadCond *const restrict cond,
+			      Mutex *const restrict lock,
+			      const struct timespec *const restrict span,
+			      const char *restrict *const restrict failure);
+extern inline void
+thread_cond_await_span_handle(ThreadCond *const restrict cond,
+			      Mutex *const restrict lock,
+			      const struct timespec *const restrict span,
+			      ThreadHandler *const handle,
+			      void *arg);
+extern inline void
+thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
+				 Mutex *const restrict lock,
+				 const struct timespec *const restrict span,
+				 ThreadHandlerClosure *const restrict cl);
+
+
+/* Prototypes
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_attr_prototype_init(void);
+
+inline void
+thread_attr_prototype_destroy(void);
+
 
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
 void
 parallel_start(void)
 {
-	supervisor_init();
 	thread_attr_prototype_init();
 }
 

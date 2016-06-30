@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_MYSQL_SEED_STRING_MACROS_H_
-#define MYSQL_SEED_MYSQL_SEED_STRING_MACROS_H_
+#ifndef MYSQL_SEED_STRING_STRING_MACROS_H_
+#define MYSQL_SEED_STRING_STRING_MACROS_H_
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
@@ -43,4 +43,4 @@ do {				\
 #define BRIGHTEN(STRING)  ANSI_BRIGHT    STRING ANSI_RESET
 #define ERROR_HEADER(STRING) ANSI_BRIGHT ANSI_RED STRING ANSI_RESET
 
-#endif /* ifndef MYSQL_SEED_MYSQL_SEED_STRING_MACROS_H_ */
+#endif /* ifndef MYSQL_SEED_STRING_STRING_MACROS_H_ */

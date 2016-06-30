@@ -8,11 +8,9 @@
 #include <unistd.h>			/* ssize_t */
 #include <stdint.h>			/* SIZE_MAX, UINT16/32/64_MAX */
 #include <stdbool.h>			/* bool */
-#include "mysql_seed_string_macros.h"	/* string helper macros */
+#include "string/string_macros.h"	/* string helper macros */
 
-#undef DIGIT_COUNT_MAX
-
-#if (SIZE_MAX == UINT64_MAX)
+#if   (SIZE_MAX == UINT64_MAX)
 #	define DIGIT_COUNT_MAX 20u
 #elif (SIZE_MAX == UINT32_MAX)
 #	define DIGIT_COUNT_MAX 10u
@@ -20,6 +18,7 @@
 #	define DIGIT_COUNT_MAX 5u
 #else
 #	include <stdio.h>	/* sprintf */
+#	undef DIGIT_COUNT_MAX
 #endif	/* if (SIZE_MAX == UINT64_MAX) */
 
 /* constants
@@ -29,13 +28,13 @@
 /* UINT64_MAX = 18446744073709551615	(20 digits) */
 
 
-/* copy string of a fixed size
+/* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
+/* for copying a string of a fixed size */
 typedef char CharBuffer1;
 typedef struct CharBuffer2  { char chars[ 2]; } CharBuffer2;
 typedef struct CharBuffer3  { char chars[ 3]; } CharBuffer3;
-typedef struct CharBuffer4  { char chars[ 4]; } CharBuffer4;
-typedef struct CharBuffer5  { char chars[ 5]; } CharBuffer5;
+typedef struct CharBuffer4  { char chars[ 4]; } CharBuffer4; typedef struct CharBuffer5  { char chars[ 5]; } CharBuffer5;
 typedef struct CharBuffer6  { char chars[ 6]; } CharBuffer6;
 typedef struct CharBuffer7  { char chars[ 7]; } CharBuffer7;
 typedef struct CharBuffer8  { char chars[ 8]; } CharBuffer8;
@@ -59,7 +58,6 @@ struct StringBuffer {
 #ifdef DIGIT_COUNT_MAX
 extern size_t ten_pow_map[DIGIT_COUNT_MAX];
 #endif	/* ifdef (DIGIT_COUNT_MAX) */
-
 
 
 
@@ -409,6 +407,5 @@ string_size_limit(const char *const restrict string,
 		--limit;
 	}
 }
-
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_UTILS_H_ */
