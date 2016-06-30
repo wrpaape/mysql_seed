@@ -3,12 +3,12 @@
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-struct SeedLog seed_log = {
+struct SeedLog seed_log_prototype = {
 	.current_ptr = NULL,
-	.end_ptr     = NULL,
+	.until_ptr   = NULL,
 	.lock	     = SEED_MUTEX_INITIALIZER,
 	.buffer	     = {
-		[0 ... LOG_BUFFER_LAST] = '\0'		/* ensure null-filled */
+		[0 ... LOG_UNTIL] = '\0'		/* ensure null-filled */
 	}
 };
 
@@ -18,46 +18,35 @@ struct SeedLog seed_log = {
 void
 seed_log_start(void)
 {
-	SEED_LOG_INIT();
+	seed_log_prototype.current_ptr = &seed_log_prototype.buffer[0];
+	seed_log_prototype.until_ptr   = &seed_log_prototype.buffer[LOG_UNTIL];
 }
-
-extern inline void
-seed_log_reset(void);
-
-void
-seed_log_stop(void)
-{
-	fputs(&seed_log.buffer[0],
-	      stdout);
-}
-
 
 /* accesor functions
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline char *
-seed_log_buffer_ptr(void);
+seed_log_buffer_ptr(struct SeedLog *const restrict log);
 
 extern inline char *
-seed_log_current_ptr(void);
+seed_log_current_ptr(struct SeedLog *const restrict log);
 
 extern inline char *
-seed_log_end_ptr(void);
+seed_log_end_ptr(struct SeedLog *const restrict log);
 
 extern inline size_t
-seed_log_remaining_characters(void);
+seed_log_remaining_characters(struct SeedLog *const restrict log);
 
 extern inline bool
 seed_log_lock(const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_log_handle_lock(void);
+seed_log_handle_lock(struct SeedLog *const restrict log);
 
 extern inline bool
 seed_log_unlock(const char *restrict *const restrict message_ptr);
 
 extern inline void
-seed_log_handle_unlock(void);
-
+seed_log_handle_unlock(struct SeedLog *const restrict log);
 
 /* mutator functions
  *─────────────────────────────────────────────────────────────────────────── */

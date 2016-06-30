@@ -8,15 +8,16 @@
 #include "mysql_seed_parallel.h"	/* SeedMutex, parallelization utils  */
 
 
-/* cap log buffer at 16kb
+/* cap log buffer at 1kb
  *─────────────────────────────────────────────────────────────────────────── */
-#define LOG_BUFFER_LENGTH 16384lu
+#define LOG_BUFFER_LENGTH 1024lu
+#define LOG_UNTIL (LOG_BUFFER_LENGTH - 1)
 
 /* declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct SeedLog {
 	char *restrict current_ptr;
-	char *restrict end_ptr;
+	char *restrict until_ptr;
 	SeedMutex lock;
 	char buffer[LOG_BUFFER_LENGTH];
 };
@@ -24,162 +25,152 @@ struct SeedLog {
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-extern struct SeedLog seed_log;
-
-
-/* helper macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define LOG_BUFFER_LAST (LOG_BUFFER_LENGTH - 1)
-#define SEED_LOG_INIT()							\
-do {									\
-	seed_log.current_ptr = &seed_log.buffer[0];			\
-	seed_log.end_ptr     = &seed_log.buffer[LOG_BUFFER_LAST];	\
-} while (0)
-
+extern struct SeedLog seed_log_prototype;
 
 
 /* initialize, reset, destroy
  *─────────────────────────────────────────────────────────────────────────── */
-void
-seed_log_start(void)
-__attribute__((constructor));
-
 inline void
-seed_log_reset(void)
+seed_log_init(struct SeedLog *const restrict log)
 {
-	memset(&seed_log,
-	       0,
-	       sizeof(seed_log));
-
-	SEED_LOG_INIT();
-
-	seed_mutex_handle_init(&seed_log.lock);
+	memcpy(log,
+	       &seed_log_prototype,
+	       sizeof(seed_log_prototype));
 }
-
-void
-seed_log_stop(void)
-__attribute__((destructor));
-
 
 /* accesor functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline char *
-seed_log_buffer_ptr(void)
+seed_log_buffer_ptr(struct SeedLog *const restrict log)
 {
-	return &seed_log.buffer[0];
+	return &log->buffer[0];
 }
 
 inline char *
-seed_log_current_ptr(void)
+seed_log_current_ptr(struct SeedLog *const restrict log)
 {
-	return seed_log.current_ptr;
+	return log->current_ptr;
 }
 
 inline char *
-seed_log_end_ptr(void)
+seed_log_end_ptr(struct SeedLog *const restrict log)
 {
-	return seed_log.end_ptr;
+	return log->until_ptr;
 }
 
 inline size_t
-seed_log_remaining_characters(void)
+seed_log_remaining_characters(struct SeedLog *const restrict log)
 {
-	return seed_log.end_ptr - seed_log.current_ptr;
+	return log->until_ptr - log->current_ptr;
 }
 
 inline bool
-seed_log_lock(const char *restrict *const restrict message_ptr)
+seed_log_lock(struct SeedLog *const restrict log,
+	      const char *restrict *const restrict message_ptr)
 {
-	return seed_mutex_lock(&seed_log.lock,
+	return seed_mutex_lock(&log->lock,
 			       message_ptr);
 }
 
 inline void
-seed_log_handle_lock(void)
+seed_log_handle_lock(struct SeedLog *const restrict log)
 {
-	seed_mutex_handle_lock(&seed_log.lock);
+	seed_mutex_handle_lock(&log->lock);
 }
 
 inline bool
-seed_log_unlock(const char *restrict *const restrict message_ptr)
+seed_log_unlock(struct SeedLog *const restrict log,
+		const char *restrict *const restrict message_ptr)
 {
-	return seed_mutex_unlock(&seed_log.lock,
+	return seed_mutex_unlock(&log->lock,
 				 message_ptr);
 }
 
 inline void
-seed_log_handle_unlock(void)
+seed_log_handle_unlock(struct SeedLog *const restrict log)
 {
-	seed_mutex_handle_unlock(&seed_log.lock);
+	seed_mutex_handle_unlock(&log->lock);
 }
 
 
 /* mutator functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-seed_log_append_string(const char *const restrict string)
+seed_log_append_string(struct SeedLog *const restrict log,
+		       const char *const restrict string)
 {
-	seed_log.current_ptr = put_string_until(seed_log.current_ptr,
+	log->current_ptr = put_string_until(log->current_ptr,
 						string,
-						seed_log.end_ptr);
+						log->until_ptr);
 }
 
 inline void
-seed_log_append_digits(const size_t n)
+seed_log_append_digits(struct SeedLog *const restrict log,
+		       const size_t n)
 {
-	seed_log.current_ptr = put_digits_until(seed_log.current_ptr,
+	log->current_ptr = put_digits_until(log->current_ptr,
 						n,
-						seed_log.end_ptr);
+						log->until_ptr);
 }
 
 inline void
-seed_log_append_number(const ssize_t n)
+seed_log_append_number(struct SeedLog *const restrict log,
+		       const ssize_t n)
 {
-	seed_log.current_ptr = put_number_until(seed_log.current_ptr,
+	log->current_ptr = put_number_until(log->current_ptr,
 						n,
-						seed_log.end_ptr);
+						log->until_ptr);
 }
 
 inline void
-seed_log_append_string_length(const char *const restrict string,
+seed_log_append_string_length(struct SeedLog *const restrict log,
+			      const char *const restrict string,
 			      const size_t length)
 {
-	char *const restrict length_ptr = seed_log.current_ptr
+	char *const restrict length_ptr = log->current_ptr
 					+ length;
 
-	seed_log.current_ptr = put_string_until(seed_log.current_ptr,
+	log->current_ptr = put_string_until(log->current_ptr,
 						string,
-						(length_ptr > seed_log.end_ptr)
-						? seed_log.end_ptr
+						(length_ptr > log->until_ptr)
+						? log->until_ptr
 						: length_ptr);
 }
 
 inline void
-seed_log_append_digits_length(const size_t n,
+seed_log_append_digits_length(struct SeedLog *const restrict log,
+			      const size_t n,
 			      const size_t length)
 {
-	char *const restrict length_ptr = seed_log.current_ptr
+	char *const restrict length_ptr = log->current_ptr
 					+ length;
 
-	seed_log.current_ptr = put_digits_until(seed_log.current_ptr,
+	log->current_ptr = put_digits_until(log->current_ptr,
 						n,
-						(length_ptr > seed_log.end_ptr)
-						? seed_log.end_ptr
+						(length_ptr > log->until_ptr)
+						? log->until_ptr
 						: length_ptr);
 }
 
 inline void
-seed_log_append_number_length(const ssize_t n,
+seed_log_append_number_length(struct SeedLog *const restrict log,
+			      const ssize_t n,
 			      const size_t length)
 {
-	char *const restrict length_ptr = seed_log.current_ptr
+	char *const restrict length_ptr = log->current_ptr
 					+ length;
 
-	seed_log.current_ptr = put_number_until(seed_log.current_ptr,
+	log->current_ptr = put_number_until(log->current_ptr,
 						n,
-						(length_ptr > seed_log.end_ptr)
-						? seed_log.end_ptr
+						(length_ptr > log->until_ptr)
+						? log->until_ptr
 						: length_ptr);
 }
+
+/* constructors, destructors
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+seed_log_start(void)
+__attribute__((constructor));
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_LOG_H_ */

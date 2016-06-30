@@ -68,7 +68,8 @@ union SeedModeSpec {
 
 /* mode procedure dispatch
  * ────────────────────────────────────────────────────────────────────────── */
-typedef void SeedModeHandler(const union SeedModeSpec *const restrict spec);
+typedef void
+SeedModeHandler(const union SeedModeSpec *const restrict spec);
 
 
 /* 'SeedModeHandler' dispatch function
