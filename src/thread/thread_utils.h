@@ -25,12 +25,13 @@ typedef void *
 ThreadRoutine(void *arg);
 
 typedef void
+ThreadProcedure(void *arg);
+
+typedef void
 ThreadHandler(void *arg,
 	      const char *restrict failure)
 __attribute__((noreturn));
 
-typedef void
-ThreadProcedure(void *arg);
 
 struct ThreadRoutineClosure {
 	ThreadRoutine *routine;
