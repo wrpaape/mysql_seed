@@ -3,12 +3,11 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <pthread.h>		/* threads API */
-#include <errno.h>		/* error codes, errno */
-#include <limits.h>		/* PTHREAD_THREADS_MAX */
-#include <string.h>		/* memcpy */
-#include <stdbool.h>		/* bool */
-#include "time/time_utils.h"	/* time utils */
+#include <pthread.h>			/* threads API */
+#include <limits.h>			/* PTHREAD_THREADS_MAX */
+#include <string.h>			/* memcpy */
+#include "time/time_utils.h"		/* time utils */
+#include "utils/fail_switch_open.h"	/* bool, errno, error report macros */
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -171,35 +170,28 @@ thread_create_muffle(Thread *const restrict thread,
 				 arg);
 }
 
+#define FAIL_SWITCH_STATUS_SUCCESS 0		/* same for all routines */
+#define FAIL_SWITCH_FAILURE_POINTER failure	/* same for all routines */
+
+#define FAIL_SWITCH_ROUTINE thread_create_imp
 inline bool
 thread_create_report(Thread *const restrict thread,
-			  ThreadRoutine *const routine,
-			  void *arg,
-			  const char *restrict *const restrict failure)
+		     ThreadRoutine *const routine,
+		     void *arg,
+		     const char *restrict *const restrict failure)
 {
-	switch (thread_create_imp(thread,
-				  routine,
-				  arg)) {
-	case 0:
-		return true;
-
-	case EAGAIN:
-		*failure = "\n\nthread_create failure:\n"
-			   "\tThe system lacked the necessary resources to "
-			   "create another thread"
+	FAIL_SWITCH_STATUS_OPEN(thread, routine, arg)
+	FAIL_SWITCH_STATUS_CASE_1(EAGAIN,
+				  "The system lacked the necessary resources to"
+				  " create another thread"
 #ifdef THREADS_MAX
-			   ", or the system-imposed limit on the total number "
-			   "of threads in a process, ('THREADS_MAX' = "
-			   THREADS_MAX_STRING "), would be exceeded"
+				  ", or the system-imposed limit on the total "
+				  "number of threads in a process, ('"
+				  "THREADS_MAX' = " THREADS_MAX_STRING "), "
+				  "would be exceeded"
 #endif /* ifdef THREADS_MAX */
-			       ".\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_create failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+				  ".")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -310,25 +302,18 @@ thread_cancel_muffle(Thread thread)
 	(void) thread_cancel_imp(thread);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_cancel_imp
 inline bool
 thread_cancel_report(Thread thread,
 		     const char *restrict *const restrict failure);
 {
-	switch (thread_cancel_imp(thread)) {
-	case 0:
-		return true;
-
-	case ESRCH:
-		*failure = "\n\nthread_cancel failure:\n"
-			   "\tNo thread could be found corresponding to that "
-			   "specified by the given Thread 'thread'\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_cancel failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(thread)
+	FAIL_SWITCH_STATUS_CASE_1(ESRCH,
+				  "No thread could be found corresponding to "
+				  "that specified by the given Thread '"
+				  "thread'.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -395,27 +380,25 @@ thread_key_create_muffle(ThreadKey *const key,
 				     cleanup);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_key_create_imp
 inline bool
 thread_key_create_report(ThreadKey *const key,
 			 ThreadProcedure *const restrict cleanup,
 			 const char *restrict *const restrict failure)
 {
-	switch (thread_key_create_imp(key,
-				      cleanup)) {
-	case 0:
-		return true;
-
-	case EAGAIN:
-		*failure = "\n\nthread_key_create failure:\n"
-			   "\tThe system lacked the necessary resources to "
-			   "create another thread-specific data key"
+	FAIL_SWITCH_STATUS_OPEN(key,
+				cleanup)
+	FAIL_SWITCH_STATUS_CASE_1(EAGAIN,
+				  "The system lacked the necessary resources to"
+				  " create another thread-specific data key"
 #ifdef THREAD_KEYS_MAX
-			   ", or the system-imposed limit on the total number "
-			   "of keys per process, ('THREAD_KEYS_MAX' = "
-			   THREAD_KEYS_MAX_STRING "), would be exceeded"
+				  ", or the system-imposed limit on the total "
+				  "number of keys per process, ('"
+				  "THREAD_KEYS_MAX' = " THREAD_KEYS_MAX_STRING
+				  "), would be exceeded"
 #endif /* ifdef THREAD_KEYS_MAX */
-			       ".\n";
-		return false;
+			          ".")
 
 	case ENOMEM:
 		*failure = "\n\nthread_key_create failure:\n"
