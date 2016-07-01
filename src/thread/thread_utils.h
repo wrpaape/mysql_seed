@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_THREAD_THREAD_H_
-#define MYSQL_SEED_THREAD_THREAD_H_
+#ifndef MYSQL_SEED_THREAD_THREAD_UTILS_H_
+#define MYSQL_SEED_THREAD_THREAD_UTILS_H_
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
@@ -1395,4 +1395,4 @@ void
 parallel_stop(void)
 __attribute__((destructor));
 
-#endif /* ifndef MYSQL_SEED_THREAD_THREAD_H_ */
+#endif /* ifndef MYSQL_SEED_THREAD_THREAD_UTILS_H_ */
