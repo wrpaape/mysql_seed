@@ -399,18 +399,10 @@ thread_key_create_report(ThreadKey *const key,
 				  "), would be exceeded"
 #endif /* ifdef THREAD_KEYS_MAX */
 			          ".")
-
-	case ENOMEM:
-		*failure = "\n\nthread_key_create failure:\n"
-			   "\tInsufficient memory exists to create "
-			   "ThreadKey, 'key'.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_key_create failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_CASE_1(ENOMEM,
+				  "Insufficient memory exists to create "
+				  "ThreadKey, 'key'.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -462,24 +454,16 @@ thread_key_delete_muffle(ThreadKey key)
 	(void) thread_key_delete_imp(key);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_key_delete_imp
 inline bool
 thread_key_delete_report(ThreadKey key,
 			 const char *restrict *const restrict failure)
 {
-	switch (thread_key_delete_imp(key)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_key_delete failure:\n"
-			   "\tthe value of Thread 'key' is invalid.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_key_delete failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(key)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "the value of Thread 'key' is invalid.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -528,24 +512,16 @@ thread_attr_init_muffle(ThreadAttr *const restrict attr)
 	(void) thread_attr_init_imp(attr);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_attr_init_imp
 inline bool
 thread_attr_init_report(ThreadAttr *const restrict attr,
 			const char *restrict *const restrict failure)
 {
-	switch (thread_attr_init_imp(attr)) {
-	case 0:
-		return true;
-
-	case ENOMEM:
-		*failure = "\n\nthread_attr_init failure:\n"
-			   "\tout of memory\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_attr_init failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(attr)
+	FAIL_SWITCH_STATUS_CASE_1(ENOMEM,
+				  "out of memory")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -596,26 +572,18 @@ thread_attr_set_detach_state_muffle(ThreadAttr *const restrict attr,
 					      state);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_attr_set_detach_state_imp
 inline bool
 thread_attr_set_detach_state_report(ThreadAttr *const restrict attr,
 				    const int state,
 				    const char *restrict *const restrict failure)
 {
-	switch (thread_attr_set_detach_state_imp(attr,
-						 state)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_attr_set_detach_state failure:\n"
-			   "\tinvalid value for 'attr' or 'state'\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_attr_set_detach_state failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(attr,
+				state)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "invalid value for 'attr' or 'state'")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -667,24 +635,16 @@ thread_attr_destroy_muffle(ThreadAttr *const restrict attr)
 	(void) thread_attr_destroy_imp(attr);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_attr_destroy_imp
 inline bool
 thread_attr_destroy_report(ThreadAttr *const restrict attr,
 			   const char *restrict *const restrict failure)
 {
-	switch (thread_attr_destroy_imp(attr)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_attr_destroy failure:\n"
-			   "\tinvalid value for 'attr'\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_attr_destroy failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(attr)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "invalid value for 'attr'")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -742,32 +702,20 @@ mutex_lock_muffle(Mutex *const lock)
 	(void) mutex_lock_imp(lock);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mutex_lock_imp
 inline bool
 mutex_lock_report(Mutex *const lock,
 		  const char *restrict *const restrict failure)
 {
-	switch (mutex_lock_imp(lock)) {
-	case 0:
-		return true;
-
-	case EDEADLK:
-		*failure = "\n\nmutex_lock failure:\n"
-			   "\tA deadlock would occur if the thread blocked "
-			   "waiting for Mutex 'lock'.";
-		return false;
-
-	case EINVAL:
-		*failure = "\n\nmutex_lock failure:\n"
-			   "\tThe value specified by Mutex 'lock' is "
-			   "invalid.\n";
-		return false;
-
-
-	default:
-		*failure = "\n\nmutex_lock failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(lock)
+	FAIL_SWITCH_STATUS_CASE_1(EDEADLK,
+				  "A deadlock would occur if the thread blocked"
+				  " waiting for Mutex 'lock'.")
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by Mutex 'lock' is "
+				  "invalid.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -814,6 +762,7 @@ mutex_try_lock_muffle(Mutex *const lock)
 	(void) mutex_try_lock_imp(lock);
 }
 
+/* since 3-value flag instead of bool is returned, can't use fail switch */
 inline enum ThreadFlag
 mutex_try_lock_report(Mutex *const lock,
 		      const char *restrict *const restrict failure)
@@ -826,14 +775,14 @@ mutex_try_lock_report(Mutex *const lock,
 		return THREAD_FALSE;
 
 	case EINVAL:
-		*failure = "\n\nmutex_try_lock failure:\n"
-			   "\tThe value specified by Mutex 'lock' is "
-			   "invalid.\n";
+		*failure = FAILURE_REASONS_1("mutex_try_lock_imp",
+					     "The value specified by Mutex "
+					     "'lock' is invalid.");
 		return THREAD_ERROR;
 
 	default:
-		*failure = "\n\nmutex_unlock failure:\n"
-			   "\tunknown\n";
+		*failure = FAILURE_REASONS_1("mutex_try_lock_imp",
+					     "unknown");
 		return THREAD_ERROR;
 	}
 }
@@ -888,31 +837,21 @@ mutex_unlock_muffle(Mutex *const lock)
 	(void) mutex_lock_imp(lock);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mutex_unlock_imp
 inline bool
 mutex_unlock_report(Mutex *const lock,
 		    const char *restrict *const restrict failure)
 {
-	switch (mutex_unlock_imp(lock)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nmutex_unlock failure:\n"
-			   "\tThe value specified by Mutex 'lock' is "
-			   "invalid.\n";
-		return false;
-
-	case EPERM:
-		*failure = "\n\nmutex_unlock failure:\n"
-			   "\tThe current thread does not hold a lock on "
-			   "Mutex 'lock'.\n";
-		return false;
-
-	default:
-		*failure = "\n\nmutex_unlock failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(lock)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by Mutex 'lock' is "
+				  "invalid.")
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The current thread does not hold a lock on "
+				  "Mutex 'lock'")
+				  )
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -972,24 +911,16 @@ thread_cond_signal_muffle(ThreadCond *const restrict cond)
 	(void) thread_cond_signal_imp(cond);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_cond_signal_imp
 inline bool
 thread_cond_signal_report(ThreadCond *const restrict cond,
 			  const char *restrict *const restrict failure)
 {
-	switch (thread_cond_signal_imp(cond)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_cond_signal failure:\n"
-			   "\tThe value specified by 'cond' is invalid.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_cond_signal failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(cond)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by 'cond' is invalid.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -1037,24 +968,16 @@ thread_cond_broadcast_muffle(ThreadCond *const restrict cond)
 	(void) thread_cond_broadcast_imp(cond);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_cond_broadcast_imp
 inline bool
 thread_cond_broadcast_report(ThreadCond *const restrict cond,
 			     const char *restrict *const restrict failure)
 {
-	switch (thread_cond_broadcast_imp(cond)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_cond_broadcast failure:\n"
-			   "\tThe value specified by 'cond' is invalid.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_cond_broadcast failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(cond)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by 'cond' is invalid.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -1108,27 +1031,19 @@ thread_cond_await_muffle(ThreadCond *const restrict cond,
 				   lock);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_cond_await_imp
 inline bool
 thread_cond_await_report(ThreadCond *const restrict cond,
 			 Mutex *const restrict lock,
 			 const char *restrict *const restrict failure)
 {
-	switch (thread_cond_await_imp(cond,
-					   lock)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_cond_await failure:\n"
-			   "\tThe value specified by 'cond' or 'lock' is "
-			   "invalid.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_cond_await failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(cond,
+				lock)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by 'cond' or 'lock' is "
+				  "invalid.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
@@ -1189,35 +1104,24 @@ thread_cond_await_limit_muffle(ThreadCond *const restrict cond,
 }
 
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_cond_await_limit_imp
 inline bool
 thread_cond_await_limit_report(ThreadCond *const restrict cond,
 			       Mutex *const restrict lock,
 			       const struct timespec *const restrict limit,
 			       const char *restrict *const restrict failure)
 {
-	switch (thread_cond_await_limit_imp(cond,
-					    lock,
-					    limit)) {
-	case 0:
-		return true;
-
-	case EINVAL:
-		*failure = "\n\nthread_cond_await_limit failure:\n"
-			   "\tThe value specified by 'cond', 'lock', or 'limit'"
-			   "is invalid.\n";
-		return false;
-
-	case ETIMEDOUT:
-		*failure = "\n\nthread_cond_await_limit failure:\n"
-			   "\tThe system time has reached or exceeded the time "
-			   "specified in 'limit'.\n";
-		return false;
-
-	default:
-		*failure = "\n\nthread_cond_await_limit failure:\n"
-			   "\tunknown\n";
-		return false;
-	}
+	FAIL_SWITCH_STATUS_OPEN(cond,
+				lock,
+				limit)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The value specified by 'cond', 'lock', or "
+				  " 'limit' is invalid.")
+	FAIL_SWITCH_STATUS_CASE_1(ETIMEDOUT,
+				  "The system time has reached or exceeded the "
+				  "time specified in 'limit'.")
+	FAIL_SWITCH_STATUS_CLOSE()
 }
 
 inline void
