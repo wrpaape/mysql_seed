@@ -17,7 +17,6 @@
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
-
 union TaskFun {
 	ThreadRoutine *awaitable;
 	ThreadProcedure *independent;
@@ -41,18 +40,14 @@ struct Worker {
 };
 
 
-struct WorkerQueue {
-	Mutex lock;
-	struct Worker *restrict head;
-	struct Worker *restrict last;
-};
-
-
 struct Supervisor {
-	struct Worker *workers;
-	struct WorkerQueue idle;
-	struct WorkerQueue busy;
-	struct WorkerQueue done;
+	/* struct WorkerQueue idle; */
+	/* struct WorkerQueue busy; */
+	/* struct WorkerQueue done; */
+	struct ThreadQueue tasks_todo;
+	struct ThreadQueue tasks_complete;
+	struct ThreadQueue busy_workers;
+	struct ThreadQueue idle_workers;
 	struct ThreadLog log;
 };
 
