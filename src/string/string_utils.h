@@ -195,11 +195,11 @@ do {								\
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 #ifdef DIGIT_COUNT_MAX
-extern size_t ten_pow_map[DIGIT_COUNT_MAX];
+extern const size_t ten_pow_map[DIGIT_COUNT_MAX];
 #endif	/* ifdef (DIGIT_COUNT_MAX) */
 
 #ifdef POINTER_ID_LENGTH_MAX
-extern size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX];
+extern const size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX];
 #endif
 
 
@@ -327,19 +327,19 @@ inline unsigned int
 pointer_id_length(const uintptr_t ptr_n)
 {
 #	if (POINTER_ID_LENGTH_MAX >= 10u)
-	if (ptr_n < 735091890625lu) {
+	if (ptr_n < 7737809375lu) {
 #	endif /* if (POINTER_ID_LENGTH_MAX >= 10u) */
 
 #		if (POINTER_ID_LENGTH_MAX >= 5u)
-		if (ptr_n < 857375lu) {
+		if (ptr_n < 9025lu) {
 #		endif /* if (POINTER_ID_LENGTH_MAX >= 5u) */
 
-			if (ptr_n < 9025lu) {
+			if (ptr_n < 95lu) {
 				return 1u;
 			} else {
 
 #			if (POINTER_ID_LENGTH_MAX == 3u)
-				if (ptr_n < 81450625lu) {
+				if (ptr_n < 9025lu) {
 #			endif /* if (POINTER_ID_LENGTH_MAX == 3u) */
 
 					return 2u;
@@ -354,8 +354,8 @@ pointer_id_length(const uintptr_t ptr_n)
 
 #		if (POINTER_ID_LENGTH_MAX >= 5u)
 		} else {
-			if (ptr_n < 7737809375lu) {
-				if (ptr_n < 81450625lu) {
+			if (ptr_n < 81450625lu) {
+				if (ptr_n < 857375lu) {
 					return 3u;
 
 				} else {
@@ -370,18 +370,18 @@ pointer_id_length(const uintptr_t ptr_n)
 #	if (POINTER_ID_LENGTH_MAX >= 10u)
 	} else {
 
-		if (ptr_n < 630249409724609375lu) {
-			if (ptr_n < 69833729609375lu) {
+		if (ptr_n < 6634204312890625lu) {
+			if (ptr_n < 735091890625lu) {
 				return 6u;
 			} else {
-				if (ptr_n < 6634204312890625lu) {
+				if (ptr_n < 69833729609375lu) {
 					return 7u;
 				} else {
 					return 8u;
 				}
 			}
 		} else {
-			if (ptr_n < 59873693923837890625lu) {
+			if (ptr_n < 630249409724609375lu) {
 				return 9u;
 			} else {
 				return 10u;
@@ -574,7 +574,9 @@ put_pointer_id_length(char *restrict buffer,
 		return buffer;
 #ifdef POINTER_ID_LENGTH_MAX
 
-	const unsigned int length_id = pointer_id_length((uintptr_t) pointer);
+	uintptr_t ptr_n = (uintptr_t) pointer;
+
+	const unsigned int length_id = pointer_id_length(ptr_n);
 
 	char *restrict until_ptr;
 
@@ -582,14 +584,14 @@ put_pointer_id_length(char *restrict buffer,
 
 		until_ptr = buffer + length;
 
-		n /= ninety_five_pow_map[length_id - length];
+		ptr_n /= ninety_five_pow_map[length_id - length];
 	} else {
 
 		until_ptr = buffer + length_id;
 	}
 
 	do_put_pointer_id(until_ptr - 1l,
-			  (uintptr_t) pointer);
+			  ptr_n);
 
 	return until_ptr;
 #else
@@ -626,7 +628,7 @@ put_pointer_id_until(char *restrict buffer,
 	return (buffer > until_ptr)
 	     ? until_ptr
 	     : put_pointer_id_length(buffer,
-				     n,
+				     pointer,
 				     until_ptr - buffer);
 }
 
@@ -700,7 +702,7 @@ put_char_times(char *const restrict buffer,
 	       const size_t times)
 {
 
-	WordPatternPtr ptr = (WordPatternPtr) buffer;
+	union WordPatternPtr ptr = (union WordPatternPtr) buffer;
 
 	size_t length_words   = DIV_WORD_SIZE(times);
 	const size_t rem_size = REM_WORD_SIZE(times);
@@ -753,7 +755,7 @@ put_char_times(char *const restrict buffer,
 		default: return ptr.string;
 		}
 
-	WordPatternPtr base = ptr;
+	union WordPatternPtr base = ptr;
 
 	*(ptr.string++) = byte;
 	*(ptr.string++) = byte;
@@ -844,7 +846,7 @@ put_char_times(char *const restrict buffer,
 #	endif /* if (WORD_SIZE > 4lu) */
 #	endif /* if (WORD_SIZE > 3lu) */
 #	endif /* if (WORD_SIZE > 2lu) */
-	default: /* fall through */
+	default: /* fall through */;
 	}
 
 	while (--length_words > 0lu)

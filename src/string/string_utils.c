@@ -1,7 +1,7 @@
 #include "string/string_utils.h"
 
 #ifdef DIGIT_COUNT_MAX
-size_t ten_pow_map[DIGIT_COUNT_MAX] = {
+const size_t ten_pow_map[DIGIT_COUNT_MAX] = {
 	[ 0] = 1lu,
 	[ 1] = 10lu,
 	[ 2] = 100lu,
@@ -40,7 +40,7 @@ do_put_digits(char *restrict buffer,
 
 
 #ifdef POINTER_ID_LENGTH_MAX
-size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX] = {
+const size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX] = {
 	[0] = 1lu,
 	[1] = 95lu
 #	if (POINTER_ID_LENGTH_MAX > 2u)
@@ -60,7 +60,7 @@ size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX] = {
 #			endif /* if (POINTER_ID_LENGTH_MAX > 5u) */
 #		endif /* if (POINTER_ID_LENGTH_MAX > 3u) */
 #	endif /* if (POINTER_ID_LENGTH_MAX > 2u) */
-}
+};
 
 extern inline unsigned int
 pointer_id_length(const uintptr_t ptr_n);

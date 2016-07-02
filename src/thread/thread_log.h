@@ -57,9 +57,9 @@ thread_log_remaining_characters(struct ThreadLog *const restrict log)
 
 /* locking the log... */
 inline bool
-thread_log_lock(struct ThreadLog *const restrict log)
+thread_log_lock_status(struct ThreadLog *const restrict log)
 {
-	return mutex_lock(&log->lock);
+	return mutex_lock_status(&log->lock);
 }
 
 inline void
@@ -88,7 +88,7 @@ thread_log_lock_handle(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_lock_handle_cl(struct ThreadLog *const restrict log,
-			  ThreadHandlerClosure *const restrict cl)
+			  struct ThreadHandlerClosure *const restrict cl)
 {
 	mutex_lock_handle_cl(&log->lock,
 			     cl);
@@ -96,9 +96,9 @@ thread_log_lock_handle_cl(struct ThreadLog *const restrict log,
 
 /* locking the log (no block on failure) */
 inline bool
-thread_log_try_lock(struct ThreadLog *const restrict log)
+thread_log_try_lock_status(struct ThreadLog *const restrict log)
 {
-	return mutex_try_lock(&log->lock);
+	return mutex_try_lock_status(&log->lock);
 }
 
 inline void
@@ -115,7 +115,7 @@ thread_log_try_lock_report(struct ThreadLog *const restrict log,
 				     failure);
 }
 
-inline bool
+inline void
 thread_log_try_lock_handle(struct ThreadLog *const restrict log,
 		       ThreadHandler *const handle,
 		       void *arg)
@@ -125,9 +125,9 @@ thread_log_try_lock_handle(struct ThreadLog *const restrict log,
 			      arg);
 }
 
-inline bool
+inline void
 thread_log_try_lock_handle_cl(struct ThreadLog *const restrict log,
-			      ThreadHandlerClosure *const restrict cl)
+			      struct ThreadHandlerClosure *const restrict cl)
 {
 	mutex_try_lock_handle_cl(&log->lock,
 				 cl);
@@ -135,9 +135,9 @@ thread_log_try_lock_handle_cl(struct ThreadLog *const restrict log,
 
 /* unlocking the log... */
 inline bool
-thread_log_unlock(struct ThreadLog *const restrict log)
+thread_log_unlock_status(struct ThreadLog *const restrict log)
 {
-	return mutex_unlock(&log->lock);
+	return mutex_unlock_status(&log->lock);
 }
 
 inline void
@@ -166,7 +166,7 @@ thread_log_unlock_handle(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_unlock_handle_cl(struct ThreadLog *const restrict log,
-			    ThreadHandlerClosure *const restrict cl)
+			    struct ThreadHandlerClosure *const restrict cl)
 {
 	mutex_unlock_handle_cl(&log->lock,
 			       cl);

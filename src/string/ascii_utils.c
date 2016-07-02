@@ -1,4 +1,4 @@
-#include "string/ascii.h" /* ascii_t, lookup tables */
+#include "string/ascii_utils.h" /* ascii_t, lookup tables */
 
 
 /* ASCII groups (ordered by ascending ASCII value)

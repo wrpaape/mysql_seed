@@ -10,14 +10,14 @@
  *─────────────────────────────────────────────────────────────────────────── */
 struct ThreadQueueNode {
 	void *payload;
-	struct QueueNode *prev;
-	struct QueueNode *next;
+	struct ThreadQueueNode *prev;
+	struct ThreadQueueNode *next;
 };
 
 struct ThreadQueue {
 	struct ThreadQueueNode *restrict head;
 	struct ThreadQueueNode *restrict last;
-	const struct *restrict ThreadHandlerClosure handle_fail;
+	const struct ThreadHandlerClosure *restrict handle_fail;
 	Mutex lock;
 	ThreadCond node_ready;
 	ThreadCond empty;
@@ -27,7 +27,7 @@ struct ThreadQueue {
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_queue_init(struct ThreadQueue *const restrict queue,
-		  const struct *const restrict ThreadHandlerClosure handle_fail)
+		  const struct ThreadHandlerClosure *const restrict handle_fail)
 {
 	mutex_init(&queue->lock);
 
@@ -39,7 +39,7 @@ thread_queue_init(struct ThreadQueue *const restrict queue,
 
 inline void
 thread_queue_init_empty(struct ThreadQueue *const restrict queue,
-			const struct *const restrict ThreadHandlerClosure handle_fail)
+			const struct ThreadHandlerClosure *const restrict handle_fail)
 {
 	thread_queue_init(queue,
 			  handle_fail);
@@ -50,7 +50,7 @@ thread_queue_init_empty(struct ThreadQueue *const restrict queue,
 
 inline void
 thread_queue_init_populated(struct ThreadQueue *const restrict queue,
-			    const struct *const restrict ThreadHandlerClosure handle_fail,
+			    const struct ThreadHandlerClosure *const restrict handle_fail,
 			    struct ThreadQueueNode *restrict nodes,
 			    void *restrict payloads,
 			    const size_t payload_count,
@@ -92,7 +92,7 @@ thread_queue_init_populated(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_queue_push(struct ThreadQueue *const restrict queue,
-		  struct ThreadQueueNode *const restrict *restrict node)
+		  struct ThreadQueueNode *const restrict node)
 {
 	mutex_lock_handle_cl(&queue->lock,
 			     queue->handle_fail);
@@ -120,7 +120,7 @@ thread_queue_push(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_queue_pop(struct ThreadQueue *const restrict queue,
-		 struct ThreadQueueNode *const restrict *restrict node)
+		 struct ThreadQueueNode *restrict *const restrict node)
 {
 	mutex_lock_handle_cl(&queue->lock,
 			     queue->handle_fail);
@@ -163,7 +163,7 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_queue_remove(struct ThreadQueue *const restrict queue,
-		    struct ThreadQueueNode *const restrict *restrict node)
+		    struct ThreadQueueNode *const restrict node)
 {
 	mutex_lock_handle_cl(&queue->lock,
 			     queue->handle_fail);

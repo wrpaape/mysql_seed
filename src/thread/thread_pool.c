@@ -5,134 +5,104 @@
 
 /* Supervisor operations
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-supervisor_init(void);
+/* void */
+/* supervisor_exit(const char *restrict failure) */
+/* { */
+/* 	struct Worker *restrict worker; */
+/* 	struct ExitSpec spec; */
 
-void
-supervisor_exit(const char *restrict failure)
-{
-	struct Worker *restrict worker;
-	struct ExitSpec spec;
+/* 	(void) mutex_lock_imp(&supervisor.done.lock); */
+/* 	(void) mutex_lock_imp(&supervisor.idle.lock); */
+/* 	(void) mutex_lock_imp(&supervisor.busy.lock); */
 
-	(void) mutex_lock_imp(&supervisor.done.lock);
-	(void) mutex_lock_imp(&supervisor.idle.lock);
-	(void) mutex_lock_imp(&supervisor.busy.lock);
+/* 	while (1) { */
+/* 		worker = worker_queue_pop(&supervisor.busy); */
 
-	while (1) {
-		worker = worker_queue_pop(&supervisor.busy);
+/* 		if (worker == NULL) */
+/* 			break; */
 
-		if (worker == NULL)
-			break;
+/* 		(void) thread_cancel_imp(worker->thread); */
+/* 	} */
 
-		(void) thread_cancel_imp(worker->thread);
-	}
+/* 	(void) mutex_unlock_imp(&supervisor.busy.lock); */
+/* 	(void) mutex_unlock_imp(&supervisor.idle.lock); */
+/* 	(void) mutex_unlock_imp(&supervisor.done.lock); */
 
-	(void) mutex_unlock_imp(&supervisor.busy.lock);
-	(void) mutex_unlock_imp(&supervisor.idle.lock);
-	(void) mutex_unlock_imp(&supervisor.done.lock);
+/* 	exit_spec_set_failure(&spec, */
+/* 				   failure); */
 
-	exit_spec_set_failure(&spec,
-				   failure);
-
-	exit_spec_exit(&spec);
-}
+/* 	exit_spec_exit(&spec); */
+/* } */
 
 /* WorkerQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
-/* LIFO push */
-extern inline void
-worker_queue_push(struct WorkerQueue *const restrict queue,
-		  struct Worker *const restrict worker);
-
-extern inline void
-worker_queue_handle_push(struct WorkerQueue *const restrict queue,
-			 struct Worker *const restrict worker);
-
-/* LIFO pop */
-extern inline struct Worker *
-worker_queue_pop(struct WorkerQueue *const restrict queue);
-
-extern inline struct Worker *
-worker_queue_handle_pop(struct WorkerQueue *const restrict queue);
-
-/* random access delete */
-extern inline void
-worker_queue_remove(struct WorkerQueue *const restrict queue,
-		    struct Worker *const restrict worker);
-
-extern inline void
-worker_queue_handle_remove(struct WorkerQueue *const restrict queue,
-			   struct Worker *const restrict worker);
 
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
-/* extern inline struct Worker * */
-/* worker_fetch(const WorkerID id); */
+
+/* extern inline void */
+/* worker_exit_cleanup(void *arg); */
 
 
-extern inline void
-worker_exit_cleanup(void *arg);
+/* void * */
+/* worker_do_awaitable(void *arg) */
+/* { */
+/* 	struct Worker *const restrict */
+/* 	worker = (struct Worker *const restrict) arg; */
 
+/* 	mutex_handle_lock(&worker->processing); */
 
-void *
-worker_do_awaitable(void *arg)
-{
-	struct Worker *const restrict
-	worker = (struct Worker *const restrict) arg;
+/* 	thread_key_handle_create(&worker->key, */
+/* 				      &worker_exit_cleanup); */
 
-	mutex_handle_lock(&worker->processing);
+/* 	worker->result = worker->routine.awaitable(worker->arg); */
 
-	thread_key_handle_create(&worker->key,
-				      &worker_exit_cleanup);
+/* 	worker->busy = false; */
 
-	worker->result = worker->routine.awaitable(worker->arg);
+/* 	thread_key_handle_delete(worker->key); */
 
-	worker->busy = false;
+/* 	worker_queue_handle_remove(&supervisor.busy, */
+/* 				   worker); */
 
-	thread_key_handle_delete(worker->key);
+/* 	worker_queue_handle_push(&supervisor.done, */
+/* 				 worker); */
 
-	worker_queue_handle_remove(&supervisor.busy,
-				   worker);
+/* 	mutex_handle_unlock(&worker->processing); */
 
-	worker_queue_handle_push(&supervisor.done,
-				 worker);
+/* 	thread_cond_handle_signal(&worker->done); */
 
-	mutex_handle_unlock(&worker->processing);
+/* 	return NULL; */
+/* } */
 
-	thread_cond_handle_signal(&worker->done);
+/* /1* extern inline WorkerID *1/ */
+/* /1* worker_spawn_awaitable(AwaitableRoutine *const routine, *1/ */
+/* /1* 			    void *arg); *1/ */
 
-	return NULL;
-}
+/* void * */
+/* worker_do_independent(void *arg) */
+/* { */
+/* 	struct Worker *const restrict */
+/* 	worker = (struct Worker *const restrict) arg; */
 
-/* extern inline WorkerID */
-/* worker_spawn_awaitable(AwaitableRoutine *const routine, */
-/* 			    void *arg); */
+/* 	thread_key_handle_create(&worker->key, */
+/* 				      &worker_exit_cleanup); */
 
-void *
-worker_do_independent(void *arg)
-{
-	struct Worker *const restrict
-	worker = (struct Worker *const restrict) arg;
+/* 	worker->routine.independent(worker->arg); */
 
-	thread_key_handle_create(&worker->key,
-				      &worker_exit_cleanup);
+/* 	thread_key_handle_delete(worker->key); */
 
-	worker->routine.independent(worker->arg);
+/* 	worker_queue_handle_remove(&supervisor.busy, */
+/* 				   worker); */
 
-	thread_key_handle_delete(worker->key);
+/* 	worker_queue_handle_push(&supervisor.idle, */
+/* 				 worker); */
 
-	worker_queue_handle_remove(&supervisor.busy,
-				   worker);
+/* 	return NULL; */
+/* } */
 
-	worker_queue_handle_push(&supervisor.idle,
-				 worker);
-
-	return NULL;
-}
-
-extern inline void
-worker_spawn_independent(IndependentRoutine *const routine,
-			      void *arg);
+/* extern inline void */
+/* worker_spawn_independent(IndependentRoutine *const routine, */
+/* 			      void *arg); */
 
 /* inline void * */
 /* worker_await(const WorkerID id); */

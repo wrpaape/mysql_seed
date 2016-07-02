@@ -109,11 +109,10 @@ inline void init_random_int_array(rint_t *const restrict array,
 
 inline rint_t *create_random_int_array(const size_t length)
 {
-	rint_t *restrict array;
+	rint_t *const restrict array = malloc(sizeof(rint_t) * length);
 
-	HANDLE_MALLOC(array, sizeof(rint_t) * length);
-
-	init_random_int_array(array, length);
+	if (array != NULL)
+		init_random_int_array(array, length);
 
 	return array;
 }
@@ -132,11 +131,10 @@ inline rint_t *create_random_int_array_in_range(const size_t length,
 						const rint_t lbound,
 						const rint_t rbound)
 {
-	rint_t *restrict array;
+	rint_t *const restrict array = malloc(sizeof(rint_t) * length);
 
-	HANDLE_MALLOC(array, sizeof(rint_t) * length);
-
-	init_random_int_array_in_range(array, length, lbound, rbound);
+	if (array != NULL)
+		init_random_int_array_in_range(array, length, lbound, rbound);
 
 	return array;
 }

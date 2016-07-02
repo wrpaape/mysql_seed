@@ -4,7 +4,8 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* threads API */
-#include "thread/thread_log.h"		/* logger */
+#include "thread/thread_queue.h"	/* ThreadQueue */
+#include "thread/thread_log.h"		/* ThreadLog */
 
 #define SEED_WORKERS_MAX 16lu
 
@@ -40,9 +41,6 @@ struct Worker {
 
 
 struct Supervisor {
-	/* struct WorkerQueue idle; */
-	/* struct WorkerQueue busy; */
-	/* struct WorkerQueue done; */
 	struct ThreadQueue tasks_todo;
 	struct ThreadQueue tasks_complete;
 	struct ThreadQueue busy_workers;
@@ -55,38 +53,9 @@ struct Supervisor {
 
 /* Supervisor operations
  *─────────────────────────────────────────────────────────────────────────── */
-inline void
-supervisor_init(void)
-{
-}
-
-void
-supervisor_exit(const char *restrict failure)
-__attribute__((noreturn));
-
-
-
-
-/* WorkerQueue operations
- *─────────────────────────────────────────────────────────────────────────── */
-/* LIFO push */
-inline void
-worker_queue_push(struct WorkerQueue *const restrict queue,
-		  struct Worker *const restrict worker)
-{
-	worker->next = NULL;
-
-	if (queue->last == NULL) {
-		queue->head  = worker;
-		worker->prev = NULL;
-	} else {
-		worker->prev	  = queue->last;
-		queue->last->next = worker;
-	}
-
-	queue->last = worker;
-}
-
+/* void */
+/* supervisor_exit(const char *restrict failure) */
+/* __attribute__((noreturn)); */
 
 
 
@@ -111,23 +80,23 @@ thread_try_ensure_close_imp()
 
 
 
-inline void
-worker_exit_cleanup(void *arg)
-{
-	struct Worker *const restrict
-	worker = (struct Worker *const restrict) arg;
+/* inline void */
+/* worker_exit_cleanup(void *arg) */
+/* { */
+/* 	struct Worker *const restrict */
+/* 	worker = (struct Worker *const restrict) arg; */
 
-	thread_key_handle_delete(worker->key);
+/* 	thread_key_delete_handle(worker->key); */
 
-	worker_queue_handle_remove(&supervisor.busy,
-				   worker);
+/* 	worker_queue_handle_remove(&supervisor.busy, */
+/* 				   worker); */
 
-	worker_queue_handle_push(&supervisor.idle,
-				 worker);
-}
+/* 	worker_queue_handle_push(&supervisor.idle, */
+/* 				 worker); */
+/* } */
 
-void *
-worker_do_awaitable(void *arg);
+/* void * */
+/* worker_do_awaitable(void *arg); */
 
 
 /* inline WorkerID */
@@ -155,30 +124,30 @@ worker_do_awaitable(void *arg);
 /* 	return worker->id; */
 /* } */
 
-void *
-worker_do_independent(void *arg);
+/* void * */
+/* worker_do_independent(void *arg); */
 
-inline void
-worker_spawn_independent(ThreadProcedure *const routine,
-			      void *arg)
-{
-	struct Worker *const restrict
-	worker = worker_queue_handle_pop(&supervisor.idle);
+/* inline void */
+/* worker_spawn_independent(ThreadProcedure *const routine, */
+/* 			      void *arg) */
+/* { */
+/* 	struct Worker *const restrict */
+/* 	worker = worker_queue_handle_pop(&supervisor.idle); */
 
-	if (worker == NULL)
-		supervisor_exit(SEED_WORKER_SPAWN_FAILURE_MESSAGE);
+/* 	if (worker == NULL) */
+/* 		supervisor_exit(SEED_WORKER_SPAWN_FAILURE_MESSAGE); */
 
-	worker->key		    = (ThreadKey) worker;
-	worker->routine.independent = routine;
-	worker->arg		    = arg;
+/* 	worker->key		    = (ThreadKey) worker; */
+/* 	worker->routine.independent = routine; */
+/* 	worker->arg		    = arg; */
 
-	thread_handle_create(&worker->thread,
-				  &worker_do_independent,
-				  worker);
+/* 	thread_handle_create(&worker->thread, */
+/* 				  &worker_do_independent, */
+/* 				  worker); */
 
-	worker_queue_handle_push(&supervisor.busy,
-				 worker);
-}
+/* 	worker_queue_handle_push(&supervisor.busy, */
+/* 				 worker); */
+/* } */
 
 
 

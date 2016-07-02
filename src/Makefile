@@ -289,7 +289,7 @@ TARGETS			+= $(UNITY_OBJ)					\
 # independent headers
 # ──────────────────────────────────────────────────────────────────────────────
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
-UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types ascii)
+UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_WORD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils word_utils)
 UTILS_FAIL_SWITCH_OPEN_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_open)
 UTILS_FAIL_SWITCH_CLOSE_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_close)
@@ -306,7 +306,6 @@ UTILS_UTILS_HDR			:= $(call HELPER_HEADER_PATH,utils utils)
 UTILS_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,utils utils)
 UTILS_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,utils utils)
 UTILS_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,utils utils)
-UTILS_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,utils utils)
 UTILS_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,utils utils)
 UTILS_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,utils utils)
 UTILS_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils utils)
@@ -340,7 +339,6 @@ TIME_TIME_UTILS_HDR		:= $(call HELPER_HEADER_PATH,time time_utils)
 TIME_TIME_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,time time_utils)
 TIME_TIME_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,time time_utils)
 TIME_TIME_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,time time_utils)
-TIME_TIME_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,time time_utils)
 TIME_TIME_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,time time_utils)
 TIME_TIME_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,time time_utils)
 TIME_TIME_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,time time_utils)
@@ -374,7 +372,6 @@ MEMORY_MEMORY_UTILS_HDR		:= $(call HELPER_HEADER_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_OBJ 	:= $(call HELPER_OBJECT_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_utils)
-MEMORY_MEMORY_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_utils)
 MEMORY_MEMORY_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_utils)
@@ -413,7 +410,6 @@ MEMORY_MEMORY_SWAP_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_swap_wid
 MEMORY_MEMORY_SWAP_OBJ 		:= $(call HELPER_OBJECT_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_swap)
-MEMORY_MEMORY_SWAP_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_swap)
@@ -449,7 +445,6 @@ RANDOM_PCG_BASIC_HDR		:= $(call HELPER_HEADER_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_OBJ 		:= $(call HELPER_OBJECT_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,random pcg_basic)
 RANDOM_PCG_BASIC_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,random pcg_basic)
@@ -485,7 +480,6 @@ RANDOM_RANDOM_TYPES_HDR		:= $(call HELPER_HEADER_PATH,random random_types)
 RANDOM_RANDOM_OBJ 		:= $(call HELPER_OBJECT_PATH,random random)
 RANDOM_RANDOM_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,random random)
 RANDOM_RANDOM_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random random)
-RANDOM_RANDOM_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,random random)
 RANDOM_RANDOM_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,random random)
 RANDOM_RANDOM_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,random random)
 RANDOM_RANDOM_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,random random)
@@ -519,15 +513,14 @@ TARGETS			+= $(RANDOM_RANDOM_OBJ)				\
 
 # string/ascii_utils
 # ──────────────────────────────────────────────────────────────────────────────
-STRING_ASCII_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string string_utils)
-STRING_ASCII_UTILS_HDR		:= $(call HELPER_HEADER_PATH,string string_utils)
-STRING_ASCII_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string string_utils)
-STRING_ASCII_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,string string_utils)
-STRING_ASCII_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string string_utils)
-STRING_ASCII_UTILS_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
-STRING_ASCII_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
-STRING_ASCII_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,string string_utils)
-STRING_ASCII_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string string_utils)
+STRING_ASCII_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string ascii_utils)
+STRING_ASCII_UTILS_HDR		:= $(call HELPER_HEADER_PATH,string ascii_utils)
+STRING_ASCII_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string ascii_utils)
+STRING_ASCII_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,string ascii_utils)
+STRING_ASCII_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string ascii_utils)
+STRING_ASCII_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string ascii_utils)
+STRING_ASCII_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,string ascii_utils)
+STRING_ASCII_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string ascii_utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 STRING_ASCII_UTILS_OBJ_PREQS		:= $(STRING_ASCII_UTILS_SRC) 			\
 			   		   $(STRING_ASCII_UTILS_HDR)			\
@@ -560,7 +553,6 @@ STRING_STRING_UTILS_HDR			:= $(call HELPER_HEADER_PATH,string string_utils)
 STRING_STRING_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string string_utils)
 STRING_STRING_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,string string_utils)
 STRING_STRING_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string string_utils)
-STRING_STRING_UTILS_TEST_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
 STRING_STRING_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
 STRING_STRING_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,string string_utils)
 STRING_STRING_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,string string_utils)
@@ -599,7 +591,6 @@ THREAD_THREAD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_OBJ 	:= $(call HELPER_OBJECT_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_utils)
-THREAD_THREAD_UTILS_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_utils)
 THREAD_THREAD_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_utils)
@@ -609,7 +600,7 @@ THREAD_THREAD_UTILS_OBJ_PREQS		:= $(THREAD_THREAD_UTILS_SRC)			\
 			   	   	   $(TIME_TIME_UTILS_HDR)			\
 			   	   	   $(UTILS_FAIL_SWITCH_OPEN_HDR)		\
 			   	   	   $(UTILS_FAIL_SWITCH_CLOSE_HDR)
-THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_OBJ)				\
+THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_UTILS_OBJ)			\
 			   	   	   $(TIME_TIME_UTILS_OBJ)
 THREAD_THREAD_UTILS_TRNR_SRC_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
@@ -631,6 +622,42 @@ TARGETS			+= $(THREAD_THREAD_UTILS_OBJ)			\
 			   $(THREAD_THREAD_UTILS_TEST_BIN)
 
 
+# thread/thread_queue
+# ──────────────────────────────────────────────────────────────────────────────
+THREAD_THREAD_QUEUE_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_HDR		:= $(call HELPER_HEADER_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_OBJ 	:= $(call HELPER_OBJECT_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_queue)
+THREAD_THREAD_QUEUE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_queue)
+# ─────────────── target prequisites ───────────────────────────────────────────
+THREAD_THREAD_QUEUE_OBJ_PREQS		:= $(THREAD_THREAD_QUEUE_SRC) 		\
+			   		   $(THREAD_THREAD_QUEUE_HDR) 		\
+			   		   $(THREAD_THREAD_UTILS_HDR)
+THREAD_THREAD_QUEUE_OBJ_GROUP		:= $(THREAD_THREAD_QUEUE_OBJ)		\
+					   $(THREAD_THREAD_UTILS_OBJ_GROUP)
+THREAD_THREAD_QUEUE_TRNR_SRC_PREQS	:= $(THREAD_THREAD_QUEUE_TEST_SRC)	\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+THREAD_THREAD_QUEUE_TEST_OBJ_PREQS	:= $(THREAD_THREAD_QUEUE_TEST_SRC)	\
+			   		   $(THREAD_THREAD_QUEUE_OBJ_PREQS) 	\
+			   		   $(UNITY_OBJ_PREQS)
+THREAD_THREAD_QUEUE_TRNR_OBJ_PREQS	:= $(THREAD_THREAD_QUEUE_TRNR_SRC)	\
+			   		   $(THREAD_THREAD_QUEUE_TEST_OBJ_PREQS)
+THREAD_THREAD_QUEUE_TEST_BIN_PREQS	:= $(THREAD_THREAD_QUEUE_TRNR_OBJ)	\
+			   		   $(THREAD_THREAD_QUEUE_TEST_OBJ)	\
+			   		   $(THREAD_THREAD_QUEUE_OBJ_GROUP)	\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(THREAD_THREAD_QUEUE_TEST_BIN)
+TARGETS			+= $(THREAD_THREAD_QUEUE_OBJ)			\
+			   $(THREAD_THREAD_QUEUE_TRNR_SRC)		\
+			   $(THREAD_THREAD_QUEUE_TRNR_OBJ)		\
+			   $(THREAD_THREAD_QUEUE_TEST_OBJ)		\
+			   $(THREAD_THREAD_QUEUE_TEST_BIN)
+
+
 # thread/thread_log
 # ──────────────────────────────────────────────────────────────────────────────
 THREAD_THREAD_LOG_SRC 		:= $(call HELPER_SOURCE_PATH,thread thread_log)
@@ -638,7 +665,6 @@ THREAD_THREAD_LOG_HDR		:= $(call HELPER_HEADER_PATH,thread thread_log)
 THREAD_THREAD_LOG_OBJ 		:= $(call HELPER_OBJECT_PATH,thread thread_log)
 THREAD_THREAD_LOG_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_log)
 THREAD_THREAD_LOG_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_log)
-THREAD_THREAD_LOG_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_log)
 THREAD_THREAD_LOG_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_log)
 THREAD_THREAD_LOG_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_log)
 THREAD_THREAD_LOG_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_log)
@@ -677,7 +703,6 @@ THREAD_THREAD_POOL_HDR		:= $(call HELPER_HEADER_PATH,thread thread_pool)
 THREAD_THREAD_POOL_OBJ 		:= $(call HELPER_OBJECT_PATH,thread thread_pool)
 THREAD_THREAD_POOL_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_pool)
 THREAD_THREAD_POOL_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_pool)
-THREAD_THREAD_POOL_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_pool)
 THREAD_THREAD_POOL_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_pool)
 THREAD_THREAD_POOL_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_pool)
 THREAD_THREAD_POOL_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_pool)
@@ -718,7 +743,6 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # GEN_GEN_STRINGS_OBJ 		:= $(call GEN_OBJECT_PATH,strings)
 # GEN_GEN_STRINGS_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,strings)
 # GEN_GEN_STRINGS_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,strings)
-# GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
 # GEN_GEN_STRINGS_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
 # GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,strings)
 # GEN_GEN_STRINGS_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,strings)
@@ -758,7 +782,6 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # GEN_GEN_NAMES_OBJ 		:= $(call GEN_OBJECT_PATH,names)
 # GEN_GEN_NAMES_TEST_SRC		:= $(call GEN_TEST_SOURCE_PATH,names)
 # GEN_GEN_NAMES_TRNR_SRC		:= $(call GEN_TEST_RUNNER_SOURCE_PATH,names)
-# GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
 # GEN_GEN_NAMES_TRNR_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
 # GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_OBJECT_PATH,names)
 # GEN_GEN_NAMES_TEST_BIN		:= $(call GEN_TEST_BINARY_PATH,names)
@@ -805,7 +828,6 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # GEN_GEN_COUNT_STRING_OBJ 	:= $(call GEN_OBJECT_PATH,count_string)
 # GEN_GEN_COUNT_STRING_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,count_string)
 # GEN_GEN_COUNT_STRING_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
 # GEN_GEN_COUNT_STRING_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
 # GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,count_string)
 # GEN_GEN_COUNT_STRING_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,count_string)
@@ -848,7 +870,6 @@ CREATE_HDR		:= $(call PROJECT_HEADER_PATH,create)
 CREATE_OBJ 		:= $(call PROJECT_OBJECT_PATH,create)
 CREATE_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,create)
 CREATE_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,create)
-CREATE_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,create)
 CREATE_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,create)
 CREATE_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,create)
 CREATE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,create)
@@ -884,7 +905,6 @@ RUN_HDR			:= $(call PROJECT_HEADER_PATH,run)
 RUN_OBJ 		:= $(call PROJECT_OBJECT_PATH,run)
 RUN_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,run)
 RUN_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,run)
-RUN_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,run)
 RUN_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,run)
 RUN_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,run)
 RUN_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,run)
@@ -920,7 +940,6 @@ EXIT_HDR		:= $(call PROJECT_HEADER_PATH,exit)
 EXIT_OBJ 		:= $(call PROJECT_OBJECT_PATH,exit)
 EXIT_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,exit)
 EXIT_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,exit)
-EXIT_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
 EXIT_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
 EXIT_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,exit)
 EXIT_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,exit)
@@ -958,7 +977,6 @@ CLI_HDR			:= $(call PROJECT_HEADER_PATH,cli)
 CLI_OBJ 		:= $(call PROJECT_OBJECT_PATH,cli)
 CLI_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,cli)
 CLI_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,cli)
-CLI_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,cli)
 CLI_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,cli)
 CLI_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,cli)
 CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
@@ -1001,35 +1019,35 @@ CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
 
 # mysql_seed (entry point)
 # ──────────────────────────────────────────────────────────────────────────────
-PROJECT_SRC 		:= $(call SOURCE_PATH,$(PROJECT))
-PROJECT_HDR		:= $(call HEADER_PATH,$(PROJECT))
-PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
-PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
-# ─────────────── target prequisites ───────────────────────────────────────────
-PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
-			   $(CREATE_OBJ_GROUP) 				\
-			   $(RUN_OBJ_GROUP)				\
-			   $(EXIT_OBJ_GROUP)
-			   # $(GEN_GEN_COUNT_STRING_OBJ) 			\
-			   # $(GEN_GEN_NAMES_OBJ) 			\
-			   # $(GEN_GEN_STRINGS_OBJ) 			\
-			   # $(THREAD_THREAD_LOG_OBJ) 					\
-			   # $(THREAD_THREAD_UTILS_OBJ)				\
-			   # $(EXIT_OBJ) 					\
-			   # $(STRING_STRING_UTILS_OBJ)					\
-			   # $(RANDOM_RANDOM_OBJ)				\
-			   # $(RANDOM_PCG_BASIC_OBJ)			\
-			   # $(MEMORY_MEMORY_SWAP_OBJ)			\
-			   # $(MEMORY_MEMORY_UTILS_OBJ)			\
-			   # $(TIME_TIME_UTILS_OBJ)			\
-			   # $(UTILS_UTILS_OBJ)
+# PROJECT_SRC 		:= $(call SOURCE_PATH,$(PROJECT))
+# PROJECT_HDR		:= $(call HEADER_PATH,$(PROJECT))
+# PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
+# PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
+# # ─────────────── target prequisites ───────────────────────────────────────────
+# PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
+# 			   $(CREATE_OBJ_GROUP) 				\
+# 			   $(RUN_OBJ_GROUP)				\
+# 			   $(EXIT_OBJ_GROUP)
+# 			   $(GEN_GEN_COUNT_STRING_OBJ) 			\
+# 			   $(GEN_GEN_NAMES_OBJ) 			\
+# 			   $(GEN_GEN_STRINGS_OBJ) 			\
+# 			   $(THREAD_THREAD_LOG_OBJ) 					\
+# 			   $(THREAD_THREAD_UTILS_OBJ)				\
+# 			   $(EXIT_OBJ) 					\
+# 			   $(STRING_STRING_UTILS_OBJ)					\
+# 			   $(RANDOM_RANDOM_OBJ)				\
+# 			   $(RANDOM_PCG_BASIC_OBJ)			\
+# 			   $(MEMORY_MEMORY_SWAP_OBJ)			\
+# 			   $(MEMORY_MEMORY_UTILS_OBJ)			\
+# 			   $(TIME_TIME_UTILS_OBJ)			\
+# 			   $(UTILS_UTILS_OBJ)
 
-PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
-			   $(PROJECT_HDR) 				\
-			   $(CLI_HDR)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TARGETS			+= $(PROJECT_OBJ)				\
-			   $(PROJECT_BIN)
+# PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
+# 			   $(PROJECT_HDR) 				\
+# 			   $(CLI_HDR)
+# # ─────────────── targets ──────────────────────────────────────────────────────
+# TARGETS			+= $(PROJECT_OBJ)				\
+# 			   $(PROJECT_BIN)
 
 
 
@@ -1045,8 +1063,7 @@ TARGETS			+= $(PROJECT_OBJ)				\
 # ══════════════════════════════════════════════════════════════════════════════
 # make all targets
 # ──────────────────────────────────────────────────────────────────────────────
-all: $(info $(TARGETS))
-# all: $(TARGETS)
+all: $(TARGETS)
 
 # run all unit tests
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1066,15 +1083,15 @@ clean:
 $(PROJECT_BIN): $(PROJECT_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(LD_LIB_FLAGS) -o $@
 
-# make mysql_seed object
-# ──────────────────────────────────────────────────────────────────────────────
-$(PROJECT_OBJ): $(PROJECT_OBJ_PREQS)
-	$(CC) $(CC_FLAGS) -c $< -o $@
+# # make mysql_seed object
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(PROJECT_OBJ): $(PROJECT_OBJ_PREQS)
+# 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make mysql_seed_cli object
-# ──────────────────────────────────────────────────────────────────────────────
-$(CLI_OBJ): $(CLI_OBJ_PREQS)
-	$(CC) $(CC_FLAGS) -c $< -o $@
+# # make mysql_seed_cli object
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(CLI_OBJ): $(CLI_OBJ_PREQS)
+# 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_create object
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1091,34 +1108,49 @@ $(RUN_OBJ): $(RUN_OBJ_PREQS)
 $(EXIT_OBJ): $(EXIT_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make mysql_seed_log object
+# make thread/thread_pool object
+# ──────────────────────────────────────────────────────────────────────────────
+$(THREAD_THREAD_POOL_OBJ): $(THREAD_THREAD_POOL_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make thread/thread_log object
 # ──────────────────────────────────────────────────────────────────────────────
 $(THREAD_THREAD_LOG_OBJ): $(THREAD_THREAD_LOG_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make mysql_seed_parallel object
+# make thread/thread_queue object
+# ──────────────────────────────────────────────────────────────────────────────
+$(THREAD_THREAD_QUEUE_OBJ): $(THREAD_THREAD_QUEUE_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make thread/thread_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make mysql_seed_utils object
+# # make gen/gen_count_string object
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_COUNT_STRING_OBJ): $(GEN_GEN_COUNT_STRING_OBJ_PREQS)
+# 	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# # make gen/gen_names object
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_NAMES_OBJ): $(GEN_GEN_NAMES_OBJ_PREQS)
+# 	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# # make gen/gen_strings object
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_STRINGS_OBJ): $(GEN_GEN_STRINGS_OBJ_PREQS)
+# 	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make string/string_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make gen/gen_count_string object
+# make string/ascii_utils object
 # ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_COUNT_STRING_OBJ): $(GEN_GEN_COUNT_STRING_OBJ_PREQS)
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-# make gen/gen_names object
-# ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_NAMES_OBJ): $(GEN_GEN_NAMES_OBJ_PREQS)
-	$(CC) $(CC_FLAGS) -c $< -o $@
-
-# make gen/gen_strings object
-# ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_STRINGS_OBJ): $(GEN_GEN_STRINGS_OBJ_PREQS)
+$(STRING_ASCII_UTILS_OBJ): $(STRING_ASCII_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make random/random object
@@ -1178,17 +1210,17 @@ $(TEST_RUNNER_SOURCE_DIR):
 # 	mysql_seed_cli_test		object, and
 # 	mysql_seed_cli_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(CLI_TEST_BIN): $(CLI_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+# $(CLI_TEST_BIN): $(CLI_TEST_BIN_PREQS)
+# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(CLI_TRNR_OBJ): $(CLI_TRNR_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+# $(CLI_TRNR_OBJ): $(CLI_TRNR_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(CLI_TEST_OBJ): $(CLI_TEST_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+# $(CLI_TEST_OBJ): $(CLI_TEST_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(CLI_TRNR_SRC): $(CLI_TRNR_SRC_PREQS)
-	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+# $(CLI_TRNR_SRC): $(CLI_TRNR_SRC_PREQS)
+# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
 # for mysql_seed_create
@@ -1251,12 +1283,32 @@ $(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for mysql_seed_log
+# for thread/thread_pool
 # make:
-# 	mysql_seed_log_test		binary,
-# 	mysql_seed_log_test_runner 	object,
-# 	mysql_seed_log_test		object, and
-# 	mysql_seed_log_test_runner	source
+# 	thread_thread_pool_test		binary,
+# 	thread_thread_pool_test_runner 	object,
+# 	thread_thread_pool_test		object, and
+# 	thread_thread_pool_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(THREAD_THREAD_POOL_TEST_BIN): $(THREAD_THREAD_POOL_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(THREAD_THREAD_POOL_TRNR_OBJ): $(THREAD_THREAD_POOL_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(THREAD_THREAD_POOL_TEST_OBJ): $(THREAD_THREAD_POOL_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(THREAD_THREAD_POOL_TRNR_SRC): $(THREAD_THREAD_POOL_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for thread/thread_log
+# make:
+# 	thread_thread_log_test		binary,
+# 	thread_thread_log_test_runner 	object,
+# 	thread_thread_log_test		object, and
+# 	thread_thread_log_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
 $(THREAD_THREAD_LOG_TEST_BIN): $(THREAD_THREAD_LOG_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
@@ -1268,6 +1320,26 @@ $(THREAD_THREAD_LOG_TEST_OBJ): $(THREAD_THREAD_LOG_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(THREAD_THREAD_LOG_TRNR_SRC): $(THREAD_THREAD_LOG_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for thread/thread_queue
+# make:
+# 	thread_thread_queue_test		binary,
+# 	thread_thread_queue_test_runner 	object,
+# 	thread_thread_queue_test		object, and
+# 	thread_thread_queue_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(THREAD_THREAD_QUEUE_TEST_BIN): $(THREAD_THREAD_QUEUE_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(THREAD_THREAD_QUEUE_TRNR_OBJ): $(THREAD_THREAD_QUEUE_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(THREAD_THREAD_QUEUE_TEST_OBJ): $(THREAD_THREAD_QUEUE_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(THREAD_THREAD_QUEUE_TRNR_SRC): $(THREAD_THREAD_QUEUE_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
@@ -1311,63 +1383,83 @@ $(STRING_STRING_UTILS_TRNR_SRC): $(STRING_STRING_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for gen/gen_count_string
+# for string/ascii_utils
 # make:
-# 	gen_gen_count_string_test		binary,
-# 	gen_gen_count_string_test_runner 	object,
-# 	gen_gen_count_string_test		object, and
-# 	gen_gen_count_string_test_runner	source
+# 	string_ascii_utils_test		binary,
+# 	string_ascii_utils_test_runner 	object,
+# 	string_ascii_utils_test		object, and
+# 	string_ascii_utils_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_COUNT_STRING_TEST_BIN): $(GEN_GEN_COUNT_STRING_TEST_BIN_PREQS)
+$(STRING_ASCII_UTILS_TEST_BIN): $(STRING_ASCII_UTILS_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(GEN_GEN_COUNT_STRING_TRNR_OBJ): $(GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS)
+$(STRING_ASCII_UTILS_TRNR_OBJ): $(STRING_ASCII_UTILS_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GEN_GEN_COUNT_STRING_TEST_OBJ): $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
+$(STRING_ASCII_UTILS_TEST_OBJ): $(STRING_ASCII_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GEN_GEN_COUNT_STRING_TRNR_SRC): $(GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS)
-	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
-
-# for gen/gen_names
-# make:
-# 	gen_gen_names_test		binary,
-# 	gen_gen_names_test_runner 	object,
-# 	gen_gen_names_test		object, and
-# 	gen_gen_names_test_runner	source
-# ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_NAMES_TEST_BIN): $(GEN_GEN_NAMES_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
-
-$(GEN_GEN_NAMES_TRNR_OBJ): $(GEN_GEN_NAMES_TRNR_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
-
-$(GEN_GEN_NAMES_TEST_OBJ): $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
-
-$(GEN_GEN_NAMES_TRNR_SRC): $(GEN_GEN_NAMES_TRNR_SRC_PREQS)
+$(STRING_ASCII_UTILS_TRNR_SRC): $(STRING_ASCII_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for gen/gen_strings
-# make:
-# 	gen_gen_strings_test		binary,
-# 	gen_gen_strings_test_runner 	object,
-# 	gen_gen_strings_test		object, and
-# 	gen_gen_strings_test_runner	source
-# ──────────────────────────────────────────────────────────────────────────────
-$(GEN_GEN_STRINGS_TEST_BIN): $(GEN_GEN_STRINGS_TEST_BIN_PREQS)
-	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+# # for gen/gen_count_string
+# # make:
+# # 	gen_gen_count_string_test		binary,
+# # 	gen_gen_count_string_test_runner 	object,
+# # 	gen_gen_count_string_test		object, and
+# # 	gen_gen_count_string_test_runner	source
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_COUNT_STRING_TEST_BIN): $(GEN_GEN_COUNT_STRING_TEST_BIN_PREQS)
+# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(GEN_GEN_STRINGS_TRNR_OBJ): $(GEN_GEN_STRINGS_TRNR_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+# $(GEN_GEN_COUNT_STRING_TRNR_OBJ): $(GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GEN_GEN_STRINGS_TEST_OBJ): $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
-	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+# $(GEN_GEN_COUNT_STRING_TEST_OBJ): $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GEN_GEN_STRINGS_TRNR_SRC): $(GEN_GEN_STRINGS_TRNR_SRC_PREQS)
-	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+# $(GEN_GEN_COUNT_STRING_TRNR_SRC): $(GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS)
+# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+# # for gen/gen_names
+# # make:
+# # 	gen_gen_names_test		binary,
+# # 	gen_gen_names_test_runner 	object,
+# # 	gen_gen_names_test		object, and
+# # 	gen_gen_names_test_runner	source
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_NAMES_TEST_BIN): $(GEN_GEN_NAMES_TEST_BIN_PREQS)
+# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+# $(GEN_GEN_NAMES_TRNR_OBJ): $(GEN_GEN_NAMES_TRNR_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+# $(GEN_GEN_NAMES_TEST_OBJ): $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+# $(GEN_GEN_NAMES_TRNR_SRC): $(GEN_GEN_NAMES_TRNR_SRC_PREQS)
+# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# # for gen/gen_strings
+# # make:
+# # 	gen_gen_strings_test		binary,
+# # 	gen_gen_strings_test_runner 	object,
+# # 	gen_gen_strings_test		object, and
+# # 	gen_gen_strings_test_runner	source
+# # ──────────────────────────────────────────────────────────────────────────────
+# $(GEN_GEN_STRINGS_TEST_BIN): $(GEN_GEN_STRINGS_TEST_BIN_PREQS)
+# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+# $(GEN_GEN_STRINGS_TRNR_OBJ): $(GEN_GEN_STRINGS_TRNR_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+# $(GEN_GEN_STRINGS_TEST_OBJ): $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
+# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+# $(GEN_GEN_STRINGS_TRNR_SRC): $(GEN_GEN_STRINGS_TRNR_SRC_PREQS)
+# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
 
