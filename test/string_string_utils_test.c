@@ -142,3 +142,16 @@ void test_put_number(void)
 	TEST_ASSERT_EQUAL_STRING("-123",
 				 &buffer[0]);
 }
+
+
+void test_put_pointer_id(void)
+{
+	char buffer[32];
+
+	char *ptr = put_pointer_id(&buffer[0],
+				   &buffer);
+
+	*ptr = '\0';
+
+	puts(&buffer[0]);
+}

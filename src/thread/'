@@ -11,10 +11,9 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define THREAD_LOG_BUFFER_LENGTH 1024lu
 #define THREAD_LOG_HEADER_1						\
-ANSI_WHITE_BG "\n\n" ANSI_BLACK ANSI_BRIGHT ANSI_UNDERLINE		\
-"THREAD LOG FOR" ANSI_NO_UNDERLINE ":\n\t"
-#define THREAD_LOG_HEADER_2 " (" ANSI_BLACK_BG ANSI_WHITE
-#define THREAD_LOG_HEADER_3 ANSI_WHITE_BG ANSI_BLACK ")\n" ANSI_RESET
+ANSI_INVERSE "\n" ANSI_UNDERLINE "THREAD LOG FOR " ANSI_BRIGHT
+#define THREAD_LOG_HEADER_2 " " ANSI_INVERSE
+#define THREAD_LOG_HEADER_3 ANSI_RESET "\n"
 
 /* declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -207,15 +206,6 @@ thread_log_append_number(struct ThreadLog *const restrict log,
 }
 
 inline void
-thread_log_append_pointer_id(struct ThreadLog *const restrict log,
-			     void *const restrict pointer)
-{
-	log->current_ptr = put_pointer_id_until(log->current_ptr,
-						pointer,
-						log->until_ptr);
-}
-
-inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length)
@@ -260,26 +250,12 @@ thread_log_append_number_length(struct ThreadLog *const restrict log,
 					    : length_ptr);
 }
 
-inline void
-thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
-				    void *const restrict pointer,
-				    const size_t length)
-{
-	char *const restrict length_ptr = log->current_ptr
-					+ length;
-
-	log->current_ptr = put_pointer_id_until(log->current_ptr,
-						pointer,
-						(length_ptr > log->until_ptr)
-						? log->until_ptr
-						: length_ptr);
-}
-
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_log_init(struct ThreadLog *const restrict log,
-		const char *const restrict label)
+		const char *const restrict label,
+		const size_t id)
 {
 	mutex_init(&log->lock);
 
@@ -288,7 +264,8 @@ thread_log_init(struct ThreadLog *const restrict log,
 	       sizeof(thread_log_buffer_prototype));
 
 	log->until_ptr   = &log->buffer[THREAD_LOG_BUFFER_LENGTH - 1];
-	log->current_ptr = &log->buffer[sizeof(THREAD_LOG_HEADER_1) - 1];
+	log->current_ptr = &log->buffer[sizeof(THREAD_LOG_HEADER_1)];
+
 
 	thread_log_append_string(log,
 				 label);
@@ -296,8 +273,8 @@ thread_log_init(struct ThreadLog *const restrict log,
 	thread_log_append_string(log,
 				 THREAD_LOG_HEADER_2);
 
-	thread_log_append_pointer_id(log,
-				     (void *) log);
+	thread_log_append_digits(log,
+				 id);
 
 	thread_log_append_string(log,
 				 THREAD_LOG_HEADER_3);

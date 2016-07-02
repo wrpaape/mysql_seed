@@ -6,8 +6,6 @@
 
 const char thread_log_buffer_prototype[THREAD_LOG_BUFFER_LENGTH] = {
 	THREAD_LOG_HEADER_1
-	/* [0 ... (sizeof(THREAD_LOG_HEADER_1) - 1)] = */ 
-	/* [sizeof(THREAD_LOG_HEADER_1) ... (THREAD_LOG_BUFFER_LENGTH - 1)] = '\0' */
 };
 
 
@@ -84,6 +82,9 @@ extern inline void
 thread_log_append_number(struct ThreadLog *const restrict log,
 			 const ssize_t n);
 extern inline void
+thread_log_append_pointer_id(struct ThreadLog *const restrict log,
+			     void *const restrict pointer);
+extern inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length);
@@ -95,10 +96,13 @@ extern inline void
 thread_log_append_number_length(struct ThreadLog *const restrict log,
 				const ssize_t n,
 				const size_t length);
+extern inline void
+thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
+				    void *const restrict pointer,
+				    const size_t length);
 
 /* initialize, reset
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_log_init(struct ThreadLog *const restrict log,
-		const char *const restrict label,
-		const size_t id);
+		const char *const restrict label);

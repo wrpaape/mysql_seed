@@ -11,5 +11,10 @@ void tearDown(void)
 
 void test_thread_log(void)
 {
-	TEST_IGNORE();
+	struct ThreadLog log;
+
+	thread_log_init(&log,
+			"supervisor");
+
+	puts(&log.buffer[0]);
 }
