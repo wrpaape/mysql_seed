@@ -570,9 +570,9 @@ put_pointer_id_length(char *restrict buffer,
 		      void *const restrict pointer,
 		      const unsigned int length)
 {
+#ifdef POINTER_ID_LENGTH_MAX
 	if (length == 0lu)
 		return buffer;
-#ifdef POINTER_ID_LENGTH_MAX
 
 	const unsigned int length_id = pointer_id_length((uintptr_t) pointer);
 
@@ -600,34 +600,16 @@ put_pointer_id_length(char *restrict buffer,
 	char *restrict id_ptr = do_put_pointer_id(last_ptr,
 						  (uintptr_t) pointer);
 
-	const size_t length_id = last_ptr - id_ptr;
+	const unsigned int length_id = snprintf(buffer,
+						length,
+						"%zu",
+						n);
 
-	char *const restrict until_ptr = id_ptr + ((length_id > length)
-						   ? length
-						   : length_id);
+	return buffer + ((length_id > length)
+			 ? length
+			 : length_id);
 
-	while (1) {
-		*buffer = *id_ptr;
-		++buffer;
-
-		if (id_ptr == last_ptr)
-			return buffer;
-
-		++id_ptr;
-	}
 #endif /* ifdef POINTER_ID_LENGTH_MAX */
-}
-
-inline char *
-put_pointer_id_until(char *restrict buffer,
-		     void *const restrict pointer,
-		     char *const restrict until_ptr)
-{
-	return (buffer > until_ptr)
-	     ? until_ptr
-	     : put_pointer_id_length(buffer,
-				     n,
-				     until_ptr - buffer);
 }
 
 

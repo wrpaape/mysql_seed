@@ -20,10 +20,6 @@
 
 #define PUT_PATH_DELIM(PTR) PUT_CHAR(PTR, PATH_DELIM)
 
-/* 0..9 → '0'..'9' */
-#define ASCII_DIGIT(DIGIT) ((char) (((unsigned int) (DIGIT)) | 48u))
-
-
 /* ANSI escape macros
  *─────────────────────────────────────────────────────────────────────────── */
 #define ANSI_WRAP(STRING, ANSI) ANSI_ ## ANSI  STRING ANSI_RESET
