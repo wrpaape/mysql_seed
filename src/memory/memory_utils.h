@@ -4,8 +4,8 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include "utils/utils.h"	/* m/c/realloc/free, limits, EXIT_ON_FAILURE */
-#include "utils/word_utils.h"	/* word_t, WORD_WIDTH/SIZE */
+#include "utils/utils.h"	/* m/c/realloc/free, limits */
+#include "utils/word_utils.h"	/* OCTET_CHAR, word_t, WORD_WIDTH/SIZE */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
@@ -16,14 +16,42 @@
 
 /* byte buffers where sizeof(Width<WIDTH>) = WIDTH
  * ========================================================================== */
-/* common byte widths */
-typedef uint_fast8_t Width1;
+#if   (OCTET_CHAR == 1)
+typedef uint_fast8_t  Width1;
 typedef uint_fast16_t Width2;
 typedef uint_fast32_t Width4;
 typedef uint_fast64_t Width8;
-typedef __uint128_t Width16;
+typedef __uint128_t   Width16;
+#elif (OCTET_CHAR == 2)
+typedef uint_fast16_t Width1;
+typedef uint_fast32_t Width2;
+typedef uint_fast64_t Width4;
+typedef __uint128_t   Width8;
+#elif (OCTET_CHAR == 4)
+typedef uint_fast32_t Width1;
+typedef uint_fast64_t Width2;
+typedef __uint128_t   Width4;
+#elif (OCTET_CHAR == 8)
+typedef uint_fast64_t Width1;
+typedef __uint128_t   Width2;
+#else	/* OCTET_CHAR = 3, 5, 6, or 7 */
+typedef unsigned char Width1;
+typedef struct Width2  { Width1 bytes[ 2]; } Width2;
+#endif /* if (OCTET_CHAR == 1) */
 
-/* uncommon widths (backed by an array of 'WIDTH' bytes) */
+#if (OCTET_CHAR > 1)
+typedef struct Width16 { Width1 bytes[16]; } Width16;
+#endif /* if (OCTET_CHAR > 1) */
+
+#if (OCTET_CHAR > 2)
+typedef struct Width8  { Width1 bytes[ 8]; } Width8;
+#endif /* if (OCTET_CHAR > 2) */
+
+#if (OCTET_CHAR == 3) || (OCTET_CHAR > 4)
+typedef struct Width4  { Width1 bytes[ 4]; } Width4;
+#endif /* if (OCTET_CHAR == 3) || (OCTET_CHAR > 4) */
+
+/* shared by all cases of 'OCTET_CHAR' */
 typedef struct Width3  { Width1 bytes[ 3]; } Width3;
 typedef struct Width5  { Width1 bytes[ 5]; } Width5;
 typedef struct Width6  { Width1 bytes[ 6]; } Width6;
@@ -58,60 +86,6 @@ typedef word_t WidthWord;
  *
  * FUNCTION-LIKE MACROS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
-
-/* m/c/realloc handlers
- * ========================================================================== */
-#ifdef __cplusplus /* for c++ files ───────────────────────────────────────── */
-/* cast returned alloc, 'nullptr' instead of 'NULL' */
-#define HANDLE_MALLOC(PTR, SIZE)					\
-do {									\
-	PTR = (__typeof__(PTR)) malloc(SIZE);				\
-	if (PTR == nullptr)						\
-		EXIT_ON_FAILURE("failed to allocate %lu bytes of "	\
-				"memory for '" #PTR "'", SIZE);		\
-} while (0)
-#define HANDLE_CALLOC(PTR, COUNT, SIZE)					\
-do {									\
-	PTR = (__typeof__(PTR)) calloc(COUNT, SIZE);			\
-	if (PTR == nullptr)						\
-		EXIT_ON_FAILURE("failed to allocate %lu blocks of %lu"	\
-				"bytes of zeroed memory for '" #PTR	\
-				"'", COUNT, SIZE);			\
-} while (0)
-#define HANDLE_REALLOC(PTR, SIZE)					\
-do {									\
-	PTR = (__typeof__(PTR)) realloc(PTR, SIZE);			\
-	if (PTR == nullptr)						\
-		EXIT_ON_FAILURE("failed to reallocate memory for '"	\
-				#PTR "' to %lu bytes", SIZE);		\
-} while (0)
-
-#else /* for c files ───────────────────────────────────────────────── */
-/* leave alloc uncasted, 'NULL' instead of 'nullptr' */
-#define HANDLE_MALLOC(PTR, SIZE)					\
-do {									\
-	PTR = malloc(SIZE);						\
-	if (PTR == NULL)						\
-		EXIT_ON_FAILURE("failed to allocate %lu bytes of "	\
-				"memory for '" #PTR "'", SIZE);		\
-} while (0)
-#define HANDLE_CALLOC(PTR, COUNT, SIZE)					\
-do {									\
-	PTR = calloc(COUNT, SIZE);					\
-	if (PTR == NULL)						\
-		EXIT_ON_FAILURE("failed to allocate %lu blocks of %lu"	\
-				"bytes of zeroed memory for '" #PTR	\
-				"'", COUNT, SIZE);			\
-} while (0)
-#define HANDLE_REALLOC(PTR, SIZE)					\
-do {									\
-	PTR = realloc(PTR, SIZE);					\
-	if (PTR == NULL)						\
-		EXIT_ON_FAILURE("failed to reallocate memory for '"	\
-				#PTR "' to %lu bytes", SIZE);		\
-} while (0)
-
-#endif	/* ifdef __cplusplus */
 
 /* call memory action function */
 #define MEMORY_ACTION_WIDTH(ACTION, WIDTH, ...)				\

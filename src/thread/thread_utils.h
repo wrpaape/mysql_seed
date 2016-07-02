@@ -1308,4 +1308,7 @@ void
 parallel_stop(void)
 __attribute__((destructor));
 
+
+#include <utils/fail_switch_close.h>	/* clear fail_switch macro constants */
+
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_UTILS_H_ */

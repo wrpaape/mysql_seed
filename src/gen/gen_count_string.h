@@ -377,10 +377,11 @@ count_string_await(struct CountString *const restrict string)
 	if (string->incomplete) {
 		seed_mutex_handle_lock(&string->processing);
 
-		while (string->incomplete)
+		do {
 			seed_thread_cond_handle_await_span(&string->done,
 							   &string->processing,
 							   &cs_await_span);
+		} while (string->incomplete);
 
 		seed_mutex_handle_unlock(&string->processing);
 	}

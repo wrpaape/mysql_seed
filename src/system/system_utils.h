@@ -44,31 +44,6 @@
 #define get_winsize_imp(WINDOW, FILEDES)				\
 ioctl(FILEDES, TIOCGWINSZ, WINDOW)
 
-/* ioctl */
-#define HANDLE_IOCTL(FILEDES, REQUEST, ...)				\
-do {									\
-	const int status = ioctl(FILEDES, REQUEST, ##__VA_ARGS__);	\
-	if (status == -1)						\
-		EXIT_ON_FAILURE("failed device request"			\
-				"\e24m]\n\n{\n"				\
-				"\tfildes:  '" #FILEDES ",'\n"		\
-				"\trequest: '" #REQUEST "'\n"		\
-				"}\n\n"					\
-				"reason: %s",				\
-				IOCTL_FAILURE(errno));			\
-} while (0)
-#define IOCTL_FAILURE(ERRNO)						\
-  ((ERRNO == EBADF)							\
-? "'fildes', is not a valid descriptor"					\
-: ((ERRNO == EINVAL)							\
-? "'request' or 'argp' is not valid."					\
-: ((ERRNO == ENOTTY)							\
-? "(one of the following)\n"						\
-  "\t- 'fildes' is not associated with a character special device.\n"	\
-  "\t- The specified request does not apply to the kind of object that"	\
-   " the descriptor 'fildes' references."				\
-: "unknown")))
-
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * FUNCTION-LIKE MACROS
  *
@@ -109,32 +84,9 @@ get_winsize_report(struct winsize *const restrict window,
 				 "references.")
 
 	FAIL_SWITCH_ERRNO_CLOSE()
-
-	/* if (get_winsize_imp(window, */
-	/* 		    fildes) != -1) */
-	/* 	return true; */
-
-	/* switch (errno) { */
-	/* case: EBADF */
-	/* 	*failure = "get_winsize failure'fildes', is not a valid descriptor.\n"; */
-	/* 	return false; */
-
-	/* case: EINVAL */
-	/* 	*failure = "'request' or 'argp' is not valid.\n"; */
-	/* 	return false; */
-
-	/* case: ENOTTY */
-	/* 	*failure = "(one of the following)\n" */
-	/* 		   "\t- 'fildes' is not associated with a character " */
-	/* 			"special device.\n"; */
-	/* 		   "\t- The specified request does not apply to the " */
-	/* 			"kind of object that the descriptor 'fildes' " */
-	/* 			"references.\n"; */
-	/* default: */
-	/* 	*failure = "unknown"; */
-	/* 	return false; */
-	/* } */
 }
+
+#include "utils/fail_switch_clear.h"
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

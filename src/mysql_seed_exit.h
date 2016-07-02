@@ -5,17 +5,17 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdlib.h>			/* exit */
 #include "mysql_seed_mode.h"		/* <stdio.h>, SeedExitSpec, SeedModeSpec */
-#include "mysql_seed_string_macros.h"	/* string helper macros */
+#include "string/string_macros.h"	/* string helper macros */
 
 /* help messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define HELP_USAGE_MESSAGE					\
-UNDERLINE("USAGE:") "\n"					\
-"\t" BRIGHTEN("mysql_seed [OPTIONS] <INPUTS>") "\n\n"		\
-UNDERLINE("OPTIONS:") "\n"					\
-"\t" BRIGHTEN("-h, --help")   "\tprints this message\n"		\
-"\t" BRIGHTEN("-c, --create") "\tcreates a seed file\n"		\
-"\t" BRIGHTEN("-r, --run")    "\truns a seed file\n"
+#define HELP_USAGE_MESSAGE						\
+UNDERLINE_WRAP("USAGE:") "\n"						\
+"\t" ANSI_WRAP(BRIGHT, "mysql_seed [OPTIONS] <INPUTS>") "\n\n"		\
+UNDERLINE_WRAP("OPTIONS:") "\n"						\
+"\t" ANSI_WRAP(BRIGHT, "-h, --help")   "\tprints this message\n"	\
+"\t" ANSI_WRAP(BRIGHT, "-c, --create") "\tcreates a seed file\n"	\
+"\t" ANSI_WRAP(BRIGHT, "-r, --run")    "\truns a seed file\n"
 
 #define HELP_CREATE_MESSAGE "OOGA BOOGA"
 

@@ -8,9 +8,9 @@
 #include <unistd.h>			/* ssize_t */
 #include <stdint.h>			/* SIZE_MAX, UINT16/32/64_MAX */
 #include <stdbool.h>			/* bool */
+#include "utils/word_utils.h"		/* WORD_SIZE */
 #include "string/ascii_utils.h"		/* ascii helper macros, groups, sets */
 #include "string/string_macros.h"	/* string helper macros */
-#include "utils/word_utils.h"		/* WORD_SIZE */
 
 #if   (SIZE_MAX == UINT64_MAX)
 #	define DIGIT_COUNT_MAX 20u

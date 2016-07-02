@@ -6,7 +6,7 @@
 #include "mysql_seed_create.h"	/* CreateSpec */
 #include "mysql_seed_run.h"	/* RunSpec */
 #include "mysql_seed_exit.h"	/* ExitSpec, seed_exit_spec_set_<X> */
-#include "mysql_seed_log.h"	/* seed_log */
+#include "thread/thread_log.h"	/* thread log */
 
 
 /* cap reads on input strings

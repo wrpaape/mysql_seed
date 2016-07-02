@@ -1,25 +1,10 @@
 #ifndef MYSQL_SEED_SYSTEM_STDIO_UTILS_H_
 #define MYSQL_SEED_SYSTEM_STDIO_UTILS_H_
 
-#ifdef __cplusplus /* ensure C linkage */
-extern "C" {
-#	ifndef restrict /* use c++ compatible '__restrict__' */
-#		define restrict __restrict__
-#	endif
-#	ifndef NULL_POINTER /* use c++ null pointer macro */
-#		define NULL_POINTER nullptr
-#	endif
-#else
-#	ifndef NULL_POINTER /* use traditional c null pointer macro */
-#		define NULL_POINTER NULL
-#	endif
-#endif
-
-
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include "system/system_utils.h" /* get_winsize, EXIT_ON_FAILURE */
+#include "system/system_utils.h" /* get_winsize, FAIL_SWITCH */
 #include "system/file_utils.h"	 /* stream handlers, STDOUT/IN/ERR_FILENO */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -52,42 +37,36 @@ extern "C" {
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 /* popen */
-#define HANDLE_POPEN(STREAM, COMMAND, MODE)				\
+#define POPEN_REPORT(STREAM, COMMAND, MODE, FAILURE)			\
 do {									\
 	STREAM = popen(COMMAND, MODE);					\
-	if (STREAM == NULL_POINTER)					\
-		EXIT_ON_FAILURE("failed open process"			\
-				"\e24m]\n\n{\n"				\
-				"\tcommand: '" #COMMAND "' (%s),\n"	\
-				"\tmode:    '" #MODE    "' (%s)\n"	\
-				"}\n\n"					\
-				"reason: " POPEN_FAILURE,		\
-				COMMAND,				\
-				MODE);					\
+	if (STREAM == NULL) {						\
+		*(FAILURE) = FAILURE_REASON_3("popen",			\
+					      "fork(2) failure",	\
+					      "pipe(2) failure",	\
+					      "failed to allocate "	\
+					      "sufficient memory");	\
+		return false;						\
+	}								\
 } while (0)
-#define POPEN_FAILURE							\
-"(one of the following)\n"						\
-"\t- fork(2) failure"							\
-"\t- pipe(2) failure\n"							\
-"\t- failed to allocate sufficient memory"
+
 
 
 /* pclose */
-#define HANDLE_PCLOSE(STREAM)						\
+#define PCLOSE_REPORT(STREAM, FAILURE)					\
 do {									\
-	if (pclose(STREAM) == -1)					\
-		EXIT_ON_FAILURE("failed close process"			\
-				"\e24m]\n\n{\n"				\
-				"\tstream: '" #STREAM " (%p) '\n"	\
-				"}\n\n"					\
-				"reason: " PCLOSE_FAILURE,		\
-				STREAM);				\
+	if (pclose(STREAM) == -1) {					\
+		*(FAILURE) = FAILURE_REASON_3("pclose",			\
+					      "'stream' is not "	\
+					      "associated with a "	\
+					      "\"popened\" command",	\
+					      "'stream' is already "	\
+					      "\"pclosed\"",		\
+					      "wait4(2) returned an "	\
+					      "error");			\
+		return false;						\
+	}								\
 } while (0)
-#define PCLOSE_FAILURE							\
-"(one of the following)\n"						\
-"\t- 'stream' is not associated with a \"popened\" command"		\
-"\t- 'stream' is already \"pclosed\"\n"					\
-"\t- wait4(2) returned an error"
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * FUNCTION-LIKE MACROS
@@ -96,16 +75,20 @@ do {									\
  * TOP-LEVEL FUNCTIONS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-inline size_t shell_command_read(char *restrict buffer,
-				 const size_t size,
-				 const char *const restrict command)
+inline size_t
+shell_command_read_report(char *restrict buffer,
+			  const size_t size,
+			  const char *const restrict command,
+			  const char *restrict *const restrict failure)
 {
-	FILE *process;
 	size_t nread;
+	FILE *process;
 
-	HANDLE_POPEN(process, command, "r");
+	POPEN_REPORT(process, command, "r", failure);
+
 	HANDLE_FREAD(nread, buffer, sizeof(char), size, process);
-	HANDLE_PCLOSE(process);
+
+	PCLOSE_REPORT(process, failure);
 
 	return nread;
 }
@@ -116,7 +99,7 @@ inline void shell_command_gets(char *restrict buffer,
 {
 	FILE *process;
 
-	HANDLE_POPEN(process, command, "r");
+	POPEN_REPORT(process, command, "r");
 	HANDLE_FGETS(buffer, size, process);
 	HANDLE_PCLOSE(process);
 }

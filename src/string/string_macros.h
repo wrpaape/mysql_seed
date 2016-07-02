@@ -22,7 +22,7 @@
 
 /* ANSI escape macros
  *─────────────────────────────────────────────────────────────────────────── */
-#define ANSI_WRAP(STRING, ANSI) ANSI_ ## ANSI  STRING ANSI_RESET
+#define ANSI_WRAP(ANSI, STRING) ANSI_ ## ANSI  STRING ANSI_RESET
 #define UNDERLINE_WRAP(STRING)  ANSI_UNDERLINE STRING ANSI_NO_UNDERLINE
 #define BLINK_WRAP(STRING)	ANSI_BLINK     STRING ANSI_BLINK_OFF
 

@@ -288,9 +288,14 @@ TARGETS			+= $(UNITY_OBJ)					\
 
 # independent headers
 # ──────────────────────────────────────────────────────────────────────────────
-UTILS_WORD_UTILS_HDR	:= $(call HELPER_HEADER_PATH,utils word_utils)
-MODE_HDR		:= $(call PROJECT_HEADER_PATH,mode)
-STRING_MACROS_HDR	:= $(call PROJECT_HEADER_PATH,string_macros)
+UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
+UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types ascii)
+UTILS_WORD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils word_utils)
+UTILS_FAIL_SWITCH_OPEN_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_open)
+UTILS_FAIL_SWITCH_CLOSE_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_close)
+STRING_STRING_TOKEN_HDR		:= $(call HELPER_HEADER_PATH,string string_token)
+STRING_STRING_MACROS_HDR	:= $(call HELPER_HEADER_PATH,string string_macros)
+MODE_HDR			:= $(call PROJECT_HEADER_PATH,mode)
 
 ## HELPER MODULES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -308,6 +313,7 @@ UTILS_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 UTILS_UTILS_OBJ_PREQS		:= $(UTILS_UTILS_SRC) 			\
 			   	   $(UTILS_UTILS_HDR)
+UTILS_UTILS_OBJ_GROUP		:= $(UTILS_OBJ)
 UTILS_UTILS_TRNR_SRC_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 UTILS_UTILS_TEST_OBJ_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
@@ -317,7 +323,7 @@ UTILS_UTILS_TRNR_OBJ_PREQS	:= $(UTILS_UTILS_TRNR_SRC)		\
 			   	   $(UTILS_UTILS_TEST_OBJ_PREQS)
 UTILS_UTILS_TEST_BIN_PREQS	:= $(UTILS_UTILS_TRNR_OBJ)		\
 				   $(UTILS_UTILS_TEST_OBJ)		\
-			   	   $(UTILS_UTILS_OBJ)			\
+			   	   $(UTILS_UTILS_OBJ_GROUP)		\
 			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(UTILS_UTILS_TEST_BIN)
@@ -341,6 +347,7 @@ TIME_TIME_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,time time_utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 TIME_TIME_UTILS_OBJ_PREQS	:= $(TIME_TIME_UTILS_SRC) 		\
 			   	   $(TIME_TIME_UTILS_HDR)
+TIME_TIME_UTILS_OBJ_GROUP		:= $(TIME_TIME_UTILS_OBJ)
 TIME_TIME_UTILS_TRNR_SRC_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 TIME_TIME_UTILS_TEST_OBJ_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
@@ -350,7 +357,7 @@ TIME_TIME_UTILS_TRNR_OBJ_PREQS	:= $(TIME_TIME_UTILS_TRNR_SRC)		\
 			   	   $(TIME_TIME_UTILS_TEST_OBJ_PREQS)
 TIME_TIME_UTILS_TEST_BIN_PREQS	:= $(TIME_TIME_UTILS_TRNR_OBJ)		\
 				   $(TIME_TIME_UTILS_TEST_OBJ)		\
-			   	   $(TIME_TIME_UTILS_OBJ)		\
+			   	   $(TIME_TIME_UTILS_OBJ_GROUP)		\
 			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(TIME_TIME_UTILS_TEST_BIN)
@@ -376,6 +383,8 @@ MEMORY_MEMORY_UTILS_OBJ_PREQS		:= $(MEMORY_MEMORY_UTILS_SRC) 		\
 			   	   	   $(MEMORY_MEMORY_UTILS_HDR)		\
 			   	   	   $(UTILS_UTILS_HDR)			\
 			   	   	   $(UTILS_WORD_UTILS_HDR)
+MEMORY_MEMORY_UTILS_OBJ_GROUP		:= $(MEMORY_MEMORY_UTILS_OBJ) 		\
+					   $(UTILS_UTILS_OBJ_GROUP)
 MEMORY_MEMORY_UTILS_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_UTILS_TEST_SRC)	\
 					   $(TEST_RUNNER_SOURCE_DIR)
 MEMORY_MEMORY_UTILS_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_UTILS_TEST_SRC)	\
@@ -385,8 +394,7 @@ MEMORY_MEMORY_UTILS_TRNR_OBJ_PREQS	:= $(MEMORY_MEMORY_UTILS_TRNR_SRC)	\
 					   $(MEMORY_MEMORY_UTILS_TEST_OBJ_PREQS)
 MEMORY_MEMORY_UTILS_TEST_BIN_PREQS	:= $(MEMORY_MEMORY_UTILS_TRNR_OBJ)	\
 					   $(MEMORY_MEMORY_UTILS_TEST_OBJ)	\
-					   $(MEMORY_MEMORY_UTILS_OBJ)		\
-					   $(UTILS_UTILS_OBJ)			\
+					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)	\
 					   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(MEMORY_MEMORY_UTILS_TEST_BIN)
@@ -413,6 +421,8 @@ MEMORY_MEMORY_SWAP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_swap
 MEMORY_MEMORY_SWAP_OBJ_PREQS		:= $(MEMORY_MEMORY_SWAP_SRC) 		\
 			   	   	   $(MEMORY_MEMORY_SWAP_HDR)		\
 			   	   	   $(MEMORY_MEMORY_SWAP_WIDTH_HDR)
+MEMORY_MEMORY_SWAP_OBJ_GROUP		:= $(MEMORY_MEMORY_SWAP_OBJ)		\
+					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)
 MEMORY_MEMORY_SWAP_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_SWAP_TEST_SRC)	\
 					   $(TEST_RUNNER_SOURCE_DIR)
 MEMORY_MEMORY_SWAP_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_SWAP_TEST_SRC)	\
@@ -422,9 +432,7 @@ MEMORY_MEMORY_SWAP_TRNR_OBJ_PREQS	:= $(MEMORY_MEMORY_SWAP_TRNR_SRC)	\
 					   $(MEMORY_MEMORY_SWAP_TEST_OBJ_PREQS)
 MEMORY_MEMORY_SWAP_TEST_BIN_PREQS	:= $(MEMORY_MEMORY_SWAP_TRNR_OBJ)	\
 					   $(MEMORY_MEMORY_SWAP_TEST_OBJ)	\
-					   $(MEMORY_MEMORY_SWAP_OBJ)		\
-					   $(MEMORY_MEMORY_UTILS_OBJ)		\
-					   $(UTILS_UTILS_OBJ)			\
+					   $(MEMORY_MEMORY_SWAP_OBJ_GROUP)	\
 					   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(MEMORY_MEMORY_SWAP_TEST_BIN)
@@ -448,6 +456,7 @@ RANDOM_PCG_BASIC_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,random pcg_basic)
 # ─────────────── target prequisites ───────────────────────────────────────────
 RANDOM_PCG_BASIC_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_SRC) 		\
 			   	   $(RANDOM_PCG_BASIC_HDR)
+RANDOM_PCG_BASIC_OBJ_GROUP	:= $(RANDOM_PCG_BASIC_OBJ)
 RANDOM_PCG_BASIC_TRNR_SRC_PREQS	:= $(RANDOM_PCG_BASIC_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 RANDOM_PCG_BASIC_TEST_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_TEST_SRC)		\
@@ -457,7 +466,7 @@ RANDOM_PCG_BASIC_TRNR_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_TRNR_SRC)		\
 			   	   $(RANDOM_PCG_BASIC_TEST_OBJ_PREQS)
 RANDOM_PCG_BASIC_TEST_BIN_PREQS	:= $(RANDOM_PCG_BASIC_TRNR_OBJ)		\
 				   $(RANDOM_PCG_BASIC_TEST_OBJ)		\
-			   	   $(RANDOM_PCG_BASIC_OBJ)		\
+			   	   $(RANDOM_PCG_BASIC_OBJ_GROUP)	\
 			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(RANDOM_PCG_BASIC_TEST_BIN)
@@ -485,6 +494,9 @@ RANDOM_RANDOM_OBJ_PREQS		:= $(RANDOM_RANDOM_SRC) 		\
 			   	   $(RANDOM_RANDOM_HDR)			\
 			   	   $(RANDOM_RANDOM_TYPES_HDR)		\
 			   	   $(MEMORY_MEMORY_SWAP_HDR)
+RANDOM_RANDOM_OBJ_GROUP		:= $(RANDOM_RANDOM_OBJ)			\
+			   	   $(RANDOM_PCG_BASIC_OBJ)		\
+			   	   $(MEMORY_MEMORY_SWAP_OBJ_GROUP)
 RANDOM_RANDOM_TRNR_SRC_PREQS	:= $(RANDOM_RANDOM_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 RANDOM_RANDOM_TEST_OBJ_PREQS	:= $(RANDOM_RANDOM_TEST_SRC)		\
@@ -494,11 +506,7 @@ RANDOM_RANDOM_TRNR_OBJ_PREQS	:= $(RANDOM_RANDOM_TRNR_SRC)		\
 			   	   $(RANDOM_RANDOM_TEST_OBJ_PREQS)
 RANDOM_RANDOM_TEST_BIN_PREQS	:= $(RANDOM_RANDOM_TRNR_OBJ)		\
 				   $(RANDOM_RANDOM_TEST_OBJ)		\
-			   	   $(RANDOM_RANDOM_OBJ)			\
-			   	   $(RANDOM_PCG_BASIC_OBJ)		\
-			   	   $(MEMORY_MEMORY_SWAP_OBJ)		\
-			   	   $(MEMORY_MEMORY_UTILS_OBJ)		\
-			   	   $(UTILS_UTILS_OBJ)			\
+			   	   $(RANDOM_RANDOM_OBJ_GROUP)		\
 			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(RANDOM_RANDOM_TEST_BIN)
@@ -509,289 +517,330 @@ TARGETS			+= $(RANDOM_RANDOM_OBJ)				\
 			   $(RANDOM_RANDOM_TEST_BIN)
 
 
+# string/ascii_utils
+# ──────────────────────────────────────────────────────────────────────────────
+STRING_ASCII_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string string_utils)
+STRING_ASCII_UTILS_HDR		:= $(call HELPER_HEADER_PATH,string string_utils)
+STRING_ASCII_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string string_utils)
+STRING_ASCII_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,string string_utils)
+STRING_ASCII_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string string_utils)
+STRING_ASCII_UTILS_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
+STRING_ASCII_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
+STRING_ASCII_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,string string_utils)
+STRING_ASCII_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string string_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+STRING_ASCII_UTILS_OBJ_PREQS		:= $(STRING_ASCII_UTILS_SRC) 			\
+			   		   $(STRING_ASCII_UTILS_HDR)			\
+					   $(UTILS_TYPES_OCTET_HDR)
+STRING_ASCII_UTILS_OBJ_GROUP		:= $(STRING_ASCII_UTILS_OBJ)
+STRING_ASCII_UTILS_TRNR_SRC_PREQS	:= $(STRING_ASCII_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+STRING_ASCII_UTILS_TEST_OBJ_PREQS	:= $(STRING_ASCII_UTILS_TEST_SRC)		\
+			   		   $(STRING_ASCII_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+STRING_ASCII_UTILS_TRNR_OBJ_PREQS	:= $(STRING_ASCII_UTILS_TRNR_SRC)		\
+			   		   $(STRING_ASCII_UTILS_TEST_OBJ_PREQS)
+STRING_ASCII_UTILS_TEST_BIN_PREQS	:= $(STRING_ASCII_UTILS_TRNR_OBJ)		\
+			   		   $(STRING_ASCII_UTILS_TEST_OBJ)		\
+			   		   $(STRING_ASCII_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(STRING_ASCII_UTILS_TEST_BIN)
+TARGETS			+= $(STRING_ASCII_UTILS_OBJ)					\
+			   $(STRING_ASCII_UTILS_TRNR_SRC)				\
+			   $(STRING_ASCII_UTILS_TRNR_OBJ)				\
+			   $(STRING_ASCII_UTILS_TEST_OBJ)				\
+			   $(STRING_ASCII_UTILS_TEST_BIN)
+
+
+# string/string_utils
+# ──────────────────────────────────────────────────────────────────────────────
+STRING_STRING_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string string_utils)
+STRING_STRING_UTILS_HDR			:= $(call HELPER_HEADER_PATH,string string_utils)
+STRING_STRING_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string string_utils)
+STRING_STRING_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,string string_utils)
+STRING_STRING_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string string_utils)
+STRING_STRING_UTILS_TEST_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
+STRING_STRING_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string string_utils)
+STRING_STRING_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,string string_utils)
+STRING_STRING_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,string string_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+STRING_STRING_UTILS_OBJ_PREQS		:= $(STRING_STRING_UTILS_SRC) 			\
+			   		   $(STRING_STRING_UTILS_HDR)			\
+			   		   $(UTILS_WORD_UTILS_HDR)			\
+			   		   $(STRING_ASCII_UTILS_HDR)			\
+			   		   $(STRING_STRING_MACROS_HDR)
+STRING_STRING_UTILS_OBJ_GROUP		:= $(STRING_STRING_UTILS_OBJ)			\
+					   $(STRING_ASCII_UTILS_OBJ_GROUP)
+STRING_STRING_UTILS_TRNR_SRC_PREQS	:= $(STRING_STRING_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+STRING_STRING_UTILS_TEST_OBJ_PREQS	:= $(STRING_STRING_UTILS_TEST_SRC)		\
+			   		   $(STRING_STRING_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+STRING_STRING_UTILS_TRNR_OBJ_PREQS	:= $(STRING_STRING_UTILS_TRNR_SRC)		\
+			   		   $(STRING_STRING_UTILS_TEST_OBJ_PREQS)
+STRING_STRING_UTILS_TEST_BIN_PREQS	:= $(STRING_STRING_UTILS_TRNR_OBJ)		\
+			   		   $(STRING_STRING_UTILS_TEST_OBJ)		\
+			   		   $(STRING_STRING_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(STRING_STRING_UTILS_TEST_BIN)
+TARGETS			+= $(STRING_STRING_UTILS_OBJ)					\
+			   $(STRING_STRING_UTILS_TRNR_SRC)				\
+			   $(STRING_STRING_UTILS_TRNR_OBJ)				\
+			   $(STRING_STRING_UTILS_TEST_OBJ)				\
+			   $(STRING_STRING_UTILS_TEST_BIN)
+
+
+# thread/thread_utils
+# ──────────────────────────────────────────────────────────────────────────────
+THREAD_THREAD_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_OBJ 	:= $(call HELPER_OBJECT_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_utils)
+THREAD_THREAD_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+THREAD_THREAD_UTILS_OBJ_PREQS		:= $(THREAD_THREAD_UTILS_SRC)			\
+			   	   	   $(THREAD_THREAD_UTILS_HDR)			\
+			   	   	   $(TIME_TIME_UTILS_HDR)			\
+			   	   	   $(UTILS_FAIL_SWITCH_OPEN_HDR)		\
+			   	   	   $(UTILS_FAIL_SWITCH_CLOSE_HDR)
+THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_OBJ)				\
+			   	   	   $(TIME_TIME_UTILS_OBJ)
+THREAD_THREAD_UTILS_TRNR_SRC_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+THREAD_THREAD_UTILS_TEST_OBJ_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
+			   		   $(THREAD_THREAD_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+THREAD_THREAD_UTILS_TRNR_OBJ_PREQS	:= $(THREAD_THREAD_UTILS_TRNR_SRC)		\
+			   		   $(THREAD_THREAD_UTILS_TEST_OBJ_PREQS)
+THREAD_THREAD_UTILS_TEST_BIN_PREQS	:= $(THREAD_THREAD_UTILS_TRNR_OBJ)		\
+			   		   $(THREAD_THREAD_UTILS_TEST_OBJ)		\
+			   		   $(THREAD_THREAD_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(THREAD_THREAD_UTILS_TEST_BIN)
+TARGETS			+= $(THREAD_THREAD_UTILS_OBJ)			\
+			   $(THREAD_THREAD_UTILS_TRNR_SRC)		\
+			   $(THREAD_THREAD_UTILS_TRNR_OBJ)		\
+			   $(THREAD_THREAD_UTILS_TEST_OBJ)		\
+			   $(THREAD_THREAD_UTILS_TEST_BIN)
+
+
+# thread/thread_log
+# ──────────────────────────────────────────────────────────────────────────────
+THREAD_THREAD_LOG_SRC 		:= $(call HELPER_SOURCE_PATH,thread thread_log)
+THREAD_THREAD_LOG_HDR		:= $(call HELPER_HEADER_PATH,thread thread_log)
+THREAD_THREAD_LOG_OBJ 		:= $(call HELPER_OBJECT_PATH,thread thread_log)
+THREAD_THREAD_LOG_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_log)
+THREAD_THREAD_LOG_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_log)
+THREAD_THREAD_LOG_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_log)
+THREAD_THREAD_LOG_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_log)
+THREAD_THREAD_LOG_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_log)
+THREAD_THREAD_LOG_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_log)
+# ─────────────── target prequisites ───────────────────────────────────────────
+THREAD_THREAD_LOG_OBJ_PREQS		:= $(THREAD_THREAD_LOG_SRC) 		\
+			   		   $(THREAD_THREAD_LOG_HDR) 		\
+			   		   $(THREAD_THREAD_UTILS_HDR)		\
+			   		   $(STRING_STRING_UTILS_HDR)
+THREAD_THREAD_LOG_OBJ_GROUP		:= $(THREAD_THREAD_LOG_OBJ)		\
+					   $(THREAD_THREAD_UTILS_OBJ_GROUP)	\
+					   $(STRING_STRING_UTILS_OBJ_GROUP)
+THREAD_THREAD_LOG_TRNR_SRC_PREQS	:= $(THREAD_THREAD_LOG_TEST_SRC)	\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+THREAD_THREAD_LOG_TEST_OBJ_PREQS	:= $(THREAD_THREAD_LOG_TEST_SRC)	\
+			   		   $(THREAD_THREAD_LOG_OBJ_PREQS) 	\
+			   		   $(UNITY_OBJ_PREQS)
+THREAD_THREAD_LOG_TRNR_OBJ_PREQS	:= $(THREAD_THREAD_LOG_TRNR_SRC)	\
+			   		   $(THREAD_THREAD_LOG_TEST_OBJ_PREQS)
+THREAD_THREAD_LOG_TEST_BIN_PREQS	:= $(THREAD_THREAD_LOG_TRNR_OBJ)	\
+			   		   $(THREAD_THREAD_LOG_TEST_OBJ)	\
+			   		   $(THREAD_THREAD_LOG_OBJ_GROUP)	\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(THREAD_THREAD_LOG_TEST_BIN)
+TARGETS			+= $(THREAD_THREAD_LOG_OBJ)			\
+			   $(THREAD_THREAD_LOG_TRNR_SRC)		\
+			   $(THREAD_THREAD_LOG_TRNR_OBJ)		\
+			   $(THREAD_THREAD_LOG_TEST_OBJ)		\
+			   $(THREAD_THREAD_LOG_TEST_BIN)
+
+
+# thread/thread_pool
+# ──────────────────────────────────────────────────────────────────────────────
+THREAD_THREAD_POOL_SRC 		:= $(call HELPER_SOURCE_PATH,thread thread_pool)
+THREAD_THREAD_POOL_HDR		:= $(call HELPER_HEADER_PATH,thread thread_pool)
+THREAD_THREAD_POOL_OBJ 		:= $(call HELPER_OBJECT_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TEST_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_pool)
+THREAD_THREAD_POOL_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_pool)
+# ─────────────── target prequisites ───────────────────────────────────────────
+THREAD_THREAD_POOL_OBJ_PREQS		:= $(THREAD_THREAD_POOL_SRC) 		\
+			   		   $(THREAD_THREAD_POOL_HDR) 		\
+			   		   $(THREAD_THREAD_UTILS_HDR)		\
+			   		   $(THREAD_THREAD_LOG_HDR)
+THREAD_THREAD_POOL_OBJ_GROUP		:= $(THREAD_THREAD_POOL_OBJ)		\
+					   $(THREAD_THREAD_LOG_OBJ_GROUP)
+THREAD_THREAD_POOL_TRNR_SRC_PREQS	:= $(THREAD_THREAD_POOL_TEST_SRC)	\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+THREAD_THREAD_POOL_TEST_OBJ_PREQS	:= $(THREAD_THREAD_POOL_TEST_SRC)	\
+			   		   $(THREAD_THREAD_POOL_OBJ_PREQS) 	\
+			   		   $(UNITY_OBJ_PREQS)
+THREAD_THREAD_POOL_TRNR_OBJ_PREQS	:= $(THREAD_THREAD_POOL_TRNR_SRC)	\
+			   		   $(THREAD_THREAD_POOL_TEST_OBJ_PREQS)
+THREAD_THREAD_POOL_TEST_BIN_PREQS	:= $(THREAD_THREAD_POOL_TRNR_OBJ)	\
+			   		   $(THREAD_THREAD_POOL_TEST_OBJ)	\
+			   		   $(THREAD_THREAD_POOL_OBJ_GROUP)	\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(THREAD_THREAD_POOL_TEST_BIN)
+TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
+			   $(THREAD_THREAD_POOL_TRNR_SRC)		\
+			   $(THREAD_THREAD_POOL_TRNR_OBJ)		\
+			   $(THREAD_THREAD_POOL_TEST_OBJ)		\
+			   $(THREAD_THREAD_POOL_TEST_BIN)
+
+
+
+# ## GENERATOR MODULES
+# # ══════════════════════════════════════════════════════════════════════════════
+# # gen/gen_strings
+# # ──────────────────────────────────────────────────────────────────────────────
+# GEN_GEN_STRINGS_SRC 		:= $(call GEN_SOURCE_PATH,strings)
+# GEN_GEN_STRINGS_HDR		:= $(call GEN_HEADER_PATH,strings)
+# GEN_GEN_STRINGS_OBJ 		:= $(call GEN_OBJECT_PATH,strings)
+# GEN_GEN_STRINGS_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,strings)
+# GEN_GEN_STRINGS_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,strings)
+# GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
+# GEN_GEN_STRINGS_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
+# GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,strings)
+# GEN_GEN_STRINGS_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,strings)
+# # ─────────────── target prequisites ───────────────────────────────────────────
+# GEN_GEN_STRINGS_OBJ_PREQS	:= $(GEN_GEN_STRINGS_SRC) 		\
+# 			   	   $(GEN_GEN_STRINGS_HDR)		\
+# 			   	   $(THREAD_THREAD_LOG_HDR)
+# GEN_GEN_STRINGS_TRNR_SRC_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
+# 				   $(TEST_RUNNER_SOURCE_DIR)
+# GEN_GEN_STRINGS_TEST_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
+# 			   	   $(GEN_GEN_STRINGS_OBJ_PREQS) 	\
+# 			   	   $(UNITY_OBJ_PREQS)
+# GEN_GEN_STRINGS_TRNR_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TRNR_SRC)		\
+# 			   	   $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
+# GEN_GEN_STRINGS_TEST_BIN_PREQS	:= $(GEN_GEN_STRINGS_TRNR_OBJ)		\
+# 				   $(GEN_GEN_STRINGS_TEST_OBJ)		\
+# 			   	   $(GEN_GEN_STRINGS_OBJ)		\
+# 			   	   $(THREAD_THREAD_LOG_OBJ)				\
+# 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
+# 			   	   $(EXIT_OBJ)				\
+# 			   	   $(TIME_TIME_UTILS_OBJ)		\
+# 			   	   $(STRING_STRING_UTILS_OBJ)				\
+# 			   	   $(UNITY_OBJ)
+# # ─────────────── targets ──────────────────────────────────────────────────────
+# TEST_BINARIES		+= $(GEN_GEN_STRINGS_TEST_BIN)
+# TARGETS			+= $(GEN_GEN_STRINGS_OBJ)		\
+# 			   $(GEN_GEN_STRINGS_TRNR_SRC)		\
+# 			   $(GEN_GEN_STRINGS_TRNR_OBJ)		\
+# 			   $(GEN_GEN_STRINGS_TEST_OBJ)		\
+# 			   $(GEN_GEN_STRINGS_TEST_BIN)
+
+
+# # gen/gen_names
+# # ──────────────────────────────────────────────────────────────────────────────
+# GEN_GEN_NAMES_SRC 		:= $(call GEN_SOURCE_PATH,names)
+# GEN_GEN_NAMES_HDR		:= $(call GEN_HEADER_PATH,names)
+# GEN_GEN_NAMES_OBJ 		:= $(call GEN_OBJECT_PATH,names)
+# GEN_GEN_NAMES_TEST_SRC		:= $(call GEN_TEST_SOURCE_PATH,names)
+# GEN_GEN_NAMES_TRNR_SRC		:= $(call GEN_TEST_RUNNER_SOURCE_PATH,names)
+# GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
+# GEN_GEN_NAMES_TRNR_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
+# GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_OBJECT_PATH,names)
+# GEN_GEN_NAMES_TEST_BIN		:= $(call GEN_TEST_BINARY_PATH,names)
+# # ─────────────── target prequisites ───────────────────────────────────────────
+# GEN_GEN_NAMES_OBJ_PREQS		:= $(GEN_GEN_NAMES_SRC) 		\
+# 			     	   $(GEN_GEN_NAMES_HDR)			\
+# 			     	   $(GEN_GEN_STRINGS_HDR)		\
+# 			      	   $(RANDOM_RANDOM_HDR)
+# GEN_GEN_NAMES_TRNR_SRC_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
+# 				   $(TEST_RUNNER_SOURCE_DIR)
+# GEN_GEN_NAMES_TEST_OBJ_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
+# 			   	   $(GEN_GEN_NAMES_OBJ_PREQS)		\
+# 			   	   $(UNITY_OBJ_PREQS)
+# GEN_GEN_NAMES_TRNR_OBJ_PREQS	:= $(GEN_GEN_NAMES_TRNR_SRC)		\
+# 			   	   $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
+# GEN_GEN_NAMES_TEST_BIN_PREQS	:= $(GEN_GEN_NAMES_TRNR_OBJ)		\
+# 				   $(GEN_GEN_NAMES_TEST_OBJ)		\
+# 			   	   $(GEN_GEN_NAMES_OBJ)			\
+# 			   	   $(GEN_GEN_STRINGS_OBJ)		\
+# 			   	   $(THREAD_THREAD_LOG_OBJ)				\
+# 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
+# 			   	   $(EXIT_OBJ)				\
+# 			   	   $(TIME_TIME_UTILS_OBJ)		\
+# 			   	   $(STRING_STRING_UTILS_OBJ)				\
+# 			   	   $(RANDOM_RANDOM_OBJ)			\
+# 			   	   $(RANDOM_PCG_BASIC_OBJ)		\
+# 			   	   $(MEMORY_MEMORY_SWAP_OBJ)		\
+# 			   	   $(MEMORY_MEMORY_UTILS_OBJ)		\
+# 				   $(UTILS_UTILS_OBJ_GROUP)		\
+# 			   	   $(UNITY_OBJ)
+# # ─────────────── targets ──────────────────────────────────────────────────────
+# TEST_BINARIES		+= $(GEN_GEN_NAMES_TEST_BIN)
+# TARGETS			+= $(GEN_GEN_NAMES_OBJ)			\
+# 			   $(GEN_GEN_NAMES_TRNR_SRC)		\
+# 			   $(GEN_GEN_NAMES_TRNR_OBJ)		\
+# 			   $(GEN_GEN_NAMES_TEST_OBJ)		\
+# 			   $(GEN_GEN_NAMES_TEST_BIN)
+
+
+# # gen/gen_count_string
+# # ──────────────────────────────────────────────────────────────────────────────
+# GEN_GEN_COUNT_STRING_SRC 	:= $(call GEN_SOURCE_PATH,count_string)
+# GEN_GEN_COUNT_STRING_HDR	:= $(call GEN_HEADER_PATH,count_string)
+# GEN_GEN_COUNT_STRING_OBJ 	:= $(call GEN_OBJECT_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,count_string)
+# GEN_GEN_COUNT_STRING_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,count_string)
+# # ─────────────── target prequisites ───────────────────────────────────────────
+# GEN_GEN_COUNT_STRING_OBJ_PREQS		:= $(GEN_GEN_COUNT_STRING_SRC) 		\
+# 				   	   $(GEN_GEN_COUNT_STRING_HDR) 		\
+# 				   	   $(GEN_GEN_STRINGS_HDR)
+# GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
+# 			   	   	   $(TEST_RUNNER_SOURCE_DIR)
+# GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
+# 			   	   	   $(GEN_GEN_COUNT_STRING_OBJ_PREQS) 	\
+# 			   	   	   $(UNITY_OBJ_PREQS)
+# GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_SRC)	\
+# 			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
+# GEN_GEN_COUNT_STRING_TEST_BIN_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_OBJ)	\
+# 			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ)	\
+# 			   	   	   $(GEN_GEN_COUNT_STRING_OBJ)		\
+# 			   	   	   $(GEN_GEN_STRINGS_OBJ)		\
+# 			   	   	   $(THREAD_THREAD_LOG_OBJ)				\
+# 			   	   	   $(THREAD_THREAD_UTILS_OBJ)			\
+# 			   	   	   $(EXIT_OBJ)				\
+# 			   	   	   $(TIME_TIME_UTILS_OBJ)		\
+# 			   	   	   $(STRING_STRING_UTILS_OBJ)				\
+# 			           	   $(UNITY_OBJ)
+# # ─────────────── targets ──────────────────────────────────────────────────────
+# TEST_BINARIES		+= $(GEN_GEN_COUNT_STRING_TEST_BIN)
+# TARGETS			+= $(GEN_GEN_COUNT_STRING_OBJ)			\
+# 			   $(GEN_GEN_COUNT_STRING_TRNR_SRC)		\
+# 			   $(GEN_GEN_COUNT_STRING_TRNR_OBJ)		\
+# 			   $(GEN_GEN_COUNT_STRING_TEST_OBJ)		\
+# 			   $(GEN_GEN_COUNT_STRING_TEST_BIN)
+
 
 ## PROJECT MODULES
 # ══════════════════════════════════════════════════════════════════════════════
-# mysql_seed_utils
-# ──────────────────────────────────────────────────────────────────────────────
-UTILS_SRC 		:= $(call PROJECT_SOURCE_PATH,utils)
-UTILS_HDR		:= $(call PROJECT_HEADER_PATH,utils)
-UTILS_OBJ 		:= $(call PROJECT_OBJECT_PATH,utils)
-UTILS_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,utils)
-UTILS_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,utils)
-UTILS_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,utils)
-UTILS_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,utils)
-UTILS_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,utils)
-UTILS_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,utils)
-# ─────────────── target prequisites ───────────────────────────────────────────
-UTILS_OBJ_PREQS		:= $(UTILS_SRC) 				\
-			   $(UTILS_HDR)					\
-			   $(STRING_MACROS_HDR)
-UTILS_TRNR_SRC_PREQS	:= $(UTILS_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-UTILS_TEST_OBJ_PREQS	:= $(UTILS_TEST_SRC)				\
-			   $(UTILS_OBJ_PREQS) 				\
-			   $(UNITY_OBJ_PREQS)
-UTILS_TRNR_OBJ_PREQS	:= $(UTILS_TRNR_SRC)				\
-			   $(UTILS_TEST_OBJ_PREQS)
-UTILS_TEST_BIN_PREQS	:= $(UTILS_TRNR_OBJ)				\
-			   $(UTILS_TEST_OBJ)				\
-			   $(UTILS_OBJ)					\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(UTILS_TEST_BIN)
-TARGETS			+= $(UTILS_OBJ)					\
-			   $(UTILS_TRNR_SRC)				\
-			   $(UTILS_TRNR_OBJ)				\
-			   $(UTILS_TEST_OBJ)				\
-			   $(UTILS_TEST_BIN)
-
-
-
-# mysql_seed_exit
-# ──────────────────────────────────────────────────────────────────────────────
-EXIT_SRC 		:= $(call PROJECT_SOURCE_PATH,exit)
-EXIT_HDR		:= $(call PROJECT_HEADER_PATH,exit)
-EXIT_OBJ 		:= $(call PROJECT_OBJECT_PATH,exit)
-EXIT_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,exit)
-EXIT_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,exit)
-EXIT_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
-EXIT_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
-EXIT_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,exit)
-EXIT_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,exit)
-# ─────────────── target prequisites ───────────────────────────────────────────
-EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
-			   $(EXIT_HDR) 					\
-			   $(MODE_HDR) 					\
-			   $(STRING_MACROS_HDR)
-EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
-			   $(EXIT_OBJ_PREQS) 				\
-			   $(UNITY_OBJ_PREQS)
-EXIT_TRNR_OBJ_PREQS	:= $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TEST_OBJ_PREQS)
-EXIT_TEST_BIN_PREQS	:= $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_OBJ)					\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(EXIT_TEST_BIN)
-TARGETS			+= $(EXIT_OBJ)					\
-			   $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_TEST_BIN)
-
-
-# mysql_seed_parallel
-# ──────────────────────────────────────────────────────────────────────────────
-PARALLEL_SRC 		:= $(call PROJECT_SOURCE_PATH,parallel)
-PARALLEL_HDR		:= $(call PROJECT_HEADER_PATH,parallel)
-PARALLEL_OBJ 		:= $(call PROJECT_OBJECT_PATH,parallel)
-PARALLEL_TEST_SRC	:= $(call PROJECT_TEST_SOURCE_PATH,parallel)
-PARALLEL_TRNR_SRC	:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,parallel)
-PARALLEL_TEST_OBJ	:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,parallel)
-PARALLEL_TRNR_OBJ	:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,parallel)
-PARALLEL_TEST_OBJ	:= $(call PROJECT_TEST_OBJECT_PATH,parallel)
-PARALLEL_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,parallel)
-# ─────────────── target prequisites ───────────────────────────────────────────
-PARALLEL_OBJ_PREQS	:= $(PARALLEL_SRC) 				\
-			   $(PARALLEL_HDR)				\
-			   $(EXIT_HDR)
-PARALLEL_TRNR_SRC_PREQS	:= $(PARALLEL_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-PARALLEL_TEST_OBJ_PREQS	:= $(PARALLEL_TEST_SRC)				\
-			   $(PARALLEL_OBJ_PREQS) 			\
-			   $(UNITY_OBJ_PREQS)
-PARALLEL_TRNR_OBJ_PREQS	:= $(PARALLEL_TRNR_SRC)				\
-			   $(PARALLEL_TEST_OBJ_PREQS)
-PARALLEL_TEST_BIN_PREQS	:= $(PARALLEL_TRNR_OBJ)				\
-			   $(PARALLEL_TEST_OBJ)				\
-			   $(PARALLEL_OBJ)				\
-			   $(EXIT_OBJ)					\
-			   $(TIME_TIME_UTILS_OBJ)			\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(PARALLEL_TEST_BIN)
-TARGETS			+= $(PARALLEL_OBJ)				\
-			   $(PARALLEL_TRNR_SRC)				\
-			   $(PARALLEL_TRNR_OBJ)				\
-			   $(PARALLEL_TEST_OBJ)				\
-			   $(PARALLEL_TEST_BIN)
-
-
-
-# mysql_seed_log
-# ──────────────────────────────────────────────────────────────────────────────
-LOG_SRC 		:= $(call PROJECT_SOURCE_PATH,log)
-LOG_HDR			:= $(call PROJECT_HEADER_PATH,log)
-LOG_OBJ 		:= $(call PROJECT_OBJECT_PATH,log)
-LOG_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,log)
-LOG_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,log)
-LOG_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,log)
-LOG_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,log)
-LOG_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,log)
-LOG_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,log)
-# ─────────────── target prequisites ───────────────────────────────────────────
-LOG_OBJ_PREQS		:= $(LOG_SRC) 					\
-			   $(LOG_HDR) 					\
-			   $(PARALLEL_HDR)				\
-			   $(UTILS_HDR)
-LOG_TRNR_SRC_PREQS	:= $(LOG_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-LOG_TEST_OBJ_PREQS	:= $(LOG_TEST_SRC)				\
-			   $(LOG_OBJ_PREQS) 				\
-			   $(UNITY_OBJ_PREQS)
-LOG_TRNR_OBJ_PREQS	:= $(LOG_TRNR_SRC)				\
-			   $(LOG_TEST_OBJ_PREQS)
-LOG_TEST_BIN_PREQS	:= $(LOG_TRNR_OBJ)				\
-			   $(LOG_TEST_OBJ)				\
-			   $(LOG_OBJ)					\
-			   $(PARALLEL_OBJ)				\
-			   $(EXIT_OBJ)					\
-			   $(TIME_TIME_UTILS_OBJ)			\
-			   $(UTILS_OBJ)					\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(LOG_TEST_BIN)
-TARGETS			+= $(LOG_OBJ)					\
-			   $(LOG_TRNR_SRC)				\
-			   $(LOG_TRNR_OBJ)				\
-			   $(LOG_TEST_OBJ)				\
-			   $(LOG_TEST_BIN)
-
-
-## GENERATOR MODULES
-# ══════════════════════════════════════════════════════════════════════════════
-# gen/gen_strings
-# ──────────────────────────────────────────────────────────────────────────────
-GEN_GEN_STRINGS_SRC 		:= $(call GEN_SOURCE_PATH,strings)
-GEN_GEN_STRINGS_HDR		:= $(call GEN_HEADER_PATH,strings)
-GEN_GEN_STRINGS_OBJ 		:= $(call GEN_OBJECT_PATH,strings)
-GEN_GEN_STRINGS_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,strings)
-GEN_GEN_STRINGS_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,strings)
-GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
-GEN_GEN_STRINGS_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
-GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,strings)
-GEN_GEN_STRINGS_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,strings)
-# ─────────────── target prequisites ───────────────────────────────────────────
-GEN_GEN_STRINGS_OBJ_PREQS	:= $(GEN_GEN_STRINGS_SRC) 		\
-			   	   $(GEN_GEN_STRINGS_HDR)		\
-			   	   $(LOG_HDR)
-GEN_GEN_STRINGS_TRNR_SRC_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
-				   $(TEST_RUNNER_SOURCE_DIR)
-GEN_GEN_STRINGS_TEST_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
-			   	   $(GEN_GEN_STRINGS_OBJ_PREQS) 	\
-			   	   $(UNITY_OBJ_PREQS)
-GEN_GEN_STRINGS_TRNR_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TRNR_SRC)		\
-			   	   $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
-GEN_GEN_STRINGS_TEST_BIN_PREQS	:= $(GEN_GEN_STRINGS_TRNR_OBJ)		\
-				   $(GEN_GEN_STRINGS_TEST_OBJ)		\
-			   	   $(GEN_GEN_STRINGS_OBJ)		\
-			   	   $(LOG_OBJ)				\
-			   	   $(PARALLEL_OBJ)			\
-			   	   $(EXIT_OBJ)				\
-			   	   $(TIME_TIME_UTILS_OBJ)		\
-			   	   $(UTILS_OBJ)				\
-			   	   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(GEN_GEN_STRINGS_TEST_BIN)
-TARGETS			+= $(GEN_GEN_STRINGS_OBJ)		\
-			   $(GEN_GEN_STRINGS_TRNR_SRC)		\
-			   $(GEN_GEN_STRINGS_TRNR_OBJ)		\
-			   $(GEN_GEN_STRINGS_TEST_OBJ)		\
-			   $(GEN_GEN_STRINGS_TEST_BIN)
-
-
-# gen/gen_names
-# ──────────────────────────────────────────────────────────────────────────────
-GEN_GEN_NAMES_SRC 		:= $(call GEN_SOURCE_PATH,names)
-GEN_GEN_NAMES_HDR		:= $(call GEN_HEADER_PATH,names)
-GEN_GEN_NAMES_OBJ 		:= $(call GEN_OBJECT_PATH,names)
-GEN_GEN_NAMES_TEST_SRC		:= $(call GEN_TEST_SOURCE_PATH,names)
-GEN_GEN_NAMES_TRNR_SRC		:= $(call GEN_TEST_RUNNER_SOURCE_PATH,names)
-GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
-GEN_GEN_NAMES_TRNR_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
-GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_OBJECT_PATH,names)
-GEN_GEN_NAMES_TEST_BIN		:= $(call GEN_TEST_BINARY_PATH,names)
-# ─────────────── target prequisites ───────────────────────────────────────────
-GEN_GEN_NAMES_OBJ_PREQS		:= $(GEN_GEN_NAMES_SRC) 		\
-			     	   $(GEN_GEN_NAMES_HDR)			\
-			     	   $(GEN_GEN_STRINGS_HDR)		\
-			      	   $(RANDOM_RANDOM_HDR)
-GEN_GEN_NAMES_TRNR_SRC_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
-				   $(TEST_RUNNER_SOURCE_DIR)
-GEN_GEN_NAMES_TEST_OBJ_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
-			   	   $(GEN_GEN_NAMES_OBJ_PREQS)		\
-			   	   $(UNITY_OBJ_PREQS)
-GEN_GEN_NAMES_TRNR_OBJ_PREQS	:= $(GEN_GEN_NAMES_TRNR_SRC)		\
-			   	   $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
-GEN_GEN_NAMES_TEST_BIN_PREQS	:= $(GEN_GEN_NAMES_TRNR_OBJ)		\
-				   $(GEN_GEN_NAMES_TEST_OBJ)		\
-			   	   $(GEN_GEN_NAMES_OBJ)			\
-			   	   $(GEN_GEN_STRINGS_OBJ)		\
-			   	   $(LOG_OBJ)				\
-			   	   $(PARALLEL_OBJ)			\
-			   	   $(EXIT_OBJ)				\
-			   	   $(TIME_TIME_UTILS_OBJ)		\
-			   	   $(UTILS_OBJ)				\
-			   	   $(RANDOM_RANDOM_OBJ)			\
-			   	   $(RANDOM_PCG_BASIC_OBJ)		\
-			   	   $(MEMORY_MEMORY_SWAP_OBJ)		\
-			   	   $(MEMORY_MEMORY_UTILS_OBJ)		\
-			   	   $(UTILS_UTILS_OBJ)			\
-			   	   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(GEN_GEN_NAMES_TEST_BIN)
-TARGETS			+= $(GEN_GEN_NAMES_OBJ)			\
-			   $(GEN_GEN_NAMES_TRNR_SRC)		\
-			   $(GEN_GEN_NAMES_TRNR_OBJ)		\
-			   $(GEN_GEN_NAMES_TEST_OBJ)		\
-			   $(GEN_GEN_NAMES_TEST_BIN)
-
-
-# gen/gen_count_string
-# ──────────────────────────────────────────────────────────────────────────────
-GEN_GEN_COUNT_STRING_SRC 	:= $(call GEN_SOURCE_PATH,count_string)
-GEN_GEN_COUNT_STRING_HDR	:= $(call GEN_HEADER_PATH,count_string)
-GEN_GEN_COUNT_STRING_OBJ 	:= $(call GEN_OBJECT_PATH,count_string)
-GEN_GEN_COUNT_STRING_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,count_string)
-GEN_GEN_COUNT_STRING_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,count_string)
-GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
-GEN_GEN_COUNT_STRING_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
-GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,count_string)
-GEN_GEN_COUNT_STRING_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,count_string)
-# ─────────────── target prequisites ───────────────────────────────────────────
-GEN_GEN_COUNT_STRING_OBJ_PREQS		:= $(GEN_GEN_COUNT_STRING_SRC) 		\
-				   	   $(GEN_GEN_COUNT_STRING_HDR) 		\
-				   	   $(GEN_GEN_STRINGS_HDR)
-GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
-			   	   	   $(TEST_RUNNER_SOURCE_DIR)
-GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
-			   	   	   $(GEN_GEN_COUNT_STRING_OBJ_PREQS) 	\
-			   	   	   $(UNITY_OBJ_PREQS)
-GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_SRC)	\
-			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
-GEN_GEN_COUNT_STRING_TEST_BIN_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_OBJ)	\
-			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ)	\
-			   	   	   $(GEN_GEN_COUNT_STRING_OBJ)		\
-			   	   	   $(GEN_GEN_STRINGS_OBJ)		\
-			   	   	   $(LOG_OBJ)				\
-			   	   	   $(PARALLEL_OBJ)			\
-			   	   	   $(EXIT_OBJ)				\
-			   	   	   $(TIME_TIME_UTILS_OBJ)		\
-			   	   	   $(UTILS_OBJ)				\
-			           	   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(GEN_GEN_COUNT_STRING_TEST_BIN)
-TARGETS			+= $(GEN_GEN_COUNT_STRING_OBJ)			\
-			   $(GEN_GEN_COUNT_STRING_TRNR_SRC)		\
-			   $(GEN_GEN_COUNT_STRING_TRNR_OBJ)		\
-			   $(GEN_GEN_COUNT_STRING_TEST_OBJ)		\
-			   $(GEN_GEN_COUNT_STRING_TEST_BIN)
-
-
 # mysql_seed_create
 # ──────────────────────────────────────────────────────────────────────────────
 CREATE_SRC 		:= $(call PROJECT_SOURCE_PATH,create)
@@ -807,6 +856,7 @@ CREATE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,create)
 CREATE_OBJ_PREQS	:= $(CREATE_SRC) 				\
 			   $(CREATE_HDR) 				\
 			   $(MODE_HDR)
+CREATE_OBJ_GROUP	:= $(CREATE_OBJ)
 CREATE_TRNR_SRC_PREQS	:= $(CREATE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 CREATE_TEST_OBJ_PREQS	:= $(CREATE_TEST_SRC)				\
@@ -816,7 +866,7 @@ CREATE_TRNR_OBJ_PREQS	:= $(CREATE_TRNR_SRC)				\
 			   $(CREATE_TEST_OBJ_PREQS)
 CREATE_TEST_BIN_PREQS	:= $(CREATE_TRNR_OBJ)				\
 			   $(CREATE_TEST_OBJ)				\
-			   $(CREATE_OBJ)				\
+			   $(CREATE_OBJ_GROUP)				\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(CREATE_TEST_BIN)
@@ -842,6 +892,7 @@ RUN_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,run)
 RUN_OBJ_PREQS		:= $(RUN_SRC) 					\
 			   $(RUN_HDR) 					\
 			   $(MODE_HDR)
+RUN_OBJ_GROUP		:= $(RUN_OBJ)
 RUN_TRNR_SRC_PREQS	:= $(RUN_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 RUN_TEST_OBJ_PREQS	:= $(RUN_TEST_SRC)				\
@@ -862,6 +913,44 @@ TARGETS			+= $(RUN_OBJ)					\
 			   $(RUN_TEST_BIN)
 
 
+# mysql_seed_exit
+# ──────────────────────────────────────────────────────────────────────────────
+EXIT_SRC 		:= $(call PROJECT_SOURCE_PATH,exit)
+EXIT_HDR		:= $(call PROJECT_HEADER_PATH,exit)
+EXIT_OBJ 		:= $(call PROJECT_OBJECT_PATH,exit)
+EXIT_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,exit)
+EXIT_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,exit)
+EXIT_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
+EXIT_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
+EXIT_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,exit)
+EXIT_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,exit)
+# ─────────────── target prequisites ───────────────────────────────────────────
+EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
+			   $(EXIT_HDR) 					\
+			   $(MODE_HDR) 					\
+			   $(STRING_STRING_MACROS_HDR)
+EXIT_OBJ_GROUP		:= $(EXIT_OBJ)
+EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
+			   $(EXIT_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+EXIT_TRNR_OBJ_PREQS	:= $(EXIT_TRNR_SRC)				\
+			   $(EXIT_TEST_OBJ_PREQS)
+EXIT_TEST_BIN_PREQS	:= $(EXIT_TRNR_OBJ)				\
+			   $(EXIT_TEST_OBJ)				\
+			   $(EXIT_OBJ_GROUP)				\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(EXIT_TEST_BIN)
+TARGETS			+= $(EXIT_OBJ)					\
+			   $(EXIT_TRNR_SRC)				\
+			   $(EXIT_TRNR_OBJ)				\
+			   $(EXIT_TEST_OBJ)				\
+			   $(EXIT_TEST_BIN)
+
+
+
 # mysql_seed_cli
 # ──────────────────────────────────────────────────────────────────────────────
 CLI_SRC 		:= $(call PROJECT_SOURCE_PATH,cli)
@@ -873,37 +962,40 @@ CLI_TEST_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,cli)
 CLI_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,cli)
 CLI_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,cli)
 CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
-# ─────────────── target prequisites ───────────────────────────────────────────
-CLI_OBJ_PREQS		:= $(CLI_SRC) 					\
-			   $(CLI_HDR)					\
-			   $(CREATE_HDR)				\
-			   $(RUN_HDR)					\
-			   $(EXIT_HDR)
-CLI_TRNR_SRC_PREQS	:= $(CLI_TEST_SRC)				\
-			   $(TEST_RUNNER_SOURCE_DIR)
-CLI_TEST_OBJ_PREQS	:= $(CLI_TEST_SRC)				\
-			   $(CLI_OBJ_PREQS) 				\
-			   $(UNITY_OBJ_PREQS)
-CLI_TRNR_OBJ_PREQS	:= $(CLI_TRNR_SRC)				\
-			   $(CLI_TEST_OBJ_PREQS)
-CLI_TEST_BIN_PREQS	:= $(CLI_TRNR_OBJ)				\
-			   $(CLI_TEST_OBJ)				\
-			   $(CLI_OBJ)					\
-			   $(CREATE_OBJ)				\
-			   $(RUN_OBJ)					\
-			   $(LOG_OBJ)					\
-			   $(PARALLEL_OBJ)				\
-			   $(EXIT_OBJ)					\
-			   $(TIME_TIME_UTILS_OBJ)			\
-			   $(UTILS_OBJ)					\
-			   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(CLI_TEST_BIN)
-TARGETS			+= $(CLI_OBJ)					\
-			   $(CLI_TRNR_SRC)				\
-			   $(CLI_TRNR_OBJ)				\
-			   $(CLI_TEST_OBJ)				\
-			   $(CLI_TEST_BIN)
+# # ─────────────── target prequisites ───────────────────────────────────────────
+# CLI_OBJ_PREQS		:= $(CLI_SRC) 					\
+# 			   $(CLI_HDR)					\
+# 			   $(CREATE_HDR)				\
+# 			   $(RUN_HDR)					\
+# 			   $(EXIT_HDR)
+# CLI_OBJ_GROUP		:= $(CREATE_OBJ_GROUP)				\
+# 			   $(RUN_OBJ_GROUP)				\
+# 			   $(EXIT_OBJ_GROUP)
+# CLI_TRNR_SRC_PREQS	:= $(CLI_TEST_SRC)				\
+# 			   $(TEST_RUNNER_SOURCE_DIR)
+# CLI_TEST_OBJ_PREQS	:= $(CLI_TEST_SRC)				\
+# 			   $(CLI_OBJ_PREQS) 				\
+# 			   $(UNITY_OBJ_PREQS)
+# CLI_TRNR_OBJ_PREQS	:= $(CLI_TRNR_SRC)				\
+# 			   $(CLI_TEST_OBJ_PREQS)
+# CLI_TEST_BIN_PREQS	:= $(CLI_TRNR_OBJ)				\
+# 			   $(CLI_TEST_OBJ)				\
+# 			   $(CLI_OBJ)					\
+# 			   $(CREATE_OBJ)				\
+# 			   $(RUN_OBJ)					\
+# 			   $(THREAD_THREAD_LOG_OBJ)					\
+# 			   $(THREAD_THREAD_UTILS_OBJ)				\
+# 			   $(EXIT_OBJ)					\
+# 			   $(TIME_TIME_UTILS_OBJ)			\
+# 			   $(STRING_STRING_UTILS_OBJ)					\
+# 			   $(UNITY_OBJ)
+# # ─────────────── targets ──────────────────────────────────────────────────────
+# TEST_BINARIES		+= $(CLI_TEST_BIN)
+# TARGETS			+= $(CLI_OBJ)					\
+# 			   $(CLI_TRNR_SRC)				\
+# 			   $(CLI_TRNR_OBJ)				\
+# 			   $(CLI_TEST_OBJ)				\
+# 			   $(CLI_TEST_BIN)
 
 
 
@@ -915,22 +1007,22 @@ PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
 PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
 # ─────────────── target prequisites ───────────────────────────────────────────
 PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
-			   $(CLI_OBJ) 					\
-			   $(CREATE_OBJ) 				\
-			   $(RUN_OBJ) 					\
-			   $(GEN_GEN_COUNT_STRING_OBJ) 			\
-			   $(GEN_GEN_NAMES_OBJ) 			\
-			   $(GEN_GEN_STRINGS_OBJ) 			\
-			   $(LOG_OBJ) 					\
-			   $(PARALLEL_OBJ)				\
-			   $(EXIT_OBJ) 					\
-			   $(UTILS_OBJ)					\
-			   $(RANDOM_RANDOM_OBJ)				\
-			   $(RANDOM_PCG_BASIC_OBJ)			\
-			   $(MEMORY_MEMORY_SWAP_OBJ)			\
-			   $(MEMORY_MEMORY_UTILS_OBJ)			\
-			   $(TIME_TIME_UTILS_OBJ)			\
-			   $(UTILS_UTILS_OBJ)
+			   $(CREATE_OBJ_GROUP) 				\
+			   $(RUN_OBJ_GROUP)				\
+			   $(EXIT_OBJ_GROUP)
+			   # $(GEN_GEN_COUNT_STRING_OBJ) 			\
+			   # $(GEN_GEN_NAMES_OBJ) 			\
+			   # $(GEN_GEN_STRINGS_OBJ) 			\
+			   # $(THREAD_THREAD_LOG_OBJ) 					\
+			   # $(THREAD_THREAD_UTILS_OBJ)				\
+			   # $(EXIT_OBJ) 					\
+			   # $(STRING_STRING_UTILS_OBJ)					\
+			   # $(RANDOM_RANDOM_OBJ)				\
+			   # $(RANDOM_PCG_BASIC_OBJ)			\
+			   # $(MEMORY_MEMORY_SWAP_OBJ)			\
+			   # $(MEMORY_MEMORY_UTILS_OBJ)			\
+			   # $(TIME_TIME_UTILS_OBJ)			\
+			   # $(UTILS_UTILS_OBJ)
 
 PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
 			   $(PROJECT_HDR) 				\
@@ -953,7 +1045,8 @@ TARGETS			+= $(PROJECT_OBJ)				\
 # ══════════════════════════════════════════════════════════════════════════════
 # make all targets
 # ──────────────────────────────────────────────────────────────────────────────
-all: $(TARGETS)
+all: $(info $(TARGETS))
+# all: $(TARGETS)
 
 # run all unit tests
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1000,17 +1093,17 @@ $(EXIT_OBJ): $(EXIT_OBJ_PREQS)
 
 # make mysql_seed_log object
 # ──────────────────────────────────────────────────────────────────────────────
-$(LOG_OBJ): $(LOG_OBJ_PREQS)
+$(THREAD_THREAD_LOG_OBJ): $(THREAD_THREAD_LOG_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_parallel object
 # ──────────────────────────────────────────────────────────────────────────────
-$(PARALLEL_OBJ): $(PARALLEL_OBJ_PREQS)
+$(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_utils object
 # ──────────────────────────────────────────────────────────────────────────────
-$(UTILS_OBJ): $(UTILS_OBJ_PREQS)
+$(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make gen/gen_count_string object
@@ -1165,56 +1258,56 @@ $(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
 # 	mysql_seed_log_test		object, and
 # 	mysql_seed_log_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(LOG_TEST_BIN): $(LOG_TEST_BIN_PREQS)
+$(THREAD_THREAD_LOG_TEST_BIN): $(THREAD_THREAD_LOG_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(LOG_TRNR_OBJ): $(LOG_TRNR_OBJ_PREQS)
+$(THREAD_THREAD_LOG_TRNR_OBJ): $(THREAD_THREAD_LOG_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(LOG_TEST_OBJ): $(LOG_TEST_OBJ_PREQS)
+$(THREAD_THREAD_LOG_TEST_OBJ): $(THREAD_THREAD_LOG_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(LOG_TRNR_SRC): $(LOG_TRNR_SRC_PREQS)
+$(THREAD_THREAD_LOG_TRNR_SRC): $(THREAD_THREAD_LOG_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for mysql_seed_parallel
+# for thread/thread_utils
 # make:
-# 	mysql_seed_parallel_test		binary,
-# 	mysql_seed_parallel_test_runner 	object,
-# 	mysql_seed_parallel_test		object, and
-# 	mysql_seed_parallel_test_runner	source
+# 	thread_thread_utils_test		binary,
+# 	thread_thread_utils_test_runner 	object,
+# 	thread_thread_utils_test		object, and
+# 	thread_thread_utils_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(PARALLEL_TEST_BIN): $(PARALLEL_TEST_BIN_PREQS)
+$(THREAD_THREAD_UTILS_TEST_BIN): $(THREAD_THREAD_UTILS_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(PARALLEL_TRNR_OBJ): $(PARALLEL_TRNR_OBJ_PREQS)
+$(THREAD_THREAD_UTILS_TRNR_OBJ): $(THREAD_THREAD_UTILS_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(PARALLEL_TEST_OBJ): $(PARALLEL_TEST_OBJ_PREQS)
+$(THREAD_THREAD_UTILS_TEST_OBJ): $(THREAD_THREAD_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(PARALLEL_TRNR_SRC): $(PARALLEL_TRNR_SRC_PREQS)
+$(THREAD_THREAD_UTILS_TRNR_SRC): $(THREAD_THREAD_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for mysql_seed_utils
+# for string/string_utils
 # make:
-# 	mysql_seed_utils_test		binary,
-# 	mysql_seed_utils_test_runner 	object,
-# 	mysql_seed_utils_test		object, and
-# 	mysql_seed_utils_test_runner	source
+# 	string_string_utils_test		binary,
+# 	string_string_utils_test_runner 	object,
+# 	string_string_utils_test		object, and
+# 	string_string_utils_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(UTILS_TEST_BIN): $(UTILS_TEST_BIN_PREQS)
+$(STRING_STRING_UTILS_TEST_BIN): $(STRING_STRING_UTILS_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(UTILS_TRNR_OBJ): $(UTILS_TRNR_OBJ_PREQS)
+$(STRING_STRING_UTILS_TRNR_OBJ): $(STRING_STRING_UTILS_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(UTILS_TEST_OBJ): $(UTILS_TEST_OBJ_PREQS)
+$(STRING_STRING_UTILS_TEST_OBJ): $(STRING_STRING_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(UTILS_TRNR_SRC): $(UTILS_TRNR_SRC_PREQS)
+$(STRING_STRING_UTILS_TRNR_SRC): $(STRING_STRING_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
