@@ -198,7 +198,7 @@ thread_log_append_digits(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_append_number(struct ThreadLog *const restrict log,
-		       const ssize_t n)
+			 const ssize_t n)
 {
 	log->current_ptr = put_number_until(log->current_ptr,
 					    n,
@@ -207,8 +207,8 @@ thread_log_append_number(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
-			      const char *const restrict string,
-			      const size_t length)
+				const char *const restrict string,
+				const size_t length)
 {
 	char *const restrict length_ptr = log->current_ptr
 					+ length;

@@ -51,29 +51,23 @@ thread_create_cl_handle(Thread *const restrict thread,
 			ThreadRoutineClosure *const restrict cl,
 			ThreadHandler *const handle,
 			void *handler_arg);
-
 extern inline void
 thread_create_cl_handle_cl(Thread *const restrict thread,
 			   ThreadRoutineClosure *const restrict routine_cl,
 			   ThreadHandlerClosure *const restrict handler_cl);
 
-
 /* thread_cancel */
 extern inline bool
 thread_cancel(Thread thread);
-
 extern inline void
 thread_cancel_muffle(Thread thread);
-
 extern inline bool
 thread_cancel_report(Thread thread,
 		     const char *restrict *const restrict failure);
-
 extern inline void
 thread_cancel_handle(Thread thread,
 		     ThreadHandler *const handle,
 		     void *arg);
-
 extern inline void
 thread_cancel_handle_cl(Thread thread,
 			ThreadHandlerClosure *const restrict cl);
@@ -84,6 +78,16 @@ thread_exit_detached(void);
 
 extern inline void
 thread_exit_joinable(void *pointer);
+
+/* thread_self */
+extern inline Thread
+thread_self(void);
+
+/* threads_equal */
+extern inline bool
+threads_equal(const Thread thread1,
+	      const Thread thread2);
+
 
 /* ThreadKey operations
  *─────────────────────────────────────────────────────────────────────────── */

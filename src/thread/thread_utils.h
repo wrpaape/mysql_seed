@@ -61,6 +61,12 @@ extern ThreadAttr thread_attr_prototype;
 #define thread_create_imp(THREAD, ROUTINE, ARG)				\
 pthread_create(THREAD, &thread_attr_prototype, ROUTINE, ARG)
 
+#define thread_self_imp()						\
+pthread_self()
+
+#define threads_equal_imp(THREAD1, THREAD2)				\
+pthread_equal(THREAD1, THREAD2)
+
 #define thread_cancel_imp(THREAD)					\
 pthread_cancel(THREAD)
 
@@ -234,7 +240,6 @@ thread_create_handle_cl(Thread *const restrict thread,
 	__builtin_unreachable();
 }
 
-
 /* thread_create_cl */
 inline bool
 thread_create_cl(Thread *const restrict thread,
@@ -290,7 +295,7 @@ thread_create_cl_handle_cl(Thread *const restrict thread,
 }
 
 
-
+/* thread_cancel */
 inline bool
 thread_cancel(Thread thread)
 {
@@ -361,6 +366,26 @@ thread_exit_joinable(void *pointer)
 {
 	thread_exit_joinable_imp(pointer);
 }
+
+
+/* thread_self */
+inline Thread
+thread_self(void)
+{
+	return thread_self_imp();
+}
+
+
+/* threads_equal */
+inline bool
+threads_equal(const Thread thread1,
+	      const Thread thread2)
+{
+	return threads_equal_imp(thread1,
+				 thread2) == 0;
+}
+
+
 
 /* ThreadKey operations
  *─────────────────────────────────────────────────────────────────────────── */

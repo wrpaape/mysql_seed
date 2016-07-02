@@ -23,8 +23,7 @@ union TaskFun {
 };
 
 struct Task {
-	struct Task *prev;
-	struct Task *next;
+	struct ThreadHandlerClosure *handle_fail;
 	union TaskFun fun;
 	void *arg;
 	void *result;
@@ -88,84 +87,9 @@ worker_queue_push(struct WorkerQueue *const restrict queue,
 	queue->last = worker;
 }
 
-inline void
-worker_queue_handle_push(struct WorkerQueue *const restrict queue,
-			 struct Worker *const restrict worker)
-{
-	mutex_handle_lock(&queue->lock);	/* exit on lock failure */
-
-	worker_queue_push(queue,
-			  worker);
-
-	mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
-}
 
 
-/* LIFO pop */
-inline struct Worker *
-worker_queue_pop(struct WorkerQueue *const restrict queue)
-{
-	struct Worker *const restrict worker = queue->head;
 
-	if (worker == NULL)
-		return NULL;
-
-	queue->head = worker->next;
-
-	if (queue->head == NULL)
-		queue->last = NULL;
-	else
-		queue->head->prev = NULL;
-
-	return worker;
-}
-
-inline struct Worker *
-worker_queue_handle_pop(struct WorkerQueue *const restrict queue)
-{
-	mutex_handle_lock(&queue->lock);	/* exit on lock failure */
-
-	struct Worker *const restrict worker = worker_queue_pop(queue);
-
-	mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
-
-	return worker;
-}
-
-/* random access delete */
-inline void
-worker_queue_remove(struct WorkerQueue *const restrict queue,
-		    struct Worker *const restrict worker)
-{
-	if (worker->prev == NULL) {
-		if (worker->next == NULL) {
-			queue->head = NULL;
-			queue->last = NULL;
-		} else {
-			worker->next->prev = NULL;
-			queue->head	   = worker->next;
-		}
-	} else {
-		worker->prev->next = worker->next;
-
-		if (worker->next == NULL)
-			queue->last	   = worker->prev;
-		else
-			worker->next->prev = worker->prev;
-	}
-}
-
-inline void
-worker_queue_handle_remove(struct WorkerQueue *const restrict queue,
-			   struct Worker *const restrict worker)
-{
-	mutex_handle_lock(&queue->lock);	/* exit on lock failure */
-
-	worker_queue_remove(queue,
-			    worker);
-
-	mutex_handle_unlock(&queue->lock);	/* exit on unlock failure */
-}
 
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */

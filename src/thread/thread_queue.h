@@ -20,6 +20,7 @@ struct ThreadQueue {
 	const struct *restrict ThreadHandlerClosure handle_fail;
 	Mutex lock;
 	ThreadCond node_ready;
+	ThreadCond empty;
 };
 
 /* initialize
@@ -31,6 +32,7 @@ thread_queue_init(struct ThreadQueue *const restrict queue,
 	mutex_init(&queue->lock);
 
 	thread_cond_init(&queue->node_ready);
+	thread_cond_init(&queue->empty);
 
 	queue->handle_fail = handle_fail;
 }
@@ -135,15 +137,21 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
 		queue->head = NULL;
 		queue->last = NULL;
 
+		thread_cond_signal_handle_cl(&queue->empty,
+					     queue->handle_fail);
 	} else {
 		*node = queue->head;
 
 		queue->head = (*node)->next;
 
-		if (queue->head == NULL)
+		if (queue->head == NULL) {
 			queue->last = NULL;
-		else
+
+			thread_cond_signal_handle_cl(&queue->empty,
+						     queue->handle_fail);
+		} else {
 			queue->head->prev = NULL;
+		}
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
@@ -154,8 +162,8 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
 /* random access delete
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-thread_queue_pop(struct ThreadQueue *const restrict queue,
-		 struct ThreadQueueNode *const restrict *restrict node)
+thread_queue_remove(struct ThreadQueue *const restrict queue,
+		    struct ThreadQueueNode *const restrict *restrict node)
 {
 	mutex_lock_handle_cl(&queue->lock,
 			     queue->handle_fail);
@@ -164,6 +172,9 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
 		if (node->next == NULL) {
 			queue->head = NULL;
 			queue->last = NULL;
+
+			thread_cond_signal_handle_cl(&queue->empty,
+						     queue->handle_fail);
 		} else {
 			node->next->prev = NULL;
 			queue->head	 = node->next;
@@ -176,6 +187,27 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
 		else
 			node->next->prev = node->prev;
 	}
+
+	mutex_unlock_handle_cl(&queue->lock,
+			       queue->handle_fail);
+}
+
+/* block until emptied
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+thread_queue_await_empty(struct ThreadQueue *const restrict queue)
+{
+	if (queue->head == NULL)
+		return;
+
+	mutex_lock_handle_cl(&queue->lock,
+			     queue->handle_fail);
+
+	do {
+		thread_cond_await_handle_cl(&queue->empty,
+					    &queue->lock,
+					    queue->handle_fail);
+	} while (queue->head != NULL);
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       queue->handle_fail);
