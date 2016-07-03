@@ -18,6 +18,64 @@ thread_queue_init_populated(struct ThreadQueue *const restrict queue,
 			    const size_t payload_count,
 			    const size_t payload_width);
 
+/* Accessor, Mutator functions
+ *─────────────────────────────────────────────────────────────────────────── */
+/* locking the queue... */
+extern inline void
+thread_queue_lock(struct ThreadQueue *const restrict queue);
+extern inline bool
+thread_queue_lock_status(struct ThreadQueue *const restrict queue);
+extern inline void
+thread_queue_lock_muffle(struct ThreadQueue *const restrict queue);
+extern inline bool
+thread_queue_lock_report(struct ThreadQueue *const restrict queue,
+			 const char *restrict *const restrict failure);
+extern inline void
+thread_queue_lock_handle(struct ThreadQueue *const restrict queue,
+			 ThreadHandler *const handle,
+			 void *arg);
+extern inline void
+thread_queue_lock_handle_cl(struct ThreadQueue *const restrict queue,
+			    struct ThreadHandlerClosure *const restrict cl);
+
+/* locking the queue (no block on failure) */
+extern inline void
+thread_queue_try_lock(struct ThreadQueue *const restrict queue);
+extern inline bool
+thread_queue_try_lock_status(struct ThreadQueue *const restrict queue);
+extern inline void
+thread_queue_try_lock_muffle(struct ThreadQueue *const restrict queue);
+extern inline enum ThreadFlag
+thread_queue_try_lock_report(struct ThreadQueue *const restrict queue,
+			     const char *restrict *const restrict failure);
+extern inline void
+thread_queue_try_lock_handle(struct ThreadQueue *const restrict queue,
+			     ThreadHandler *const handle,
+			     void *arg);
+extern inline void
+thread_queue_try_lock_handle_cl(struct ThreadQueue *const restrict queue,
+				struct ThreadHandlerClosure *const restrict cl);
+
+/* unlocking the queue... */
+extern inline void
+thread_queue_unlock(struct ThreadQueue *const restrict queue);
+extern inline bool
+thread_queue_unlock_status(struct ThreadQueue *const restrict queue);
+extern inline void
+thread_queue_unlock_muffle(struct ThreadQueue *const restrict queue);
+extern inline bool
+thread_queue_unlock_report(struct ThreadQueue *const restrict queue,
+			   const char *restrict *const restrict failure);
+extern inline void
+thread_queue_unlock_handle(struct ThreadQueue *const restrict queue,
+			   ThreadHandler *const handle,
+			   void *arg);
+
+/* LIFO peek
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_queue_peek(struct ThreadQueue *const restrict queue,
+		  struct ThreadQueueNode *const restrict node);
 
 /* LIFO push
  *─────────────────────────────────────────────────────────────────────────── */

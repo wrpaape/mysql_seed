@@ -9,12 +9,18 @@
 
 /* cap log buffer at 1kb
  *─────────────────────────────────────────────────────────────────────────── */
+#define THREAD_LOG_LABEL_LENGTH 128lu
 #define THREAD_LOG_BUFFER_LENGTH 1024lu
-#define THREAD_LOG_HEADER_1						\
-ANSI_WHITE_BG "\n\n" ANSI_BLACK ANSI_BRIGHT ANSI_UNDERLINE		\
-"THREAD LOG FOR" ANSI_NO_UNDERLINE ":\n\t"
-#define THREAD_LOG_HEADER_2 " (" ANSI_BLACK_BG ANSI_WHITE
-#define THREAD_LOG_HEADER_3 ANSI_WHITE_BG ANSI_BLACK ")\n" ANSI_RESET
+#define THREAD_LOG_HEADER_1(ACTION) ANSI_YELLOW_BG "\n\n" ANSI_BLACK	\
+ANSI_BRIGHT "THREAD LOG " ACTION " FOR:\t"
+#define THREAD_LOG_HEADER_2 ANSI_YELLOW_BG "\n" ANSI_RESET
+
+#define THREAD_LOG_LABEL_1 ANSI_WHITE_BG ANSI_BLUE
+#define THREAD_LOG_LABEL_2 " " ANSI_BLUE_BG ANSI_WHITE
+
+#define THREAD_LOG_OPEN_HEADER THREAD_LOG_HEADER_1("OPEN")
+#define THREAD_LOG_CLOSE_HEADER  THREAD_LOG_HEADER_1("CLOSE")
+
 
 /* declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -22,6 +28,7 @@ struct ThreadLog {
 	char *restrict current_ptr;
 	char *restrict until_ptr;
 	Mutex lock;
+	char label[THREAD_LOG_LABEL_LENGTH];
 	char buffer[THREAD_LOG_BUFFER_LENGTH];
 };
 
@@ -275,32 +282,65 @@ thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
 						: length_ptr);
 }
 
-/* initialize
- *─────────────────────────────────────────────────────────────────────────── */
 inline void
-thread_log_init(struct ThreadLog *const restrict log,
-		const char *const restrict label)
+thread_log_append_close(struct ThreadLog *const restrict log)
 {
-	mutex_init(&log->lock);
-
-	memcpy(&log->buffer[0],
-	       &thread_log_buffer_prototype,
-	       sizeof(thread_log_buffer_prototype));
-
-	log->until_ptr   = &log->buffer[THREAD_LOG_BUFFER_LENGTH - 1];
-	log->current_ptr = &log->buffer[sizeof(THREAD_LOG_HEADER_1) - 1];
+	thread_log_append_string(log,
+				 THREAD_LOG_CLOSE_HEADER);
 
 	thread_log_append_string(log,
-				 label);
+				 &log->label[0]);
 
 	thread_log_append_string(log,
 				 THREAD_LOG_HEADER_2);
+}
 
-	thread_log_append_pointer_id(log,
-				     (void *) log);
+/* initialize
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+thread_log_init_label(struct ThreadLog *const restrict log,
+		      const char *const restrict name)
+{
+	char *const restrict until_ptr = &log->label[THREAD_LOG_LABEL_LENGTH
+						     - 1];
 
-	thread_log_append_string(log,
-				 THREAD_LOG_HEADER_3);
+	char *restrict ptr = put_string(&log->label[0],
+					THREAD_LOG_LABEL_1);
+	ptr  = put_string_until(ptr,
+				name,
+				until_ptr);
+
+	ptr  = put_string_until(ptr,
+				THREAD_LOG_LABEL_2,
+				until_ptr);
+
+	ptr  = put_pointer_id_until(ptr,
+				    log,
+				    until_ptr);
+	*ptr = '\0';
+}
+
+inline void
+thread_log_init(struct ThreadLog *const restrict log,
+		const char *const restrict name)
+{
+	mutex_init(&log->lock);
+
+	(void) memcpy(&log->buffer[0],
+		      &thread_log_buffer_prototype,
+		      sizeof(thread_log_buffer_prototype));
+
+	thread_log_init_label(log,
+			      name);
+
+	log->current_ptr =
+		put_string(&log->buffer[sizeof(THREAD_LOG_OPEN_HEADER) - 1],
+			   &log->label[0]);
+
+	log->current_ptr = put_string(log->current_ptr,
+				      THREAD_LOG_HEADER_2);
+
+	log->until_ptr   = &log->buffer[THREAD_LOG_BUFFER_LENGTH - 1];
 }
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_LOG_H_ */

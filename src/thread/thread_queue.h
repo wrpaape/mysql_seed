@@ -87,6 +87,153 @@ thread_queue_init_populated(struct ThreadQueue *const restrict queue,
 	}
 }
 
+/* locking the queue... */
+inline void
+thread_queue_lock(struct ThreadQueue *const restrict queue)
+{
+	mutex_lock_handle_cl(&queue->lock,
+			     queue->handle_fail);
+}
+
+inline bool
+thread_queue_lock_status(struct ThreadQueue *const restrict queue)
+{
+	return mutex_lock_status(&queue->lock);
+}
+
+inline void
+thread_queue_lock_muffle(struct ThreadQueue *const restrict queue)
+{
+	mutex_lock_muffle(&queue->lock);
+}
+
+inline bool
+thread_queue_lock_report(struct ThreadQueue *const restrict queue,
+			 const char *restrict *const restrict failure)
+{
+	return mutex_lock_report(&queue->lock,
+				 failure);
+}
+
+inline void
+thread_queue_lock_handle(struct ThreadQueue *const restrict queue,
+			 ThreadHandler *const handle,
+			 void *arg)
+{
+	mutex_lock_handle(&queue->lock,
+			  handle,
+			  arg);
+}
+
+inline void
+thread_queue_lock_handle_cl(struct ThreadQueue *const restrict queue,
+			    struct ThreadHandlerClosure *const restrict cl)
+{
+	mutex_lock_handle_cl(&queue->lock,
+			     cl);
+}
+
+/* locking the queue (no block on failure) */
+inline void
+thread_queue_try_lock(struct ThreadQueue *const restrict queue)
+{
+	mutex_try_lock_handle_cl(&queue->lock,
+				 queue->handle_fail);
+}
+
+inline bool
+thread_queue_try_lock_status(struct ThreadQueue *const restrict queue)
+{
+	return mutex_try_lock_status(&queue->lock);
+}
+
+inline void
+thread_queue_try_lock_muffle(struct ThreadQueue *const restrict queue)
+{
+	mutex_try_lock_muffle(&queue->lock);
+}
+
+inline enum ThreadFlag
+thread_queue_try_lock_report(struct ThreadQueue *const restrict queue,
+			     const char *restrict *const restrict failure)
+{
+	return mutex_try_lock_report(&queue->lock,
+				     failure);
+}
+
+inline void
+thread_queue_try_lock_handle(struct ThreadQueue *const restrict queue,
+			     ThreadHandler *const handle,
+			     void *arg)
+{
+	mutex_try_lock_handle(&queue->lock,
+			      handle,
+			      arg);
+}
+
+inline void
+thread_queue_try_lock_handle_cl(struct ThreadQueue *const restrict queue,
+				struct ThreadHandlerClosure *const restrict cl)
+{
+	mutex_try_lock_handle_cl(&queue->lock,
+				 cl);
+}
+
+/* unlocking the queue... */
+inline void
+thread_queue_unlock(struct ThreadQueue *const restrict queue)
+{
+	mutex_unlock_handle_cl(&queue->lock,
+			       queue->handle_fail);
+}
+
+inline bool
+thread_queue_unlock_status(struct ThreadQueue *const restrict queue)
+{
+	return mutex_unlock_status(&queue->lock);
+}
+
+inline void
+thread_queue_unlock_muffle(struct ThreadQueue *const restrict queue)
+{
+	mutex_unlock_muffle(&queue->lock);
+}
+
+inline bool
+thread_queue_unlock_report(struct ThreadQueue *const restrict queue,
+			   const char *restrict *const restrict failure)
+{
+	return mutex_unlock_report(&queue->lock,
+				   failure);
+}
+
+inline void
+thread_queue_unlock_handle(struct ThreadQueue *const restrict queue,
+			   ThreadHandler *const handle,
+			   void *arg)
+{
+	mutex_unlock_handle(&queue->lock,
+			    handle,
+			    arg);
+}
+
+inline void
+thread_queue_unlock_handle_cl(struct ThreadQueue *const restrict queue,
+			      struct ThreadHandlerClosure *const restrict cl)
+{
+	mutex_unlock_handle_cl(&queue->lock,
+			       cl);
+}
+
+/* LIFO peek
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+thread_queue_peek(struct ThreadQueue *const restrict queue,
+		  struct ThreadQueueNode *const restrict node)
+{
+	*node = queue->head;
+}
+
 
 /* LIFO push
  *─────────────────────────────────────────────────────────────────────────── */
@@ -94,8 +241,7 @@ inline void
 thread_queue_push(struct ThreadQueue *const restrict queue,
 		  struct ThreadQueueNode *const restrict node)
 {
-	mutex_lock_handle_cl(&queue->lock,
-			     queue->handle_fail);
+	thread_queue_lock(queue);
 
 	node->next = NULL;
 
@@ -112,8 +258,7 @@ thread_queue_push(struct ThreadQueue *const restrict queue,
 		queue->last	  = node;
 	}
 
-	mutex_unlock_handle_cl(&queue->lock,
-			       queue->handle_fail);
+	thread_queue_unlock(queue);
 }
 
 /* LIFO pop
@@ -122,8 +267,7 @@ inline void
 thread_queue_pop(struct ThreadQueue *const restrict queue,
 		 struct ThreadQueueNode *restrict *const restrict node)
 {
-	mutex_lock_handle_cl(&queue->lock,
-			     queue->handle_fail);
+	thread_queue_lock(queue);
 
 	if (queue->head == NULL) {
 		do {
@@ -154,8 +298,7 @@ thread_queue_pop(struct ThreadQueue *const restrict queue,
 		}
 	}
 
-	mutex_unlock_handle_cl(&queue->lock,
-			       queue->handle_fail);
+	thread_queue_unlock(queue);
 }
 
 
@@ -165,8 +308,7 @@ inline void
 thread_queue_remove(struct ThreadQueue *const restrict queue,
 		    struct ThreadQueueNode *const restrict node)
 {
-	mutex_lock_handle_cl(&queue->lock,
-			     queue->handle_fail);
+	thread_queue_lock(queue);
 
 	if (node->prev == NULL) {
 		if (node->next == NULL) {
@@ -188,8 +330,7 @@ thread_queue_remove(struct ThreadQueue *const restrict queue,
 			node->next->prev = node->prev;
 	}
 
-	mutex_unlock_handle_cl(&queue->lock,
-			       queue->handle_fail);
+	thread_queue_unlock(queue);
 }
 
 /* block until emptied
@@ -200,8 +341,7 @@ thread_queue_await_empty(struct ThreadQueue *const restrict queue)
 	if (queue->head == NULL)
 		return;
 
-	mutex_lock_handle_cl(&queue->lock,
-			     queue->handle_fail);
+	thread_queue_lock(queue);
 
 	do {
 		thread_cond_await_handle_cl(&queue->empty,
@@ -209,8 +349,7 @@ thread_queue_await_empty(struct ThreadQueue *const restrict queue)
 					    queue->handle_fail);
 	} while (queue->head != NULL);
 
-	mutex_unlock_handle_cl(&queue->lock,
-			       queue->handle_fail);
+	thread_queue_unlock(queue);
 }
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_QUEUE_H_ */

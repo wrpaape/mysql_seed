@@ -3,8 +3,10 @@
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 
-/* Supervisor operations
+/* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
+inline void supervisor_init(struct ThreadPool *const restrict)
+
 /* void */
 /* supervisor_exit(const char *restrict failure) */
 /* { */

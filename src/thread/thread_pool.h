@@ -7,14 +7,21 @@
 #include "thread/thread_queue.h"	/* ThreadQueue */
 #include "thread/thread_log.h"		/* ThreadLog */
 
-#define SEED_WORKERS_MAX 16lu
+#define WORKERS_MAX 16lu
 
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define SEED_WORKER_SPAWN_FAILURE_MESSAGE				\
-"\n\nfailed to spawn new seed worker\nreason:\n"			\
-"\t'SEED_WORKERS_MAX' (" EXPAND_STRINGIFY(SEED_WORKERS_MAX) ") "	\
+#define WORKER_SPAWN_FAILURE_MESSAGE					\
+"\n\nfailed to spawn new worker\nreason:\n"				\
+"\t'WORKERS_MAX' (" EXPAND_STRINGIFY(SEED_WORKERS_MAX) ") "		\
 "exceeded\n"
+
+#define THREAD_POOL_EXIT_ON_FAILURE_MESSAGE ANSI_BRIGHT ANSI_RED_BG	\
+ANSI_YELLOW "\nTHREAD POOL EXITING ON FAILURE\n" ANSI_RESET
+
+#define THREAD_POOL_EXIT_ON_SUCCESS_MESSAGE ANSI_BRIGHT ANSI_WHITE_BG	\
+ANSI_GREEN "\nTHREAD POOL EXITING ON SUCCESS\n" ANSI_RESET
+
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -39,20 +46,87 @@ struct Worker {
 	Thread thread;
 };
 
-
 struct Supervisor {
-	struct ThreadQueue tasks_todo;
-	struct ThreadQueue tasks_complete;
-	struct ThreadQueue busy_workers;
-	struct ThreadQueue idle_workers;
+	Thread thread;
+	ThreadKey key;
+	ThreadProcedure *event;
+	ThreadCond trigger;
+	Mutex listening;
+};
+
+struct TaskQueues {
+	struct ThreadQueue vacant;
+	struct ThreadQueue awaitable;
+	struct ThreadQueue independent;
+	struct ThreadQueue finished;
+};
+
+struct ThreadPool {
+	bool busy;
+	ThreadCond done;
+	Mutex processing;
+	struct Supervisor supervisor;
+	struct ThreadQueue workers;
+	struct TaskQueues tasks;
 	struct ThreadLog log;
+	struct ThreadHandlerClosure handle_fail;
 };
 
 
 
 
-/* Supervisor operations
+/* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
+
+/* should only be called from supervisor thread */
+inline void
+thread_pool_cancel_workers(struct ThreadPool *const restrict pool)
+{
+	struct ThreadQueueNode *restrict node;
+	struct Worker *restrict worker;
+
+	thread_queue_lock_muffle(&pool->workers);
+
+	thread_queue_peek(&pool->workers,
+			  &node);
+
+	while (node != NULL) {
+		worker = (struct Worker *restrict) node->payload;
+
+		thread_cancel_muffle(worker->thread);
+
+		node = node->next;
+	}
+
+	thread_queue_unlock_muffle(&pool->workers);
+}
+
+inline void
+thread_pool_exit_on_failure(void *arg,
+			    const char *restrict failure)
+{
+	struct ThreadPool *const restrict pool =
+	(struct ThreadPool *const restrict) arg;
+
+	thread_log_lock_muffle(&pool->log);
+
+	thread_log_append_string(&pool->log,
+				 THREAD_POOL_EXIT_ON_FAILURE_MESSAGE);
+
+	thread_log_append_close(&pool->log);
+
+
+
+}
+
+inline void
+thread_pool_init(struct ThreadPool *restrict pool,
+		 size_t count_workers)
+{
+
+}
+
+
 /* void */
 /* supervisor_exit(const char *restrict failure) */
 /* __attribute__((noreturn)); */

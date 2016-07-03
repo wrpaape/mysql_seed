@@ -5,9 +5,8 @@
  *─────────────────────────────────────────────────────────────────────────── */
 
 const char thread_log_buffer_prototype[THREAD_LOG_BUFFER_LENGTH] = {
-	THREAD_LOG_HEADER_1
+	THREAD_LOG_OPEN_HEADER
 };
-
 
 /* accesor functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -100,6 +99,8 @@ extern inline void
 thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
 				    void *const restrict pointer,
 				    const size_t length);
+extern inline void
+thread_log_append_close(struct ThreadLog *const restrict log);
 
 /* initialize, reset
  *─────────────────────────────────────────────────────────────────────────── */
