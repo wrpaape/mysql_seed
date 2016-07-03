@@ -1,0 +1,53 @@
+
+     [EACCES]           O_CREAT is specified, the file does not exist, and the directory in
+                        which it is to be created does not permit writing.
+
+     [EACCES]           O_TRUNC is specified and write permission is denied.
+
+     [EAGAIN]           path specifies the slave side of a locked pseudo-terminal device.
+
+     [EDQUOT]           O_CREAT is specified, the file does not exist, and the directory in
+                        which the entry for the new file is being placed cannot be extended
+                        because the user's quota of disk blocks on the file system containing
+                        the directory has been exhausted.
+
+     [EDQUOT]           O_CREAT is specified, the file does not exist, and the user's quota of
+                        inodes on the file system on which the file is being created has been
+                        exhausted.
+
+     [EEXIST]           O_CREAT and O_EXCL are specified and the file exists.
+
+     [EFAULT]           Path points outside the process's allocated address space.
+
+     [EINTR]            The open() operation is interrupted by a signal.
+
+     [EINVAL]           The value of oflag is not valid.
+
+     [EIO]              An I/O error occurs while making the directory entry or allocating the
+                        inode for O_CREAT.
+
+     [EISDIR]           The named file is a directory, and the arguments specify that it is to
+                        be opened for writing.
+
+     [ELOOP]            Too many symbolic links are encountered in translating the pathname.
+                        This is taken to be indicative of a looping symbolic link.
+
+     [EMFILE]           The process has already reached its limit for open file descriptors.
+
+     [ENAMETOOLONG]     A component of a pathname exceeds {NAME_MAX} characters, or an entire
+                        path name exceeded {PATH_MAX} characters.
+
+     [ENFILE]           The system file table is full.
+
+     [ELOOP]            O_NOFOLLOW was specified and the target is a symbolic link.
+
+     [ENOENT]           O_CREAT is not set and the named file does not exist.
+
+     [ENOENT]           A component of the path name that must exist does not exist.
+
+     [ENOSPC]           O_CREAT is specified, the file does not exist, and the directory in
+                        which the entry for the new file is being placed cannot be extended
+                        because there is no space left on the file system containing the direc-
+                        tory.
+
+:

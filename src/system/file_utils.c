@@ -1,13 +1,42 @@
 #include "system/file_utils.h"
 
-extern inline char *file_permissions_string_put(char *restrict buffer,
-						const int mode);
+/* write */
+extern inline bool
+write_status(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size);
+extern inline void
+write_muffle(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size);
+extern inline bool
+write_report(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size,
+	     const char *restrict *const restrict failure);
+extern inline void
+write_handle(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size,
+	     Handler *const handle,
+	     void *arg);
+extern inline void
+write_handle_cl(const int file_descriptor,
+		const void *const restrict buffer,
+		const size_t size,
+		const struct HandlerClosure *const restrict fail_cl);
+/* open */
+inline bool
+open_absolute_status(const char *const absolute_path,
+		     const int open_flag)
+inline void
+open_absolute_muffle(const char *const absolute_path,
+		     const int open_flag)
 
-extern inline void file_permissions_string(char *restrict buffer,
-					   const int mode);
-
-extern inline void fildes_write_all(const int fildes,
-				    const char *restrict contents);
-
-extern inline void filename_write_all(const char *restrict filename,
-				      const char *restrict contents);
+/* inspect file permissions */
+extern inline char *
+put_file_permissions_string(char *restrict buffer,
+			    const int mode);
+extern inline void
+file_permissions_string(char *restrict buffer,
+			const int mode);
