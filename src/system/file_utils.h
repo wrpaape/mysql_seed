@@ -943,6 +943,67 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 	__builtin_unreachable();
 }
 
+/* close */
+inline bool
+close_status(const int file_descriptor)
+{
+	return close(file_descriptor) == 0;
+}
+
+inline void
+close_muffle(const int file_descriptor)
+{
+	(void) close(file_descriptor);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE close
+inline bool
+close_report(const int file_descriptor,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(file_descriptor)
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'file_descriptor' is not a valid, active file"
+				 " descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "Execution was interrupted by a signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "A previously-uncommitted write(2) encountered"
+				 " an input/output error.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+close_handle(const int file_descriptor,
+	     Handler *const handle,
+	     void *arg)
+{
+	const char *restrict failure;
+
+	if (close_report(file_descriptor,
+			 &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+close_handle_cl(const int file_descriptor,
+		const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (close_report(file_descriptor,
+			 &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
 
 
 /* mkdir (absolute path) */

@@ -130,6 +130,21 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 			     const int open_flag,
 			     const mode_t mode,
 			     const struct HandlerClosure *const restrict fail_cl);
+/* close */
+extern inline bool
+close_status(const int file_descriptor);
+extern inline void
+close_muffle(const int file_descriptor);
+extern inline bool
+close_report(const int file_descriptor,
+	     const char *restrict *const restrict failure);
+extern inline void
+close_handle(const int file_descriptor,
+	     Handler *const handle,
+	     void *arg);
+extern inline void
+close_handle_cl(const int file_descriptor,
+		const struct HandlerClosure *const restrict fail_cl);
 
 /* mkdir (absolute path) */
 extern inline bool
