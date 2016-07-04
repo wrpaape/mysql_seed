@@ -27,7 +27,7 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_thread_log_dump(void);
+extern void test_thread_log(void);
 
 
 //=======Test Reset Option=====
@@ -43,7 +43,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/thread_thread_log_test.c");
-  RUN_TEST(test_thread_log_dump, 32);
+  RUN_TEST(test_thread_log, 32);
 
   return (UnityEnd());
 }
