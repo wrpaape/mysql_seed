@@ -25,13 +25,158 @@ write_handle_cl(const int file_descriptor,
 		const void *const restrict buffer,
 		const size_t size,
 		const struct HandlerClosure *const restrict fail_cl);
-/* open */
-inline bool
+
+/* open (absolute path, no mode) */
+extern inline bool
 open_absolute_status(const char *const absolute_path,
-		     const int open_flag)
-inline void
+		     const int open_flag);
+extern inline void
 open_absolute_muffle(const char *const absolute_path,
-		     const int open_flag)
+		     const int open_flag);
+extern inline bool
+open_absolute_report(const char *const absolute_path,
+		     const int open_flag,
+		     const char *restrict *const restrict failure);
+extern inline void
+open_absolute_handle(const char *const absolute_path,
+		     const int open_flag,
+		     Handler *const handle,
+		     void *arg);
+extern inline void
+open_absolute_handle_cl(const char *const absolute_path,
+			const int open_flag,
+			const struct HandlerClosure *const restrict fail_cl);
+
+/* open (absolute path, provide mode) */
+extern inline bool
+open_absolute_mode_status(const char *const absolute_path,
+			  const int open_flag,
+			  const mode_t mode);
+extern inline void
+open_absolute_mode_muffle(const char *const absolute_mode_path,
+			  const int open_flag,
+			  const mode_t mode);
+extern inline bool
+open_absolute_mode_report(const char *const absolute_mode_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  const char *restrict *const restrict failure);
+extern inline void
+open_absolute_mode_handle(const char *const absolute_mode_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  Handler *const handle,
+			  void *arg);
+extern inline void
+open_absolute_mode_handle_cl(const char *const absolute_path,
+			     const int open_flag,
+			     const mode_t mode,
+			     const struct HandlerClosure *const restrict fail_cl);
+
+/* open (relative path, no mode) */
+extern inline bool
+open_relative_status(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag);
+extern inline void
+open_relative_muffle(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag);
+extern inline bool
+open_relative_report(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     const char *restrict *const restrict failure);
+extern inline void
+open_relative_handle(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     Handler *const handle,
+		     void *arg);
+extern inline void
+open_relative_handle_cl(const int directory_descriptor,
+			const char *const relative_path,
+			const int open_flag,
+			const struct HandlerClosure *const restrict fail_cl);
+
+/* open (const int directory_descriptor,
+	relative path, provide mode) */
+extern inline bool
+open_relative_mode_status(const int directory_descriptor,
+			  const char *const relative_path,
+			  const int open_flag,
+			  const mode_t mode);
+extern inline void
+open_relative_mode_muffle(const int directory_descriptor,
+			  const char *const relative_mode_path,
+			  const int open_flag,
+			  const mode_t mode);
+extern inline bool
+open_relative_mode_report(const int directory_descriptor,
+			  const char *const relative_mode_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  const char *restrict *const restrict failure);
+extern inline void
+open_relative_mode_handle(const int directory_descriptor,
+			  const char *const relative_mode_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  Handler *const handle,
+			  void *arg);
+extern inline void
+open_relative_mode_handle_cl(const int directory_descriptor,
+			     const char *const relative_path,
+			     const int open_flag,
+			     const mode_t mode,
+			     const struct HandlerClosure *const restrict fail_cl);
+
+/* mkdir (absolute path) */
+extern inline bool
+mkdir_absolute_status(const char *const restrict absolute_path,
+		      const mode_t mode);
+extern inline void
+mkdir_absolute_muffle(const char *const restrict absolute_path,
+		      const mode_t mode);
+extern inline bool
+mkdir_absolute_report(const char *const restrict absolute_path,
+		      const mode_t mode,
+		      const char *restrict *const restrict failure);
+extern inline void
+mkdir_absolute_handle(const char *const restrict absolute_path,
+		      const mode_t mode,
+		      Handler *const handle,
+		      void *arg);
+extern inline void
+mkdir_absolute_handle_cl(const char *const restrict absolute_path,
+			 const mode_t mode,
+			 const struct HandlerClosure *const restrict fail_cl);
+
+/* mkdir (relative path) */
+extern inline bool
+mkdir_relative_status(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode);
+extern inline void
+mkdir_relative_muffle(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode);
+extern inline bool
+mkdir_relative_report(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode,
+		      const char *restrict *const restrict failure);
+extern inline void
+mkdir_relative_handle(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode,
+		      Handler *const handle,
+		      void *arg);
+extern inline void
+mkdir_relative_handle_cl(const int directory_descriptor,
+			 const char *const restrict relative_path,
+			 const mode_t mode,
+			 const struct HandlerClosure *const restrict fail_cl);
 
 /* inspect file permissions */
 extern inline char *

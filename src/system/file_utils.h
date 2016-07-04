@@ -7,7 +7,6 @@
 #include <unistd.h>		    /* close, getcwd, STDOUT/IN/ERR_FILENO */
 #include "utils/utils.h"	    /* FILE/stream API */
 #include "system/system_utils.h"    /* sys headers, FAIL_SWITCH, misc macros */
-/* #include <stdarg.h>		/1* va_list, va_start/arg/copy/end *1/ */
 
 /* EXTERNAL DEPENDENCIES ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
@@ -228,115 +227,14 @@ write_handle_cl(const int file_descriptor,
 	__builtin_unreachable();
 }
 
-#define OPEN_OPENAT_FAIL_SWITCH(...)					\
-FAIL_SWITCH_ERRNO_OPEN(__VA_ARGS__)					\
-FAIL_SWITCH_CASE_4(EACCES,						\
-		   "Search permission is denied for a component of the "\
-		   "path prefix.",					\
-		   "The required permissions (for reading and/or "	\
-		   "writing) are denied for the given flags.",		\
-		   "'O_CREAT' is specified, the file does not exist, "	\
-		   "and the directory in which it is to be created does"\
-		   " not permit writing.",				\
-		   "'O_TRUNC' is specified and write permission is "	\
-		   "denied.")						\
-FAIL_SWITCH_CASE_1(EAGAIN,						\
-		   "path specifies the slave side of a locked "		\
-		   "pseudo-terminal device.")				\
-FAIL_SWITCH_CASE_2(EDQUOT,						\
-		   "'O_CREAT' is specified, the file does not exist, "	\
-		   "and the directory in which the entry for the new "	\
-		   "file is being placed cannot be extended because the"\
-		   " user's quota of disk blocks on the file system "	\
-		   "containing the directory has been exhausted.",	\
-		   "'O_CREAT' is specified, the file does not exist, "	\
-		   "and the user's quota of inodes on the file system "	\
-		   "on which the file is being created has been "	\
-		   "exhausted.")					\
-FAIL_SWITCH_CASE_1(EEXIST,						\
-		   "'O_CREAT' and 'O_EXCL' are specified and the file "	\
-		   "exists.")						\
-FAIL_SWITCH_CASE_1(EFAULT,						\
-		   "Path points outside the process's allocated address"\
-		   " space.")						\
-FAIL_SWITCH_CASE_1(EINTR,						\
-		   "The open() operation is interrupted by a signal.")	\
-FAIL_SWITCH_CASE_1(EINVAL,						\
-		   "The value of 'open_flag' is not valid.")		\
-FAIL_SWITCH_CASE_1(EIO,							\
-		   "An I/O error occurs while making the directory "	\
-		   "entry or allocating the inode for 'O_CREAT'.")	\
-FAIL_SWITCH_CASE_1(EISDIR,						\
-		   "The named file is a directory, and the arguments "	\
-		   "specify that it is to be opened for writing.")	\
-FAIL_SWITCH_CASE_2(ELOOP,						\
-		   "Too many symbolic links are encountered in "	\
-		   "translating the pathname. This is taken to be "	\
-		   "indicative of a looping symbolic link.",		\
-		   "'O_NOFOLLOW' was specified and the target is a "	\
-		   "symbolic link.")					\
-FAIL_SWITCH_CASE_1(EMFILE,						\
-		   "The process has already reached its limit for open "\
-		   "file descriptors.")					\
-FAIL_SWITCH_CASE_1(ENAMETOOLONG,					\
-		   "A component of a pathname exceeds {NAME_MAX} "	\
-		   "characters, or an entire path name exceeded "	\
-		   "{PATH_MAX} characters.")				\
-FAIL_SWITCH_CASE_1(ENFILE,						\
-		   "The system file table is full.")			\
-FAIL_SWITCH_CASE_2(ENOENT,						\
-		   "'O_CREAT' is not set and the named file does not "	\
-		   "exist.",						\
-		   "A component of the path name that must exist does "	\
-		   "not exist.")					\
-FAIL_SWITCH_CASE_2(ENOSPC,						\
-		   "'O_CREAT' is specified, the file does not exist, "	\
-		   "and the directory in which the entry for the new "	\
-		   "file is being placed cannot be extended because "	\
-		   "there is no space left on the file system "		\
-		   "containing the direc- tory.",			\
-		   "'O_CREAT' is specified, the file does not exist, "	\
-		   "and there are no free inodes on the file system on "\
-		   "which the file is being created.")			\
-FAIL_SWITCH_CASE_2(ENOTDIR,						\
-		   "A component of the path prefix is not a directory.",\
-		   "The path argument is not an absolute path and "	\
-		   "'file_descriptor' is neither 'AT_FDCWD' nor a file "\
-		   "descriptor associated with a directory.")		\
-FAIL_SWITCH_CASE_2(ENXIO,						\
-		   "The named file is a character-special or "		\
-		   "block-special file and the device associated with "	\
-		   "this special file does not exist.",			\
-		   "'O_NONBLOCK' and 'O_WRONLY' are set, the file is a "\
-		   "FIFO, and no process has it open for reading.")	\
-FAIL_SWITCH_CASE_2(EOPNOTSUPP,						\
-		   "'O_SHLOCK' or 'O_EXLOCK' is specified, but the "	\
-		   "underlying filesystem does not support locking.",	\
-		   "An attempt is made to open a socket (not currently "\
-		   "implemented).")					\
-FAIL_SWITCH_CASE_1(EOVERFLOW,						\
-		   "The named file is a regular file and its size does "\
-		   "not fit in an object of type 'off_t'.")		\
-FAIL_SWITCH_CASE_1(EROFS,						\
-		   "The named file resides on a read-only file system, "\
-		   "and the file is to be modified.")			\
-FAIL_SWITCH_CASE_1(ETXTBSY,						\
-		   "The file is a pure procedure (shared text) file "	\
-		   "that is being executed and the open() call requests"\
-		   " write access.")					\
-FAIL_SWITCH_CASE_1(EBADF,						\
-		   "The 'absolute_path' argument does not specify an "	\
-		   "absolute path and the 'file_descriptor' argument is"\
-		   " neither 'AT_FDCWD' nor a valid file descriptor "	\
-		   "open for searching.")
 
-/* open */
+/* open (absolute path, no mode) */
 inline bool
 open_absolute_status(const char *const absolute_path,
 		     const int open_flag)
 {
 	return open(absolute_path,
-		    open_flag) == -1;
+		    open_flag) >= 0;
 }
 
 inline void
@@ -354,8 +252,112 @@ open_absolute_report(const char *const absolute_path,
 		     const int open_flag,
 		     const char *restrict *const restrict failure)
 {
-	OPEN_OPENAT_FAIL_SWITCH(absolute_path,
-				open_flag)
+	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
+			       open_flag)
+	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "The required permissions (for reading and/or "
+				 "writing) are denied for the given flags.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which it is to be"
+				 " created does not permit writing.",
+				 "'O_TRUNC' is specified and write permission "
+				 "is denied.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "path specifies the slave side of a locked "
+				 "pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because the user's quota of disk "
+				 "blocks on the file system containing the "
+				 "directory has been exhausted.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the user's quota of inodes on the "
+				 "file system on which the file is being "
+				 "created has been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "'O_CREAT' and 'O_EXCL' are specified and the "
+				 "file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "The open() operation is interrupted by a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'open_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurs while making the "
+				 "directory entry or allocating the inode for '"
+				 "O_CREAT'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "The named file is a directory, and the "
+				 "arguments specify that it is to be opened for"
+				 " writing.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "The process has already reached its limit for"
+				 " open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENFILE,
+				 "The system file table is full.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "'O_CREAT' is not set and the named file does "
+				 "not exist.",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because there is no space left on "
+				 "the file system containing the direc- tory.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and there are no free inodes on the "
+				 "file system on which the file is being "
+				 "created.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "The path argument is not an absolute path")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "The named file is a character-special or "
+				 "block-special file and the device associated "
+				 "with this special file does not exist.",
+				 "'O_NONBLOCK' and 'O_WRONLY' are set, the file"
+				 " is a FIFO, and no process has it open for "
+				 "reading.")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the open() "
+				 "call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "The path argument does not specify an "
+				 "absolute path.")
+	FAIL_SWITCH_ERRNO_CLOSE()
 }
 
 inline void
@@ -392,6 +394,802 @@ open_absolute_handle_cl(const char *const absolute_path,
 			failure);
 	__builtin_unreachable();
 }
+
+
+/* open (absolute path, provide mode) */
+inline bool
+open_absolute_mode_status(const char *const absolute_path,
+			  const int open_flag,
+			  const mode_t mode)
+{
+	return open(absolute_path,
+		    open_flag,
+		    mode) >= 0;
+}
+
+inline void
+open_absolute_mode_muffle(const char *const absolute_path,
+			  const int open_flag,
+			  const mode_t mode)
+{
+	(void) open(absolute_path,
+		    open_flag,
+		    mode);
+}
+
+inline bool
+open_absolute_mode_report(const char *const absolute_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
+			       open_flag,
+			       mode)
+	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "The required permissions (for reading and/or "
+				 "writing) are denied for the given flags.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which it is to be"
+				 " created does not permit writing.",
+				 "'O_TRUNC' is specified and write permission "
+				 "is denied.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "path specifies the slave side of a locked "
+				 "pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because the user's quota of disk "
+				 "blocks on the file system containing the "
+				 "directory has been exhausted.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the user's quota of inodes on the "
+				 "file system on which the file is being "
+				 "created has been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "'O_CREAT' and 'O_EXCL' are specified and the "
+				 "file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "The open() operation is interrupted by a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'open_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurs while making the "
+				 "directory entry or allocating the inode for '"
+				 "O_CREAT'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "The named file is a directory, and the "
+				 "arguments specify that it is to be opened for"
+				 " writing.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "The process has already reached its limit for"
+				 " open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENFILE,
+				 "The system file table is full.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "'O_CREAT' is not set and the named file does "
+				 "not exist.",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because there is no space left on "
+				 "the file system containing the direc- tory.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and there are no free inodes on the "
+				 "file system on which the file is being "
+				 "created.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "The path argument is not an absolute path")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "The named file is a character-special or "
+				 "block-special file and the device associated "
+				 "with this special file does not exist.",
+				 "'O_NONBLOCK' and 'O_WRONLY' are set, the file"
+				 " is a FIFO, and no process has it open for "
+				 "reading.")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the open() "
+				 "call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "The path argument does not specify an "
+				 "absolute path.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+open_absolute_mode_handle(const char *const absolute_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  Handler *const handle,
+			  void *arg)
+{
+	const char *restrict failure;
+
+	if (open_absolute_mode_report(absolute_path,
+				      open_flag,
+				      mode,
+				      &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+open_absolute_mode_handle_cl(const char *const absolute_path,
+			     const int open_flag,
+			     const mode_t mode,
+			     const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (open_absolute_mode_report(absolute_path,
+				      open_flag,
+				      mode,
+				      &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+/* open (relative path, no mode) */
+inline bool
+open_relative_status(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     const mode_t mode)
+{
+	return openat(directory_descriptor,
+		      relative_path,
+		      open_flag) >= 0;
+}
+
+inline void
+open_relative_muffle(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     const mode_t mode)
+{
+	(void) openat(directory_descriptor,
+		      relative_path,
+		      open_flag)
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE openat
+inline bool
+open_relative_report(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
+			       relative_path,
+			       open_flag)
+	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "The required permissions (for reading and/or "
+				 "writing) are denied for the given flags.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which it is to be"
+				 " created does not permit writing.",
+				 "'O_TRUNC' is specified and write permission "
+				 "is denied.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "path specifies the slave side of a locked "
+				 "pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because the user's quota of disk "
+				 "blocks on the file system containing the "
+				 "directory has been exhausted.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the user's quota of inodes on the "
+				 "file system on which the file is being "
+				 "created has been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "'O_CREAT' and 'O_EXCL' are specified and the "
+				 "file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "The openat() operation is interrupted by a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'open_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurs while making the "
+				 "directory entry or allocating the inode for '"
+				 "O_CREAT'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "The named file is a directory, and the "
+				 "arguments specify that it is to be opened for"
+				 " writing.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "The process has already reached its limit for"
+				 " open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENFILE,
+				 "The system file table is full.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "'O_CREAT' is not set and the named file does "
+				 "not exist.",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because there is no space left on "
+				 "the file system containing the direc- tory.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and there are no free inodes on the "
+				 "file system on which the file is being "
+				 "created.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a file descriptor associated with a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "The named file is a character-special or "
+				 "block-special file and the device associated "
+				 "with this special file does not exist.",
+				 "'O_NONBLOCK' and 'O_WRONLY' are set, the file"
+				 " is a FIFO, and no process has it open for "
+				 "reading.")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the openat("
+				 ") call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a valid file descriptor open for "
+				 "searching.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+open_relative_handle(const int directory_descriptor,
+		     const char *const relative_path,
+		     const int open_flag,
+		     Handler *const handle,
+		     void *arg)
+{
+	const char *restrict failure;
+
+	if (open_relative_report(directory_descriptor,
+				 relative_path,
+				 open_flag,
+				 &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+open_relative_handle_cl(const int directory_descriptor,
+			const char *const relative_path,
+			const int open_flag,
+			const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (open_relative_report(directory_descriptor,
+				 relative_path,
+				 open_flag,
+				 &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+/* open (relative path, provide mode) */
+inline bool
+open_relative_mode_status(const int directory_descriptor,
+			  const char *const relative_path,
+			  const int open_flag,
+			  const mode_t mode)
+{
+	return openat(directory_descriptor,
+		      relative_path,
+		      open_flag,
+		      mode) >= 0;
+}
+
+inline void
+open_relative_mode_muffle(const int directory_descriptor,
+			  const char *const relative_path,
+			  const int open_flag,
+			  const mode_t mode)
+{
+	(void) openat(directory_descriptor,
+		      relative_path,
+		      open_flag,
+		      mode);
+}
+
+inline bool
+open_relative_mode_report(const int directory_descriptor,
+			  const char *const relative_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
+			       relative_path,
+			       open_flag,
+			       mode)
+	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "The required permissions (for reading and/or "
+				 "writing) are denied for the given flags.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which it is to be"
+				 " created does not permit writing.",
+				 "'O_TRUNC' is specified and write permission "
+				 "is denied.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "path specifies the slave side of a locked "
+				 "pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because the user's quota of disk "
+				 "blocks on the file system containing the "
+				 "directory has been exhausted.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the user's quota of inodes on the "
+				 "file system on which the file is being "
+				 "created has been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "'O_CREAT' and 'O_EXCL' are specified and the "
+				 "file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "The openat() operation is interrupted by a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'open_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurs while making the "
+				 "directory entry or allocating the inode for '"
+				 "O_CREAT'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "The named file is a directory, and the "
+				 "arguments specify that it is to be opened for"
+				 " writing.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "The process has already reached its limit for"
+				 " open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENFILE,
+				 "The system file table is full.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "'O_CREAT' is not set and the named file does "
+				 "not exist.",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and the directory in which the entry "
+				 "for the new file is being placed cannot be "
+				 "extended because there is no space left on "
+				 "the file system containing the direc- tory.",
+				 "'O_CREAT' is specified, the file does not "
+				 "exist, and there are no free inodes on the "
+				 "file system on which the file is being "
+				 "created.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a file descriptor associated with a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "The named file is a character-special or "
+				 "block-special file and the device associated "
+				 "with this special file does not exist.",
+				 "'O_NONBLOCK' and 'O_WRONLY' are set, the file"
+				 " is a FIFO, and no process has it open for "
+				 "reading.")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the openat("
+				 ") call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a valid file descriptor open for "
+				 "searching.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+open_relative_mode_handle(const int directory_descriptor,
+			  const char *const relative_path,
+			  const int open_flag,
+			  const mode_t mode,
+			  Handler *const handle,
+			  void *arg)
+{
+	const char *restrict failure;
+
+	if (open_relative_mode_report(directory_descriptor,
+				      relative_path,
+				      open_flag,
+				      mode,
+				      &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+open_relative_mode_handle_cl(const int directory_descriptor,
+			     const char *const relative_path,
+			     const int open_flag,
+			     const mode_t mode,
+			     const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (open_relative_mode_report(directory_descriptor,
+				      relative_path,
+				      open_flag,
+				      mode,
+				      &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+
+/* mkdir (absolute path) */
+inline bool
+mkdir_absolute_status(const char *const restrict absolute_path,
+		      const mode_t mode)
+{
+	return mkdir(absolute_path,
+		     mode) == 0;
+}
+
+inline void
+mkdir_absolute_muffle(const char *const restrict absolute_path,
+		      const mode_t mode)
+{
+	(void) mkdir(absolute_path,
+		     mode);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mkdir
+inline bool
+mkdir_absolute_report(const char *const restrict absolute_path,
+		      const mode_t mode,
+		      const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
+			       mode)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied for the parent "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "The new directory cannot be created because "
+				 "the user's quota of disk blocks on the file "
+				 "system that will contain the directory has "
+				 "been exhausted.",
+				 "The user's quota of inodes on the file system"
+				 " on which the directory is being created has "
+				 "been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "The named file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_2(EIO,
+				 "An I/O error occurred while making the "
+				 "directory entry or allocating the inode.",
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links were encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMLINK,
+				 "The parent directory already has {LINK_MAX} "
+				 "links.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeded {NAME_MAX}"
+				 " characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "A component of the path prefix does not exist"
+				 " or path is an empty string.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "The new directory cannot be created because "
+				 "there is no space left on the file system "
+				 "that would contain it.",
+				 "There are no free inodes on the file system "
+				 "on which the directory is being created.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The parent directory resides on a read-only "
+				 "file system.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+mkdir_absolute_handle(const char *const restrict absolute_path,
+		      const mode_t mode,
+		      Handler *const handle,
+		      void *arg)
+{
+	const char *restrict failure;
+
+	if (mkdir_absolute_report(absolute_path,
+				  mode,
+				  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+mkdir_absolute_handle_cl(const char *const restrict absolute_path,
+			 const mode_t mode,
+			 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (mkdir_absolute_report(absolute_path,
+				  mode,
+				  &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+/* mkdir (relative path) */
+inline bool
+mkdir_relative_status(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode)
+{
+	return mkdirat(directory_descriptor,
+		       relative_path,
+		       mode) == 0;
+}
+
+inline void
+mkdir_relative_muffle(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode)
+{
+	(void) mkdirat(directory_descriptor,
+		       relative_path,
+		       mode);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mkdirat
+inline bool
+mkdir_relative_report(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode,
+		      const char *restrict *const restrict failure)
+
+{
+	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
+			       relative_path,
+			       mode)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied for the parent "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
+				 "The new directory cannot be created because "
+				 "the user's quota of disk blocks on the file "
+				 "system that will contain the directory has "
+				 "been exhausted.",
+				 "The user's quota of inodes on the file system"
+				 " on which the directory is being created has "
+				 "been exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
+				 "The named file exists.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Path points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_2(EIO,
+				 "An I/O error occurred while making the "
+				 "directory entry or allocating the inode.",
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links were encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMLINK,
+				 "The parent directory already has {LINK_MAX} "
+				 "links.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeded {NAME_MAX}"
+				 " characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "A component of the path prefix does not exist"
+				 " or path is an empty string.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOSPC,
+				 "The new directory cannot be created because "
+				 "there is no space left on the file system "
+				 "that would contain it.",
+				 "There are no free inodes on the file system "
+				 "on which the directory is being created.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a file descriptor associated with a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The parent directory resides on a read-only "
+				 "file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a valid file descriptor open for "
+				 "searching.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+mkdir_relative_handle(const int directory_descriptor,
+		      const char *const restrict relative_path,
+		      const mode_t mode,
+		      Handler *const handle,
+		      void *arg)
+{
+	const char *restrict failure;
+
+	if (mkdir_relative_report(directory_descriptor,
+				  relative_path,
+				  mode,
+				  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+mkdir_relative_handle_cl(const int directory_descriptor,
+			 const char *const restrict relative_path,
+			 const mode_t mode,
+			 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (mkdir_relative_report(directory_descriptor,
+				  relative_path,
+				  mode,
+				  &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
 
 /* inspect file permissions (10 chars long) */
 inline char *
