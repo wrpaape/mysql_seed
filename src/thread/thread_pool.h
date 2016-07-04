@@ -25,6 +25,8 @@ ANSI_GREEN "\nTHREAD POOL EXITING ON SUCCESS\n" ANSI_RESET
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
+struct ThreadPool;
+
 typedef void
 ThreadPoolEvent(struct ThreadPool *const restrict pool);
 
@@ -46,6 +48,7 @@ struct Worker {
 	struct Task *task;
 	ThreadKey key;
 	Thread thread;
+	struct ThreadQueueNode *node;
 	struct ThreadPool *pool;
 	struct HandlerClosure fail_cl;
 };
@@ -67,6 +70,7 @@ struct TaskQueues {
 	struct ThreadQueue finished;
 };
 
+
 struct ThreadPool {
 	bool busy;
 	ThreadCond done;
@@ -77,7 +81,6 @@ struct ThreadPool {
 	struct ThreadLog log;
 };
 
-
 /* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
 /* should only be called from supervisor thread */
@@ -87,7 +90,9 @@ supervisor_cancel_workers(struct ThreadPool *const restrict pool)
 	struct ThreadQueueNode *restrict node;
 	struct Worker *restrict worker;
 
-	thread_queue_lock_muffle(&pool->workers);
+	mutex_lock_try_catch_open(&pool->workers.lock)
+
+	mutex_lock_muffle(&pool->workers.lock);
 
 	thread_queue_peek(&pool->workers,
 			  &node);
@@ -100,7 +105,9 @@ supervisor_cancel_workers(struct ThreadPool *const restrict pool)
 		node = node->next;
 	}
 
-	thread_queue_unlock_muffle(&pool->workers);
+	mutex_unlock_muffle(&pool->workers.lock);
+
+	mutex_lock_try_catch_close();
 }
 
 /* should only be called from supervisor thread */
@@ -145,19 +152,24 @@ supervisor_init(struct Supervisor *const restrict supervisor,
 inline void
 supervisor_listen(struct Supervisor *const restrict supervisor)
 {
+	mutex_lock_try_catch_open(&supervisor->listening);
+
 	while (1) {
 		mutex_lock_handle_cl(&supervisor->listening,
 				     &supervisor->fail_cl);
 
 		while (supervisor->event == NULL)
 			thread_cond_await_handle_cl(&supervisor->trigger,
-						    &supervisor->listening)
+						    &supervisor->listening,
+						    &supervisor->fail_cl);
 
 		supervisor->event(supervisor->pool);
 
 		mutex_unlock_handle_cl(&supervisor->listening,
 				       &supervisor->fail_cl);
 	}
+
+	mutex_lock_try_catch_close();
 }
 
 inline void
@@ -179,6 +191,9 @@ supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
 void
+worker_exit_cleanup(void *arg);
+
+void
 worker_exit_on_failure(void *arg,
 		       const char *restrict failure)
 __attribute__((noreturn));
@@ -189,7 +204,7 @@ __attribute__((noreturn));
 inline void
 thread_pool_init(struct ThreadPool *restrict pool,
 		 size_t count_workers,
-		 const struct HandlerClosure *const restrict handle_init_fail)
+		 const struct HandlerClosure *const restrict init_fail_cl)
 {
 	pool->busy = true;
 	thread_cond_init(&pool->done);
@@ -199,12 +214,8 @@ thread_pool_init(struct ThreadPool *restrict pool,
 			"thread pool");
 
 	supervisor_init(&pool->supervisor,
-			&pool);
+			pool);
 }
-
-/* void */
-/* supervisor_exit(const char *restrict failure) */
-/* __attribute__((noreturn)); */
 
 
 
@@ -212,36 +223,7 @@ thread_pool_init(struct ThreadPool *restrict pool,
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
 
-/* apply 'ARG' to 'CATCH_ROUTINE' if exit in block */
-#define worker_try_catch_open(CATCH_ROUTINE, ARG)			\
-thread_try_catch_open_imp(CATCH_ROUTINE, ARG)
 
-#define worker_try_catch_close()					\
-thread_try_catch_close_imp()
-
-/* apply 'ARG' to 'ENSURE_ROUTINE' if exit in block or upon completing block */
-#define worker_try_ensure_open(ENSURE_ROUTINE, ARG)			\
-thread_try_ensure_open_imp(ENSURE_ROUTINE, ARG)
-
-#define worker_try_ensure_close()					\
-thread_try_ensure_close_imp()
-
-
-
-/* inline void */
-/* worker_exit_cleanup(void *arg) */
-/* { */
-/* 	struct Worker *const restrict */
-/* 	worker = (struct Worker *const restrict) arg; */
-
-/* 	thread_key_delete_handle(worker->key); */
-
-/* 	worker_queue_handle_remove(&supervisor.busy, */
-/* 				   worker); */
-
-/* 	worker_queue_handle_push(&supervisor.idle, */
-/* 				 worker); */
-/* } */
 
 /* void * */
 /* worker_do_awaitable(void *arg); */

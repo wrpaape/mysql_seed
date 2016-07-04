@@ -211,7 +211,9 @@ inline void
 thread_queue_push_muffle(struct ThreadQueue *const restrict queue,
 			 struct ThreadQueueNode *const restrict node)
 {
-	thread_queue_lock_muffle(queue);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
 
 	node->next = NULL;
 
@@ -227,7 +229,9 @@ thread_queue_push_muffle(struct ThreadQueue *const restrict queue,
 		queue->last	  = node;
 	}
 
-	thread_queue_unlock_muffle(queue);
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
 }
 
 
@@ -236,8 +240,10 @@ thread_queue_push_handle_cl(struct ThreadQueue *const restrict queue,
 			    struct ThreadQueueNode *const restrict node,
 			    const struct HandlerClosure *const restrict h_cl)
 {
-	thread_queue_lock_handle_cl(queue,
-				    h_cl);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     h_cl);
 
 	node->next = NULL;
 
@@ -254,8 +260,10 @@ thread_queue_push_handle_cl(struct ThreadQueue *const restrict queue,
 		queue->last	  = node;
 	}
 
-	thread_queue_unlock_handle_cl(queue,
-				      h_cl);
+	mutex_unlock_handle_cl(&queue->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
 }
 
 
@@ -265,7 +273,9 @@ inline void
 thread_queue_pop_muffle(struct ThreadQueue *const restrict queue,
 			struct ThreadQueueNode *restrict *const restrict node)
 {
-	thread_queue_lock_muffle(queue);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
 
 	if (queue->head == NULL) {
 		do {
@@ -293,7 +303,9 @@ thread_queue_pop_muffle(struct ThreadQueue *const restrict queue,
 		}
 	}
 
-	thread_queue_unlock_muffle(queue);
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
 }
 
 inline void
@@ -301,8 +313,10 @@ thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
 			   struct ThreadQueueNode *restrict *const restrict node,
 			   const struct HandlerClosure *const restrict h_cl)
 {
-	thread_queue_lock_handle_cl(queue,
-				    h_cl);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     h_cl);
 
 	if (queue->head == NULL) {
 		do {
@@ -333,8 +347,10 @@ thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
 		}
 	}
 
-	thread_queue_unlock_handle_cl(queue,
-				      h_cl);
+	mutex_unlock_handle_cl(&queue->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
 }
 
 
@@ -342,10 +358,11 @@ thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
-			   struct ThreadQueueNode *const restrict node,
-			   const struct HandlerClosure *const restrict h_cl)
+			   struct ThreadQueueNode *const restrict node)
 {
-	thread_queue_lock_muffle(queue);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
 
 	if (node->prev == NULL) {
 		if (node->next == NULL) {
@@ -366,7 +383,9 @@ thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
 			node->next->prev = node->prev;
 	}
 
-	thread_queue_unlock_muffle(queue);
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
 }
 
 inline void
@@ -375,8 +394,10 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 			      const struct HandlerClosure *const restrict h_cl)
 
 {
-	thread_queue_lock_handle_cl(queue,
-				    h_cl);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     h_cl);
 
 	if (node->prev == NULL) {
 		if (node->next == NULL) {
@@ -398,8 +419,10 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 			node->next->prev = node->prev;
 	}
 
-	thread_queue_unlock_handle_cl(queue,
-				      h_cl);
+	mutex_unlock_handle_cl(&queue->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
 }
 
 
@@ -411,14 +434,18 @@ thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue)
 	if (queue->head == NULL)
 		return;
 
-	thread_queue_lock_muffle(queue);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
 
 	do {
 		thread_cond_await_muffle(&queue->empty,
 					 &queue->lock);
 	} while (queue->head != NULL);
 
-	thread_queue_unlock_muffle(queue);
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
 }
 
 inline void
@@ -428,8 +455,10 @@ thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 	if (queue->head == NULL)
 		return;
 
-	thread_queue_lock_handle_cl(queue,
-				    h_cl);
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     h_cl);
 
 	do {
 		thread_cond_await_handle_cl(&queue->empty,
@@ -437,8 +466,10 @@ thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 					    h_cl);
 	} while (queue->head != NULL);
 
-	thread_queue_unlock_handle_cl(queue,
-				      h_cl);
+	mutex_unlock_handle_cl(&queue->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
 }
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_QUEUE_H_ */

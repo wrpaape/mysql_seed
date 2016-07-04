@@ -195,52 +195,61 @@ mutex_init(Mutex *const restrict lock);
 
 /* mutex_lock */
 extern inline bool
-mutex_lock_status(Mutex *const lock);
+mutex_lock_status(Mutex *const restrict lock);
 extern inline void
-mutex_lock_muffle(Mutex *const lock);
+mutex_lock_muffle(Mutex *const restrict lock);
 extern inline bool
-mutex_lock_report(Mutex *const lock,
+mutex_lock_report(Mutex *const restrict lock,
 		  const char *restrict *restrict failure);
 extern inline void
-mutex_lock_handle(Mutex *const lock,
+mutex_lock_handle(Mutex *const restrict lock,
 		  Handler *const handle,
 		  void *arg);
 extern inline void
-mutex_lock_handle_cl(Mutex *const lock,
+mutex_lock_handle_cl(Mutex *const restrict lock,
 		     const struct HandlerClosure *const restrict cl);
 
 /* mutex_try_lock */
 extern inline bool
-mutex_try_lock_status(Mutex *const lock);
-extern inline void
-mutex_try_lock_muffle(Mutex *const lock);
+mutex_try_lock_status(Mutex *const restrict lock);
+extern inline bool
+mutex_try_lock_muffle(Mutex *const restrict lock);
 extern inline enum ThreadFlag
-mutex_try_lock_report(Mutex *const lock,
+mutex_try_lock_report(Mutex *const restrict lock,
 		      const char *restrict *const restrict failure);
 extern inline bool
-mutex_try_lock_handle(Mutex *const lock,
+mutex_try_lock_handle(Mutex *const restrict lock,
 		      Handler *const handle,
 		      void *arg);
 extern inline bool
-mutex_try_lock_handle_cl(Mutex *const lock,
+mutex_try_lock_handle_cl(Mutex *const restrict lock,
 			 const struct HandlerClosure *const restrict cl);
 
 /* mutex_unlock */
 extern inline bool
-mutex_unlock_status(Mutex *const lock);
+mutex_unlock_status(Mutex *const restrict lock);
 extern inline void
-mutex_unlock_muffle(Mutex *const lock);
+mutex_unlock_muffle(Mutex *const restrict lock);
 extern inline bool
-mutex_unlock_report(Mutex *const lock,
+mutex_unlock_report(Mutex *const restrict lock,
 		    const char *restrict *const restrict failure);
 extern inline void
-mutex_unlock_handle(Mutex *const lock,
+mutex_unlock_handle(Mutex *const restrict lock,
 		    Handler *const handle,
 		    void *arg);
 extern inline void
-mutex_unlock_handle_cl(Mutex *const lock,
+mutex_unlock_handle_cl(Mutex *const restrict lock,
 		       const struct HandlerClosure *const restrict cl);
 
+/* mutex_lock cleanup */
+void
+mutex_lock_cleanup(void *arg)
+{
+	Mutex *const restrict lock = (Mutex *const restrict) arg;
+
+	if (mutex_try_lock_muffle(lock))
+		mutex_unlock_muffle(lock);
+}
 
 /* ThreadCond operations
  *─────────────────────────────────────────────────────────────────────────── */

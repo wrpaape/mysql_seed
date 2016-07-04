@@ -94,8 +94,7 @@ thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
-			   struct ThreadQueueNode *const restrict node,
-			   const struct HandlerClosure *const restrict h_cl);
+			   struct ThreadQueueNode *const restrict node);
 extern inline void
 thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 			      struct ThreadQueueNode *const restrict node,

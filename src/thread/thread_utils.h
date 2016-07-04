@@ -56,17 +56,11 @@ pthread_exit(NULL)
 #define thread_exit_joinable_imp(pointer)				\
 pthread_exit(pointer)
 
-#define thread_try_catch_open_imp(CATCH_ROUTINE, ARG)			\
-pthread_cleanup_push(CATCH_ROUTINE, ARG)
+#define thread_cleanup_push_imp(ROUTINE, ARG)				\
+pthread_cleanup_push(ROUTINE, ARG)
 
-#define thread_try_catch_close_imp()					\
-pthread_cleanup_pop(0)
-
-#define thread_try_ensure_open_imp(ENSURE_ROUTINE, ARG)			\
-pthread_cleanup_push(ENSURE_ROUTINE, ARG)
-
-#define thread_try_ensure_close_imp()					\
-pthread_cleanup_pop(1)
+#define thread_cleanup_pop_imp(EXECUTE)					\
+pthread_cleanup_pop(EXECUTE)
 
 #define thread_key_create_imp(KEY, CLEANUP)				\
 pthread_key_create(KEY, CLEANUP)
@@ -364,6 +358,21 @@ threads_equal(const Thread thread1,
 				 thread2) == 0;
 }
 
+/* wrap block to apply 'ARG' to 'CATCH_ROUTINE' immediately if thread exits or
+ * is canceled */
+#define thread_try_catch_open(CATCH_ROUTINE, ARG)			\
+thread_cleanup_push_imp(CATCH_ROUTINE, ARG)
+
+#define thread_try_catch_close()					\
+thread_cleanup_pop_imp(0)
+
+/* wrap block to apply 'ARG' to 'ENSURE_ROUTINE' either immediately if thread
+ * exits or is canceled, or at block end if reached */
+#define thread_try_ensure_open(ENSURE_ROUTINE, ARG)			\
+thread_cleanup_push_imp(ENSURE_ROUTINE, ARG)
+
+#define thread_try_ensure_close()					\
+thread_cleanup_pop_imp(1)
 
 
 /* ThreadKey operations
@@ -696,13 +705,13 @@ mutex_init(Mutex *const restrict lock)
 
 /* mutex_lock */
 inline bool
-mutex_lock_status(Mutex *const lock)
+mutex_lock_status(Mutex *const restrict lock)
 {
 	return mutex_lock_imp(lock);
 }
 
 inline void
-mutex_lock_muffle(Mutex *const lock)
+mutex_lock_muffle(Mutex *const restrict lock)
 {
 	(void) mutex_lock_imp(lock);
 }
@@ -710,7 +719,7 @@ mutex_lock_muffle(Mutex *const lock)
 #undef  FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE mutex_lock_imp
 inline bool
-mutex_lock_report(Mutex *const lock,
+mutex_lock_report(Mutex *const restrict lock,
 		  const char *restrict *const restrict failure)
 {
 	FAIL_SWITCH_STATUS_OPEN(lock)
@@ -724,7 +733,7 @@ mutex_lock_report(Mutex *const lock,
 }
 
 inline void
-mutex_lock_handle(Mutex *const lock,
+mutex_lock_handle(Mutex *const restrict lock,
 		  Handler *const handle,
 		  void *arg)
 {
@@ -740,7 +749,7 @@ mutex_lock_handle(Mutex *const lock,
 }
 
 inline void
-mutex_lock_handle_cl(Mutex *const lock,
+mutex_lock_handle_cl(Mutex *const restrict lock,
 		     const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
@@ -756,20 +765,20 @@ mutex_lock_handle_cl(Mutex *const lock,
 
 /* mutex_try_lock */
 inline bool
-mutex_try_lock_status(Mutex *const lock)
+mutex_try_lock_status(Mutex *const restrict lock)
 {
 	return mutex_try_lock_imp(lock) == 0;
 }
 
-inline void
-mutex_try_lock_muffle(Mutex *const lock)
+inline bool
+mutex_try_lock_muffle(Mutex *const restrict lock)
 {
-	(void) mutex_try_lock_imp(lock);
+	return mutex_try_lock_imp(lock) != EBUSY;
 }
 
 /* since 3-value flag instead of bool is returned, can't use fail switch */
 inline enum ThreadFlag
-mutex_try_lock_report(Mutex *const lock,
+mutex_try_lock_report(Mutex *const restrict lock,
 		      const char *restrict *const restrict failure)
 {
 	switch (mutex_try_lock_imp(lock)) {
@@ -793,7 +802,7 @@ mutex_try_lock_report(Mutex *const lock,
 }
 
 inline bool
-mutex_try_lock_handle(Mutex *const lock,
+mutex_try_lock_handle(Mutex *const restrict lock,
 		      Handler *const handle,
 		      void *arg)
 {
@@ -812,7 +821,7 @@ mutex_try_lock_handle(Mutex *const lock,
 }
 
 inline bool
-mutex_try_lock_handle_cl(Mutex *const lock,
+mutex_try_lock_handle_cl(Mutex *const restrict lock,
 			 const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
@@ -831,13 +840,13 @@ mutex_try_lock_handle_cl(Mutex *const lock,
 
 
 inline bool
-mutex_unlock_status(Mutex *const lock)
+mutex_unlock_status(Mutex *const restrict lock)
 {
 	return mutex_lock_imp(lock) == 0;
 }
 
 inline void
-mutex_unlock_muffle(Mutex *const lock)
+mutex_unlock_muffle(Mutex *const restrict lock)
 {
 	(void) mutex_lock_imp(lock);
 }
@@ -845,7 +854,7 @@ mutex_unlock_muffle(Mutex *const lock)
 #undef  FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE mutex_unlock_imp
 inline bool
-mutex_unlock_report(Mutex *const lock,
+mutex_unlock_report(Mutex *const restrict lock,
 		    const char *restrict *const restrict failure)
 {
 	FAIL_SWITCH_STATUS_OPEN(lock)
@@ -859,7 +868,7 @@ mutex_unlock_report(Mutex *const lock,
 }
 
 inline void
-mutex_unlock_handle(Mutex *const lock,
+mutex_unlock_handle(Mutex *const restrict lock,
 		    Handler *const handle,
 		    void *arg)
 {
@@ -876,7 +885,7 @@ mutex_unlock_handle(Mutex *const lock,
 }
 
 inline void
-mutex_unlock_handle_cl(Mutex *const lock,
+mutex_unlock_handle_cl(Mutex *const restrict lock,
 		       const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
@@ -890,6 +899,16 @@ mutex_unlock_handle_cl(Mutex *const lock,
 
 	__builtin_unreachable();
 }
+
+/* mutex_lock cleanup */
+void
+mutex_lock_cleanup(void *arg);
+
+#define mutex_lock_try_catch_open(LOCK)					\
+thread_cleanup_push_imp(&mutex_lock_cleanup, LOCK)
+
+#define mutex_lock_try_catch_close()					\
+thread_cleanup_pop_imp(0)
 
 
 /* ThreadCond operations

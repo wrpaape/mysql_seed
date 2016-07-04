@@ -2,6 +2,26 @@
 
 /* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
+void
+supervisor_exit_cleanup(void *arg)
+{
+	struct Supervisor *const restrict
+	supervisor = (struct Supervisor *const restrict) arg;
+
+	thread_key_delete_muffle(supervisor->key);
+
+	struct ThreadPool *const restrict pool = supervisor->pool;
+
+	mutex_lock_muffle(&pool->processing);
+
+	pool->busy = false;
+
+	thread_cond_signal_muffle(&pool->done);
+
+	mutex_unlock_muffle(&pool->processing);
+
+	/* release held mutexes? */
+}
 extern inline void
 supervisor_cancel_workers(struct ThreadPool *const restrict pool);
 extern inline void
@@ -35,6 +55,16 @@ supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
 void
+worker_exit_cleanup(void *arg)
+{
+	struct Worker *const restrict
+	worker = (struct Worker *const restrict) arg;
+
+	thread_key_delete_muffle(worker->key);
+
+	/* release held mutexes? */
+}
+void
 worker_exit_on_failure(void *arg,
 		       const char *restrict failure)
 {
@@ -51,7 +81,7 @@ worker_exit_on_failure(void *arg,
 	thread_log_unlock_muffle(&pool->log);
 
 	thread_queue_remove_muffle(&pool->workers,
-				   worker);
+				   worker->node);
 
 	supervisor_signal_event_muffle(&pool->supervisor,
 				       &supervisor_do_exit_failure);
@@ -65,43 +95,10 @@ worker_exit_on_failure(void *arg,
 extern inline void
 thread_pool_init(struct ThreadPool *restrict pool,
 		 size_t count_workers,
-		 const struct HandlerClosure *const restrict handle_init_fail);
+		 const struct HandlerClosure *const restrict init_fail_cl);
 
 
-/* void */
-/* supervisor_exit(const char *restrict failure) */
-/* { */
-/* 	struct Worker *restrict worker; */
-/* 	struct ExitSpec spec; */
 
-/* 	(void) mutex_lock_imp(&supervisor.done.lock); */
-/* 	(void) mutex_lock_imp(&supervisor.idle.lock); */
-/* 	(void) mutex_lock_imp(&supervisor.busy.lock); */
-
-/* 	while (1) { */
-/* 		worker = worker_queue_pop(&supervisor.busy); */
-
-/* 		if (worker == NULL) */
-/* 			break; */
-
-/* 		(void) thread_cancel_imp(worker->thread); */
-/* 	} */
-
-/* 	(void) mutex_unlock_imp(&supervisor.busy.lock); */
-/* 	(void) mutex_unlock_imp(&supervisor.idle.lock); */
-/* 	(void) mutex_unlock_imp(&supervisor.done.lock); */
-
-/* 	exit_spec_set_failure(&spec, */
-/* 				   failure); */
-
-/* 	exit_spec_exit(&spec); */
-/* } */
-
-/* WorkerQueue operations
- *─────────────────────────────────────────────────────────────────────────── */
-
-/* Worker operations
- *─────────────────────────────────────────────────────────────────────────── */
 
 /* extern inline void */
 /* worker_exit_cleanup(void *arg); */
