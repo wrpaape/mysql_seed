@@ -764,10 +764,19 @@ mutex_lock_handle_cl(Mutex *const restrict lock,
 }
 
 /* mutex_try_lock */
-inline bool
+inline enum ThreadFlag
 mutex_try_lock_status(Mutex *const restrict lock)
 {
-	return mutex_try_lock_imp(lock) == 0;
+	switch (mutex_try_lock_imp(lock)) {
+	case 0:
+		return THREAD_TRUE;
+
+	case EBUSY:
+		return THREAD_FALSE;
+
+	default:
+		return THREAD_ERROR;
+	}
 }
 
 inline bool
@@ -900,7 +909,72 @@ mutex_unlock_handle_cl(Mutex *const restrict lock,
 	__builtin_unreachable();
 }
 
-/* mutex_lock cleanup */
+/* mutex_ensure_unlocked */
+inline bool
+mutex_ensure_unlocked_status(Mutex *const restrict lock)
+{
+	switch (mutex_try_lock_status(lock)) {
+	case THREAD_TRUE:
+		return mutex_unlock_status(lock);
+
+	case THREAD_FALSE:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+inline void
+mutex_ensure_unlocked_muffle(Mutex *const restrict lock)
+{
+	if (mutex_try_lock_muffle(lock))
+		mutex_unlock_muffle(lock);
+}
+
+inline bool
+mutex_ensure_unlocked_report(Mutex *const restrict lock,
+			     const char *restrict *const restrict failure)
+{
+	switch (mutex_try_lock_report(lock,
+				      failure)) {
+	case THREAD_TRUE:
+		return mutex_unlock_report(lock,
+					   failure);
+
+	case THREAD_FALSE:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+inline void
+mutex_ensure_unlocked_handle(Mutex *const restrict lock,
+			     Handler *const handle,
+			     void *arg)
+{
+	if (mutex_try_lock_handle(lock,
+				  handle,
+				  arg))
+		mutex_unlock_handle(lock,
+				    handle,
+				    arg);
+}
+
+inline void
+mutex_ensure_unlocked_handle_cl(Mutex *const restrict lock,
+				const struct HandlerClosure *const restrict cl)
+{
+	if (mutex_try_lock_handle_cl(lock,
+				     cl))
+		mutex_unlock_handle_cl(lock,
+				    cl);
+}
+
+
+/* mutex_lock_cleanup */
 void
 mutex_lock_cleanup(void *arg);
 

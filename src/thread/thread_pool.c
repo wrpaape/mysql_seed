@@ -2,6 +2,16 @@
 
 /* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+supervisor_oversee_completion(struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_cancel_workers_failure(struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_cancel_workers_success(struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_do_exit_failure(struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_do_exit_success(struct ThreadPool *const restrict pool);
 void
 supervisor_exit_cleanup(void *arg)
 {
@@ -10,22 +20,8 @@ supervisor_exit_cleanup(void *arg)
 
 	thread_key_delete_muffle(supervisor->key);
 
-	struct ThreadPool *const restrict pool = supervisor->pool;
-
-	mutex_lock_muffle(&pool->processing);
-
-	pool->busy = false;
-
-	thread_cond_signal_muffle(&pool->done);
-
-	mutex_unlock_muffle(&pool->processing);
-
-	/* release held mutexes? */
+	supervisor_do_exit_failure(supervisor->pool);
 }
-extern inline void
-supervisor_cancel_workers(struct ThreadPool *const restrict pool);
-extern inline void
-supervisor_do_exit_failure(struct ThreadPool *const restrict pool);
 void
 supervisor_exit_on_failure(void *arg,
 			   const char *restrict failure)
@@ -33,14 +29,18 @@ supervisor_exit_on_failure(void *arg,
 	struct ThreadPool *const restrict pool =
 	(struct ThreadPool *const restrict) arg;
 
-	thread_log_lock_muffle(&pool->log);
+	mutex_lock_try_catch_open(&pool->log.lock)
+
+	mutex_lock_muffle(&pool->log.lock);
 
 	thread_log_append_string(&pool->log,
 				 failure);
 
-	thread_log_unlock_muffle(&pool->log);
+	mutex_unlock_muffle(&pool->log.lock);
 
-	supervisor_do_exit_failure(pool);
+	mutex_lock_try_catch_close();
+
+	thread_exit_detached();
 	__builtin_unreachable();
 }
 extern inline void
@@ -49,8 +49,12 @@ supervisor_init(struct Supervisor *const restrict supervisor,
 extern inline void
 supervisor_listen(struct Supervisor *const restrict supervisor);
 extern inline void
-supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
-			       ThreadPoolEvent *const event);
+supervisor_signal_muffle(struct Supervisor *const restrict supervisor,
+			 ThreadPoolEvent *const event);
+extern inline void
+supervisor_signal_handle_cl(struct Supervisor *const restrict supervisor,
+			    ThreadPoolEvent *const event,
+			    const struct HandlerClosure *const restrict fail_cl);
 
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -61,9 +65,8 @@ worker_exit_cleanup(void *arg)
 	worker = (struct Worker *const restrict) arg;
 
 	thread_key_delete_muffle(worker->key);
-
-	/* release held mutexes? */
 }
+
 void
 worker_exit_on_failure(void *arg,
 		       const char *restrict failure)
@@ -73,20 +76,23 @@ worker_exit_on_failure(void *arg,
 
 	struct ThreadPool *const restrict pool = worker->pool;
 
-	thread_log_lock_muffle(&pool->log);
+	mutex_lock_try_catch_open(&pool->log.lock);
+
+	mutex_lock_muffle(&pool->log.lock);
 
 	thread_log_append_string(&pool->log,
 				 failure);
 
-	thread_log_unlock_muffle(&pool->log);
+	mutex_unlock_muffle(&pool->log.lock);
+
+	mutex_lock_try_catch_close();
 
 	thread_queue_remove_muffle(&pool->workers,
 				   worker->node);
 
-	supervisor_signal_event_muffle(&pool->supervisor,
-				       &supervisor_do_exit_failure);
+	supervisor_signal_muffle(&pool->supervisor,
+				 &supervisor_do_exit_failure);
 	thread_exit_detached();
-
 	__builtin_unreachable();
 }
 
@@ -98,6 +104,9 @@ thread_pool_init(struct ThreadPool *restrict pool,
 		 const struct HandlerClosure *const restrict init_fail_cl);
 
 
+extern inline void
+thread_pool_process(struct ThreadPool *restrict pool,
+		    const struct HandlerClosure *const restrict fail_cl);
 
 
 /* extern inline void */

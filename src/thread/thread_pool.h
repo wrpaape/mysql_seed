@@ -19,7 +19,7 @@
 #define THREAD_POOL_EXIT_FAILURE_MESSAGE ANSI_BRIGHT ANSI_RED_BG	\
 ANSI_YELLOW "\nTHREAD POOL EXITING ON FAILURE\n" ANSI_RESET
 
-#define THREAD_POOL_EXIT_ON_SUCCESS_MESSAGE ANSI_BRIGHT ANSI_WHITE_BG	\
+#define THREAD_POOL_EXIT_SUCCESS_MESSAGE ANSI_BRIGHT ANSI_WHITE_BG	\
 ANSI_GREEN "\nTHREAD POOL EXITING ON SUCCESS\n" ANSI_RESET
 
 
@@ -85,7 +85,7 @@ struct ThreadPool {
  *─────────────────────────────────────────────────────────────────────────── */
 /* should only be called from supervisor thread */
 inline void
-supervisor_cancel_workers(struct ThreadPool *const restrict pool)
+supervisor_cancel_workers_failure(struct ThreadPool *const restrict pool)
 {
 	struct ThreadQueueNode *restrict node;
 	struct Worker *restrict worker;
@@ -110,13 +110,49 @@ supervisor_cancel_workers(struct ThreadPool *const restrict pool)
 	mutex_lock_try_catch_close();
 }
 
+inline void
+supervisor_cancel_workers_success(struct ThreadPool *const restrict pool)
+{
+	struct ThreadQueueNode *restrict node;
+	struct Worker *restrict worker;
+
+	mutex_lock_try_catch_open(&pool->workers.lock)
+
+	mutex_lock_handle_cl(&pool->workers.lock,
+			     &pool->supervisor.fail_cl);
+
+	thread_queue_peek(&pool->workers,
+			  &node);
+
+	while (node != NULL) {
+		worker = (struct Worker *restrict) node->payload;
+
+		thread_cancel_handle_cl(worker->thread,
+					&pool->supervisor.fail_cl);
+
+		node = node->next;
+	}
+
+	mutex_unlock_handle_cl(&pool->workers.lock,
+			       &pool->supervisor.fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+/* should only be called from supervisor thread */
+void
+supervisor_exit_cleanup(void *arg);
 /* should only be called from supervisor thread */
 inline void
 supervisor_do_exit_failure(struct ThreadPool *const restrict pool)
 {
-	supervisor_cancel_workers(pool);
+	/* cancel all living workers */
+	supervisor_cancel_workers_failure(pool);
 
-	thread_log_lock_muffle(&pool->log);
+	/* close the log with a failure message and dump to stderr */
+	mutex_lock_try_catch_open(&pool->log.lock);
+
+	mutex_lock_muffle(&pool->log.lock);
 
 	thread_log_append_string(&pool->log,
 				 THREAD_POOL_EXIT_FAILURE_MESSAGE);
@@ -126,14 +162,99 @@ supervisor_do_exit_failure(struct ThreadPool *const restrict pool)
 	thread_log_dump_muffle(&pool->log,
 			       STDERR_FILENO);
 
+	mutex_unlock_muffle(&pool->log.lock);
+
+	mutex_lock_try_catch_close();
+
+	/* wake up any threads waiting on 'thread_pool_process' */
+	mutex_lock_try_catch_open(&pool->processing);
+
+	mutex_lock_muffle(&pool->processing);
+
+	pool->busy = false;
+
+	thread_cond_signal_muffle(&pool->done);
+
+	mutex_unlock_muffle(&pool->processing);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+supervisor_do_exit_success(struct ThreadPool *const restrict pool)
+{
+	/* cancel all living workers */
+	supervisor_cancel_workers_success(pool);
+
+	/* close the log with a success message and dump to stdout */
+	mutex_lock_try_catch_open(&pool->log.lock);
+
+	mutex_lock_handle_cl(&pool->log.lock,
+			     &pool->supervisor.fail_cl);
+
+	thread_log_append_string(&pool->log,
+				 THREAD_POOL_EXIT_SUCCESS_MESSAGE);
+
+	thread_log_append_close(&pool->log);
+
+	thread_log_dump_handle_cl(&pool->log,
+				  STDOUT_FILENO,
+				  &pool->supervisor.fail_cl);
+
+	mutex_unlock_handle_cl(&pool->log.lock,
+			       &pool->supervisor.fail_cl);
+
+	mutex_lock_try_catch_close();
+
+	/* ensure failure destructor functions aren't called on exit */
+	thread_key_delete_handle_cl(pool->supervisor.key,
+				    &pool->supervisor.fail_cl);
+
+	/* exit */
 	thread_exit_detached();
 	__builtin_unreachable();
 }
 
+/* should only be called from supervisor thread */
 void
 supervisor_exit_on_failure(void *arg,
 			   const char *restrict failure)
 __attribute__((noreturn));
+
+/* should only be called from supervisor thread */
+inline void
+supervisor_oversee_completion(struct ThreadPool *const restrict pool)
+{
+	/* wait for workers to complete tasks */
+	thread_queue_await_empty_handle_cl(&pool->tasks.awaitable,
+					   &pool->supervisor.fail_cl);
+
+	thread_queue_await_empty_handle_cl(&pool->tasks.independent,
+					   &pool->supervisor.fail_cl);
+
+	thread_queue_await_empty_handle_cl(&pool->tasks.finished,
+					   &pool->supervisor.fail_cl);
+
+	/* wake up any threads waiting on 'thread_pool_process' */
+	mutex_lock_try_catch_open(&pool->processing);
+
+	mutex_lock_handle_cl(&pool->processing,
+			     &pool->supervisor.fail_cl);
+
+	pool->busy = false;
+
+	thread_cond_signal_handle_cl(&pool->done,
+				     &pool->supervisor.fail_cl);
+
+	mutex_unlock_handle_cl(&pool->processing,
+			       &pool->supervisor.fail_cl);
+
+	mutex_lock_try_catch_close();
+
+	/* cancel workers, cleanup, exit */
+	supervisor_do_exit_success(pool);
+}
+
 
 inline void
 supervisor_init(struct Supervisor *const restrict supervisor,
@@ -173,9 +294,11 @@ supervisor_listen(struct Supervisor *const restrict supervisor)
 }
 
 inline void
-supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
-			       ThreadPoolEvent *const event)
+supervisor_signal_muffle(struct Supervisor *const restrict supervisor,
+			 ThreadPoolEvent *const event)
 {
+	mutex_lock_try_catch_open(&supervisor->listening);
+
 	mutex_lock_muffle(&supervisor->listening);
 
 	supervisor->event = event;
@@ -183,6 +306,29 @@ supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
 	thread_cond_signal_muffle(&supervisor->trigger);
 
 	mutex_unlock_muffle(&supervisor->listening);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+supervisor_signal_handle_cl(struct Supervisor *const restrict supervisor,
+			    ThreadPoolEvent *const event,
+			    const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&supervisor->listening);
+
+	mutex_lock_handle_cl(&supervisor->listening,
+			     fail_cl);
+
+	supervisor->event = event;
+
+	thread_cond_signal_handle_cl(&supervisor->trigger,
+				     fail_cl);
+
+	mutex_unlock_handle_cl(&supervisor->listening,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
 }
 
 
@@ -218,6 +364,29 @@ thread_pool_init(struct ThreadPool *restrict pool,
 }
 
 
+inline void
+thread_pool_process(struct ThreadPool *restrict pool,
+		    const struct HandlerClosure *const restrict fail_cl)
+{
+	supervisor_signal_handle_cl(&pool->supervisor,
+				    &supervisor_oversee_completion,
+				    fail_cl);
+
+	mutex_lock_try_catch_open(&pool->processing);
+
+	mutex_lock_handle_cl(&pool->processing,
+			     fail_cl);
+
+	while (pool->busy)
+		thread_cond_await_handle_cl(&pool->done,
+					    &pool->processing,
+					    fail_cl);
+
+	mutex_unlock_handle_cl(&pool->processing,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
 
 
 /* Worker operations

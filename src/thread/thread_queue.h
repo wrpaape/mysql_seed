@@ -392,7 +392,6 @@ inline void
 thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 			      struct ThreadQueueNode *const restrict node,
 			      const struct HandlerClosure *const restrict h_cl)
-
 {
 	mutex_lock_try_catch_open(&queue->lock);
 

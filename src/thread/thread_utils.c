@@ -210,7 +210,7 @@ mutex_lock_handle_cl(Mutex *const restrict lock,
 		     const struct HandlerClosure *const restrict cl);
 
 /* mutex_try_lock */
-extern inline bool
+extern inline enum ThreadFlag
 mutex_try_lock_status(Mutex *const restrict lock);
 extern inline bool
 mutex_try_lock_muffle(Mutex *const restrict lock);
@@ -241,7 +241,23 @@ extern inline void
 mutex_unlock_handle_cl(Mutex *const restrict lock,
 		       const struct HandlerClosure *const restrict cl);
 
-/* mutex_lock cleanup */
+/* mutex_ensure_unlocked */
+extern inline bool
+mutex_ensure_unlocked_status(Mutex *const restrict lock);
+extern inline void
+mutex_ensure_unlocked_muffle(Mutex *const restrict lock);
+extern inline bool
+mutex_ensure_unlocked_report(Mutex *const restrict lock,
+			     const char *restrict *const restrict failure);
+extern inline void
+mutex_ensure_unlocked_handle(Mutex *const restrict lock,
+			     Handler *const handle,
+			     void *arg);
+extern inline void
+mutex_ensure_unlocked_handle_cl(Mutex *const restrict lock,
+				const struct HandlerClosure *const restrict cl);
+
+/* mutex_lock_cleanup */
 void
 mutex_lock_cleanup(void *arg)
 {
