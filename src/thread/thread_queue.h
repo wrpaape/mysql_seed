@@ -22,6 +22,7 @@ struct ThreadQueue {
 	ThreadCond empty;
 };
 
+
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
 inline void

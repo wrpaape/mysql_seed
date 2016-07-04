@@ -87,7 +87,7 @@ worker_exit_on_failure(void *arg,
 
 	mutex_lock_try_catch_close();
 
-	thread_queue_remove_muffle(&pool->workers,
+	thread_queue_remove_muffle(&pool->worker_queue,
 				   worker->node);
 
 	supervisor_signal_muffle(&pool->supervisor,
@@ -99,15 +99,25 @@ worker_exit_on_failure(void *arg,
 /* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_pool_init(struct ThreadPool *restrict pool,
-		 size_t count_workers,
-		 const struct HandlerClosure *const restrict init_fail_cl);
-
+thread_pool_init_default(struct ThreadPool *const restrict pool);
+extern inline void
+thread_pool_init_empty(struct ThreadPool *const restrict pool);
+extern inline void
+thread_pool_init(struct ThreadPool *const restrict pool,
+		 const size_t count_workers,
+		 const size_t count_tasks);
+extern inline struct ThreadPool *
+thread_pool_create_empty(const struct HandlerClosure *const restrict fail_cl);
+extern inline struct ThreadPool *
+thread_pool_create(size_t count_workers,
+		   const struct HandlerClosure *const restrict fail_cl);
 
 extern inline void
 thread_pool_process(struct ThreadPool *restrict pool,
 		    const struct HandlerClosure *const restrict fail_cl);
 
+extern inline void
+thread_pool_destroy(struct ThreadPool *restrict pool);
 
 /* extern inline void */
 /* worker_exit_cleanup(void *arg); */

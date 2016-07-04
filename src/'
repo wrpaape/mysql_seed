@@ -344,7 +344,7 @@ worker_exit_on_failure(void *arg,
 __attribute__((noreturn));
 
 inline void
-worker_queue_init(struct ThreadQueue *const restrict queue,
+worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 		  struct ThreadQueueNode *restrict node,
 		  struct ThreadQueueNode *const restrict last,
 		  struct Worker *restrict worker,
@@ -352,21 +352,16 @@ worker_queue_init(struct ThreadQueue *const restrict queue,
 {
 	struct ThreadQueueNode *restrict next;
 
-	thread_queue_init(queue);
+	thread_queue_init(worker_queue);
 
-	last->next  = NULL;
-	queue->last = last;
+	last->next	   = NULL;
+	worker_queue->last = last;
 
-	node->prev  = NULL;
+	node->prev = NULL;
 	queue->head = node;
 
+
 	while (1) {
-		worker->fail_cl.handle = &worker_exit_on_failure;
-		worker->fail_cl.arg    = pool;
-
-		worker->pool = pool;
-		worker->node = node;
-
 		node->payload = (void *) worker;
 
 		if (node == last)
@@ -378,6 +373,7 @@ worker_queue_init(struct ThreadQueue *const restrict queue,
 		next->prev = node;
 
 		node = next;
+
 		++worker;
 	}
 }
@@ -385,11 +381,18 @@ worker_queue_init(struct ThreadQueue *const restrict queue,
 /* TaskQueues operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-task_queues_init_default(struct TaskQueues *const restrict task_queues)
+task_queues_init_active(struct TaskQueues *const restrict task_queues)
 {
 	thread_queue_init_empty(&task_queues->awaitable);
 	thread_queue_init_empty(&task_queues->independent);
 	thread_queue_init_empty(&task_queues->complete);
+}
+
+inline void
+task_queues_init_empty(struct TaskQueues *const restrict task_queues)
+{
+	task_queues_init_active(task_queues);
+	thread_queue_init_empty(&task_queues->vacant);
 }
 
 inline void
@@ -400,8 +403,6 @@ vacant_task_queue_init(struct ThreadQueue *const restrict vacant,
 {
 	struct ThreadQueueNode *restrict next;
 
-	thread_queue_init(vacant);
-
 	last->next   = NULL;
 	vacant->last = last;
 
@@ -409,9 +410,7 @@ vacant_task_queue_init(struct ThreadQueue *const restrict vacant,
 	vacant->head = node;
 
 	while (1) {
-		task->node = node;
-
-		node->payload = (void *) task;
+		node->payload = (void *) worker;
 
 		if (node == last)
 			return;
@@ -422,8 +421,24 @@ vacant_task_queue_init(struct ThreadQueue *const restrict vacant,
 		next->prev = node;
 
 		node = next;
-		++task;
+
+		++worker;
 	}
+}
+
+inline void
+task_queues_init(struct TaskQueues *const restrict task_queues,
+		 struct ThreadQueueNode *restrict node,
+		 struct ThreadQueueNode *const restrict last,
+		 struct Task *restrict task)
+{
+
+	task_queues_init_active(task_queues);
+
+	vacant_task_queue_init(&task_queues->vacant,
+			       node,
+			       last,
+			       task);
 }
 
 
@@ -442,17 +457,12 @@ thread_pool_init_default(struct ThreadPool *const restrict pool)
 	supervisor_init(&pool->supervisor,
 			pool);
 
-	task_queues_init_default(&pool->task_queues);
+
 }
 
 inline void
 thread_pool_init_empty(struct ThreadPool *const restrict pool)
 {
-	thread_pool_init_default(pool);
-
-	thread_queue_init_empty(&pool->task_queues.vacant);
-
-	thread_queue_init_empty(&pool->worker_queue);
 }
 
 inline void
@@ -485,18 +495,13 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 
 	struct ThreadQueueNode *const restrict last_task_queue_node
 	= ((struct ThreadQueueNode *const restrict) tasks) - 1l;
-
-	vacant_task_queue_init(&pool->task_queues.vacant,
-			       task_queue_nodes,
-			       last_task_queue_node,
-			       tasks);
 }
 
 inline struct ThreadPool *
 thread_pool_create_empty(const struct HandlerClosure *const restrict fail_cl)
 {
 	struct ThreadPool *const restrict pool
-	= malloc(sizeof(struct ThreadPool));
+	= malloc(sizeof(struct ThreadPool);
 
 	if (pool != NULL) {
 		thread_pool_init_empty(pool);
@@ -522,7 +527,7 @@ thread_pool_create(size_t count_workers,
 	 *	count_workers X 2	Task
 	 *	count_workers X 2	ThreadQueueNode (task queues) */
 
-	const size_t count_tasks = count_workers * 2lu;
+	const count_tasks = count_workers * 2lu;
 
 	struct ThreadPool *const restrict pool
 	= malloc(sizeof(struct ThreadPool)

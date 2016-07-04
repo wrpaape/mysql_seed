@@ -283,4 +283,13 @@
 #define FAILURE_REASONS_4_AOTF(SOURCE, R1, R2, R3, R4)			\
 	ERROR_REASONS_4_AOTF(SOURCE, "failure", R1, R2, R3, R4)
 
+
+/* failure messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define MALLOC_FAILURE_REASON						\
+"malloc failure (out of memory)"
+
+#define MALLOC_FAILURE_MESSAGE(SOURCE)					\
+FAILURE_REASON(SOURCE, MALLOC_FAILURE_REASON)
+
 #endif /* ifndef MYSQL_SEED_STRING_STRING_MACROS_H_ */

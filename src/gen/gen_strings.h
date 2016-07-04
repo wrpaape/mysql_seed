@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdlib.h>		/* malloc, free */
-#include "mysql_seed_log.h"	/* seed_log, seed_parallel, string utils */
+#include "thread/thread_log.h"	/* ThreadLog, parallelization, string utils */
 
 
 /* failure messages
