@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_UTILS_FAIL_SWITCH_OPEN_H_
-#define MYSQL_SEED_UTILS_FAIL_SWITCH_OPEN_H_
+#ifndef MYSQL_SEED_UTILS_FAIL_SWITCH_H_
+#define MYSQL_SEED_UTILS_FAIL_SWITCH_H_
 
 /* external dependencies
  * ─────────────────────────────────────────────────────────────────────────── */
@@ -7,11 +7,11 @@
 #include <errno.h>			/* errno */
 #include "string/string_macros.h"	/* error macros */
 
-#include "utils/fail_switch_close.h"	/* undefine the following macros */
-/* #define FAIL_SWITCH_ROUTINE */
-/* #define FAIL_SWITCH_STATUS_SUCCESS */
-/* #define FAIL_SWITCH_ERRNO_FAILURE */
-/* #define FAIL_SWITCH_FAILURE_POINTER */
+/* must define these in included file */
+#undef FAIL_SWITCH_ROUTINE
+#undef FAIL_SWITCH_STATUS_SUCCESS
+#undef FAIL_SWITCH_ERRNO_FAILURE
+#undef FAIL_SWITCH_FAILURE_POINTER
 
 #define _FS_ROUTINE_STRING EXPAND_STRINGIFY(FAIL_SWITCH_ROUTINE)
 
@@ -51,7 +51,7 @@ _FS_HANDLE_FAILURE_STATUS(STATUS,					\
 
 #define FAIL_SWITCH_STATUS_CASE_4(STATUS, R1, R2, R3, R4)		\
 _FS_HANDLE_FAILURE_STATUS(STATUS,					\
-			  FAILURE_REASONS_4(_FS_ROUTINE_STRING, R1	\
+			  FAILURE_REASONS_4(_FS_ROUTINE_STRING, R1,	\
 								R2,	\
 								R3,	\
 								R4))
@@ -64,7 +64,7 @@ _FS_HANDLE_DEFAULT_CASE()						\
 /* diagnose failure according to errno
  * ────────────────────────────────────────────────────────────────────────── */
 #define FAIL_SWITCH_ERRNO_OPEN(...)					\
-if (FAIL_SWITCH_ERRNO_ROUTINE(__VA_ARGS__)				\
+if (FAIL_SWITCH_ROUTINE(__VA_ARGS__)					\
     != FAIL_SWITCH_ERRNO_FAILURE)					\
 	return true;							\
 switch (errno)	{
@@ -87,7 +87,7 @@ _FS_HANDLE_FAILURE_STATUS(ERRNO,					\
 
 #define FAIL_SWITCH_ERRNO_CASE_4(ERRNO, R1, R2, R3, R4)			\
 _FS_HANDLE_FAILURE_STATUS(ERRNO,					\
-			  FAILURE_REASONS_4(_FS_ROUTINE_STRING, R1	\
+			  FAILURE_REASONS_4(_FS_ROUTINE_STRING, R1,	\
 							        R2,	\
 							        R3,	\
 							        R4))
@@ -96,4 +96,4 @@ _FS_HANDLE_FAILURE_STATUS(ERRNO,					\
 _FS_HANDLE_DEFAULT_CASE()						\
 }
 
-#endif /* ifndef MYSQL_SEED_UTILS_FAIL_SWITCH_OPEN_H_ */
+#endif /* ifndef MYSQL_SEED_UTILS_FAIL_SWITCH_H_ */

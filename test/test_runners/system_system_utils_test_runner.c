@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "thread/thread_log.h"
+#include "system/system_utils.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_thread_log_dump(void);
+extern void test_system_utils(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/thread_thread_log_test.c");
-  RUN_TEST(test_thread_log_dump, 32);
+  UnityBegin("../test/system_system_utils_test.c");
+  RUN_TEST(test_system_utils, 12);
 
   return (UnityEnd());
 }

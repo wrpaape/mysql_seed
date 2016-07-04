@@ -11,50 +11,50 @@ ThreadAttr thread_attr_prototype;
 /* thread_create */
 extern inline bool
 thread_create_status(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
+		     Routine *const routine,
 		     void *arg);
 
 extern inline void
 thread_create_muffle(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
+		     Routine *const routine,
 		     void *arg);
 extern inline bool
 thread_create_report(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
+		     Routine *const routine,
 		     void *arg,
 		     const char *restrict *const restrict failure);
 extern inline void
 thread_create_handle(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
-		     void *routine_arg,
-		     ThreadHandler *const handle,
-		     void *handler_arg);
+		     Routine *const routine,
+		     void *r_arg,
+		     Handler *const handle,
+		     void *h_arg);
 extern inline void
 thread_create_handle_cl(Thread *const restrict thread,
-			ThreadRoutine *const routine,
-			void *routine_arg,
-			const struct ThreadHandlerClosure *const restrict cl);
+			Routine *const routine,
+			void *r_arg,
+			const struct HandlerClosure *const restrict cl);
 
 /* thread_create_cl */
 extern inline bool
 thread_create_cl_status(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl);
+			const struct RoutineClosure *const restrict cl);
 extern inline void
 thread_create_cl_muffle(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl);
+			const struct RoutineClosure *const restrict cl);
 extern inline bool
 thread_create_cl_report(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl,
+			const struct RoutineClosure *const restrict cl,
 			const char *restrict *const restrict failure);
 extern inline void
 thread_create_cl_handle(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl,
-			ThreadHandler *const handle,
-			void *handler_arg);
+			const struct RoutineClosure *const restrict cl,
+			Handler *const handle,
+			void *h_arg);
 extern inline void
 thread_create_cl_handle_cl(Thread *const restrict thread,
-			   const struct ThreadRoutineClosure *const restrict routine_cl,
-			   const struct ThreadHandlerClosure *const restrict handler_cl);
+			   const struct RoutineClosure *const restrict r_cl,
+			   const struct HandlerClosure *const restrict h_cl);
 
 /* thread_cancel */
 extern inline bool
@@ -66,11 +66,11 @@ thread_cancel_report(Thread thread,
 		     const char *restrict *const restrict failure);
 extern inline void
 thread_cancel_handle(Thread thread,
-		     ThreadHandler *const handle,
+		     Handler *const handle,
 		     void *arg);
 extern inline void
 thread_cancel_handle_cl(Thread thread,
-			const struct ThreadHandlerClosure *const restrict cl);
+			const struct HandlerClosure *const restrict cl);
 
 /* thread_exit */
 extern inline void
@@ -94,23 +94,23 @@ threads_equal(const Thread thread1,
 /* thread_key_create */
 extern inline bool
 thread_key_create_status(ThreadKey *const key,
-			 ThreadProcedure *const cleanup);
+			 Procedure *const cleanup);
 extern inline void
 thread_key_create_muffle(ThreadKey *const key,
-			 ThreadProcedure *const cleanup);
+			 Procedure *const cleanup);
 extern inline bool
 thread_key_create_report(ThreadKey *const key,
-			 ThreadProcedure *const cleanup,
+			 Procedure *const cleanup,
 			 const char *restrict *const restrict failure);
 extern inline void
 thread_key_create_handle(ThreadKey *const key,
-			 ThreadProcedure *const cleanup,
-			 ThreadHandler *const handle,
+			 Procedure *const cleanup,
+			 Handler *const handle,
 			 void *arg);
 extern inline void
 thread_key_create_handle_cl(ThreadKey *const key,
-			    ThreadProcedure *const cleanup,
-			    const struct ThreadHandlerClosure *const restrict cl);
+			    Procedure *const cleanup,
+			    const struct HandlerClosure *const restrict cl);
 
 /* thread_key_delete */
 extern inline bool
@@ -122,11 +122,11 @@ thread_key_delete_report(ThreadKey key,
 			 const char *restrict *const restrict failure);
 extern inline void
 thread_key_delete_handle(ThreadKey key,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg);
 extern inline void
 thread_key_delete_handle_cl(ThreadKey key,
-			    const struct ThreadHandlerClosure *const restrict cl);
+			    const struct HandlerClosure *const restrict cl);
 
 
 /* ThreadAttr operations
@@ -141,11 +141,11 @@ thread_attr_init_report(ThreadAttr *const restrict attr,
 			const char *restrict *const restrict failure);
 extern inline void
 thread_attr_init_handle(ThreadAttr *const restrict attr,
-			ThreadHandler *const handle,
+			Handler *const handle,
 			void *arg);
 extern inline void
 thread_attr_init_handle_cl(ThreadAttr *const restrict attr,
-			   const struct ThreadHandlerClosure *const restrict cl);
+			   const struct HandlerClosure *const restrict cl);
 
 /* thread_attr_set_detach_state */
 extern inline bool
@@ -161,12 +161,12 @@ thread_attr_set_detach_state_report(ThreadAttr *const restrict attr,
 extern inline void
 thread_attr_set_detach_state_handle(ThreadAttr *const restrict attr,
 				    const int state,
-				    ThreadHandler *const handle,
+				    Handler *const handle,
 				    void *arg);
 extern inline void
 thread_attr_set_detach_state_handle_cl(ThreadAttr *const restrict attr,
 				       const int state,
-				       const struct ThreadHandlerClosure *const restrict cl);
+				       const struct HandlerClosure *const restrict cl);
 
 /* thread_attr_destroy */
 extern inline bool
@@ -180,11 +180,11 @@ thread_attr_destroy_report(ThreadAttr *const restrict attr,
 			   const char *restrict *const restrict failure);
 extern inline void
 thread_attr_destroy_handle(ThreadAttr *const restrict attr,
-			   ThreadHandler *const handle,
+			   Handler *const handle,
 			   void *arg);
 extern inline void
 thread_attr_destroy_handle_cl(ThreadAttr *const restrict attr,
-			      const struct ThreadHandlerClosure *const restrict cl);
+			      const struct HandlerClosure *const restrict cl);
 
 
 /* Mutex operations
@@ -203,11 +203,11 @@ mutex_lock_report(Mutex *const lock,
 		  const char *restrict *restrict failure);
 extern inline void
 mutex_lock_handle(Mutex *const lock,
-		  ThreadHandler *const handle,
+		  Handler *const handle,
 		  void *arg);
 extern inline void
 mutex_lock_handle_cl(Mutex *const lock,
-		     const struct ThreadHandlerClosure *const restrict cl);
+		     const struct HandlerClosure *const restrict cl);
 
 /* mutex_try_lock */
 extern inline bool
@@ -219,11 +219,11 @@ mutex_try_lock_report(Mutex *const lock,
 		      const char *restrict *const restrict failure);
 extern inline bool
 mutex_try_lock_handle(Mutex *const lock,
-		      ThreadHandler *const handle,
+		      Handler *const handle,
 		      void *arg);
 extern inline bool
 mutex_try_lock_handle_cl(Mutex *const lock,
-			 const struct ThreadHandlerClosure *const restrict cl);
+			 const struct HandlerClosure *const restrict cl);
 
 /* mutex_unlock */
 extern inline bool
@@ -235,11 +235,11 @@ mutex_unlock_report(Mutex *const lock,
 		    const char *restrict *const restrict failure);
 extern inline void
 mutex_unlock_handle(Mutex *const lock,
-		    ThreadHandler *const handle,
+		    Handler *const handle,
 		    void *arg);
 extern inline void
 mutex_unlock_handle_cl(Mutex *const lock,
-		       const struct ThreadHandlerClosure *const restrict cl);
+		       const struct HandlerClosure *const restrict cl);
 
 
 /* ThreadCond operations
@@ -258,11 +258,11 @@ thread_cond_signal_report(ThreadCond *const restrict cond,
 			  const char *restrict *const restrict failure);
 extern inline void
 thread_cond_signal_handle(ThreadCond *const restrict cond,
-			  ThreadHandler *const handle,
+			  Handler *const handle,
 			  void *arg);
 extern inline void
 thread_cond_signal_handle_cl(ThreadCond *const restrict cond,
-			     const struct ThreadHandlerClosure *const restrict cl);
+			     const struct HandlerClosure *const restrict cl);
 
 
 /* thread_cond_broadcast */
@@ -275,11 +275,11 @@ thread_cond_broadcast_report(ThreadCond *const restrict cond,
 			     const char *restrict *const restrict failure);
 extern inline void
 thread_cond_broadcast_handle(ThreadCond *const restrict cond,
-			     ThreadHandler *const handle,
+			     Handler *const handle,
 			     void *arg);
 extern inline void
 thread_cond_broadcast_handle_cl(ThreadCond *const restrict cond,
-				const struct ThreadHandlerClosure *const restrict cl);
+				const struct HandlerClosure *const restrict cl);
 
 /* thread_cond_await */
 extern inline bool
@@ -295,12 +295,12 @@ thread_cond_await_report(ThreadCond *const restrict cond,
 extern inline void
 thread_cond_await_handle(ThreadCond *const restrict cond,
 			 Mutex *const restrict lock,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg);
 extern inline void
 thread_cond_await_handle_cl(ThreadCond *const restrict cond,
 			    Mutex *const restrict lock,
-			    const struct ThreadHandlerClosure *const restrict cl);
+			    const struct HandlerClosure *const restrict cl);
 
 /* thread_cond_await_limit */
 extern inline bool
@@ -320,13 +320,13 @@ extern inline void
 thread_cond_await_limit_handle(ThreadCond *const restrict cond,
 			       Mutex *const restrict lock,
 			       const struct timespec *const restrict limit,
-			       ThreadHandler *const handle,
+			       Handler *const handle,
 			       void *arg);
 extern inline void
 thread_cond_await_limit_handle_cl(ThreadCond *const restrict cond,
 				  Mutex *const restrict lock,
 				  const struct timespec *const restrict limit,
-				  const struct ThreadHandlerClosure *const restrict cl);
+				  const struct HandlerClosure *const restrict cl);
 
 /* thread_cond_await_span */
 extern inline bool
@@ -346,13 +346,13 @@ extern inline void
 thread_cond_await_span_handle(ThreadCond *const restrict cond,
 			      Mutex *const restrict lock,
 			      const struct timespec *const restrict span,
-			      ThreadHandler *const handle,
+			      Handler *const handle,
 			      void *arg);
 extern inline void
 thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 				 Mutex *const restrict lock,
 				 const struct timespec *const restrict span,
-				 const struct ThreadHandlerClosure *const restrict cl);
+				 const struct HandlerClosure *const restrict cl);
 
 
 /* Prototypes

@@ -5,7 +5,43 @@
 
 /* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
-inline void supervisor_init(struct ThreadPool *const restrict)
+extern inline void
+thread_pool_cancel_workers(struct ThreadPool *const restrict pool);
+
+void
+thread_pool_exit_on_failure(void *arg,
+			    const char *restrict failure);
+{
+	struct ThreadPool *const restrict pool =
+	(struct ThreadPool *const restrict) arg;
+
+	thread_log_lock_muffle(&pool->log);
+
+	thread_log_append_string(&pool->log,
+				 failure);
+
+	thread_log_append_string(&pool->log,
+				 THREAD_POOL_EXIT_ON_FAILURE_MESSAGE);
+
+	thread_log_append_close(&pool->log);
+
+
+	thread_log_dump_muffle(&pool->log,
+			       STDERR_FILENO);
+
+	/* signal to supervisor to cancel workers */
+
+	thread_log_unlock_muffle(&pool->log);
+
+	thread_exit_detached();
+
+	__builtin_unreachable();
+}
+
+extern inline void
+thread_pool_init(struct ThreadPool *restrict pool,
+		 size_t count_workers,
+		 const struct HandlerClosure *const restrict handle_init_fail);
 
 /* void */
 /* supervisor_exit(const char *restrict failure) */

@@ -136,9 +136,11 @@ write_report(const int file_descriptor,
 	FAIL_SWITCH_ERRNO_CASE_1(ESPIPE,
 				 "The file descriptor is associated with a pipe"
 				 ", socket, or FIFO.")
-	FAIL_SWITCH_ERRNO_CASE_2(EAGAIN,
+	FAIL_SWITCH_ERRNO_CASE_3(EAGAIN,
 				 "The file is marked for non-blocking I/O, and "
 				 "no data could be written immediately.",
+				 "The file descriptor is for a socket, is "
+				 "marked 'O_NONBLOCK', and write would block.",
 				 "The file descriptor is for a socket, is "
 				 "marked 'O_NONBLOCK', and write would block.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
@@ -182,9 +184,6 @@ write_report(const int file_descriptor,
 				 "An attempt was made to write to a socket of "
 				 "type 'SOCK_STREAM' that is not connected to a"
 				 " peer socket.")
-	FAIL_SWITCH_ERRNO_CASE_1(EWOULDBLOCK,
-				 "The file descriptor is for a socket, is "
-				 "marked 'O_NONBLOCK', and write would block.")
 	FAIL_SWITCH_ERRNO_CLOSE()
 }
 
@@ -576,8 +575,7 @@ open_absolute_mode_handle_cl(const char *const absolute_path,
 inline bool
 open_relative_status(const int directory_descriptor,
 		     const char *const relative_path,
-		     const int open_flag,
-		     const mode_t mode)
+		     const int open_flag)
 {
 	return openat(directory_descriptor,
 		      relative_path,
@@ -587,12 +585,11 @@ open_relative_status(const int directory_descriptor,
 inline void
 open_relative_muffle(const int directory_descriptor,
 		     const char *const relative_path,
-		     const int open_flag,
-		     const mode_t mode)
+		     const int open_flag)
 {
 	(void) openat(directory_descriptor,
 		      relative_path,
-		      open_flag)
+		      open_flag);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
@@ -1276,7 +1273,8 @@ inline void
 file_permissions_string(char *restrict buffer,
 			const int mode)
 {
-	buffer  = file_permissions_string_put(buffer, mode);
+	buffer  = put_file_permissions_string(buffer,
+					      mode);
 	*buffer = '\0';
 }
 

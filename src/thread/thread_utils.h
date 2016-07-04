@@ -7,9 +7,11 @@
 #include <limits.h>			/* PTHREAD_THREADS_MAX */
 #include <string.h>			/* memcpy */
 #include "time/time_utils.h"		/* time utils */
-#include "utils/fail_switch_open.h"	/* bool, errno, error report macros */
+#include "utils/types/routine.h"	/* Routine */
+#include "utils/types/procedure.h"	/* Procedure */
+#include "utils/handle_utils.h"		/* bool, errno, error handling macros */
 
-/* typedefs
+/* typedefs, declarations
  *─────────────────────────────────────────────────────────────────────────── */
 typedef pthread_mutex_t Mutex;
 
@@ -20,28 +22,6 @@ typedef pthread_t Thread;
 typedef pthread_attr_t ThreadAttr;
 
 typedef pthread_key_t ThreadKey;
-
-typedef void *
-ThreadRoutine(void *arg);
-
-typedef void
-ThreadProcedure(void *arg);
-
-typedef void
-ThreadHandler(void *arg,
-	      const char *restrict failure)
-__attribute__((noreturn));
-
-
-struct ThreadRoutineClosure {
-	ThreadRoutine *routine;
-	void *arg;
-};
-
-struct ThreadHandlerClosure {
-	ThreadHandler *handle;
-	void *arg;
-};
 
 enum ThreadFlag {
 	THREAD_ERROR = -1,
@@ -158,9 +138,8 @@ pthread_cond_timedwait(COND, MUTEX, LIMIT)
  *─────────────────────────────────────────────────────────────────────────── */
 /* thread_create */
 inline bool
-thread_create_status(Thread *const restrict thread,
-		   ThreadRoutine *const routine,
-		   void *arg)
+thread_create_status(Thread *const restrict thread, Routine *const routine,
+		     void *arg)
 {
 	return thread_create_imp(thread,
 				 routine,
@@ -169,7 +148,7 @@ thread_create_status(Thread *const restrict thread,
 
 inline void
 thread_create_muffle(Thread *const restrict thread,
-			  ThreadRoutine *const routine,
+			  Routine *const routine,
 			  void *arg)
 {
 	(void) thread_create_imp(thread,
@@ -183,7 +162,7 @@ thread_create_muffle(Thread *const restrict thread,
 #define FAIL_SWITCH_ROUTINE thread_create_imp
 inline bool
 thread_create_report(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
+		     Routine *const routine,
 		     void *arg,
 		     const char *restrict *const restrict failure)
 {
@@ -203,35 +182,35 @@ thread_create_report(Thread *const restrict thread,
 
 inline void
 thread_create_handle(Thread *const restrict thread,
-		     ThreadRoutine *const routine,
-		     void *routine_arg,
-		     ThreadHandler *const handle,
-		     void *handler_arg)
+		     Routine *const routine,
+		     void *r_arg,
+		     Handler *const handle,
+		     void *h_arg)
 {
 	const char *restrict failure;
 
 	if (thread_create_report(thread,
 				 routine,
-				 routine_arg,
+				 r_arg,
 				 &failure))
 		return;
 
-	handle(handler_arg,
+	handle(h_arg,
 	       failure);
 	__builtin_unreachable();
 }
 
 inline void
 thread_create_handle_cl(Thread *const restrict thread,
-			ThreadRoutine *const routine,
-			void *routine_arg,
-			const struct ThreadHandlerClosure *const restrict cl)
+			Routine *const routine,
+			void *r_arg,
+			const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
 	if (thread_create_report(thread,
 				 routine,
-				 routine_arg,
+				 r_arg,
 				 &failure))
 		return;
 
@@ -243,7 +222,7 @@ thread_create_handle_cl(Thread *const restrict thread,
 /* thread_create_cl */
 inline bool
 thread_create_cl_status(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl)
+			const struct RoutineClosure *const restrict cl)
 {
 	return thread_create_status(thread,
 				    cl->routine,
@@ -252,7 +231,7 @@ thread_create_cl_status(Thread *const restrict thread,
 
 inline void
 thread_create_cl_muffle(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl)
+			const struct RoutineClosure *const restrict cl)
 {
 	thread_create_muffle(thread,
 			     cl->routine,
@@ -261,7 +240,7 @@ thread_create_cl_muffle(Thread *const restrict thread,
 
 inline bool
 thread_create_cl_report(Thread *const restrict thread,
-			const struct ThreadRoutineClosure *const restrict cl,
+			const struct RoutineClosure *const restrict cl,
 			const char *restrict *const restrict failure)
 {
 	return thread_create_report(thread,
@@ -272,26 +251,26 @@ thread_create_cl_report(Thread *const restrict thread,
 
 inline void
 thread_create_cl_handle(Thread *const restrict thread,
-			     const struct ThreadRoutineClosure *const restrict cl,
-			     ThreadHandler *const handle,
-			     void *handler_arg)
+			     const struct RoutineClosure *const restrict cl,
+			     Handler *const handle,
+			     void *h_arg)
 {
 	thread_create_handle(thread,
 			     cl->routine,
 			     cl->arg,
 			     handle,
-			     handler_arg);
+			     h_arg);
 }
 
 inline void
 thread_create_cl_handle_cl(Thread *const restrict thread,
-			   const struct ThreadRoutineClosure *const restrict routine_cl,
-			   const struct ThreadHandlerClosure *const restrict handler_cl)
+			   const struct RoutineClosure *const restrict r_cl,
+			   const struct HandlerClosure *const restrict h_cl)
 {
 	thread_create_handle_cl(thread,
-				routine_cl->routine,
-				routine_cl->arg,
-				handler_cl);
+				r_cl->routine,
+				r_cl->arg,
+				h_cl);
 }
 
 
@@ -324,7 +303,7 @@ thread_cancel_report(Thread thread,
 
 inline void
 thread_cancel_handle(Thread thread,
-		     ThreadHandler *const handle,
+		     Handler *const handle,
 		     void *arg)
 {
 	const char *restrict failure;
@@ -340,7 +319,7 @@ thread_cancel_handle(Thread thread,
 
 inline void
 thread_cancel_handle_cl(Thread thread,
-			const struct ThreadHandlerClosure *const restrict cl)
+			const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -392,7 +371,7 @@ threads_equal(const Thread thread1,
 /* thread_key_create */
 inline bool
 thread_key_create_status(ThreadKey *const key,
-			 ThreadProcedure *const cleanup)
+			 Procedure *const cleanup)
 {
 	return thread_key_create_imp(key,
 				     cleanup);
@@ -400,7 +379,7 @@ thread_key_create_status(ThreadKey *const key,
 
 inline void
 thread_key_create_muffle(ThreadKey *const key,
-			 ThreadProcedure *const cleanup)
+			 Procedure *const cleanup)
 {
 	(void) thread_key_create_imp(key,
 				     cleanup);
@@ -410,7 +389,7 @@ thread_key_create_muffle(ThreadKey *const key,
 #define FAIL_SWITCH_ROUTINE thread_key_create_imp
 inline bool
 thread_key_create_report(ThreadKey *const key,
-			 ThreadProcedure *const cleanup,
+			 Procedure *const cleanup,
 			 const char *restrict *const restrict failure)
 {
 	FAIL_SWITCH_STATUS_OPEN(key,
@@ -433,8 +412,8 @@ thread_key_create_report(ThreadKey *const key,
 
 inline void
 thread_key_create_handle(ThreadKey *const key,
-			 ThreadProcedure *const cleanup,
-			 ThreadHandler *const handle,
+			 Procedure *const cleanup,
+			 Handler *const handle,
 			 void *arg)
 {
 	const char *restrict failure;
@@ -451,8 +430,8 @@ thread_key_create_handle(ThreadKey *const key,
 
 inline void
 thread_key_create_handle_cl(ThreadKey *const key,
-			    ThreadProcedure *const cleanup,
-			    const struct ThreadHandlerClosure *const restrict cl)
+			    Procedure *const cleanup,
+			    const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -494,7 +473,7 @@ thread_key_delete_report(ThreadKey key,
 
 inline void
 thread_key_delete_handle(ThreadKey key,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg)
 {
 	const char *restrict failure;
@@ -510,7 +489,7 @@ thread_key_delete_handle(ThreadKey key,
 
 inline void
 thread_key_delete_handle_cl(ThreadKey key,
-			    const struct ThreadHandlerClosure *const restrict cl)
+			    const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -552,7 +531,7 @@ thread_attr_init_report(ThreadAttr *const restrict attr,
 
 inline void
 thread_attr_init_handle(ThreadAttr *const restrict attr,
-			ThreadHandler *const handle,
+			Handler *const handle,
 			void *arg)
 {
 	const char *restrict failure;
@@ -568,7 +547,7 @@ thread_attr_init_handle(ThreadAttr *const restrict attr,
 
 inline void
 thread_attr_init_handle_cl(ThreadAttr *const restrict attr,
-			   const struct ThreadHandlerClosure *const restrict cl)
+			   const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -615,7 +594,7 @@ thread_attr_set_detach_state_report(ThreadAttr *const restrict attr,
 inline void
 thread_attr_set_detach_state_handle(ThreadAttr *const restrict attr,
 				    const int state,
-				    ThreadHandler *const handle,
+				    Handler *const handle,
 				    void *arg)
 {
 	const char *restrict failure;
@@ -633,7 +612,7 @@ thread_attr_set_detach_state_handle(ThreadAttr *const restrict attr,
 inline void
 thread_attr_set_detach_state_handle_cl(ThreadAttr *const restrict attr,
 				       const int state,
-				       const struct ThreadHandlerClosure *const restrict cl)
+				       const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -675,7 +654,7 @@ thread_attr_destroy_report(ThreadAttr *const restrict attr,
 
 inline void
 thread_attr_destroy_handle(ThreadAttr *const restrict attr,
-			   ThreadHandler *const handle,
+			   Handler *const handle,
 			   void *arg)
 {
 	const char *restrict failure;
@@ -691,7 +670,7 @@ thread_attr_destroy_handle(ThreadAttr *const restrict attr,
 
 inline void
 thread_attr_destroy_handle_cl(ThreadAttr *const restrict attr,
-			      const struct ThreadHandlerClosure *const restrict cl)
+			      const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -746,7 +725,7 @@ mutex_lock_report(Mutex *const lock,
 
 inline void
 mutex_lock_handle(Mutex *const lock,
-		  ThreadHandler *const handle,
+		  Handler *const handle,
 		  void *arg)
 {
 	const char *restrict failure;
@@ -762,7 +741,7 @@ mutex_lock_handle(Mutex *const lock,
 
 inline void
 mutex_lock_handle_cl(Mutex *const lock,
-		     const struct ThreadHandlerClosure *const restrict cl)
+		     const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -815,7 +794,7 @@ mutex_try_lock_report(Mutex *const lock,
 
 inline bool
 mutex_try_lock_handle(Mutex *const lock,
-		      ThreadHandler *const handle,
+		      Handler *const handle,
 		      void *arg)
 {
 	const char *restrict failure;
@@ -834,7 +813,7 @@ mutex_try_lock_handle(Mutex *const lock,
 
 inline bool
 mutex_try_lock_handle_cl(Mutex *const lock,
-			 const struct ThreadHandlerClosure *const restrict cl)
+			 const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -881,7 +860,7 @@ mutex_unlock_report(Mutex *const lock,
 
 inline void
 mutex_unlock_handle(Mutex *const lock,
-		    ThreadHandler *const handle,
+		    Handler *const handle,
 		    void *arg)
 {
 	const char *restrict failure;
@@ -898,7 +877,7 @@ mutex_unlock_handle(Mutex *const lock,
 
 inline void
 mutex_unlock_handle_cl(Mutex *const lock,
-		       const struct ThreadHandlerClosure *const restrict cl)
+		       const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -950,7 +929,7 @@ thread_cond_signal_report(ThreadCond *const restrict cond,
 
 inline void
 thread_cond_signal_handle(ThreadCond *const restrict cond,
-			  ThreadHandler *const handle,
+			  Handler *const handle,
 			  void *arg)
 {
 	const char *restrict failure;
@@ -966,7 +945,7 @@ thread_cond_signal_handle(ThreadCond *const restrict cond,
 
 inline void
 thread_cond_signal_handle_cl(ThreadCond *const restrict cond,
-			     const struct ThreadHandlerClosure *const restrict cl)
+			     const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -1007,7 +986,7 @@ thread_cond_broadcast_report(ThreadCond *const restrict cond,
 
 inline void
 thread_cond_broadcast_handle(ThreadCond *const restrict cond,
-			     ThreadHandler *const handle,
+			     Handler *const handle,
 			     void *arg)
 {
 	const char *restrict failure;
@@ -1024,7 +1003,7 @@ thread_cond_broadcast_handle(ThreadCond *const restrict cond,
 
 inline void
 thread_cond_broadcast_handle_cl(ThreadCond *const restrict cond,
-				const struct ThreadHandlerClosure *const restrict cl)
+				const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -1074,7 +1053,7 @@ thread_cond_await_report(ThreadCond *const restrict cond,
 inline void
 thread_cond_await_handle(ThreadCond *const restrict cond,
 			 Mutex *const restrict lock,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg)
 {
 	const char *restrict failure;
@@ -1092,7 +1071,7 @@ thread_cond_await_handle(ThreadCond *const restrict cond,
 inline void
 thread_cond_await_handle_cl(ThreadCond *const restrict cond,
 			    Mutex *const restrict lock,
-			    const struct ThreadHandlerClosure *const restrict cl)
+			    const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -1153,7 +1132,7 @@ inline void
 thread_cond_await_limit_handle(ThreadCond *const restrict cond,
 			       Mutex *const restrict lock,
 			       const struct timespec *const restrict limit,
-			       ThreadHandler *const handle,
+			       Handler *const handle,
 			       void *arg)
 {
 	const char *restrict failure;
@@ -1173,7 +1152,7 @@ inline void
 thread_cond_await_limit_handle_cl(ThreadCond *const restrict cond,
 				  Mutex *const restrict lock,
 				  const struct timespec *const restrict limit,
-				  const struct ThreadHandlerClosure *const restrict cl)
+				  const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -1241,7 +1220,7 @@ inline void
 thread_cond_await_span_handle(ThreadCond *const restrict cond,
 			      Mutex *const restrict lock,
 			      const struct timespec *const restrict span,
-			      ThreadHandler *const handle,
+			      Handler *const handle,
 			      void *arg)
 {
 	const char *restrict failure;
@@ -1261,7 +1240,7 @@ inline void
 thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 				 Mutex *const restrict lock,
 				 const struct timespec *const restrict span,
-				 const struct ThreadHandlerClosure *const restrict cl)
+				 const struct HandlerClosure *const restrict cl)
 {
 	const char *restrict failure;
 
@@ -1308,6 +1287,9 @@ parallel_stop(void)
 __attribute__((destructor));
 
 
-#include <utils/fail_switch_close.h>	/* clear fail_switch macro constants */
+/* undefine fail switch macro constants */
+#undef FAIL_SWITCH_STATUS_SUCCESS
+#undef FAIL_SWITCH_FAILURE_POINTER
+#undef FAIL_SWITCH_ROUTINE
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_UTILS_H_ */

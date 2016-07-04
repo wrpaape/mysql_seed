@@ -5,6 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* Mutex, memcpy  */
 #include "string/string_utils.h"	/* string utils */
+#include "system/file_utils.h"		/* write */
 
 
 /* cap log buffer at 1kb
@@ -63,6 +64,12 @@ thread_log_remaining_characters(struct ThreadLog *const restrict log)
 	return log->until_ptr - log->current_ptr;
 }
 
+inline size_t
+thread_log_buffer_size(struct ThreadLog *const restrict log)
+{
+	return log->current_ptr - &log->buffer[0];
+}
+
 /* locking the log... */
 inline bool
 thread_log_lock_status(struct ThreadLog *const restrict log)
@@ -86,7 +93,7 @@ thread_log_lock_report(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_lock_handle(struct ThreadLog *const restrict log,
-		       ThreadHandler *const handle,
+		       Handler *const handle,
 		       void *arg)
 {
 	mutex_lock_handle(&log->lock,
@@ -96,7 +103,7 @@ thread_log_lock_handle(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_lock_handle_cl(struct ThreadLog *const restrict log,
-			  struct ThreadHandlerClosure *const restrict cl)
+			  const struct HandlerClosure *const restrict cl)
 {
 	mutex_lock_handle_cl(&log->lock,
 			     cl);
@@ -125,7 +132,7 @@ thread_log_try_lock_report(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_try_lock_handle(struct ThreadLog *const restrict log,
-		       ThreadHandler *const handle,
+		       Handler *const handle,
 		       void *arg)
 {
 	mutex_try_lock_handle(&log->lock,
@@ -135,7 +142,7 @@ thread_log_try_lock_handle(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_try_lock_handle_cl(struct ThreadLog *const restrict log,
-			      struct ThreadHandlerClosure *const restrict cl)
+			      const struct HandlerClosure *const restrict cl)
 {
 	mutex_try_lock_handle_cl(&log->lock,
 				 cl);
@@ -164,7 +171,7 @@ thread_log_unlock_report(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_unlock_handle(struct ThreadLog *const restrict log,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg)
 {
 	mutex_unlock_handle(&log->lock,
@@ -174,14 +181,65 @@ thread_log_unlock_handle(struct ThreadLog *const restrict log,
 
 inline void
 thread_log_unlock_handle_cl(struct ThreadLog *const restrict log,
-			    struct ThreadHandlerClosure *const restrict cl)
+			    const struct HandlerClosure *const restrict cl)
 {
 	mutex_unlock_handle_cl(&log->lock,
 			       cl);
 }
 
+/* dump contents to file */
+inline bool
+thread_log_dump_status(struct ThreadLog *const restrict log,
+		       const int file_descriptor)
+{
+	return write_status(file_descriptor,
+			    &log->buffer[0],
+			    thread_log_buffer_size(log));
+}
 
+inline void
+thread_log_dump_muffle(struct ThreadLog *const restrict log,
+		       const int file_descriptor)
+{
+	(void) write_status(file_descriptor,
+			    &log->buffer[0],
+			    thread_log_buffer_size(log));
+}
 
+inline bool
+thread_log_dump_report(struct ThreadLog *const restrict log,
+		       const int file_descriptor,
+		       const char *restrict *const restrict failure)
+{
+	return write_report(file_descriptor,
+			    &log->buffer[0],
+			    thread_log_buffer_size(log),
+			    failure);
+}
+
+inline void
+thread_log_dump_handle(struct ThreadLog *const restrict log,
+		       const int file_descriptor,
+		       Handler *const handle,
+		       void *arg)
+{
+	write_handle(file_descriptor,
+		     &log->buffer[0],
+		     thread_log_buffer_size(log),
+		     handle,
+		     arg);
+}
+
+inline void
+thread_log_dump_handle_cl(struct ThreadLog *const restrict log,
+			  const int file_descriptor,
+			  const struct HandlerClosure *const restrict cl)
+{
+	write_handle_cl(file_descriptor,
+			&log->buffer[0],
+			thread_log_buffer_size(log),
+			cl);
+}
 
 
 /* mutator functions

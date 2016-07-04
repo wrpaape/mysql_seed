@@ -12,16 +12,14 @@ const char thread_log_buffer_prototype[THREAD_LOG_BUFFER_LENGTH] = {
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline char *
 thread_log_buffer_ptr(struct ThreadLog *const restrict log);
-
 extern inline char *
 thread_log_current_ptr(struct ThreadLog *const restrict log);
-
 extern inline char *
 thread_log_end_ptr(struct ThreadLog *const restrict log);
-
 extern inline size_t
 thread_log_remaining_characters(struct ThreadLog *const restrict log);
-
+extern inline size_t
+thread_log_buffer_size(struct ThreadLog *const restrict log);
 
 /* locking the log */
 extern inline bool
@@ -33,11 +31,11 @@ thread_log_lock_report(struct ThreadLog *const restrict log,
 		       const char *restrict *const restrict failure);
 extern inline void
 thread_log_lock_handle(struct ThreadLog *const restrict log,
-		       ThreadHandler *const handle,
+		       Handler *const handle,
 		       void *arg);
 extern inline void
 thread_log_lock_handle_cl(struct ThreadLog *const restrict log,
-			  struct ThreadHandlerClosure *const restrict cl);
+			  const struct HandlerClosure *const restrict cl);
 /* locking the log (no block on failure) */
 extern inline bool
 thread_log_try_lock_status(struct ThreadLog *const restrict log);
@@ -48,11 +46,11 @@ thread_log_try_lock_report(struct ThreadLog *const restrict log,
 			   const char *restrict *const restrict failure);
 extern inline void
 thread_log_try_lock_handle(struct ThreadLog *const restrict log,
-			   ThreadHandler *const handle,
+			   Handler *const handle,
 			   void *arg);
 extern inline void
 thread_log_try_lock_handle_cl(struct ThreadLog *const restrict log,
-			      struct ThreadHandlerClosure *const restrict cl);
+			      const struct HandlerClosure *const restrict cl);
 /* unlocking the log... */
 extern inline bool
 thread_log_unlock_status(struct ThreadLog *const restrict log);
@@ -63,11 +61,32 @@ thread_log_unlock_report(struct ThreadLog *const restrict log,
 			 const char *restrict *const restrict failure);
 extern inline void
 thread_log_unlock_handle(struct ThreadLog *const restrict log,
-			 ThreadHandler *const handle,
+			 Handler *const handle,
 			 void *arg);
 extern inline void
 thread_log_unlock_handle_cl(struct ThreadLog *const restrict log,
-			    struct ThreadHandlerClosure *const restrict cl);
+			    const struct HandlerClosure *const restrict cl);
+
+/* dump contents to file */
+extern inline bool
+thread_log_dump_status(struct ThreadLog *const restrict log,
+		       const int file_descriptor);
+extern inline void
+thread_log_dump_muffle(struct ThreadLog *const restrict log,
+		       const int file_descriptor);
+extern inline bool
+thread_log_dump_report(struct ThreadLog *const restrict log,
+		       const int file_descriptor,
+		       const char *restrict *const restrict failure);
+extern inline void
+thread_log_dump_handle(struct ThreadLog *const restrict log,
+		       const int file_descriptor,
+		       Handler *const handle,
+		       void *arg);
+extern inline void
+thread_log_dump_handle_cl(struct ThreadLog *const restrict log,
+			  const int file_descriptor,
+			  const struct HandlerClosure *const restrict cl);
 
 /* mutator functions
  *─────────────────────────────────────────────────────────────────────────── */

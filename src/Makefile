@@ -291,8 +291,7 @@ TARGETS			+= $(UNITY_OBJ)					\
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_WORD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils word_utils)
-UTILS_FAIL_SWITCH_OPEN_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_open)
-UTILS_FAIL_SWITCH_CLOSE_HDR	:= $(call HELPER_HEADER_PATH,utils fail_switch_close)
+UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
 STRING_STRING_TOKEN_HDR		:= $(call HELPER_HEADER_PATH,string string_token)
 STRING_STRING_MACROS_HDR	:= $(call HELPER_HEADER_PATH,string string_macros)
 MODE_HDR			:= $(call PROJECT_HEADER_PATH,mode)
@@ -584,6 +583,77 @@ TARGETS			+= $(STRING_STRING_UTILS_OBJ)					\
 			   $(STRING_STRING_UTILS_TEST_BIN)
 
 
+# system/system_utils
+# ──────────────────────────────────────────────────────────────────────────────
+SYSTEM_SYSTEM_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_HDR			:= $(call HELPER_HEADER_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,system system_utils)
+SYSTEM_SYSTEM_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,system system_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+SYSTEM_SYSTEM_UTILS_OBJ_PREQS		:= $(SYSTEM_SYSTEM_UTILS_SRC) 			\
+			   		   $(SYSTEM_SYSTEM_UTILS_HDR)			\
+			   		   $(UTILS_HANDLE_UTILS_HDR)
+SYSTEM_SYSTEM_UTILS_OBJ_GROUP		:= $(SYSTEM_SYSTEM_UTILS_OBJ)
+SYSTEM_SYSTEM_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+SYSTEM_SYSTEM_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TEST_SRC)		\
+			   		   $(SYSTEM_SYSTEM_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+SYSTEM_SYSTEM_UTILS_TRNR_OBJ_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TRNR_SRC)		\
+			   		   $(SYSTEM_SYSTEM_UTILS_TEST_OBJ_PREQS)
+SYSTEM_SYSTEM_UTILS_TEST_BIN_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TRNR_OBJ)		\
+			   		   $(SYSTEM_SYSTEM_UTILS_TEST_OBJ)		\
+			   		   $(SYSTEM_SYSTEM_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(SYSTEM_SYSTEM_UTILS_TEST_BIN)
+TARGETS			+= $(SYSTEM_SYSTEM_UTILS_OBJ)					\
+			   $(SYSTEM_SYSTEM_UTILS_TRNR_SRC)				\
+			   $(SYSTEM_SYSTEM_UTILS_TRNR_OBJ)				\
+			   $(SYSTEM_SYSTEM_UTILS_TEST_OBJ)				\
+			   $(SYSTEM_SYSTEM_UTILS_TEST_BIN)
+
+
+# system/file_utils
+# ──────────────────────────────────────────────────────────────────────────────
+SYSTEM_FILE_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,system file_utils)
+SYSTEM_FILE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,system file_utils)
+SYSTEM_FILE_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,system file_utils)
+SYSTEM_FILE_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,system file_utils)
+SYSTEM_FILE_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,system file_utils)
+SYSTEM_FILE_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,system file_utils)
+SYSTEM_FILE_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,system file_utils)
+SYSTEM_FILE_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,system file_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+SYSTEM_FILE_UTILS_OBJ_PREQS		:= $(SYSTEM_FILE_UTILS_SRC) 			\
+			   		   $(SYSTEM_FILE_UTILS_HDR)			\
+			   		   $(SYSTEM_SYSTEM_UTILS_HDR)
+SYSTEM_FILE_UTILS_OBJ_GROUP		:= $(SYSTEM_FILE_UTILS_OBJ)			\
+					   $(SYSTEM_SYSTEM_UTILS_OBJ_GROUP)
+SYSTEM_FILE_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_FILE_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+SYSTEM_FILE_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_FILE_UTILS_TEST_SRC)		\
+			   		   $(SYSTEM_FILE_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+SYSTEM_FILE_UTILS_TRNR_OBJ_PREQS	:= $(SYSTEM_FILE_UTILS_TRNR_SRC)		\
+			   		   $(SYSTEM_FILE_UTILS_TEST_OBJ_PREQS)
+SYSTEM_FILE_UTILS_TEST_BIN_PREQS	:= $(SYSTEM_FILE_UTILS_TRNR_OBJ)		\
+			   		   $(SYSTEM_FILE_UTILS_TEST_OBJ)		\
+			   		   $(SYSTEM_FILE_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(SYSTEM_FILE_UTILS_TEST_BIN)
+TARGETS			+= $(SYSTEM_FILE_UTILS_OBJ)					\
+			   $(SYSTEM_FILE_UTILS_TRNR_SRC)				\
+			   $(SYSTEM_FILE_UTILS_TRNR_OBJ)				\
+			   $(SYSTEM_FILE_UTILS_TEST_OBJ)				\
+			   $(SYSTEM_FILE_UTILS_TEST_BIN)
+
+
 # thread/thread_utils
 # ──────────────────────────────────────────────────────────────────────────────
 THREAD_THREAD_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_utils)
@@ -598,7 +668,7 @@ THREAD_THREAD_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_uti
 THREAD_THREAD_UTILS_OBJ_PREQS		:= $(THREAD_THREAD_UTILS_SRC)			\
 			   	   	   $(THREAD_THREAD_UTILS_HDR)			\
 			   	   	   $(TIME_TIME_UTILS_HDR)			\
-			   	   	   $(UTILS_FAIL_SWITCH_OPEN_HDR)		\
+			   	   	   $(UTILS_HANDLE_UTILS_HDR)			\
 			   	   	   $(UTILS_FAIL_SWITCH_CLOSE_HDR)
 THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_UTILS_OBJ)			\
 			   	   	   $(TIME_TIME_UTILS_OBJ)
@@ -672,10 +742,12 @@ THREAD_THREAD_LOG_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_log)
 THREAD_THREAD_LOG_OBJ_PREQS		:= $(THREAD_THREAD_LOG_SRC) 		\
 			   		   $(THREAD_THREAD_LOG_HDR) 		\
 			   		   $(THREAD_THREAD_UTILS_HDR)		\
-			   		   $(STRING_STRING_UTILS_HDR)
+			   		   $(STRING_STRING_UTILS_HDR)		\
+			   		   $(SYSTEM_FILE_UTILS_HDR)
 THREAD_THREAD_LOG_OBJ_GROUP		:= $(THREAD_THREAD_LOG_OBJ)		\
 					   $(THREAD_THREAD_UTILS_OBJ_GROUP)	\
-					   $(STRING_STRING_UTILS_OBJ_GROUP)
+					   $(STRING_STRING_UTILS_OBJ_GROUP)	\
+					   $(SYSTEM_FILE_UTILS_OBJ_GROUP)
 THREAD_THREAD_LOG_TRNR_SRC_PREQS	:= $(THREAD_THREAD_LOG_TEST_SRC)	\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 THREAD_THREAD_LOG_TEST_OBJ_PREQS	:= $(THREAD_THREAD_LOG_TEST_SRC)	\
@@ -1143,6 +1215,16 @@ $(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
 # $(GEN_GEN_STRINGS_OBJ): $(GEN_GEN_STRINGS_OBJ_PREQS)
 # 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make system/system_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_SYSTEM_UTILS_OBJ): $(SYSTEM_SYSTEM_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make system/file_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_FILE_UTILS_OBJ): $(SYSTEM_FILE_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make string/string_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
@@ -1360,6 +1442,46 @@ $(THREAD_THREAD_UTILS_TEST_OBJ): $(THREAD_THREAD_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(THREAD_THREAD_UTILS_TRNR_SRC): $(THREAD_THREAD_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for system/system_utils
+# make:
+# 	system_system_utils_test		binary,
+# 	system_system_utils_test_runner 	object,
+# 	system_system_utils_test		object, and
+# 	system_system_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_SYSTEM_UTILS_TEST_BIN): $(SYSTEM_SYSTEM_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(SYSTEM_SYSTEM_UTILS_TRNR_OBJ): $(SYSTEM_SYSTEM_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_SYSTEM_UTILS_TEST_OBJ): $(SYSTEM_SYSTEM_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_SYSTEM_UTILS_TRNR_SRC): $(SYSTEM_SYSTEM_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for system/file_utils
+# make:
+# 	system_file_utils_test		binary,
+# 	system_file_utils_test_runner 	object,
+# 	system_file_utils_test		object, and
+# 	system_file_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_FILE_UTILS_TEST_BIN): $(SYSTEM_FILE_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(SYSTEM_FILE_UTILS_TRNR_OBJ): $(SYSTEM_FILE_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_FILE_UTILS_TEST_OBJ): $(SYSTEM_FILE_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_FILE_UTILS_TRNR_SRC): $(SYSTEM_FILE_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
