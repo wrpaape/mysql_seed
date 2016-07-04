@@ -16,7 +16,7 @@
 "\t'WORKERS_MAX' (" EXPAND_STRINGIFY(SEED_WORKERS_MAX) ") "		\
 "exceeded\n"
 
-#define THREAD_POOL_EXIT_ON_FAILURE_MESSAGE ANSI_BRIGHT ANSI_RED_BG	\
+#define THREAD_POOL_EXIT_FAILURE_MESSAGE ANSI_BRIGHT ANSI_RED_BG	\
 ANSI_YELLOW "\nTHREAD POOL EXITING ON FAILURE\n" ANSI_RESET
 
 #define THREAD_POOL_EXIT_ON_SUCCESS_MESSAGE ANSI_BRIGHT ANSI_WHITE_BG	\
@@ -25,13 +25,15 @@ ANSI_GREEN "\nTHREAD POOL EXITING ON SUCCESS\n" ANSI_RESET
 
 /* typedefs
  *─────────────────────────────────────────────────────────────────────────── */
+typedef void
+ThreadPoolEvent(struct ThreadPool *const restrict pool);
+
 union TaskFun {
 	Routine *awaitable;
 	Procedure *independent;
 };
 
 struct Task {
-	struct HandlerClosure *handle_fail;
 	union TaskFun fun;
 	void *arg;
 	void *result;
@@ -44,14 +46,18 @@ struct Worker {
 	struct Task *task;
 	ThreadKey key;
 	Thread thread;
+	struct ThreadPool *pool;
+	struct HandlerClosure fail_cl;
 };
 
 struct Supervisor {
 	Thread thread;
 	ThreadKey key;
-	Procedure *event;
+	ThreadPoolEvent *event;
 	ThreadCond trigger;
 	Mutex listening;
+	struct ThreadPool *pool;
+	struct HandlerClosure fail_cl;
 };
 
 struct TaskQueues {
@@ -69,17 +75,14 @@ struct ThreadPool {
 	struct ThreadQueue workers;
 	struct TaskQueues tasks;
 	struct ThreadLog log;
-	struct HandlerClosure handle_fail;
 };
 
 
-
-
-/* ThreadPool operations
+/* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
 /* should only be called from supervisor thread */
 inline void
-thread_pool_cancel_workers(struct ThreadPool *const restrict pool)
+supervisor_cancel_workers(struct ThreadPool *const restrict pool)
 {
 	struct ThreadQueueNode *restrict node;
 	struct Worker *restrict worker;
@@ -100,19 +103,89 @@ thread_pool_cancel_workers(struct ThreadPool *const restrict pool)
 	thread_queue_unlock_muffle(&pool->workers);
 }
 
+/* should only be called from supervisor thread */
+inline void
+supervisor_do_exit_failure(struct ThreadPool *const restrict pool)
+{
+	supervisor_cancel_workers(pool);
+
+	thread_log_lock_muffle(&pool->log);
+
+	thread_log_append_string(&pool->log,
+				 THREAD_POOL_EXIT_FAILURE_MESSAGE);
+
+	thread_log_append_close(&pool->log);
+
+	thread_log_dump_muffle(&pool->log,
+			       STDERR_FILENO);
+
+	thread_exit_detached();
+	__builtin_unreachable();
+}
+
 void
-thread_pool_exit_on_failure(void *arg,
-			    const char *restrict failure)
+supervisor_exit_on_failure(void *arg,
+			   const char *restrict failure)
 __attribute__((noreturn));
 
 inline void
-thread_pool_supervisor_init(struct Supervisor *restrict supervisor)
+supervisor_init(struct Supervisor *const restrict supervisor,
+		struct ThreadPool *const restrict pool)
 {
 	supervisor->event = NULL;
 	thread_cond_init(&supervisor->trigger);
 	mutex_init(&supervisor->listening);
+
+	supervisor->fail_cl.handle = &supervisor_exit_on_failure;
+	supervisor->fail_cl.arg	   = pool;
+
+	supervisor->pool = pool;
 }
 
+inline void
+supervisor_listen(struct Supervisor *const restrict supervisor)
+{
+	while (1) {
+		mutex_lock_handle_cl(&supervisor->listening,
+				     &supervisor->fail_cl);
+
+		while (supervisor->event == NULL)
+			thread_cond_await_handle_cl(&supervisor->trigger,
+						    &supervisor->listening)
+
+		supervisor->event(supervisor->pool);
+
+		mutex_unlock_handle_cl(&supervisor->listening,
+				       &supervisor->fail_cl);
+	}
+}
+
+inline void
+supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
+			       ThreadPoolEvent *const event)
+{
+	mutex_lock_muffle(&supervisor->listening);
+
+	supervisor->event = event;
+
+	thread_cond_signal_muffle(&supervisor->trigger);
+
+	mutex_unlock_muffle(&supervisor->listening);
+}
+
+
+
+
+/* Worker operations
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+worker_exit_on_failure(void *arg,
+		       const char *restrict failure)
+__attribute__((noreturn));
+
+
+/* ThreadPool operations
+ *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_pool_init(struct ThreadPool *restrict pool,
 		 size_t count_workers,
@@ -125,12 +198,9 @@ thread_pool_init(struct ThreadPool *restrict pool,
 	thread_log_init(&pool->log,
 			"thread pool");
 
-	pool->handle_fail.handle = &thread_pool_exit_on_failure;
-	pool->handle_fail.arg	 = (void *) pool;
-
-	thread_pool_supervisor_init(&pool->supervisor)
+	supervisor_init(&pool->supervisor,
+			&pool);
 }
-
 
 /* void */
 /* supervisor_exit(const char *restrict failure) */

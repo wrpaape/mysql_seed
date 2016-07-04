@@ -3,16 +3,13 @@
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_init(struct ThreadQueue *const restrict queue,
-		  const struct HandlerClosure *const restrict handle_fail);
+thread_queue_init(struct ThreadQueue *const restrict queue);
 
 extern inline void
-thread_queue_init_empty(struct ThreadQueue *const restrict queue,
-			const struct HandlerClosure *const restrict handle_fail);
+thread_queue_init_empty(struct ThreadQueue *const restrict queue);
 
 extern inline void
 thread_queue_init_populated(struct ThreadQueue *const restrict queue,
-			    const struct HandlerClosure *const restrict handle_fail,
 			    struct ThreadQueueNode *restrict nodes,
 			    void *restrict payloads,
 			    const size_t payload_count,
@@ -21,8 +18,6 @@ thread_queue_init_populated(struct ThreadQueue *const restrict queue,
 /* Accessor, Mutator functions
  *─────────────────────────────────────────────────────────────────────────── */
 /* locking the queue... */
-extern inline void
-thread_queue_lock(struct ThreadQueue *const restrict queue);
 extern inline bool
 thread_queue_lock_status(struct ThreadQueue *const restrict queue);
 extern inline void
@@ -36,11 +31,9 @@ thread_queue_lock_handle(struct ThreadQueue *const restrict queue,
 			 void *arg);
 extern inline void
 thread_queue_lock_handle_cl(struct ThreadQueue *const restrict queue,
-			    const struct HandlerClosure *const restrict cl);
+			    const struct HandlerClosure *const restrict h_cl);
 
 /* locking the queue (no block on failure) */
-extern inline void
-thread_queue_try_lock(struct ThreadQueue *const restrict queue);
 extern inline bool
 thread_queue_try_lock_status(struct ThreadQueue *const restrict queue);
 extern inline void
@@ -54,11 +47,9 @@ thread_queue_try_lock_handle(struct ThreadQueue *const restrict queue,
 			     void *arg);
 extern inline void
 thread_queue_try_lock_handle_cl(struct ThreadQueue *const restrict queue,
-				const struct HandlerClosure *const restrict cl);
+				const struct HandlerClosure *const restrict h_cl);
 
 /* unlocking the queue... */
-extern inline void
-thread_queue_unlock(struct ThreadQueue *const restrict queue);
 extern inline bool
 thread_queue_unlock_status(struct ThreadQueue *const restrict queue);
 extern inline void
@@ -80,25 +71,41 @@ thread_queue_peek(struct ThreadQueue *const restrict queue,
 /* LIFO push
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_push(struct ThreadQueue *const restrict queue,
-		  struct ThreadQueueNode *const restrict node);
+thread_queue_push_muffle(struct ThreadQueue *const restrict queue,
+			 struct ThreadQueueNode *const restrict node);
+extern inline void
+thread_queue_push_handle_cl(struct ThreadQueue *const restrict queue,
+			    struct ThreadQueueNode *const restrict node,
+			    const struct HandlerClosure *const restrict h_cl);
 
 
 /* LIFO pop
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_pop(struct ThreadQueue *const restrict queue,
-		 struct ThreadQueueNode *restrict *const restrict node);
+thread_queue_pop_muffle(struct ThreadQueue *const restrict queue,
+			struct ThreadQueueNode *restrict *const restrict node);
+extern inline void
+thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
+			   struct ThreadQueueNode *restrict *const restrict node,
+			   const struct HandlerClosure *const restrict h_cl);
 
 
 /* random access delete
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_remove(struct ThreadQueue *const restrict queue,
-		    struct ThreadQueueNode *const restrict node);
+thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
+			   struct ThreadQueueNode *const restrict node,
+			   const struct HandlerClosure *const restrict h_cl);
+extern inline void
+thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
+			      struct ThreadQueueNode *const restrict node,
+			      const struct HandlerClosure *const restrict h_cl);
 
 
 /* block until emptied
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_await_empty(struct ThreadQueue *const restrict queue);
+thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue);
+extern inline void
+thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
+				   const struct HandlerClosure *const restrict h_cl);

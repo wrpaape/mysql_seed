@@ -1,16 +1,14 @@
 #include "thread/thread_pool.h"
 
-/* global variables
- *─────────────────────────────────────────────────────────────────────────── */
-
-/* ThreadPool operations
+/* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_pool_cancel_workers(struct ThreadPool *const restrict pool);
-
+supervisor_cancel_workers(struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_do_exit_failure(struct ThreadPool *const restrict pool);
 void
-thread_pool_exit_on_failure(void *arg,
-			    const char *restrict failure);
+supervisor_exit_on_failure(void *arg,
+			   const char *restrict failure)
 {
 	struct ThreadPool *const restrict pool =
 	(struct ThreadPool *const restrict) arg;
@@ -20,28 +18,55 @@ thread_pool_exit_on_failure(void *arg,
 	thread_log_append_string(&pool->log,
 				 failure);
 
+	thread_log_unlock_muffle(&pool->log);
+
+	supervisor_do_exit_failure(pool);
+	__builtin_unreachable();
+}
+extern inline void
+supervisor_init(struct Supervisor *const restrict supervisor,
+		struct ThreadPool *const restrict pool);
+extern inline void
+supervisor_listen(struct Supervisor *const restrict supervisor);
+extern inline void
+supervisor_signal_event_muffle(struct Supervisor *const restrict supervisor,
+			       ThreadPoolEvent *const event);
+
+/* Worker operations
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+worker_exit_on_failure(void *arg,
+		       const char *restrict failure)
+{
+	struct Worker *const restrict worker =
+	(struct Worker *const restrict) arg;
+
+	struct ThreadPool *const restrict pool = worker->pool;
+
+	thread_log_lock_muffle(&pool->log);
+
 	thread_log_append_string(&pool->log,
-				 THREAD_POOL_EXIT_ON_FAILURE_MESSAGE);
-
-	thread_log_append_close(&pool->log);
-
-
-	thread_log_dump_muffle(&pool->log,
-			       STDERR_FILENO);
-
-	/* signal to supervisor to cancel workers */
+				 failure);
 
 	thread_log_unlock_muffle(&pool->log);
 
+	thread_queue_remove_muffle(&pool->workers,
+				   worker);
+
+	supervisor_signal_event_muffle(&pool->supervisor,
+				       &supervisor_do_exit_failure);
 	thread_exit_detached();
 
 	__builtin_unreachable();
 }
 
+/* ThreadPool operations
+ *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_pool_init(struct ThreadPool *restrict pool,
 		 size_t count_workers,
 		 const struct HandlerClosure *const restrict handle_init_fail);
+
 
 /* void */
 /* supervisor_exit(const char *restrict failure) */
