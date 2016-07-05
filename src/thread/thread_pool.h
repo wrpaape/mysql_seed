@@ -301,7 +301,7 @@ worker_init(struct Worker *const restrict worker,
 	    struct ThreadPool *const restrict pool)
 {
 	worker->fail_cl.handle = &worker_exit_on_failure;
-	worker->fail_cl.arg    = pool;
+	worker->fail_cl.arg    = worker;
 	worker->pool	       = pool;
 	worker->node	       = node;
 }

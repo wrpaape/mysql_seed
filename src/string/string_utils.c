@@ -153,10 +153,34 @@ extern inline size_t
 string_size_limit(const char *const restrict string,
 		  size_t limit);
 
+#if HAVE_INT_STRING_ATTRS
+extern inline bool
+do_parse_digits(uintmax_t *const restrict n,
+		const char *restrict string,
+		const unsigned int digit_count_max,
+		const char *const restrict max_string);
+extern inline char *
+do_parse_digits_stop(uintmax_t *const restrict n,
+		     char *restrict string,
+		     const char stop,
+		     const unsigned int digit_count_max,
+		     const char *const restrict max_string);
+#endif /* if HAVE_INT_STRING_ATTRS  */
+
 extern inline bool
 parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string);
 
 extern inline bool
-parse_int(uintmax_t *const restrict n,
+parse_int(intmax_t *const restrict n,
 	  const char *restrict string);
+
+extern inline char *
+parse_uint_stop(uintmax_t *const restrict n,
+		char *restrict string,
+		const char stop);
+
+extern inline char *
+parse_int_stop(intmax_t *const restrict n,
+	       char *restrict string,
+	       const char stop);

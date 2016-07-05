@@ -791,11 +791,13 @@ string_size_limit(const char *const restrict string,
 	}
 }
 
-inline bool
-parse_uint(uintmax_t *const restrict n,
-	   const char *restrict string)
-{
 #if HAVE_INT_STRING_ATTRS
+inline bool
+do_parse_digits(uintmax_t *const restrict n,
+		const char *restrict string,
+		const unsigned int digit_count_max,
+		const char *const restrict max_string)
+{
 	while (*string == '0') {
 		++string;
 
@@ -805,7 +807,7 @@ parse_uint(uintmax_t *const restrict n,
 		}
 	}
 
-	if ((*string == '\0') || (*string > '9' ) || (*string < '0' ))
+	if ((*string > '9' ) || (*string < '0' ))
 		return false;
 
 	const char *const restrict start_ptr = string;
@@ -823,10 +825,10 @@ parse_uint(uintmax_t *const restrict n,
 
 		++count_digits;
 
-		if (count_digits == DIGIT_COUNT_UINTMAX_MAX) {
+		if (count_digits == digit_count_max) {
 
 			if (string_compare(start_ptr,
-					   DIGIT_STRING_UINTMAX_MAX) > 0)
+					   max_string) > 0)
 				return false;
 
 			++string;
@@ -857,23 +859,195 @@ parse_uint(uintmax_t *const restrict n,
 	}
 
 	return true;
+}
+
+inline char *
+do_parse_digits_stop(uintmax_t *const restrict n,
+		     char *restrict string,
+		     const char stop,
+		     const unsigned int digit_count_max,
+		     const char *const restrict max_string)
+{
+	while (*string == '0') {
+		++string;
+
+		if ((*string == stop) || (*string == '\0')) {
+			*n = 0llu;
+			return string;
+		}
+	}
+
+	if ((*string > '9' ) || (*string < '0' ))
+		return NULL;
+
+	const char *const restrict start_ptr = string;
+
+	unsigned int count_digits = 1u;
+
+	while (1) {
+		++string;
+
+		if ((*string == stop) || (*string == '\0'))
+			break;
+
+		if ((*string > '9') || (*string < '0'))
+			return NULL;
+
+		++count_digits;
+
+		if (count_digits == digit_count_max) {
+
+			if (string_compare(start_ptr,
+					   max_string) > 0)
+				return NULL;
+
+			++string;
+
+			if ((*string != stop) || (*string != '\0'))
+				return NULL;
+
+			break;
+		}
+	}
+
+	char *const restrict stop_ptr = string;
+
+	--string;
+
+	*n = (uintmax_t) ASCII_TO_DIGIT(*string);
+
+	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
+
+	const uintptr_t *const restrict until_ptr = &ten_pow_map[count_digits];
 
 
+	while (pow_ptr < until_ptr) {
+
+		--string;
+
+		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*pow_ptr));
+
+		++pow_ptr;
+	}
+
+	return stop_ptr;
+}
+#endif /* if HAVE_INT_STRING_ATTRS  */
+
+inline bool
+parse_uint(uintmax_t *const restrict n,
+	   const char *restrict string)
+{
+#if HAVE_INT_STRING_ATTRS
+
+	return do_parse_digits(n,
+			       string,
+			       DIGIT_COUNT_UINTMAX_MAX,
+			       DIGIT_STRING_UINTMAX_MAX);
 #else
-	*n = stroumax(string,
-		      NULL,
-		      10);
+	*n = strtoumax(string,
+		       NULL,
+		       10);
 
-	return (*n != 0llu)
-	    || (errno != 0);
+	return (*n != 0llu) || (errno != 0);
 #endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
 inline bool
-parse_int(uintmax_t *const restrict n,
+parse_int(intmax_t *const restrict n,
 	  const char *restrict string)
 {
-	return true;
+#if HAVE_INT_STRING_ATTRS
+	if (*string == '-') {
+		++string;
+
+		if (do_parse_digits((uintmax_t *const restrict) n,
+				    string,
+				    DIGIT_COUNT_INTMAX_MIN,
+				    DIGIT_STRING_INTMAX_MIN)) {
+			*n = -(*n);
+			return true;
+		}
+
+		return false;
+	}
+
+	return do_parse_digits((uintmax_t *const restrict) n,
+			       string,
+			       DIGIT_COUNT_INTMAX_MAX,
+			       DIGIT_STRING_INTMAX_MAX);
+#else
+	*n = strtoimax(string,
+		       NULL,
+		       10);
+
+	return (*n != 0ll) || (errno != 0);
+#endif /* if HAVE_INT_STRING_ATTRS  */
+}
+
+inline char *
+parse_uint_stop(uintmax_t *const restrict n,
+		char *restrict string,
+		const char stop)
+{
+#if HAVE_INT_STRING_ATTRS
+	return do_parse_digits_stop(n,
+				    string,
+				    stop,
+				    DIGIT_COUNT_UINTMAX_MAX,
+				    DIGIT_STRING_UINTMAX_MAX);
+#else
+	char *restrict stop_ptr;
+
+	*n = strtoumax(string,
+		       &stop_ptr,
+		       10);
+
+	return (((*n != 0llu) || (errno != 0)) && (*stop_ptr == stop))
+	     ? stop_ptr
+	     : NULL;
+#endif /* if HAVE_INT_STRING_ATTRS  */
+}
+
+inline char *
+parse_int_stop(intmax_t *const restrict n,
+	       char *restrict string,
+	       const char stop)
+{
+#if HAVE_INT_STRING_ATTRS
+	if (*string == '-') {
+		++string;
+
+		char *const restrict
+		stop_ptr = do_parse_digits_stop((uintmax_t *const restrict) n,
+						string,
+						stop,
+						DIGIT_COUNT_INTMAX_MIN,
+						DIGIT_STRING_INTMAX_MIN);
+
+		if (stop_ptr == NULL)
+			return NULL;
+
+		*n = -(*n);
+		return stop_ptr;
+	}
+
+	return do_parse_digits_stop((uintmax_t *const restrict) n,
+				    string,
+				    stop,
+				    DIGIT_COUNT_INTMAX_MAX,
+				    DIGIT_STRING_INTMAX_MAX);
+#else
+	char *restrict stop_ptr;
+
+	*n = strtoimax(string,
+		       &stop_ptr,
+		       10);
+
+	return (((*n != 0ll) || (errno != 0)) && (*stop_ptr == stop))
+	     ? stop_ptr
+	     : NULL;
+#endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */
