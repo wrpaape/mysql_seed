@@ -99,6 +99,15 @@ extern inline void
 worker_init(struct Worker *const restrict worker,
 	    struct ThreadQueueNode *const restrict node,
 	    struct ThreadPool *const restrict pool);
+extern inline void
+worker_process_tasks(struct Worker *const restrict worker);
+void *
+worker_start(void *arg)
+{
+	struct Worker *const restrict worker =
+	(struct Worker *const restrict) arg;
+}
+
 
 /* Task operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -123,6 +132,9 @@ worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 		  struct ThreadQueueNode *restrict node,
 		  struct Worker *restrict worker,
 		  struct ThreadPool *const restrict pool);
+extern inline void
+worker_queue_start(struct ThreadQueue *const restrict worker_queue,
+		   const struct HandlerClosure *const restrict fail_cl);
 
 /* TaskQueues operations
  *─────────────────────────────────────────────────────────────────────────── */

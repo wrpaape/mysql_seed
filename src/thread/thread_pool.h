@@ -277,6 +277,7 @@ supervisor_listen(struct Supervisor *const restrict supervisor)
 	}
 
 	mutex_lock_try_catch_close();
+	__builtin_unreachable();
 }
 
 inline void
@@ -333,12 +334,32 @@ worker_init(struct Worker *const restrict worker,
 	    struct ThreadQueueNode *const restrict node,
 	    struct ThreadPool *const restrict pool)
 {
-
 	worker->fail_cl.handle = &worker_exit_on_failure;
 	worker->fail_cl.arg    = pool;
 	worker->pool	       = pool;
 	worker->node	       = node;
 }
+
+inline void
+worker_process_tasks(struct Worker *const restrict worker)
+{
+	struct TaskQueues *const restrict
+	task_queues = &worker->pool.task_queues;
+
+	while (1) {
+		/* pop next assigned task */
+		thread_queue_pop_handle_cl(&task_queues->awaiting,
+					   &worker->task,
+					   &worker->fail_cl);
+
+	}
+
+	__builtin_unreachable();
+}
+
+void *
+worker_start(void *arg)
+__attribute__((noreturn));
 
 
 /* Task operations
@@ -482,8 +503,39 @@ worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 	}
 }
 
-/* inline void */
-/* worker_queue_start */
+inline void
+worker_queue_start(struct ThreadQueue *const restrict worker_queue,
+		   const struct HandlerClosure *const restrict fail_cl)
+{
+	struct ThreadQueueNode *restrict node;
+	struct Worker *restrict worker;
+
+	mutex_lock_try_catch_open(&worker_queue->lock);
+
+	mutex_lock_handle_cl(&worker_queue->lock,
+			     fail_cl);
+
+	thread_queue_peek(&pool->worker_queue,
+			  &node);
+
+	do {
+		worker = (struct Worker *restrict) node->payload;
+
+		thread_create_handle_cl(&worker->thread,
+					&worker_start,
+					worker);
+
+		node = node->next;
+
+	} while (node != NULL);
+
+
+
+	mutex_unlock_handle_cl(&worker_queue->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
 
 
 /* TaskQueues operations
@@ -629,14 +681,13 @@ inline void
 thread_pool_start(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl)
 {
-	/* pool->busy = true; */
+	pool->busy = true;
 
-	/* worker_queue_start(&pool->worker_queue, */
-	/* 		   fail_cl); */
+	worker_queue_start(&pool->worker_queue,
+			   fail_cl);
 
-	/* supervisor_start(&pool->supervisor, */
-	/* 		 fail_cl); */
-
+	supervisor_start(&pool->supervisor,
+			 fail_cl);
 }
 
 
@@ -672,8 +723,6 @@ thread_pool_destroy(struct ThreadPool *restrict pool)
 }
 
 
-/* Worker operations
- *─────────────────────────────────────────────────────────────────────────── */
 
 
 
