@@ -145,10 +145,10 @@ void test_thread_pool(void)
 
 	TEST_ASSERT_EQUAL_INT(456,	       four_five_six);
 
-	/* fail_cl.arg = "first test - clearing completed tasks"; */
+	fail_cl.arg = "first test - clearing completed tasks";
 
-	/* thread_pool_clear_completed(pool, */
-	/* 			    &fail_cl); */
+	thread_pool_clear_completed(pool,
+				    &fail_cl);
 
 	fail_cl.arg = "first test - pushing second extra task";
 
@@ -169,7 +169,6 @@ void test_thread_pool(void)
 
 	TEST_ASSERT_EQUAL_DOUBLE(3.50,       tree_fitty);
 
-	/* TEST_ASSERT_EQUAL_STRING("ooga_booga", ooga_booga); */
 	TEST_ASSERT_EQUAL_STRING("tastyham", tastyham);
 
 	fail_cl.arg = "first test - shutdown";

@@ -655,6 +655,7 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 				   &node,
 				   fail_cl);
 
+	/* TODO: NOT SAFE, MAINTAIN LOCK */
 	node->payload = (void *) task_cl;
 
 	thread_queue_push_handle_cl(&pool->task_queues.awaiting,
