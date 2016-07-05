@@ -247,7 +247,6 @@ inline void
 supervisor_init(struct Supervisor *const restrict supervisor,
 		struct ThreadPool *const restrict pool)
 {
-	supervisor->event = NULL;
 	thread_cond_init(&supervisor->trigger);
 	mutex_init(&supervisor->listening);
 
@@ -347,7 +346,7 @@ worker_init(struct Worker *const restrict worker,
 inline void
 task_init(struct Task *const restrict task,
 	  struct ThreadQueueNode *const restrict node,
-	  struct ProcedureClosure *const restrict closure)
+	  const struct ProcedureClosure *const restrict closure)
 {
 	task->node    = node;
 	task->closure = closure;
@@ -405,7 +404,7 @@ inline void
 task_queues_awaiting_init(struct ThreadQueue *const restrict awaiting,
 			  struct ThreadQueueNode *restrict node,
 			  struct Task *restrict task,
-			  struct ProcedureClosure *restrict task_cl)
+			  const struct ProcedureClosure *restrict task_cl)
 {
 	if (node == (struct ThreadQueueNode *const restrict) (task)) {
 		thread_queue_init_empty(awaiting);
@@ -417,11 +416,11 @@ task_queues_awaiting_init(struct ThreadQueue *const restrict awaiting,
 	struct ThreadQueueNode *const restrict last
 	= ((struct ThreadQueueNode *const restrict) task) - 1l;
 
-	last->next   = NULL;
-	vacant->last = last;
+	last->next     = NULL;
+	awaiting->last = last;
 
-	node->prev   = NULL;
-	vacant->head = node;
+	node->prev     = NULL;
+	awaiting->head = node;
 
 	while (1) {
 		task_init(task,
@@ -483,6 +482,9 @@ worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 	}
 }
 
+/* inline void */
+/* worker_queue_start */
+
 
 /* TaskQueues operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -492,18 +494,17 @@ task_queues_init(struct TaskQueues *const restrict task_queues,
 		 struct ThreadQueueNode *const restrict init_task_nodes,
 		 struct Task *const restrict vacant_tasks,
 		 struct Task *const restrict init_tasks,
-		 struct ProcedureClosure *const restrict init_task_cls)
+		 const struct ProcedureClosure *const restrict task_cls)
 {
 
 	task_queues_vacant_init(&task_queues->vacant,
-				init_task_nodes,
-				init_tasks,
-				task_cls);
+				vacant_task_nodes,
+				vacant_tasks);
 
 	task_queues_awaiting_init(&task_queues->awaiting,
 				  init_task_nodes,
 				  init_tasks,
-				  init_task_cls);
+				  task_cls);
 
 	thread_queue_init_empty(&task_queues->complete);
 }
@@ -513,14 +514,12 @@ task_queues_init(struct TaskQueues *const restrict task_queues,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
-		 const struct ProcedureClosure *const restrict tasks_cls,
+		 const struct ProcedureClosure *const restrict task_cls,
 		 const size_t count_workers,
 		 const size_t count_init_tasks,
-		 const size_t count_vacant_tasks,
-		 const struct HandlerClosure *const restrict fail_cl)
+		 const size_t count_vacant_tasks)
 {
 	/* initialize overall completion condition variables */
-	pool->busy = true;
 	thread_cond_init(&pool->done);
 	mutex_init(&pool->processing);
 
@@ -561,29 +560,25 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 	= (struct ThreadQueueNode *const restrict) (init_tasks
 						    + count_init_tasks);
 
-	struct Worker *const restrict workers =
+	struct Worker *const restrict workers
 	= (struct Worker *const restrict) (worker_nodes
+					   + count_workers);
 
 	/* initialize worker queue */
 	worker_queue_init(&pool->worker_queue,
 			  worker_nodes,
 			  workers,
-			  pool)
-
-	/* start the supervisor */
-
-	/* supervisor_init(&pool->supervisor, */
-	/* 		pool); */
+			  pool);
 }
 
 inline struct ThreadPool *
-thread_pool_create(const struct ProcedureClosure *const restrict tasks_cls,
+thread_pool_create(const struct ProcedureClosure *const restrict task_cls,
 		   const size_t count_workers,
 		   const size_t count_init_tasks,
 		   const size_t count_vacant_tasks,
 		   const struct HandlerClosure *const restrict fail_cl)
 {
-	const char *restrict faiure;
+	const char *restrict failure;
 
 	if (count_workers == 0lu) {
 		failure = FAILURE_REASON("thread_pool_create",
@@ -613,12 +608,12 @@ thread_pool_create(const struct ProcedureClosure *const restrict tasks_cls,
 		 + (sizeof(struct ThreadQueueNode) * (count_workers
 						      + count_total_tasks)));
 	if (pool != NULL) {
+		/* initialize, but do not start */
 		thread_pool_init(pool,
 				 task_cls,
 				 count_workers,
 				 count_init_tasks,
-				 count_vacant_tasks,
-				 fail_cl);
+				 count_vacant_tasks);
 		return pool;
 	}
 
@@ -628,6 +623,20 @@ HANDLE_FAILURE:
 	fail_cl->handle(fail_cl->arg,
 			failure);
 	__builtin_unreachable();
+}
+
+inline void
+thread_pool_start(struct ThreadPool *restrict pool,
+		  const struct HandlerClosure *const restrict fail_cl)
+{
+	/* pool->busy = true; */
+
+	/* worker_queue_start(&pool->worker_queue, */
+	/* 		   fail_cl); */
+
+	/* supervisor_start(&pool->supervisor, */
+	/* 		 fail_cl); */
+
 }
 
 

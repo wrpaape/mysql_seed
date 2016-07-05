@@ -105,7 +105,7 @@ worker_init(struct Worker *const restrict worker,
 extern inline void
 task_init(struct Task *const restrict task,
 	  struct ThreadQueueNode *const restrict node,
-	  struct ProcedureClosure *const restrict closure);
+	  const struct ProcedureClosure *const restrict closure);
 
 /* ThreadQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -117,7 +117,7 @@ extern inline void
 task_queues_awaiting_init(struct ThreadQueue *const restrict awaiting,
 			  struct ThreadQueueNode *restrict node,
 			  struct Task *restrict task,
-			  struct ProcedureClosure *restrict task_cl);
+			  const struct ProcedureClosure *restrict task_cl);
 extern inline void
 worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 		  struct ThreadQueueNode *restrict node,
@@ -132,26 +132,31 @@ task_queues_init(struct TaskQueues *const restrict task_queues,
 		 struct ThreadQueueNode *const restrict init_task_nodes,
 		 struct Task *const restrict vacant_tasks,
 		 struct Task *const restrict init_tasks,
-		 struct ProcedureClosure *const restrict init_task_cls);
+		 const struct ProcedureClosure *const restrict task_cls);
 
 
 /* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
+		 const struct ProcedureClosure *const restrict task_cls,
 		 const size_t count_workers,
-		 const size_t count_tasks);
+		 const size_t count_init_tasks,
+		 const size_t count_vacant_tasks);
 extern inline struct ThreadPool *
-thread_pool_create(const struct ProcedureClosure *const restrict tasks_cls,
+thread_pool_create(const struct ProcedureClosure *const restrict task_cls,
 		   const size_t count_workers,
 		   const size_t count_init_tasks,
 		   const size_t count_vacant_tasks,
 		   const struct HandlerClosure *const restrict fail_cl);
 
 extern inline void
+thread_pool_start(struct ThreadPool *restrict pool,
+		  const struct HandlerClosure *const restrict fail_cl);
+
+extern inline void
 thread_pool_process(struct ThreadPool *restrict pool,
 		    const struct HandlerClosure *const restrict fail_cl);
-
 extern inline void
 thread_pool_destroy(struct ThreadPool *restrict pool);
 
