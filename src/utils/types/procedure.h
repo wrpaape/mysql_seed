@@ -14,7 +14,7 @@ typedef void
 Procedure(void *arg);
 
 struct ProcedureClosure {
-	Procedure *procedure;
+	Procedure *fun;
 	void *arg;
 };
 

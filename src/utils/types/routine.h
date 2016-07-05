@@ -14,7 +14,7 @@ typedef void *
 Routine(void *arg);
 
 struct RoutineClosure {
-	Routine *routine;
+	Routine *fun;
 	void *arg;
 };
 

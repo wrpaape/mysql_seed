@@ -95,21 +95,57 @@ worker_exit_on_failure(void *arg,
 	thread_exit_detached();
 	__builtin_unreachable();
 }
+extern inline void
+worker_init(struct Worker *const restrict worker,
+	    struct ThreadQueueNode *const restrict node,
+	    struct ThreadPool *const restrict pool);
+
+/* Task operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+task_init(struct Task *const restrict task,
+	  struct ThreadQueueNode *const restrict node,
+	  struct ProcedureClosure *const restrict closure);
+
+/* ThreadQueue operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+task_queues_vacant_init(struct ThreadQueue *const restrict vacant,
+			struct ThreadQueueNode *restrict node,
+			struct Task *restrict task);
+extern inline void
+task_queues_awaiting_init(struct ThreadQueue *const restrict awaiting,
+			  struct ThreadQueueNode *restrict node,
+			  struct Task *restrict task,
+			  struct ProcedureClosure *restrict task_cl);
+extern inline void
+worker_queue_init(struct ThreadQueue *const restrict worker_queue,
+		  struct ThreadQueueNode *restrict node,
+		  struct Worker *restrict worker,
+		  struct ThreadPool *const restrict pool);
+
+/* TaskQueues operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+task_queues_init(struct TaskQueues *const restrict task_queues,
+		 struct ThreadQueueNode *const restrict vacant_task_nodes,
+		 struct ThreadQueueNode *const restrict init_task_nodes,
+		 struct Task *const restrict vacant_tasks,
+		 struct Task *const restrict init_tasks,
+		 struct ProcedureClosure *const restrict init_task_cls);
+
 
 /* ThreadPool operations
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-thread_pool_init_default(struct ThreadPool *const restrict pool);
-extern inline void
-thread_pool_init_empty(struct ThreadPool *const restrict pool);
 extern inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
 		 const size_t count_workers,
 		 const size_t count_tasks);
 extern inline struct ThreadPool *
-thread_pool_create_empty(const struct HandlerClosure *const restrict fail_cl);
-extern inline struct ThreadPool *
-thread_pool_create(size_t count_workers,
+thread_pool_create(const struct ProcedureClosure *const restrict tasks_cls,
+		   const size_t count_workers,
+		   const size_t count_init_tasks,
+		   const size_t count_vacant_tasks,
 		   const struct HandlerClosure *const restrict fail_cl);
 
 extern inline void

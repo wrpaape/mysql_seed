@@ -219,7 +219,7 @@ thread_create_cl_status(Thread *const restrict thread,
 			const struct RoutineClosure *const restrict cl)
 {
 	return thread_create_status(thread,
-				    cl->routine,
+				    cl->fun,
 				    cl->arg);
 }
 
@@ -228,7 +228,7 @@ thread_create_cl_muffle(Thread *const restrict thread,
 			const struct RoutineClosure *const restrict cl)
 {
 	thread_create_muffle(thread,
-			     cl->routine,
+			     cl->fun,
 			     cl->arg);
 }
 
@@ -238,7 +238,7 @@ thread_create_cl_report(Thread *const restrict thread,
 			const char *restrict *const restrict failure)
 {
 	return thread_create_report(thread,
-				    cl->routine,
+				    cl->fun,
 				    cl->arg,
 				    failure);
 }
@@ -250,7 +250,7 @@ thread_create_cl_handle(Thread *const restrict thread,
 			     void *h_arg)
 {
 	thread_create_handle(thread,
-			     cl->routine,
+			     cl->fun,
 			     cl->arg,
 			     handle,
 			     h_arg);
@@ -262,7 +262,7 @@ thread_create_cl_handle_cl(Thread *const restrict thread,
 			   const struct HandlerClosure *const restrict h_cl)
 {
 	thread_create_handle_cl(thread,
-				r_cl->routine,
+				r_cl->fun,
 				r_cl->arg,
 				h_cl);
 }
