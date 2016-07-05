@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <limits.h>
+#include <inttypes.h>	/* UINTMAX_MAX, <stdint.h> */
 
 /* constants
  *─────────────────────────────────────────────────────────────────────────── */
@@ -52,9 +52,6 @@
 #	undef  DIGIT_STRING_UINTMAX_MAX
 #	undef  DIGIT_STRING_INTMAX_MAX
 #	undef  DIGIT_STRING_INTMAX_MIN
-#	include <stdio.h>	/* sprintf, snprintf */
-#	include <inttypes.h>	/* stroumax */
-#	include <errno.h>	/* errno (checking return of stroumax) */
 #endif	/* if (UINTMAX_MAX == UINT64_MAX) */
 
 #endif /* ifndef MYSQL_SEED_STRING_INT_STRING_ATTRS_H_ */

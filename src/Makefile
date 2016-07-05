@@ -290,8 +290,12 @@ TARGETS			+= $(UNITY_OBJ)					\
 # ──────────────────────────────────────────────────────────────────────────────
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
-UTILS_WORD_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils word_utils)
+UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
+UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_pattern)
+UTILS_WORD_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils word_attrs)
 UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
+STRING_INT_STRING_ATTRS_HDR	:= $(call HELPER_HEADER_PATH,string int_string_attrs)
+STRING_PTR_STRING_ATTRS_HDR	:= $(call HELPER_HEADER_PATH,string ptr_string_attrs)
 STRING_STRING_TOKEN_HDR		:= $(call HELPER_HEADER_PATH,string string_token)
 STRING_STRING_MACROS_HDR	:= $(call HELPER_HEADER_PATH,string string_macros)
 MODE_HDR			:= $(call PROJECT_HEADER_PATH,mode)
@@ -344,7 +348,7 @@ TIME_TIME_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,time time_utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 TIME_TIME_UTILS_OBJ_PREQS	:= $(TIME_TIME_UTILS_SRC) 		\
 			   	   $(TIME_TIME_UTILS_HDR)
-TIME_TIME_UTILS_OBJ_GROUP		:= $(TIME_TIME_UTILS_OBJ)
+TIME_TIME_UTILS_OBJ_GROUP	:= $(TIME_TIME_UTILS_OBJ)
 TIME_TIME_UTILS_TRNR_SRC_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 TIME_TIME_UTILS_TEST_OBJ_PREQS	:= $(TIME_TIME_UTILS_TEST_SRC)		\
@@ -378,7 +382,7 @@ MEMORY_MEMORY_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_uti
 MEMORY_MEMORY_UTILS_OBJ_PREQS		:= $(MEMORY_MEMORY_UTILS_SRC) 		\
 			   	   	   $(MEMORY_MEMORY_UTILS_HDR)		\
 			   	   	   $(UTILS_UTILS_HDR)			\
-			   	   	   $(UTILS_WORD_UTILS_HDR)
+			   	   	   $(UTILS_TYPES_WIDTH_HDR)
 MEMORY_MEMORY_UTILS_OBJ_GROUP		:= $(MEMORY_MEMORY_UTILS_OBJ) 		\
 					   $(UTILS_UTILS_OBJ_GROUP)
 MEMORY_MEMORY_UTILS_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_UTILS_TEST_SRC)	\
@@ -558,7 +562,9 @@ STRING_STRING_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,string string_ut
 # ─────────────── target prequisites ───────────────────────────────────────────
 STRING_STRING_UTILS_OBJ_PREQS		:= $(STRING_STRING_UTILS_SRC) 			\
 			   		   $(STRING_STRING_UTILS_HDR)			\
-			   		   $(UTILS_WORD_UTILS_HDR)			\
+			   		   $(UTILS_TYPES_WORD_PATTERN_HDR)		\
+			   		   $(STRING_INT_STRING_ATTRS_HDR)		\
+			   		   $(STRING_PTR_STRING_ATTRS_HDR)		\
 			   		   $(STRING_ASCII_UTILS_HDR)			\
 			   		   $(STRING_STRING_MACROS_HDR)
 STRING_STRING_UTILS_OBJ_GROUP		:= $(STRING_STRING_UTILS_OBJ)			\

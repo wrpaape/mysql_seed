@@ -4,6 +4,7 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
+#include <stdint.h>		/* UINT8/16/32/84_MAX */
 #include "utils/types/word.h"	/* word_t, WORD_MAX */
 #include "utils/char_attrs.h"	/* OCTET_CHAR */
 

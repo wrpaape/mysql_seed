@@ -6,13 +6,17 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stddef.h>			/* size_t */
 #include <unistd.h>			/* ssize_t */
-#include <stdbool.h>			/* bool */
-#include "utils/types/word_pattern.h"	/* WordPattern/Ptr, CharBuffer */
+#include "utils/types/word_pattern.h"	/* WordPattern/Ptr, word_attrs */
 #include "string/int_string_attrs.h"	/* integer string attributes */
 #include "string/ptr_string_attrs.h"	/* pointer string attributes */
-#include "string/ascii_utils.h"		/* ascii helper macros, groups, sets */
+#include "string/ascii_utils.h"		/* bool, ascii macros, groups, sets */
 #include "string/string_macros.h"	/* string helper macros */
 
+#if !HAVE_INT_STRING_ATTRS
+#	include <stdio.h>	/* sprintf, snprintf */
+#	include <inttypes.h>	/* stroumax */
+#	include <errno.h>	/* errno (checking return of stroumax) */
+#endif	/* if !HAVE_INT_STRING_ATTRS */
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -792,39 +796,40 @@ parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string)
 {
 #if HAVE_INT_STRING_ATTRS
-	while (*string == '0') {
-		++string;
+	return true;
+	/* while (*string == '0') { */
+	/* 	++string; */
 
-		if (*string == '\0') {
-			*n = 0llu;
-			return true;
-		}
-	}
+	/* 	if (*string == '\0') { */
+	/* 		*n = 0llu; */
+	/* 		return true; */
+	/* 	} */
+	/* } */
 
 
-	if (   (*string == '\0')
-	    || (*string  > '9' )
-	    || (*string  < '0' ))
-		return false;
+	/* if (   (*string == '\0') */
+	/*     || (*string  > '9' ) */
+	/*     || (*string  < '0' )) */
+	/* 	return false; */
 
-	const char *const restrict start_ptr = string;
+	/* const char *const restrict start_ptr = string; */
 
-	unsigned int count_digits = 1u;
+	/* unsigned int count_digits = 1u; */
 
-	while (1) {
-		++string;
+	/* while (1) { */
+	/* 	++string; */
 
-		if (*string == '\0')
-			break;
+	/* 	if (*string == '\0') */
+	/* 		break; */
 
-		if (   (*string > '9')
-		    || (*string < '0'))
-			return false;
+	/* 	if (   (*string > '9') */
+	/* 	    || (*string < '0')) */
+	/* 		return false; */
 
-		++count_digits;
+	/* 	++count_digits; */
 
-		if (count_digits)
-	}
+	/* 	if (count_digits) */
+	/* } */
 
 
 #else

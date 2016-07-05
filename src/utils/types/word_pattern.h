@@ -14,7 +14,7 @@
  * TYPEDEFS, ENUM AND STRUCT DEFINITIONS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#ifndef WORD_SIZE
+#ifndef OCTET_WORD
 #	error "WordPattern and WordPatternPtr are not defined - "	\
 	      "unsupported WORD_SIZE"
 #endif /* ifndef WORD_SIZE */
