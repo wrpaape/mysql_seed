@@ -6,218 +6,43 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stddef.h>			/* size_t */
 #include <unistd.h>			/* ssize_t */
-#include <stdint.h>			/* u/intmax_t, UINT16/32/64_MAX */
 #include <stdbool.h>			/* bool */
-#include "utils/word_utils.h"		/* WORD_SIZE */
+#include "utils/types/word_pattern.h"	/* WordPattern/Ptr, CharBuffer */
+#include "string/int_string_attrs.h"	/* integer string attributes */
+#include "string/ptr_string_attrs.h"	/* pointer string attributes */
 #include "string/ascii_utils.h"		/* ascii helper macros, groups, sets */
 #include "string/string_macros.h"	/* string helper macros */
-
-#if   (UINTMAX_MAX == UINT64_MAX)
-#	define UINT_DIGIT_COUNT_MAX 20u
-#elif (UINTMAX_MAX == UINT32_MAX)
-#	define UINT_DIGIT_COUNT_MAX 10u
-#elif (UINTMAX_MAX == UINT16_MAX)
-#	define UINT_DIGIT_COUNT_MAX 5u
-#else
-#	include <stdio.h>	/* sprintf, snprintf */
-#	undef UINT_DIGIT_COUNT_MAX
-#endif	/* if (UINTMAX_MAX == UINT64_MAX) */
-
-
-#if   (UINTPTR_MAX == UINT64_MAX)
-#	define POINTER_DIGIT_COUNT_MAX 20u
-#	define POINTER_ID_LENGTH_MAX   10u
-#elif (UINTPTR_MAX == UINT32_MAX)
-#	define POINTER_DIGIT_COUNT_MAX 10u
-#	define POINTER_ID_LENGTH_MAX   5u
-#elif (UINTPTR_MAX == UINT16_MAX)
-#	define POINTER_DIGIT_COUNT_MAX 5u
-#	define POINTER_ID_LENGTH_MAX   3u
-#elif (UINTPTR_MAX == UINT8_MAX)
-#	define POINTER_DIGIT_COUNT_MAX 3u
-#	define POINTER_ID_LENGTH_MAX   2u
-#else
-#	undef  POINTER_DIGIT_COUNT_MAX
-#	undef  POINTER_ID_LENGTH_MAX
-#endif	/* if (UINTPTR_MAX == UINT64_MAX) */
-
-
-/* constants
- *─────────────────────────────────────────────────────────────────────────── */
-/* UINT8_MAX  = 255			(3  digits) */
-/* UINT16_MAX = 65535			(5  digits) */
-/* UINT32_MAX = 4294967295		(10 digits) */
-/* UINT64_MAX = 18446744073709551615	(20 digits) */
-
-
-/* typedefs, struct declarations
- *─────────────────────────────────────────────────────────────────────────── */
-/* for copying a string of a fixed size */
-typedef char   CharBuffer1;
-typedef struct CharBuffer2  { char chars[ 2]; } CharBuffer2;
-typedef struct CharBuffer3  { char chars[ 3]; } CharBuffer3;
-typedef struct CharBuffer4  { char chars[ 4]; } CharBuffer4;
-typedef struct CharBuffer5  { char chars[ 5]; } CharBuffer5;
-typedef struct CharBuffer6  { char chars[ 6]; } CharBuffer6;
-typedef struct CharBuffer7  { char chars[ 7]; } CharBuffer7;
-typedef struct CharBuffer8  { char chars[ 8]; } CharBuffer8;
-typedef struct CharBuffer9  { char chars[ 9]; } CharBuffer9;
-typedef struct CharBuffer10 { char chars[10]; } CharBuffer10;
-typedef struct CharBuffer11 { char chars[11]; } CharBuffer11;
-typedef struct CharBuffer12 { char chars[12]; } CharBuffer12;
-typedef struct CharBuffer13 { char chars[13]; } CharBuffer13;
-typedef struct CharBuffer14 { char chars[14]; } CharBuffer14;
-typedef struct CharBuffer15 { char chars[15]; } CharBuffer15;
-typedef struct CharBuffer16 { char chars[16]; } CharBuffer16;
-
-
-union WordPattern {
-	word_t word;
-	char string[WORD_SIZE];
-	CharBuffer1  size_1;
-#if (WORD_SIZE > 1lu)
-	CharBuffer2  size_2;
-#if (WORD_SIZE > 2lu)
-	CharBuffer3  size_3;
-#if (WORD_SIZE > 3lu)
-	CharBuffer4  size_4;
-#if (WORD_SIZE > 4lu)
-	CharBuffer5  size_5;
-#if (WORD_SIZE > 5lu)
-	CharBuffer6  size_6;
-#if (WORD_SIZE > 6lu)
-	CharBuffer7  size_7;
-#if (WORD_SIZE > 7lu)
-	CharBuffer8  size_8;
-#if (WORD_SIZE > 8lu)
-	CharBuffer9  size_9;
-#if (WORD_SIZE > 9lu)
-	CharBuffer10 size_10;
-#if (WORD_SIZE > 10lu)
-	CharBuffer11 size_11;
-#if (WORD_SIZE > 11lu)
-	CharBuffer12 size_12;
-#if (WORD_SIZE > 12lu)
-	CharBuffer13 size_13;
-#if (WORD_SIZE > 13lu)
-	CharBuffer14 size_14;
-#if (WORD_SIZE > 14lu)
-	CharBuffer15 size_15;
-#if (WORD_SIZE > 15lu)
-	CharBuffer16 size_16;
-#endif /* if (WORD_SIZE > 1) */
-#endif /* if (WORD_SIZE > 2) */
-#endif /* if (WORD_SIZE > 3) */
-#endif /* if (WORD_SIZE > 4) */
-#endif /* if (WORD_SIZE > 5) */
-#endif /* if (WORD_SIZE > 6) */
-#endif /* if (WORD_SIZE > 7) */
-#endif /* if (WORD_SIZE > 8) */
-#endif /* if (WORD_SIZE > 9) */
-#endif /* if (WORD_SIZE > 10) */
-#endif /* if (WORD_SIZE > 11) */
-#endif /* if (WORD_SIZE > 12) */
-#endif /* if (WORD_SIZE > 13) */
-#endif /* if (WORD_SIZE > 14) */
-#endif /* if (WORD_SIZE > 15) */
-};
-
-union WordPatternPtr {
-	word_t *restrict word;
-	char *restrict string;
-	CharBuffer1  *restrict size_1;
-#if (WORD_SIZE > 1lu)
-	CharBuffer2  *restrict size_2;
-#if (WORD_SIZE > 2lu)
-	CharBuffer3  *restrict size_3;
-#if (WORD_SIZE > 3lu)
-	CharBuffer4  *restrict size_4;
-#if (WORD_SIZE > 4lu)
-	CharBuffer5  *restrict size_5;
-#if (WORD_SIZE > 5lu)
-	CharBuffer6  *restrict size_6;
-#if (WORD_SIZE > 6lu)
-	CharBuffer7  *restrict size_7;
-#if (WORD_SIZE > 7lu)
-	CharBuffer8  *restrict size_8;
-#if (WORD_SIZE > 8lu)
-	CharBuffer9  *restrict size_9;
-#if (WORD_SIZE > 9lu)
-	CharBuffer10 *restrict size_10;
-#if (WORD_SIZE > 10lu)
-	CharBuffer11 *restrict size_11;
-#if (WORD_SIZE > 11lu)
-	CharBuffer12 *restrict size_12;
-#if (WORD_SIZE > 12lu)
-	CharBuffer13 *restrict size_13;
-#if (WORD_SIZE > 13lu)
-	CharBuffer14 *restrict size_14;
-#if (WORD_SIZE > 14lu)
-	CharBuffer15 *restrict size_15;
-#if (WORD_SIZE > 15lu)
-	CharBuffer16 *restrict size_16;
-#endif /* if (WORD_SIZE > 1) */
-#endif /* if (WORD_SIZE > 2) */
-#endif /* if (WORD_SIZE > 3) */
-#endif /* if (WORD_SIZE > 4) */
-#endif /* if (WORD_SIZE > 5) */
-#endif /* if (WORD_SIZE > 6) */
-#endif /* if (WORD_SIZE > 7) */
-#endif /* if (WORD_SIZE > 8) */
-#endif /* if (WORD_SIZE > 9) */
-#endif /* if (WORD_SIZE > 10) */
-#endif /* if (WORD_SIZE > 11) */
-#endif /* if (WORD_SIZE > 12) */
-#endif /* if (WORD_SIZE > 13) */
-#endif /* if (WORD_SIZE > 14) */
-#endif /* if (WORD_SIZE > 15) */
-};
-
-struct StringBuffer {
-	const char *restrict string;
-	size_t size;
-};
-
-
-
-
-/* helper macros
- *─────────────────────────────────────────────────────────────────────────── */
-#define PUT_CHAR_BUFF(PTR, BUFFER, WIDTH)			\
-do {								\
-	*((CharBuff ## WIDTH *restrict) PTR)			\
-	= (CharBuff ## WIDTH) BUFFER;				\
-	PTR = (__type_of__(PTR))				\
-	      (((CharBuff ## WIDTH *restrict) PTR) + 1l);	\
-} while (0)
 
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef UINT_DIGIT_COUNT_MAX
-extern const uintmax_t ten_pow_map[UINT_DIGIT_COUNT_MAX];
-#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
+#if HAVE_INT_STRING_ATTRS
+extern const uintmax_t ten_pow_map[DIGIT_COUNT_UINTMAX_MAX];
+#endif	/* if HAVE_INT_STRING_ATTRS */
 
-#ifdef POINTER_ID_LENGTH_MAX
-extern const uintptr_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX];
+#if HAVE_PTR_STRING_ATTRS
+extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
 
 
 /* helper functions
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef UINT_DIGIT_COUNT_MAX
+#if HAVE_INT_STRING_ATTRS
 inline unsigned int
 uint_digit_count(uintmax_t n)
 {
-#	if (UINT_DIGIT_COUNT_MAX >= 20u)
+#	if (DIGIT_COUNT_UINTMAX_MAX >= 20u)
 	if (n < 10000000000llu) {
-#	endif	/* if (UINT_DIGIT_COUNT_MAX >= 20u) */
+#	endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 20u) */
 
-#		if (UINT_DIGIT_COUNT_MAX >= 10u)
+#		if (DIGIT_COUNT_UINTMAX_MAX >= 10u)
 		if (n < 100000llu) {
-#		endif	/* if (UINT_DIGIT_COUNT_MAX >= 10u) */
+#		endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 10u) */
 
+#			if (DIGIT_COUNT_UINTMAX_MAX >= 5u)
 			if (n < 1000llu) {
+#			endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 5u) */
+
 				if (n < 100llu) {
 					if (n < 10llu) {
 						return  1u;
@@ -227,6 +52,8 @@ uint_digit_count(uintmax_t n)
 				} else {
 					return  3u;
 				}
+
+#			if (DIGIT_COUNT_UINTMAX_MAX >= 5u)
 			} else {
 				if (n < 10000llu) {
 					return  4u;
@@ -234,8 +61,9 @@ uint_digit_count(uintmax_t n)
 					return  5u;
 				}
 			}
+#			endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 5u) */
 
-#		if (UINT_DIGIT_COUNT_MAX >= 10u)
+#		if (DIGIT_COUNT_UINTMAX_MAX >= 10u)
 		} else {
 			if (n < 100000000llu) {
 				if (n < 10000000llu) {
@@ -255,9 +83,9 @@ uint_digit_count(uintmax_t n)
 				}
 			}
 		}
-#		endif	/* if (UINT_DIGIT_COUNT_MAX >= 10u) */
+#		endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 10u) */
 
-#	if (UINT_DIGIT_COUNT_MAX >= 20u)
+#	if (DIGIT_COUNT_UINTMAX_MAX >= 20u)
 	} else {
 		if (n < 1000000000000000llu) {
 			if (n < 1000000000000llu) {
@@ -298,7 +126,7 @@ uint_digit_count(uintmax_t n)
 		}
 	}
 }
-#	endif	/* if (UINT_DIGIT_COUNT_MAX >= 20u) */
+#	endif	/* if (DIGIT_COUNT_UINTMAX_MAX >= 20u) */
 
 inline void
 do_put_uint(char *restrict buffer,
@@ -315,44 +143,44 @@ do_put_uint(char *restrict buffer,
 		--buffer;
 	}
 }
-#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
+#endif	/* if HAVE_INT_STRING_ATTRS */
 
 
 
-#ifdef POINTER_ID_LENGTH_MAX
+#if HAVE_PTR_STRING_ATTRS
 
 /* returns log₉₅(ceil₉₅(ptr_n)), i.e. smallest count of ASCII printable
  * characters to encode a pointer cast to a numberic value */
 inline unsigned int
 pointer_id_length(const uintptr_t ptr_n)
 {
-#	if (POINTER_ID_LENGTH_MAX >= 10u)
+#	if (LENGTH_MAX_POINTER_ID >= 10u)
 	if (ptr_n < 7737809375lu) {
-#	endif /* if (POINTER_ID_LENGTH_MAX >= 10u) */
+#	endif /* if (LENGTH_MAX_POINTER_ID >= 10u) */
 
-#		if (POINTER_ID_LENGTH_MAX >= 5u)
+#		if (LENGTH_MAX_POINTER_ID >= 5u)
 		if (ptr_n < 9025lu) {
-#		endif /* if (POINTER_ID_LENGTH_MAX >= 5u) */
+#		endif /* if (LENGTH_MAX_POINTER_ID >= 5u) */
 
 			if (ptr_n < 95lu) {
 				return 1u;
 			} else {
 
-#			if (POINTER_ID_LENGTH_MAX == 3u)
+#			if (LENGTH_MAX_POINTER_ID == 3u)
 				if (ptr_n < 9025lu) {
-#			endif /* if (POINTER_ID_LENGTH_MAX == 3u) */
+#			endif /* if (LENGTH_MAX_POINTER_ID == 3u) */
 
 					return 2u;
 
-#			if (POINTER_ID_LENGTH_MAX == 3u)
+#			if (LENGTH_MAX_POINTER_ID == 3u)
 				} else {
 					return 3u;
 				}
-#			endif /* if (POINTER_ID_LENGTH_MAX == 3u) */
+#			endif /* if (LENGTH_MAX_POINTER_ID == 3u) */
 
 			}
 
-#		if (POINTER_ID_LENGTH_MAX >= 5u)
+#		if (LENGTH_MAX_POINTER_ID >= 5u)
 		} else {
 			if (ptr_n < 81450625lu) {
 				if (ptr_n < 857375lu) {
@@ -365,9 +193,9 @@ pointer_id_length(const uintptr_t ptr_n)
 				return 5u;
 			}
 		}
-#		endif /* if (POINTER_ID_LENGTH_MAX >= 5u) */
+#		endif /* if (LENGTH_MAX_POINTER_ID >= 5u) */
 
-#	if (POINTER_ID_LENGTH_MAX >= 10u)
+#	if (LENGTH_MAX_POINTER_ID >= 10u)
 	} else {
 
 		if (ptr_n < 6634204312890625lu) {
@@ -388,13 +216,13 @@ pointer_id_length(const uintptr_t ptr_n)
 			}
 		}
 	}
-#	endif /* if (POINTER_ID_LENGTH_MAX >= 10u) */
+#	endif /* if (LENGTH_MAX_POINTER_ID >= 10u) */
 }
 
 inline void
 #else
 inline char *
-#endif /* ifdef POINTER_ID_LENGTH_MAX */
+#endif /* if HAVE_PTR_STRING_ATTRS */
 do_put_pointer_id(char *restrict buffer,
 		  uintptr_t ptr_n)
 {
@@ -403,11 +231,11 @@ do_put_pointer_id(char *restrict buffer,
 		ptr_n  /= ASCII_PRINTABLE_CNT;
 
 		if (ptr_n == 0lu) {
-#ifdef POINTER_ID_LENGTH_MAX
+#if HAVE_PTR_STRING_ATTRS
 			return;
 #else
 			return buffer;
-#endif /* ifdef POINTER_ID_LENGTH_MAX */
+#endif /* if HAVE_PTR_STRING_ATTRS */
 		}
 
 		--buffer;
@@ -423,7 +251,7 @@ inline char *
 put_uint(char *restrict buffer,
 	 uintmax_t n)
 {
-#ifdef UINT_DIGIT_COUNT_MAX
+#if HAVE_INT_STRING_ATTRS
 	char *const restrict until_ptr = buffer + uint_digit_count(n);
 
 	do_put_uint(until_ptr - 1l,
@@ -434,7 +262,7 @@ put_uint(char *restrict buffer,
 	return buffer + sprintf(buffer,
 				"%zu",
 				n);
-#endif /* ifdef(UINT_DIGIT_COUNT_MAX) */
+#endif /* if HAVE_INT_STRING_ATTRS */
 }
 
 
@@ -443,7 +271,7 @@ put_uint_length(char *restrict buffer,
 		uintmax_t n,
 		const size_t length)
 {
-#ifdef UINT_DIGIT_COUNT_MAX
+#if HAVE_INT_STRING_ATTRS
 	if (length == 0lu)
 		return buffer;
 
@@ -474,7 +302,7 @@ put_uint_length(char *restrict buffer,
 	return buffer + ((count_digits > length)
 			 ? length
 			 : count_digits);
-#endif /* ifdef (UINT_DIGIT_COUNT_MAX) */
+#endif /* if HAVE_INT_STRING_ATTRS */
 }
 
 inline char *
@@ -537,7 +365,7 @@ inline char *
 put_pointer_id(char *restrict buffer,
 	       void *const restrict pointer)
 {
-#ifdef POINTER_ID_LENGTH_MAX
+#if HAVE_PTR_STRING_ATTRS
 	char *const restrict until_ptr = buffer
 				       + pointer_id_length((uintptr_t) pointer);
 
@@ -562,7 +390,7 @@ put_pointer_id(char *restrict buffer,
 
 		++id_ptr;
 	}
-#endif /* ifdef POINTER_ID_LENGTH_MAX */
+#endif /* if HAVE_PTR_STRING_ATTRS */
 }
 
 inline char *
@@ -572,7 +400,7 @@ put_pointer_id_length(char *restrict buffer,
 {
 	if (length == 0lu)
 		return buffer;
-#ifdef POINTER_ID_LENGTH_MAX
+#if HAVE_PTR_STRING_ATTRS
 
 	uintptr_t ptr_n = (uintptr_t) pointer;
 
@@ -617,7 +445,7 @@ put_pointer_id_length(char *restrict buffer,
 
 		++id_ptr;
 	}
-#endif /* ifdef POINTER_ID_LENGTH_MAX */
+#endif /* if HAVE_PTR_STRING_ATTRS */
 }
 
 inline char *
@@ -879,6 +707,23 @@ put_char_times_until(char *restrict buffer,
 				     until_ptr - buffer);
 }
 
+inline int
+string_compare(const char *restrict string1,
+	       const char *restrict string2)
+{
+	int comparison;
+
+	while (1) {
+		comparison = (*string1) - (*string2);
+
+		if ((*string1 == '\0') || (comparison != 0))
+			return comparison;
+
+		++string1;
+		++string2;
+	}
+}
+
 inline bool
 strings_equal(const char *restrict string1,
 	      const char *restrict string2)
@@ -911,7 +756,7 @@ string_length_limit(const char *const restrict string,
 		    ssize_t limit)
 {
 	for (const char *restrict ptr = string; limit > 0l; ++ptr, --limit)
-		if ((*ptr) == '\0')
+		if (*ptr == '\0')
 			return ptr - string;
 
 	return limit;
@@ -934,7 +779,7 @@ string_size_limit(const char *const restrict string,
 		if (limit == 0lu)
 			return 0lu;
 
-		if ((*ptr) == '\0')
+		if (*ptr == '\0')
 			return ptr - string + 1lu;
 
 		++ptr;
@@ -942,8 +787,54 @@ string_size_limit(const char *const restrict string,
 	}
 }
 
-extern inline bool
+inline bool
 parse_uint(uintmax_t *const restrict n,
-	   char *restrict string);
+	   const char *restrict string)
+{
+#if HAVE_INT_STRING_ATTRS
+	while (*string == '0') {
+		++string;
+
+		if (*string == '\0') {
+			*n = 0llu;
+			return true;
+		}
+	}
+
+
+	if (   (*string == '\0')
+	    || (*string  > '9' )
+	    || (*string  < '0' ))
+		return false;
+
+	const char *const restrict start_ptr = string;
+
+	unsigned int count_digits = 1u;
+
+	while (1) {
+		++string;
+
+		if (*string == '\0')
+			break;
+
+		if (   (*string > '9')
+		    || (*string < '0'))
+			return false;
+
+		++count_digits;
+
+		if (count_digits)
+	}
+
+
+#else
+	*n = stroumax(string,
+		      NULL,
+		      10);
+
+	return (*n != 0llu)
+	    || (errno != 0);
+#endif /* if HAVE_INT_STRING_ATTRS  */
+}
 
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */
