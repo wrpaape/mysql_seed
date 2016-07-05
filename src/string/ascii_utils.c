@@ -31,8 +31,15 @@ const ascii_t ASCII_LOWER_MAP[ASCII_CNT]  = _ASCII_LOWER_MAP();
 const ascii_t ASCII_UPPER_MAP[ASCII_CNT]  = _ASCII_UPPER_MAP();
 const ascii_t ASCII_TOGGLE_MAP[ASCII_CNT] = _ASCII_TOGGLE_MAP();
 
+extern inline bool
+is_ascii(const char byte);
+extern inline bool
+is_printable_ascii(const char byte);
 
-extern inline bool is_ascii_string(const char *restrict bytes);
+extern inline bool
+is_ascii_string(const char *restrict bytes);
+extern inline bool
+is_printable_ascii_string(const char *restrict bytes);
 
 /* character map case (ignores non-letters) */
 extern inline ascii_t

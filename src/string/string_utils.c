@@ -156,3 +156,7 @@ string_size_limit(const char *const restrict string,
 extern inline bool
 parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string);
+
+extern inline bool
+parse_int(uintmax_t *const restrict n,
+	  const char *restrict string);

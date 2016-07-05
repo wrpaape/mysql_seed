@@ -83,10 +83,10 @@ void test_put_string(void)
 }
 
 
-#ifdef UINT_DIGIT_COUNT_MAX
+#if HAVE_INT_STRING_ATTRS
 void test_ten_pow_map(void)
 {
-	for (unsigned int i = 0u; i < UINT_DIGIT_COUNT_MAX; ++i)
+	for (unsigned int i = 0u; i < DIGIT_COUNT_UINTMAX_MAX; ++i)
 		TEST_ASSERT_EQUAL_UINT((uintmax_t) pow(10.0,
 						       (double) i),
 				       ten_pow_map[i]);
@@ -94,11 +94,11 @@ void test_ten_pow_map(void)
 
 void test_uint_digit_count(void)
 {
-	for (unsigned int i = 0u; i < UINT_DIGIT_COUNT_MAX; ++i)
+	for (unsigned int i = 0u; i < DIGIT_COUNT_UINTMAX_MAX; ++i)
 		TEST_ASSERT_EQUAL_UINT(i + 1u,
 				       uint_digit_count(ten_pow_map[i]));
 }
-#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
+#endif	/* if HAVE_INT_STRING_ATTRS */
 
 void test_put_int(void)
 {
@@ -153,5 +153,34 @@ void test_put_pointer_id(void)
 
 	*ptr = '\0';
 
-	puts(&buffer[0]);
+	TEST_ASSERT_TRUE(is_printable_ascii_string(&buffer[0]));
+
+
+}
+
+void test_parse_uint(void)
+{
+	uintmax_t n;
+
+	TEST_ASSERT_FALSE(parse_uint(&n, ""));
+
+	TEST_ASSERT_FALSE(parse_uint(&n, "12oogabooga34"));
+
+	TEST_ASSERT_TRUE(parse_uint(&n, "12345"));
+
+	TEST_ASSERT_EQUAL_UINT(12345llu, n);
+
+	TEST_ASSERT_TRUE(parse_uint(&n, "00012"));
+
+	TEST_ASSERT_EQUAL_UINT(12llu, n);
+
+#if HAVE_INT_STRING_ATTRS
+
+	TEST_ASSERT_TRUE(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX));
+
+	TEST_ASSERT_EQUAL_UINT(UINTMAX_MAX, n);
+
+	TEST_ASSERT_FALSE(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX "1"));
+
+#endif /* if HAVE_INT_STRING_ATTRS */
 }

@@ -138,7 +138,7 @@ do_put_uint(char *restrict buffer,
 {
 	while (1)
 	{
-		*buffer = (char) ASCII_DIGIT(n % 10llu);
+		*buffer = (char) DIGIT_TO_ASCII(n % 10llu);
 		n /= 10llu;
 
 		if (n == 0llu)
@@ -796,40 +796,67 @@ parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string)
 {
 #if HAVE_INT_STRING_ATTRS
+	while (*string == '0') {
+		++string;
+
+		if (*string == '\0') {
+			*n = 0llu;
+			return true;
+		}
+	}
+
+	if ((*string == '\0') || (*string > '9' ) || (*string < '0' ))
+		return false;
+
+	const char *const restrict start_ptr = string;
+
+	unsigned int count_digits = 1u;
+
+	while (1) {
+		++string;
+
+		if (*string == '\0')
+			break;
+
+		if ((*string > '9') || (*string < '0'))
+			return false;
+
+		++count_digits;
+
+		if (count_digits == DIGIT_COUNT_UINTMAX_MAX) {
+
+			if (string_compare(start_ptr,
+					   DIGIT_STRING_UINTMAX_MAX) > 0)
+				return false;
+
+			++string;
+
+			if (*string != '\0')
+				return false;
+
+			break;
+		}
+	}
+
+	--string;
+
+	*n = (uintmax_t) ASCII_TO_DIGIT(*string);
+
+	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
+
+	const uintptr_t *const restrict until_ptr = &ten_pow_map[count_digits];
+
+
+	while (pow_ptr < until_ptr) {
+
+		--string;
+
+		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*pow_ptr));
+
+		++pow_ptr;
+	}
+
 	return true;
-	/* while (*string == '0') { */
-	/* 	++string; */
-
-	/* 	if (*string == '\0') { */
-	/* 		*n = 0llu; */
-	/* 		return true; */
-	/* 	} */
-	/* } */
-
-
-	/* if (   (*string == '\0') */
-	/*     || (*string  > '9' ) */
-	/*     || (*string  < '0' )) */
-	/* 	return false; */
-
-	/* const char *const restrict start_ptr = string; */
-
-	/* unsigned int count_digits = 1u; */
-
-	/* while (1) { */
-	/* 	++string; */
-
-	/* 	if (*string == '\0') */
-	/* 		break; */
-
-	/* 	if (   (*string > '9') */
-	/* 	    || (*string < '0')) */
-	/* 		return false; */
-
-	/* 	++count_digits; */
-
-	/* 	if (count_digits) */
-	/* } */
 
 
 #else
@@ -840,6 +867,13 @@ parse_uint(uintmax_t *const restrict n,
 	return (*n != 0llu)
 	    || (errno != 0);
 #endif /* if HAVE_INT_STRING_ATTRS  */
+}
+
+inline bool
+parse_int(uintmax_t *const restrict n,
+	  const char *restrict string)
+{
+	return true;
 }
 
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */

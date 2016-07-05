@@ -34,6 +34,7 @@ extern void test_ten_pow_map(void);
 extern void test_uint_digit_count(void);
 extern void test_put_int(void);
 extern void test_put_pointer_id(void);
+extern void test_parse_uint(void);
 
 
 //=======Test Reset Option=====
@@ -55,6 +56,7 @@ int main(void)
   RUN_TEST(test_uint_digit_count, 95);
   RUN_TEST(test_put_int, 103);
   RUN_TEST(test_put_pointer_id, 147);
+  RUN_TEST(test_parse_uint, 161);
 
   return (UnityEnd());
 }

@@ -201,7 +201,10 @@ _ASCII_SYMBOL_BLOCK_D
 /* ASCII code macros
  * ========================================================================== */
 /* 0..9 → '0'..'9' */
-#define ASCII_DIGIT(DIGIT)	(((unsigned int) (DIGIT)) | 48u)
+#define DIGIT_TO_ASCII(DIGIT)	(((unsigned int) (DIGIT)) | 48u)
+
+/* '0'..'9' → 0..9 */
+#define ASCII_TO_DIGIT(ASCII)	(((unsigned int) (ASCII)) & 15u)
 
 /* 'a' → 'A', 'A' → 'A' */
 #define ASCII_UPPERCASE(CHAR)	(((unsigned int) (CHAR))  & 95u)
@@ -255,9 +258,15 @@ extern const ascii_t ASCII_TOGGLE_MAP[ASCII_CNT];
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 inline bool
-is_ascii(char byte)
+is_ascii(const char byte)
 {
 	return (byte & 0x80) == 0x00;
+}
+
+inline bool
+is_printable_ascii(const char byte)
+{
+	return (byte >= 0x20) && (byte <= 0x7E);
 }
 
 /* character map case (ignores non-letters) */
@@ -298,6 +307,15 @@ is_ascii_string(const char *restrict string)
 		else
 			return false;
 	}
+}
+
+inline bool
+is_printable_ascii_string(const char *restrict bytes)
+{
+	while (is_printable_ascii(*bytes))
+		++bytes;
+
+	return *bytes == '\0';
 }
 
 
