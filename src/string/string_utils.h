@@ -6,38 +6,38 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stddef.h>			/* size_t */
 #include <unistd.h>			/* ssize_t */
-#include <stdint.h>			/* SIZE_MAX, UINT16/32/64_MAX */
+#include <stdint.h>			/* u/intmax_t, UINT16/32/64_MAX */
 #include <stdbool.h>			/* bool */
 #include "utils/word_utils.h"		/* WORD_SIZE */
 #include "string/ascii_utils.h"		/* ascii helper macros, groups, sets */
 #include "string/string_macros.h"	/* string helper macros */
 
-#if   (SIZE_MAX == UINT64_MAX)
-#	define DIGIT_COUNT_MAX 20u
-#elif (SIZE_MAX == UINT32_MAX)
-#	define DIGIT_COUNT_MAX 10u
-#elif (SIZE_MAX == UINT16_MAX)
-#	define DIGIT_COUNT_MAX 5u
+#if   (UINTMAX_MAX == UINT64_MAX)
+#	define UINT_DIGIT_COUNT_MAX 20u
+#elif (UINTMAX_MAX == UINT32_MAX)
+#	define UINT_DIGIT_COUNT_MAX 10u
+#elif (UINTMAX_MAX == UINT16_MAX)
+#	define UINT_DIGIT_COUNT_MAX 5u
 #else
 #	include <stdio.h>	/* sprintf, snprintf */
-#	undef DIGIT_COUNT_MAX
-#endif	/* if (SIZE_MAX == UINT64_MAX) */
+#	undef UINT_DIGIT_COUNT_MAX
+#endif	/* if (UINTMAX_MAX == UINT64_MAX) */
 
 
 #if   (UINTPTR_MAX == UINT64_MAX)
-#	define DIGIT_COUNT_POINTER_MAX 20u
+#	define POINTER_DIGIT_COUNT_MAX 20u
 #	define POINTER_ID_LENGTH_MAX   10u
 #elif (UINTPTR_MAX == UINT32_MAX)
-#	define DIGIT_COUNT_POINTER_MAX 10u
+#	define POINTER_DIGIT_COUNT_MAX 10u
 #	define POINTER_ID_LENGTH_MAX   5u
 #elif (UINTPTR_MAX == UINT16_MAX)
-#	define DIGIT_COUNT_POINTER_MAX 5u
+#	define POINTER_DIGIT_COUNT_MAX 5u
 #	define POINTER_ID_LENGTH_MAX   3u
 #elif (UINTPTR_MAX == UINT8_MAX)
-#	define DIGIT_COUNT_POINTER_MAX 3u
+#	define POINTER_DIGIT_COUNT_MAX 3u
 #	define POINTER_ID_LENGTH_MAX   2u
 #else
-#	undef  DIGIT_COUNT_POINTER_MAX
+#	undef  POINTER_DIGIT_COUNT_MAX
 #	undef  POINTER_ID_LENGTH_MAX
 #endif	/* if (UINTPTR_MAX == UINT64_MAX) */
 
@@ -194,32 +194,32 @@ do {								\
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef DIGIT_COUNT_MAX
-extern const size_t ten_pow_map[DIGIT_COUNT_MAX];
-#endif	/* ifdef (DIGIT_COUNT_MAX) */
+#ifdef UINT_DIGIT_COUNT_MAX
+extern const uintmax_t ten_pow_map[UINT_DIGIT_COUNT_MAX];
+#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
 
 #ifdef POINTER_ID_LENGTH_MAX
-extern const size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX];
+extern const uintptr_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX];
 #endif
 
 
 /* helper functions
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef DIGIT_COUNT_MAX
+#ifdef UINT_DIGIT_COUNT_MAX
 inline unsigned int
-digit_count(size_t n)
+uint_digit_count(uintmax_t n)
 {
-#	if (DIGIT_COUNT_MAX >= 20u)
-	if (n < 10000000000lu) {
-#	endif	/* if (DIGIT_COUNT_MAX >= 20u) */
+#	if (UINT_DIGIT_COUNT_MAX >= 20u)
+	if (n < 10000000000llu) {
+#	endif	/* if (UINT_DIGIT_COUNT_MAX >= 20u) */
 
-#		if (DIGIT_COUNT_MAX >= 10u)
-		if (n < 100000lu) {
-#		endif	/* if (DIGIT_COUNT_MAX >= 10u) */
+#		if (UINT_DIGIT_COUNT_MAX >= 10u)
+		if (n < 100000llu) {
+#		endif	/* if (UINT_DIGIT_COUNT_MAX >= 10u) */
 
-			if (n < 1000lu) {
-				if (n < 100lu) {
-					if (n < 10lu) {
+			if (n < 1000llu) {
+				if (n < 100llu) {
+					if (n < 10llu) {
 						return  1u;
 					} else {
 						return  2u;
@@ -228,18 +228,18 @@ digit_count(size_t n)
 					return  3u;
 				}
 			} else {
-				if (n < 10000lu) {
+				if (n < 10000llu) {
 					return  4u;
 				} else {
 					return  5u;
 				}
 			}
 
-#		if (DIGIT_COUNT_MAX >= 10u)
+#		if (UINT_DIGIT_COUNT_MAX >= 10u)
 		} else {
-			if (n < 100000000lu) {
-				if (n < 10000000lu) {
-					if (n < 1000000lu) {
+			if (n < 100000000llu) {
+				if (n < 10000000llu) {
+					if (n < 1000000llu) {
 						return  6u;
 					} else {
 						return  7u;
@@ -248,29 +248,29 @@ digit_count(size_t n)
 					return  8u;
 				}
 			} else {
-				if (n < 1000000000lu)	{
+				if (n < 1000000000llu)	{
 					return  9u;
 				} else {
 					return 10u;
 				}
 			}
 		}
-#		endif	/* if (DIGIT_COUNT_MAX >= 10u) */
+#		endif	/* if (UINT_DIGIT_COUNT_MAX >= 10u) */
 
-#	if (DIGIT_COUNT_MAX >= 20u)
+#	if (UINT_DIGIT_COUNT_MAX >= 20u)
 	} else {
-		if (n < 1000000000000000lu) {
-			if (n < 1000000000000lu) {
-				if (n < 100000000000lu) {
+		if (n < 1000000000000000llu) {
+			if (n < 1000000000000llu) {
+				if (n < 100000000000llu) {
 					return 11u;
 				} else {
 					return 12u;
 				}
 			} else {
-				if (n < 10000000000000lu) {
-					return 13lu;
+				if (n < 10000000000000llu) {
+					return 13llu;
 				} else {
-					if (n < 100000000000000lu) {
+					if (n < 100000000000000llu) {
 						return 14u;
 					} else {
 						return 15u;
@@ -278,17 +278,17 @@ digit_count(size_t n)
 				}
 			}
 		} else {
-			if (n < 100000000000000000lu) {
-				if (n < 10000000000000000lu) {
+			if (n < 100000000000000000llu) {
+				if (n < 10000000000000000llu) {
 					return 16u;
 				} else {
 					return 17u;
 				}
 			} else {
-				if (n < 1000000000000000000lu) {
-					return 18lu;
+				if (n < 1000000000000000000llu) {
+					return 18llu;
 				} else {
-					if (n < 10000000000000000000lu) {
+					if (n < 10000000000000000000llu) {
 						return 19u;
 					} else {
 						return 20u;
@@ -298,24 +298,24 @@ digit_count(size_t n)
 		}
 	}
 }
-#	endif	/* if (DIGIT_COUNT_MAX >= 20u) */
+#	endif	/* if (UINT_DIGIT_COUNT_MAX >= 20u) */
 
 inline void
-do_put_digits(char *restrict buffer,
-	      size_t n)
+do_put_uint(char *restrict buffer,
+	    uintmax_t n)
 {
 	while (1)
 	{
-		*buffer = (char) ASCII_DIGIT(n % 10lu);
-		n /= 10lu;
+		*buffer = (char) ASCII_DIGIT(n % 10llu);
+		n /= 10llu;
 
-		if (n == 0lu)
+		if (n == 0llu)
 			return;
 
 		--buffer;
 	}
 }
-#endif	/* ifdef (DIGIT_COUNT_MAX) */
+#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
 
 
 
@@ -420,34 +420,34 @@ do_put_pointer_id(char *restrict buffer,
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline char *
-put_digits(char *restrict buffer,
-	   size_t n)
+put_uint(char *restrict buffer,
+	 uintmax_t n)
 {
-#ifdef DIGIT_COUNT_MAX
-	char *const restrict until_ptr = buffer + digit_count(n);
+#ifdef UINT_DIGIT_COUNT_MAX
+	char *const restrict until_ptr = buffer + uint_digit_count(n);
 
-	do_put_digits(until_ptr - 1l,
-		      n);
+	do_put_uint(until_ptr - 1l,
+		    n);
 
 	return until_ptr;
 #else
 	return buffer + sprintf(buffer,
 				"%zu",
 				n);
-#endif /* ifdef(DIGIT_COUNT_MAX) */
+#endif /* ifdef(UINT_DIGIT_COUNT_MAX) */
 }
 
 
 inline char *
-put_digits_length(char *restrict buffer,
-		  size_t n,
-		  const size_t length)
+put_uint_length(char *restrict buffer,
+		uintmax_t n,
+		const size_t length)
 {
-#ifdef DIGIT_COUNT_MAX
+#ifdef UINT_DIGIT_COUNT_MAX
 	if (length == 0lu)
 		return buffer;
 
-	const unsigned int count_digits = digit_count(n);
+	const unsigned int count_digits = uint_digit_count(n);
 
 	char *restrict until_ptr;
 
@@ -461,8 +461,8 @@ put_digits_length(char *restrict buffer,
 		until_ptr = buffer + count_digits;
 	}
 
-	do_put_digits(until_ptr - 1l,
-		      n);
+	do_put_uint(until_ptr - 1l,
+		    n);
 
 	return until_ptr;
 #else
@@ -474,38 +474,38 @@ put_digits_length(char *restrict buffer,
 	return buffer + ((count_digits > length)
 			 ? length
 			 : count_digits);
-#endif /* ifdef (DIGIT_COUNT_MAX) */
+#endif /* ifdef (UINT_DIGIT_COUNT_MAX) */
 }
 
 inline char *
-put_digits_until(char *restrict buffer,
-		 const size_t n,
-		 char *const restrict until_ptr)
+put_uint_until(char *restrict buffer,
+	       const uintmax_t n,
+	       char *const restrict until_ptr)
 {
 	return (buffer > until_ptr)
 	     ? until_ptr
-	     : put_digits_length(buffer,
-				 n,
-				 until_ptr - buffer);
+	     : put_uint_length(buffer,
+			       n,
+			       until_ptr - buffer);
 }
 
 inline char *
-put_number(char *restrict buffer,
-	   ssize_t n)
+put_int(char *restrict buffer,
+	intmax_t n)
 {
 	if (n < 0l) {
 		PUT_CHAR(buffer, '-');
 		n = -n;
 	}
 
-	return put_digits(buffer,
-			  n);
+	return put_uint(buffer,
+			n);
 }
 
 inline char *
-put_number_length(char *restrict buffer,
-		  ssize_t n,
-		  unsigned int length)
+put_int_length(char *restrict buffer,
+	       intmax_t n,
+	       unsigned int length)
 {
 	if (length == 0u)
 		return buffer;
@@ -516,21 +516,21 @@ put_number_length(char *restrict buffer,
 		n = -n;
 	}
 
-	return put_digits_length(buffer,
-				 n,
-				 length);
+	return put_uint_length(buffer,
+			       n,
+			       length);
 }
 
 inline char *
-put_number_until(char *restrict buffer,
-		 const ssize_t n,
-		 char *const restrict until_ptr)
+put_int_until(char *restrict buffer,
+	      const intmax_t n,
+	      char *const restrict until_ptr)
 {
 	return (buffer > until_ptr)
 	     ? until_ptr
-	     : put_number_length(buffer,
-				 n,
-				 until_ptr - buffer);
+	     : put_int_length(buffer,
+			      n,
+			      until_ptr - buffer);
 }
 
 inline char *
@@ -910,18 +910,11 @@ inline ssize_t
 string_length_limit(const char *const restrict string,
 		    ssize_t limit)
 {
-	const char *restrict ptr = string;
-
-	while (1) {
-		if (limit < 0l)
-			return limit;
-
+	for (const char *restrict ptr = string; limit > 0l; ++ptr, --limit)
 		if ((*ptr) == '\0')
 			return ptr - string;
 
-		++ptr;
-		--limit;
-	}
+	return limit;
 }
 
 inline size_t
@@ -948,5 +941,9 @@ string_size_limit(const char *const restrict string,
 		--limit;
 	}
 }
+
+extern inline bool
+parse_uint(uintmax_t *const restrict n,
+	   char *restrict string);
 
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */

@@ -46,16 +46,24 @@ void set_string(void *arg)
 	*string = "tastyham";
 }
 
+void divide_by_zero(void *arg)
+{
+	const intptr_t zero = (const intptr_t) arg;
+
+	printf("2 / %zd = %zd\n", zero, 2 / zero);
+}
+
 void test_thread_pool(void)
 {
 	int one_two_three;
 	double qtpi;
 	const char *restrict tastyham;
 
-	const struct ProcedureClosure tasks[3] = {
-		{ .fun = &set_integer, .arg = (void *) &one_two_three },
-		{ .fun = &set_double,  .arg = (void *) &qtpi },
-		{ .fun = &set_string,  .arg = (void *) &tastyham }
+	const struct ProcedureClosure tasks[4] = {
+		{ .fun = &set_integer,	   .arg = (void *) &one_two_three },
+		{ .fun = &set_double,	   .arg = (void *) &qtpi },
+		{ .fun = &set_string,	   .arg = (void *) &tastyham },
+		{ .fun = &divide_by_zero,  .arg = (void *) 0 },
 	};
 
 	struct HandlerClosure fail_cl = {
@@ -66,7 +74,7 @@ void test_thread_pool(void)
 	struct ThreadPool *const restrict pool = thread_pool_create(&tasks[0],
 								    3lu,
 								    0lu,
-								    2lu,
+								    3lu,
 								    &fail_cl);
 
 	fail_cl.arg = "first test - start up";

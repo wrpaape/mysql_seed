@@ -835,7 +835,7 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # 			   	   $(GEN_GEN_STRINGS_OBJ)		\
 # 			   	   $(THREAD_THREAD_LOG_OBJ)				\
 # 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   $(EXIT_OBJ)				\
+# 			   	   $(HELP_OBJ)				\
 # 			   	   $(TIME_TIME_UTILS_OBJ)		\
 # 			   	   $(STRING_STRING_UTILS_OBJ)				\
 # 			   	   $(UNITY_OBJ)
@@ -876,7 +876,7 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # 			   	   $(GEN_GEN_STRINGS_OBJ)		\
 # 			   	   $(THREAD_THREAD_LOG_OBJ)				\
 # 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   $(EXIT_OBJ)				\
+# 			   	   $(HELP_OBJ)				\
 # 			   	   $(TIME_TIME_UTILS_OBJ)		\
 # 			   	   $(STRING_STRING_UTILS_OBJ)				\
 # 			   	   $(RANDOM_RANDOM_OBJ)			\
@@ -921,7 +921,7 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # 			   	   	   $(GEN_GEN_STRINGS_OBJ)		\
 # 			   	   	   $(THREAD_THREAD_LOG_OBJ)				\
 # 			   	   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   	   $(EXIT_OBJ)				\
+# 			   	   	   $(HELP_OBJ)				\
 # 			   	   	   $(TIME_TIME_UTILS_OBJ)		\
 # 			   	   	   $(STRING_STRING_UTILS_OBJ)				\
 # 			           	   $(UNITY_OBJ)
@@ -1006,40 +1006,40 @@ TARGETS			+= $(RUN_OBJ)					\
 			   $(RUN_TEST_BIN)
 
 
-# mysql_seed_exit
+# mysql_seed_help
 # ──────────────────────────────────────────────────────────────────────────────
-EXIT_SRC 		:= $(call PROJECT_SOURCE_PATH,exit)
-EXIT_HDR		:= $(call PROJECT_HEADER_PATH,exit)
-EXIT_OBJ 		:= $(call PROJECT_OBJECT_PATH,exit)
-EXIT_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,exit)
-EXIT_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,exit)
-EXIT_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,exit)
-EXIT_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,exit)
-EXIT_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,exit)
+HELP_SRC 		:= $(call PROJECT_SOURCE_PATH,help)
+HELP_HDR		:= $(call PROJECT_HEADER_PATH,help)
+HELP_OBJ 		:= $(call PROJECT_OBJECT_PATH,help)
+HELP_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,help)
+HELP_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,help)
+HELP_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,help)
+HELP_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,help)
+HELP_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,help)
 # ─────────────── target prequisites ───────────────────────────────────────────
-EXIT_OBJ_PREQS		:= $(EXIT_SRC) 					\
-			   $(EXIT_HDR) 					\
+HELP_OBJ_PREQS		:= $(HELP_SRC) 					\
+			   $(HELP_HDR) 					\
 			   $(MODE_HDR) 					\
 			   $(STRING_STRING_MACROS_HDR)
-EXIT_OBJ_GROUP		:= $(EXIT_OBJ)
-EXIT_TRNR_SRC_PREQS	:= $(EXIT_TEST_SRC)				\
+HELP_OBJ_GROUP		:= $(HELP_OBJ)
+HELP_TRNR_SRC_PREQS	:= $(HELP_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
-EXIT_TEST_OBJ_PREQS	:= $(EXIT_TEST_SRC)				\
-			   $(EXIT_OBJ_PREQS) 				\
+HELP_TEST_OBJ_PREQS	:= $(HELP_TEST_SRC)				\
+			   $(HELP_OBJ_PREQS) 				\
 			   $(UNITY_OBJ_PREQS)
-EXIT_TRNR_OBJ_PREQS	:= $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TEST_OBJ_PREQS)
-EXIT_TEST_BIN_PREQS	:= $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_OBJ_GROUP)				\
+HELP_TRNR_OBJ_PREQS	:= $(HELP_TRNR_SRC)				\
+			   $(HELP_TEST_OBJ_PREQS)
+HELP_TEST_BIN_PREQS	:= $(HELP_TRNR_OBJ)				\
+			   $(HELP_TEST_OBJ)				\
+			   $(HELP_OBJ_GROUP)				\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(EXIT_TEST_BIN)
-TARGETS			+= $(EXIT_OBJ)					\
-			   $(EXIT_TRNR_SRC)				\
-			   $(EXIT_TRNR_OBJ)				\
-			   $(EXIT_TEST_OBJ)				\
-			   $(EXIT_TEST_BIN)
+TEST_BINARIES		+= $(HELP_TEST_BIN)
+TARGETS			+= $(HELP_OBJ)					\
+			   $(HELP_TRNR_SRC)				\
+			   $(HELP_TRNR_OBJ)				\
+			   $(HELP_TEST_OBJ)				\
+			   $(HELP_TEST_BIN)
 
 
 
@@ -1058,10 +1058,10 @@ CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
 # 			   $(CLI_HDR)					\
 # 			   $(CREATE_HDR)				\
 # 			   $(RUN_HDR)					\
-# 			   $(EXIT_HDR)
+# 			   $(HELP_HDR)
 # CLI_OBJ_GROUP		:= $(CREATE_OBJ_GROUP)				\
 # 			   $(RUN_OBJ_GROUP)				\
-# 			   $(EXIT_OBJ_GROUP)
+# 			   $(HELP_OBJ_GROUP)
 # CLI_TRNR_SRC_PREQS	:= $(CLI_TEST_SRC)				\
 # 			   $(TEST_RUNNER_SOURCE_DIR)
 # CLI_TEST_OBJ_PREQS	:= $(CLI_TEST_SRC)				\
@@ -1076,7 +1076,7 @@ CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
 # 			   $(RUN_OBJ)					\
 # 			   $(THREAD_THREAD_LOG_OBJ)					\
 # 			   $(THREAD_THREAD_UTILS_OBJ)				\
-# 			   $(EXIT_OBJ)					\
+# 			   $(HELP_OBJ)					\
 # 			   $(TIME_TIME_UTILS_OBJ)			\
 # 			   $(STRING_STRING_UTILS_OBJ)					\
 # 			   $(UNITY_OBJ)
@@ -1100,13 +1100,13 @@ CLI_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,cli)
 # PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 # 			   $(CREATE_OBJ_GROUP) 				\
 # 			   $(RUN_OBJ_GROUP)				\
-# 			   $(EXIT_OBJ_GROUP)
+# 			   $(HELP_OBJ_GROUP)
 # 			   $(GEN_GEN_COUNT_STRING_OBJ) 			\
 # 			   $(GEN_GEN_NAMES_OBJ) 			\
 # 			   $(GEN_GEN_STRINGS_OBJ) 			\
 # 			   $(THREAD_THREAD_LOG_OBJ) 					\
 # 			   $(THREAD_THREAD_UTILS_OBJ)				\
-# 			   $(EXIT_OBJ) 					\
+# 			   $(HELP_OBJ) 					\
 # 			   $(STRING_STRING_UTILS_OBJ)					\
 # 			   $(RANDOM_RANDOM_OBJ)				\
 # 			   $(RANDOM_PCG_BASIC_OBJ)			\
@@ -1176,9 +1176,9 @@ $(CREATE_OBJ): $(CREATE_OBJ_PREQS)
 $(RUN_OBJ): $(RUN_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make mysql_seed_exit object
+# make mysql_seed_help object
 # ──────────────────────────────────────────────────────────────────────────────
-$(EXIT_OBJ): $(EXIT_OBJ_PREQS)
+$(HELP_OBJ): $(HELP_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make thread/thread_pool object
@@ -1346,23 +1346,23 @@ $(RUN_TRNR_SRC): $(RUN_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for mysql_seed_exit
+# for mysql_seed_help
 # make:
-# 	mysql_seed_exit_test		binary,
-# 	mysql_seed_exit_test_runner 	object,
-# 	mysql_seed_exit_test		object, and
-# 	mysql_seed_exit_test_runner	source
+# 	mysql_seed_help_test		binary,
+# 	mysql_seed_help_test_runner 	object,
+# 	mysql_seed_help_test		object, and
+# 	mysql_seed_help_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(EXIT_TEST_BIN): $(EXIT_TEST_BIN_PREQS)
+$(HELP_TEST_BIN): $(HELP_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(EXIT_TRNR_OBJ): $(EXIT_TRNR_OBJ_PREQS)
+$(HELP_TRNR_OBJ): $(HELP_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(EXIT_TEST_OBJ): $(EXIT_TEST_OBJ_PREQS)
+$(HELP_TEST_OBJ): $(HELP_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(EXIT_TRNR_SRC): $(EXIT_TRNR_SRC_PREQS)
+$(HELP_TRNR_SRC): $(HELP_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

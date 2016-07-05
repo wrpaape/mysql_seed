@@ -3,7 +3,6 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stdio.h> /* FILE */
 
 /* MODE SPECS
  * ══════════════════════════════════════════════════════════════════════════ */
@@ -48,21 +47,11 @@ struct SeedRunSpec {
 };
 
 
-/* seed_exit
- * ────────────────────────────────────────────────────────────────────────── */
-struct SeedExitSpec {
-	int status;
-	FILE *restrict stream;
-	const char *restrict message;
-};
-
-
 /* input for 'SeedModeHandler' dispatch functions
  * ────────────────────────────────────────────────────────────────────────── */
 union SeedModeSpec {
 	struct SeedCreateSpec create;
 	struct SeedRunSpec run;
-	struct SeedExitSpec exit;
 };
 
 

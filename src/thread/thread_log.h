@@ -254,21 +254,21 @@ thread_log_append_string(struct ThreadLog *const restrict log,
 }
 
 inline void
-thread_log_append_digits(struct ThreadLog *const restrict log,
-			 const size_t n)
+thread_log_append_uint(struct ThreadLog *const restrict log,
+		       const uintmax_t n)
 {
-	log->current_ptr = put_digits_until(log->current_ptr,
-						n,
-						log->until_ptr);
+	log->current_ptr = put_uint_until(log->current_ptr,
+					  n,
+					  log->until_ptr);
 }
 
 inline void
-thread_log_append_number(struct ThreadLog *const restrict log,
-			 const ssize_t n)
+thread_log_append_int(struct ThreadLog *const restrict log,
+		      const intmax_t n)
 {
-	log->current_ptr = put_number_until(log->current_ptr,
-					    n,
-					    log->until_ptr);
+	log->current_ptr = put_int_until(log->current_ptr,
+					 n,
+					 log->until_ptr);
 }
 
 inline void
@@ -296,33 +296,33 @@ thread_log_append_string_length(struct ThreadLog *const restrict log,
 }
 
 inline void
-thread_log_append_digits_length(struct ThreadLog *const restrict log,
-				const size_t n,
-				const size_t length)
+thread_log_append_uint_length(struct ThreadLog *const restrict log,
+			      const uintmax_t n,
+			      const size_t length)
 {
 	char *const restrict length_ptr = log->current_ptr
 					+ length;
 
-	log->current_ptr = put_digits_until(log->current_ptr,
-					    n,
-					    (length_ptr > log->until_ptr)
-					    ? log->until_ptr
-					    : length_ptr);
+	log->current_ptr = put_uint_until(log->current_ptr,
+					  n,
+					  (length_ptr > log->until_ptr)
+					  ? log->until_ptr
+					  : length_ptr);
 }
 
 inline void
-thread_log_append_number_length(struct ThreadLog *const restrict log,
-				const ssize_t n,
-				const size_t length)
+thread_log_append_int_length(struct ThreadLog *const restrict log,
+			     const intmax_t n,
+			     const size_t length)
 {
 	char *const restrict length_ptr = log->current_ptr
 					+ length;
 
-	log->current_ptr = put_number_until(log->current_ptr,
-					    n,
-					    (length_ptr > log->until_ptr)
-					    ? log->until_ptr
-					    : length_ptr);
+	log->current_ptr = put_int_until(log->current_ptr,
+					 n,
+					 (length_ptr > log->until_ptr)
+					 ? log->until_ptr
+					 : length_ptr);
 }
 
 inline void

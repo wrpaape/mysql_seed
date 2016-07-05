@@ -83,60 +83,60 @@ void test_put_string(void)
 }
 
 
-#ifdef DIGIT_COUNT_MAX
+#ifdef UINT_DIGIT_COUNT_MAX
 void test_ten_pow_map(void)
 {
-	for (unsigned int i = 0u; i < DIGIT_COUNT_MAX; ++i)
-		TEST_ASSERT_EQUAL_UINT((size_t) pow(10.0,
-						    (double) i),
+	for (unsigned int i = 0u; i < UINT_DIGIT_COUNT_MAX; ++i)
+		TEST_ASSERT_EQUAL_UINT((uintmax_t) pow(10.0,
+						       (double) i),
 				       ten_pow_map[i]);
 }
 
-void test_digit_count(void)
+void test_uint_digit_count(void)
 {
-	for (unsigned int i = 0u; i < DIGIT_COUNT_MAX; ++i)
+	for (unsigned int i = 0u; i < UINT_DIGIT_COUNT_MAX; ++i)
 		TEST_ASSERT_EQUAL_UINT(i + 1u,
-				       digit_count(ten_pow_map[i]));
+				       uint_digit_count(ten_pow_map[i]));
 }
-#endif	/* ifdef (DIGIT_COUNT_MAX) */
+#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
 
-void test_put_number(void)
+void test_put_int(void)
 {
 	char buffer[8];
 	char *ptr;
 
-	ptr = put_number(&buffer[0],
-			 -1234);
+	ptr = put_int(&buffer[0],
+		      -1234);
 	*ptr = '\0';
 
 	TEST_ASSERT_EQUAL_STRING("-1234",
 				 &buffer[0]);
 
-	ptr = put_number(&buffer[0],
-			 0);
+	ptr = put_int(&buffer[0],
+		      0);
 	*ptr = '\0';
 
 	TEST_ASSERT_EQUAL_STRING("0",
 				 &buffer[0]);
 
-	ptr = put_number(&buffer[0],
-			 666);
+	ptr = put_int(&buffer[0],
+		      666);
 	*ptr = '\0';
 
 	TEST_ASSERT_EQUAL_STRING("666",
 				 &buffer[0]);
 
-	ptr = put_number_length(&buffer[0],
-				12345,
-				3);
+	ptr = put_int_length(&buffer[0],
+			     12345,
+			     3);
 	*ptr = '\0';
 
 	TEST_ASSERT_EQUAL_STRING("123",
 				 &buffer[0]);
 
-	ptr = put_number_until(&buffer[0],
-				-1234,
-				&buffer[4]);
+	ptr = put_int_until(&buffer[0],
+			    -1234,
+			    &buffer[4]);
 	*ptr = '\0';
 
 	TEST_ASSERT_EQUAL_STRING("-123",

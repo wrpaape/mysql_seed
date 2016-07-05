@@ -1,4 +1,4 @@
-#include "system/system_utils.h"
+#include "system_utils.h"
 
 extern inline bool
 get_winsize_status(struct winsize *const restrict window,

@@ -1,46 +1,46 @@
 #include "string/string_utils.h"
 
-#ifdef DIGIT_COUNT_MAX
-const size_t ten_pow_map[DIGIT_COUNT_MAX] = {
-	[ 0] = 1lu,
-	[ 1] = 10lu,
-	[ 2] = 100lu,
-	[ 3] = 1000lu,
-	[ 4] = 10000lu
-#	if (DIGIT_COUNT_MAX > 5u)
+#ifdef UINT_DIGIT_COUNT_MAX
+const uintmax_t ten_pow_map[UINT_DIGIT_COUNT_MAX] = {
+	[ 0] = 1llu,
+	[ 1] = 10llu,
+	[ 2] = 100llu,
+	[ 3] = 1000llu,
+	[ 4] = 10000llu
+#	if (UINT_DIGIT_COUNT_MAX > 5u)
 		      ,
-	[ 5] = 100000lu,
-	[ 6] = 1000000lu,
-	[ 7] = 10000000lu,
-	[ 8] = 100000000lu,
-	[ 9] = 1000000000lu
-#		if (DIGIT_COUNT_MAX > 10u)
+	[ 5] = 100000llu,
+	[ 6] = 1000000llu,
+	[ 7] = 10000000llu,
+	[ 8] = 100000000llu,
+	[ 9] = 1000000000llu
+#		if (UINT_DIGIT_COUNT_MAX > 10u)
 			   ,
-	[10] = 10000000000lu,
-	[11] = 100000000000lu,
-	[12] = 1000000000000lu,
-	[13] = 10000000000000lu,
-	[14] = 100000000000000lu,
-	[15] = 1000000000000000lu,
-	[16] = 10000000000000000lu,
-	[17] = 100000000000000000lu,
-	[18] = 1000000000000000000lu,
-	[19] = 10000000000000000000lu
-#		endif /* if (DIGIT_COUNT_MAX > 10u) */
-#	endif /* if (DIGIT_COUNT_MAX > 5u) */
+	[10] = 10000000000llu,
+	[11] = 100000000000llu,
+	[12] = 1000000000000llu,
+	[13] = 10000000000000llu,
+	[14] = 100000000000000llu,
+	[15] = 1000000000000000llu,
+	[16] = 10000000000000000llu,
+	[17] = 100000000000000000llu,
+	[18] = 1000000000000000000llu,
+	[19] = 10000000000000000000llu
+#		endif /* if (UINT_DIGIT_COUNT_MAX > 10u) */
+#	endif /* if (UINT_DIGIT_COUNT_MAX > 5u) */
 };
 
 extern inline unsigned int
-digit_count(size_t n);
+uint_digit_count(uintmax_t n);
 
 extern inline void
-do_put_digits(char *restrict buffer,
-	      size_t n);
-#endif	/* ifdef (DIGIT_COUNT_MAX) */
+do_put_uint(char *restrict buffer,
+	    uintmax_t n);
+#endif	/* ifdef (UINT_DIGIT_COUNT_MAX) */
 
 
 #ifdef POINTER_ID_LENGTH_MAX
-const size_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX] = {
+const uintptr_t ninety_five_pow_map[POINTER_ID_LENGTH_MAX] = {
 	[0] = 1lu,
 	[1] = 95lu
 #	if (POINTER_ID_LENGTH_MAX > 2u)
@@ -73,32 +73,32 @@ do_put_pointer_id(char *restrict buffer,
 		  uintptr_t ptr_n);
 
 extern inline char *
-put_digits(char *restrict buffer,
-	   size_t n);
+put_uint(char *restrict buffer,
+	 uintmax_t n);
 
 extern inline char *
-put_digits_length(char *restrict buffer,
-		  size_t n,
-		  const size_t length);
+put_uint_length(char *restrict buffer,
+		uintmax_t n,
+		const size_t length);
 
 extern inline char *
-put_digits_until(char *restrict buffer,
-		 const size_t n,
-		 char *const restrict until_ptr);
+put_uint_until(char *restrict buffer,
+	       const uintmax_t n,
+	       char *const restrict until_ptr);
 
 extern inline char *
-put_number(char *restrict buffer,
-	   ssize_t n);
+put_int(char *restrict buffer,
+	intmax_t n);
 
 extern inline char *
-put_number_length(char *restrict buffer,
-		  ssize_t n,
-		  unsigned int length);
+put_int_length(char *restrict buffer,
+	       intmax_t n,
+	       unsigned int length);
 
 extern inline char *
-put_number_until(char *restrict buffer,
-		 const ssize_t n,
-		 char *const restrict until_ptr);
+put_int_until(char *restrict buffer,
+	      const intmax_t n,
+	      char *const restrict until_ptr);
 
 extern inline char *
 put_pointer_id(char *restrict buffer,
@@ -145,3 +145,7 @@ string_size(const char *const restrict string);
 extern inline size_t
 string_size_limit(const char *const restrict string,
 		  size_t limit);
+
+extern inline bool
+parse_uint(uintmax_t *const restrict n,
+	   char *restrict string);

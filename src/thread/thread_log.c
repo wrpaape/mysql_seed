@@ -94,11 +94,11 @@ extern inline void
 thread_log_append_string(struct ThreadLog *const restrict log,
 			 const char *const restrict string);
 extern inline void
-thread_log_append_digits(struct ThreadLog *const restrict log,
-			 const size_t n);
+thread_log_append_uint(struct ThreadLog *const restrict log,
+		       const uintmax_t n);
 extern inline void
-thread_log_append_number(struct ThreadLog *const restrict log,
-			 const ssize_t n);
+thread_log_append_int(struct ThreadLog *const restrict log,
+		      const intmax_t n);
 extern inline void
 thread_log_append_pointer_id(struct ThreadLog *const restrict log,
 			     void *const restrict pointer);
@@ -107,13 +107,13 @@ thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length);
 extern inline void
-thread_log_append_digits_length(struct ThreadLog *const restrict log,
-				const size_t n,
-				const size_t length);
+thread_log_append_uint_length(struct ThreadLog *const restrict log,
+			      const uintmax_t n,
+			      const size_t length);
 extern inline void
-thread_log_append_number_length(struct ThreadLog *const restrict log,
-				const ssize_t n,
-				const size_t length);
+thread_log_append_int_length(struct ThreadLog *const restrict log,
+			     const intmax_t n,
+			     const size_t length);
 extern inline void
 thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
 				    void *const restrict pointer,

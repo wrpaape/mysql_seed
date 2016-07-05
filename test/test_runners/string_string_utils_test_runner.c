@@ -31,8 +31,8 @@ extern void tearDown(void);
 extern void test_string_length(void);
 extern void test_put_string(void);
 extern void test_ten_pow_map(void);
-extern void test_digit_count(void);
-extern void test_put_number(void);
+extern void test_uint_digit_count(void);
+extern void test_put_int(void);
 extern void test_put_pointer_id(void);
 
 
@@ -52,8 +52,8 @@ int main(void)
   RUN_TEST(test_string_length, 13);
   RUN_TEST(test_put_string, 27);
   RUN_TEST(test_ten_pow_map, 87);
-  RUN_TEST(test_digit_count, 95);
-  RUN_TEST(test_put_number, 103);
+  RUN_TEST(test_uint_digit_count, 95);
+  RUN_TEST(test_put_int, 103);
   RUN_TEST(test_put_pointer_id, 147);
 
   return (UnityEnd());
