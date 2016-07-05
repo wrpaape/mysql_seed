@@ -193,6 +193,10 @@ extern inline void
 thread_pool_await(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
+thread_pool_push_task(struct ThreadPool *restrict pool,
+		      const struct ProcedureClosure *const restrict task_cl,
+		      const struct HandlerClosure *const restrict fail_cl);
+extern inline void
 thread_pool_clear_completed(struct ThreadPool *restrict pool,
 			    const struct HandlerClosure *const restrict fail_cl);
 extern inline void

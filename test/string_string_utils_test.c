@@ -184,3 +184,77 @@ void test_parse_uint(void)
 
 #endif /* if HAVE_INT_STRING_ATTRS */
 }
+
+
+void test_parse_int(void)
+{
+	intmax_t n;
+
+	TEST_ASSERT_FALSE(parse_int(&n, ""));
+
+	TEST_ASSERT_FALSE(parse_int(&n, "12oogabooga34"));
+
+	TEST_ASSERT_TRUE(parse_int(&n, "12345"));
+
+	TEST_ASSERT_EQUAL_INT(12345ll, n);
+
+	TEST_ASSERT_TRUE(parse_int(&n, "-12345"));
+
+	TEST_ASSERT_EQUAL_INT(-12345ll, n);
+
+	TEST_ASSERT_TRUE(parse_int(&n, "-00012"));
+
+	TEST_ASSERT_EQUAL_INT(-12ll, n);
+
+#if HAVE_INT_STRING_ATTRS
+
+	TEST_ASSERT_TRUE(parse_int(&n, DIGIT_STRING_INTMAX_MAX));
+
+	TEST_ASSERT_EQUAL_INT(INTMAX_MAX, n);
+
+	TEST_ASSERT_FALSE(parse_int(&n, DIGIT_STRING_INTMAX_MIN));
+
+	TEST_ASSERT_TRUE(parse_int(&n, "-" DIGIT_STRING_INTMAX_MIN));
+
+	TEST_ASSERT_EQUAL_INT(INTMAX_MIN, n);
+
+#endif /* if HAVE_INT_STRING_ATTRS */
+}
+
+void
+test_parse_uint_stop(void)
+{
+
+	uintmax_t n;
+
+	char buffer[] = "123!:45";
+
+	TEST_ASSERT_NULL(parse_uint_stop(&n, &buffer[0], ':'));
+
+	char *ptr = parse_uint_stop(&n, &buffer[0], '!');
+
+	TEST_ASSERT_NOT_NULL(ptr);
+
+	TEST_ASSERT_EQUAL_UINT(123llu, n);
+
+	TEST_ASSERT_EQUAL_PTR(ptr, &buffer[3]);
+}
+
+void
+test_parse_int_stop(void)
+{
+
+	intmax_t n;
+
+	char buffer[] = "-123!:45";
+
+	TEST_ASSERT_NULL(parse_int_stop(&n, &buffer[0], ':'));
+
+	char *ptr = parse_int_stop(&n, &buffer[0], '!');
+
+	TEST_ASSERT_NOT_NULL(ptr);
+
+	TEST_ASSERT_EQUAL_INT(-123ll, n);
+
+	TEST_ASSERT_EQUAL_PTR(ptr, &buffer[4]);
+}

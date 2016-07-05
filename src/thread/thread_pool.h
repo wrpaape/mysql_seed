@@ -644,6 +644,24 @@ thread_pool_await(struct ThreadPool *restrict pool,
 					   fail_cl);
 }
 
+inline void
+thread_pool_push_task(struct ThreadPool *restrict pool,
+		      const struct ProcedureClosure *const restrict task_cl,
+		      const struct HandlerClosure *const restrict fail_cl)
+{
+	struct ThreadQueueNode *restrict node;
+
+	thread_queue_pop_handle_cl(&pool->task_queues.vacant,
+				   &node,
+				   fail_cl);
+
+	node->payload = (void *) task_cl;
+
+	thread_queue_push_handle_cl(&pool->task_queues.awaiting,
+				    node,
+				    fail_cl);
+}
+
 /* transfer all 'complete' tasks to the 'vacant' task queue, should call after
  * assured that results from all completed tasks have been gathered, processed
  * (perhaps following thread_pool_await) */

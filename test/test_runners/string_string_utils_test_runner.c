@@ -35,6 +35,9 @@ extern void test_uint_digit_count(void);
 extern void test_put_int(void);
 extern void test_put_pointer_id(void);
 extern void test_parse_uint(void);
+extern void test_parse_int(void);
+extern void test_parse_uint_stop(void);
+extern void test_parse_int_stop(void);
 
 
 //=======Test Reset Option=====
@@ -57,6 +60,9 @@ int main(void)
   RUN_TEST(test_put_int, 103);
   RUN_TEST(test_put_pointer_id, 147);
   RUN_TEST(test_parse_uint, 161);
+  RUN_TEST(test_parse_int, 189);
+  RUN_TEST(test_parse_uint_stop, 225);
+  RUN_TEST(test_parse_int_stop, 244);
 
   return (UnityEnd());
 }
