@@ -13,7 +13,6 @@ seed_mode_set_exit_help(struct SeedMode *const restrict mode,
 
 extern inline void
 seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
-
 				  const char *const restrict option);
 
 /* parse stdin args

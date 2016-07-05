@@ -6,7 +6,7 @@
 #include "mysql_seed_create.h"	/* CreateSpec */
 #include "mysql_seed_run.h"	/* RunSpec */
 #include "mysql_seed_exit.h"	/* ExitSpec, seed_exit_spec_set_<X> */
-#include "thread/thread_log.h"	/* thread log */
+#include "thread/thread_log.h"	/* thread log, string_utils */
 
 
 /* cap reads on input strings
@@ -23,8 +23,26 @@ ERROR_HEADER("missing input options\n")
 #define ERROR_INVALID_OPTION					\
 ERROR_HEADER("invalid option: ")
 
+/* helpful macros
+ *─────────────────────────────────────────────────────────────────────────── */
+#define CASE_SHORT_OPT(CHAR, HANDLE_MATCH, HANDLE_NOMATCH)	\
+case CHAR:							\
+	if (opt[2] == '\0') {					\
+		HANDLE_MATCH;					\
+		return;						\
+	}							\
+	HANDLE_NOMATCH
 
-/* #define DEFAULT_USER_COUNT 25000 */
+#define CASE_LONG_OPT(FIRST, REM, HANDLE_MATCH, HANDLE_NOMATCH)	\
+case FIRST:							\
+	if (strings_equal(REM,					\
+			  &opt[3])) {				\
+		HANDLE_MATCH;					\
+		return;						\
+	}							\
+	HANDLE_NOMATCH
+
+
 
 inline void
 seed_mode_set_exit_failure(struct SeedMode *const restrict mode,
@@ -42,35 +60,18 @@ seed_mode_set_exit_invalid_option(struct SeedMode *const restrict mode,
 	seed_mode_set_exit_failure(mode,
 				   seed_log_buffer_ptr());
 
-	seed_log_handle_lock();
 
-	seed_log_append_string(ERROR_INVALID_OPTION);
+	/* seed_log_append_string(ERROR_INVALID_OPTION); */
 
 
-	seed_log_append_string_length(option,
-				      OPTION_MAX_LENGTH);
+	/* seed_log_append_string_length(option, */
+	/* 			      OPTION_MAX_LENGTH); */
 
-	seed_log_append_string("\n\n");
+	/* seed_log_append_string("\n\n"); */
 
-	seed_log_handle_unlock();
+	/* seed_log_handle_unlock(); */
 }
 
-#define CASE_SHORT_OPT(CHAR, HANDLE_MATCH, HANDLE_NOMATCH)	\
-case CHAR:							\
-	if (opt[2] == '\0') {					\
-		HANDLE_MATCH;					\
-		return;						\
-	}							\
-	HANDLE_NOMATCH
-
-#define CASE_LONG_OPT(FIRST, REM, HANDLE_MATCH, HANDLE_NOMATCH)	\
-case FIRST:							\
-	if (strings_equal(REM,					\
-			  &opt[3])) {				\
-		HANDLE_MATCH;					\
-		return;						\
-	}							\
-	HANDLE_NOMATCH
 
 inline void
 seed_mode_set_exit_help(struct SeedMode *const restrict mode,
