@@ -3,8 +3,6 @@
 /* Supervisor operations, ThreadPoolEvents
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-supervisor_oversee_completion(struct ThreadPool *const restrict pool);
-extern inline void
 supervisor_cancel_workers_failure(struct ThreadPool *const restrict pool);
 extern inline void
 supervisor_cancel_workers_success(struct ThreadPool *const restrict pool);
@@ -26,8 +24,8 @@ void
 supervisor_exit_on_failure(void *arg,
 			   const char *restrict failure)
 {
-	struct ThreadPool *const restrict pool =
-	(struct ThreadPool *const restrict) arg;
+	struct ThreadPool *const restrict
+	pool = (struct ThreadPool *const restrict) arg;
 
 	mutex_lock_try_catch_open(&pool->log.lock)
 
@@ -43,11 +41,29 @@ supervisor_exit_on_failure(void *arg,
 	thread_exit_detached();
 	__builtin_unreachable();
 }
+void *
+supervisor_spawn(void *arg)
+{
+	struct Supervisor *const restrict
+	supervisor = (struct Supervisor *const restrict) arg;
+
+	/* push destructor method to be executed on thread exit */
+	thread_key_create_handle_cl(&supervisor->key,
+				    &supervisor_exit_cleanup,
+				    &supervisor->fail_cl);
+
+	/* listen for events */
+	supervisor_process_events(supervisor);
+	__builtin_unreachable();
+}
+extern inline void
+supervisor_start(struct Supervisor *const restrict supervisor,
+		 const struct HandlerClosure *const restrict fail_cl);
 extern inline void
 supervisor_init(struct Supervisor *const restrict supervisor,
 		struct ThreadPool *const restrict pool);
 extern inline void
-supervisor_listen(struct Supervisor *const restrict supervisor);
+supervisor_process_events(struct Supervisor *const restrict supervisor);
 extern inline void
 supervisor_signal_muffle(struct Supervisor *const restrict supervisor,
 			 ThreadPoolEvent *const event);
@@ -102,7 +118,7 @@ worker_init(struct Worker *const restrict worker,
 extern inline void
 worker_process_tasks(struct Worker *const restrict worker);
 void *
-worker_start(void *arg)
+worker_spawn(void *arg)
 {
 	struct Worker *const restrict worker =
 	(struct Worker *const restrict) arg;
@@ -176,6 +192,9 @@ thread_pool_start(struct ThreadPool *restrict pool,
 extern inline void
 thread_pool_await(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
+extern inline void
+thread_pool_clear_completed(struct ThreadPool *restrict pool,
+			    const struct HandlerClosure *const restrict fail_cl);
 extern inline void
 thread_pool_destroy(struct ThreadPool *restrict pool);
 

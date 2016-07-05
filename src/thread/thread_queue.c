@@ -108,3 +108,22 @@ thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue);
 extern inline void
 thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 				   const struct HandlerClosure *const restrict h_cl);
+
+/* clear nodes
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_queue_clear_muffle(struct ThreadQueue *const restrict queue);
+
+extern inline void
+thread_queue_clear_handle_cl(struct ThreadQueue *const restrict queue,
+			     const struct HandlerClosure *const restrict h_cl);
+
+/* transfer all nodes from queue2 to queue1
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_queue_transfer_muffle(struct ThreadQueue *const restrict queue1,
+			     struct ThreadQueue *const restrict queue2);
+extern inline void
+thread_queue_transfer_handle_cl(struct ThreadQueue *const restrict queue1,
+				struct ThreadQueue *const restrict queue2,
+				const struct HandlerClosure *const restrict h_cl);

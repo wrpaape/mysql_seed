@@ -472,4 +472,151 @@ thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 	mutex_lock_try_catch_close();
 }
 
+/* clear nodes
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+thread_queue_clear_muffle(struct ThreadQueue *const restrict queue)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
+
+	/* do nothing if queue is empty */
+	if (queue->head != NULL) {
+
+		queue->head = NULL;
+		queue->last = NULL;
+
+		thread_cond_signal_muffle(&queue->empty);
+	}
+
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+thread_queue_clear_handle_cl(struct ThreadQueue *const restrict queue,
+			     const struct HandlerClosure *const restrict h_cl)
+
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     h_cl);
+
+	/* do nothing if queue is empty */
+	if (queue->head != NULL) {
+
+		queue->head = NULL;
+		queue->last = NULL;
+
+		thread_cond_signal_handle_cl(&queue->empty,
+					     h_cl);
+	}
+
+	mutex_unlock_handle_cl(&queue->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+
+/* transfer all nodes from queue2 to queue1
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+thread_queue_transfer_muffle(struct ThreadQueue *const restrict queue1,
+			     struct ThreadQueue *const restrict queue2)
+{
+	mutex_lock_try_catch_open(&queue1->lock);
+
+	mutex_lock_muffle(&queue1->lock);
+
+	mutex_lock_try_catch_open(&queue2->lock);
+
+	mutex_lock_muffle(&queue2->lock);
+
+	/* do nothing if queue2 is empty */
+	if (queue2->head != NULL) {
+
+		if (queue1->last == NULL) {
+			/* transfer head and last pointers, signal node_ready */
+			queue1->head = queue2->head;
+			queue1->last = queue2->last;
+
+			thread_cond_signal_muffle(&queue1->node_ready);
+
+		} else {
+			/* concat queues */
+			queue2->head->prev = queue1->last;
+			queue1->last->next = queue2->head;
+		}
+
+		/* clear queue2, signal empty */
+		queue2->head = NULL;
+		queue2->last = NULL;
+
+		thread_cond_signal_muffle(&queue2->empty);
+	}
+
+	mutex_unlock_muffle(&queue2->lock);
+
+	mutex_lock_try_catch_close();
+
+	mutex_unlock_muffle(&queue1->lock);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+thread_queue_transfer_handle_cl(struct ThreadQueue *const restrict queue1,
+				struct ThreadQueue *const restrict queue2,
+				const struct HandlerClosure *const restrict h_cl)
+{
+	mutex_lock_try_catch_open(&queue1->lock);
+
+	mutex_lock_handle_cl(&queue1->lock,
+			     h_cl);
+
+	mutex_lock_try_catch_open(&queue2->lock);
+
+	mutex_lock_handle_cl(&queue2->lock,
+			     h_cl);
+
+	/* do nothing if queue2 is empty */
+	if (queue2->head != NULL) {
+
+		if (queue1->last == NULL) {
+			/* transfer head and last pointers, signal node_ready */
+			queue1->head = queue2->head;
+			queue1->last = queue2->last;
+
+			thread_cond_signal_handle_cl(&queue1->node_ready,
+						     h_cl);
+
+		} else {
+			/* concat queues */
+			queue2->head->prev = queue1->last;
+			queue1->last->next = queue2->head;
+		}
+
+		/* clear queue2, signal empty */
+		queue2->head = NULL;
+		queue2->last = NULL;
+
+		thread_cond_signal_handle_cl(&queue2->empty,
+					     h_cl);
+	}
+
+	mutex_unlock_handle_cl(&queue2->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
+
+	mutex_unlock_handle_cl(&queue1->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
+}
+
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_QUEUE_H_ */
