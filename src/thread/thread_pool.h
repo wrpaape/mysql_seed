@@ -44,7 +44,8 @@ struct Supervisor {
 };
 
 struct TaskQueue {
-	struct ThreadQueue awaiting;
+	struct ThreadQueue backlog;
+	struct ThreadQueue active;
 	struct ThreadQueue complete;
 	struct ThreadQueue vacant;
 };

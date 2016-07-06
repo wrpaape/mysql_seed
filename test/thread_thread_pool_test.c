@@ -113,7 +113,7 @@ void test_thread_pool(void)
 
 	struct ThreadPool *const restrict pool = thread_pool_create(NULL,
 								    0lu,
-								    5lu,
+								    6lu,
 								    4lu,
 								    &fail_cl);
 
@@ -130,6 +130,7 @@ void test_thread_pool(void)
 
 	fail_cl.arg = "first test - awaiting first task";
 
+
 	thread_pool_await(pool,
 			  &fail_cl);
 
@@ -145,6 +146,7 @@ void test_thread_pool(void)
 				      &fail_cl);
 
 	} while (task_ptr < last_ptr);
+
 
 	fail_cl.arg = "first test - awaiting remaining tasks";
 

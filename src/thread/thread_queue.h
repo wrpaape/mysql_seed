@@ -416,13 +416,17 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 inline void
 thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue)
 {
+	if (queue->head == NULL)
+		return;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_muffle(&queue->lock);
 
-	while (queue->head != NULL)
+	do {
 		thread_cond_await_muffle(&queue->empty,
 					 &queue->lock);
+	} while (queue->head != NULL);
 
 	mutex_unlock_muffle(&queue->lock);
 
@@ -433,15 +437,19 @@ inline void
 thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 				   const struct HandlerClosure *const restrict h_cl)
 {
+	if (queue->head == NULL)
+		return;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
 
-	while (queue->head != NULL)
+	do {
 		thread_cond_await_handle_cl(&queue->empty,
 					    &queue->lock,
 					    h_cl);
+	} while (queue->head != NULL);
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       h_cl);
