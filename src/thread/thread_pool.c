@@ -137,10 +137,10 @@ worker_spawn(void *arg)
 /* ThreadQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-task_queue_awaiting_init(struct ThreadQueue *const restrict awaiting,
-			 struct ThreadQueueNode *restrict node,
-			 const struct ProcedureClosure *restrict init_task,
-			 const size_t count_init_tasks);
+task_queue_backlog_init(struct ThreadQueue *const restrict backlog,
+			struct ThreadQueueNode *restrict node,
+			const struct ProcedureClosure *restrict init_task,
+			const size_t count_init_tasks);
 extern inline void
 task_queue_vacant_init(struct ThreadQueue *const restrict vacant,
 		       struct ThreadQueueNode *restrict node,
@@ -195,8 +195,8 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 		      const struct ProcedureClosure *const restrict task_cl,
 		      const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_reset_task_queue(struct ThreadPool *restrict pool,
-			     const struct HandlerClosure *const restrict fail_cl);
+thread_pool_clear_completed(struct ThreadPool *restrict pool,
+			    const struct HandlerClosure *const restrict fail_cl);
 extern inline void
 thread_pool_stop(struct ThreadPool *restrict pool,
 		 const struct HandlerClosure *const restrict fail_cl);

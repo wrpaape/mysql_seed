@@ -145,7 +145,7 @@ supervisor_do_exit_failure(struct ThreadPool *const restrict pool)
 
 	/* if there's a thread waiting in thread_pool_await, ensure that it's
 	 * awoken */
-	thread_queue_clear_muffle(&pool->task_queue.awaiting);
+	thread_queue_clear_muffle(&pool->task_queue.backlog);
 }
 
 inline void
@@ -318,20 +318,27 @@ worker_process_tasks(struct Worker *const restrict worker)
 
 	while (1) {
 		printf("thread %p waiting for task\n", worker->thread);
-		/* pop next assigned task, blocking if there are none */
-		thread_queue_pop_handle_cl(&task_queue->awaiting,
-					   &node,
-					   &worker->fail_cl);
-
+		/* pop next assigned task, blocking if there are none,
+		 * then push into active queue */
+		thread_queue_pop_push_handle_cl(&task_queue->backlog,
+						&task_queue->active,
+						&node,
+						&worker->fail_cl);
 
 		/* do task */
-		task_cl = (struct ProcedureClosure *restrict) (node->payload);
+		task_cl = (struct ProcedureClosure *restrict) node->payload;
 
 		printf("thread %p got task: %p\n", worker->thread, task_cl);
 
 		task_cl->fun(task_cl->arg);
 
 		printf("thread %p finished task: %p\n", worker->thread, task_cl);
+
+		thread_queue_remove_handle_cl(&task_queue->active,
+					      node,
+					      &worker->fail_cl);
+
+		printf("thread %p removed task: %p\n", worker->thread, task_cl);
 
 		/* push completed task */
 		thread_queue_push_handle_cl(&task_queue->complete,
@@ -351,27 +358,27 @@ __attribute__((noreturn));
 /* ThreadQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-task_queue_awaiting_init(struct ThreadQueue *const restrict awaiting,
-			 struct ThreadQueueNode *restrict node,
-			 const struct ProcedureClosure *restrict init_task,
-			 const size_t count_init_tasks)
+task_queue_backlog_init(struct ThreadQueue *const restrict backlog,
+			struct ThreadQueueNode *restrict node,
+			const struct ProcedureClosure *restrict init_task,
+			const size_t count_init_tasks)
 {
 	if (count_init_tasks == 0lu) {
-		thread_queue_init_empty(awaiting);
+		thread_queue_init_empty(backlog);
 		return;
 	}
 
-	thread_queue_init(awaiting);
+	thread_queue_init(backlog);
 
 	struct ThreadQueueNode *const restrict last = node
 						    + (count_init_tasks - 1l);
 	struct ThreadQueueNode *restrict next;
 
-	last->next     = NULL;
-	awaiting->last = last;
+	last->next    = NULL;
+	backlog->last = last;
 
-	node->prev     = NULL;
-	awaiting->head = node;
+	node->prev    = NULL;
+	backlog->head = node;
 
 	while (1) {
 		node->payload = (void *) init_task;
@@ -391,8 +398,8 @@ task_queue_awaiting_init(struct ThreadQueue *const restrict awaiting,
 
 inline void
 task_queue_vacant_init(struct ThreadQueue *const restrict vacant,
-			struct ThreadQueueNode *restrict node,
-			const size_t count_vacant_tasks)
+		       struct ThreadQueueNode *restrict node,
+		       const size_t count_vacant_tasks)
 {
 	if (count_vacant_tasks == 0lu) {
 		thread_queue_init_empty(vacant);
@@ -510,10 +517,12 @@ task_queue_init(struct TaskQueue *const restrict task_queue,
 		const size_t length_task_queue,
 		const size_t count_init_tasks)
 {
-	task_queue_awaiting_init(&task_queue->awaiting,
-				 task_nodes,
-				 init_tasks,
-				 count_init_tasks);
+	task_queue_backlog_init(&task_queue->backlog,
+				task_nodes,
+				init_tasks,
+				count_init_tasks);
+
+	thread_queue_init_empty(&task_queue->active);
 
 	thread_queue_init_empty(&task_queue->complete);
 
@@ -646,12 +655,20 @@ thread_pool_await(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl)
 {
 	printf("waiting on tasks to finish\n");
+	fflush(stdout);
 
 	/* wait for tasks to be completed */
-	thread_queue_await_empty_handle_cl(&pool->task_queue.awaiting,
+	thread_queue_await_empty_handle_cl(&pool->task_queue.backlog,
+					   fail_cl);
+
+	puts("backlog empty");
+	fflush(stdout);
+
+	thread_queue_await_empty_handle_cl(&pool->task_queue.active,
 					   fail_cl);
 
 	printf("tasks finished, returning\n");
+	fflush(stdout);
 }
 
 inline void
@@ -667,7 +684,7 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 
 	node->payload = (void *) task_cl;
 
-	thread_queue_push_handle_cl(&pool->task_queue.awaiting,
+	thread_queue_push_handle_cl(&pool->task_queue.backlog,
 				    node,
 				    fail_cl);
 }
@@ -676,12 +693,12 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
  * assured that results from all completed tasks have been gathered, processed
  * (perhaps following thread_pool_await) */
 inline void
-thread_pool_reset_task_queue(struct ThreadPool *restrict pool,
+thread_pool_clear_completed(struct ThreadPool *restrict pool,
 			    const struct HandlerClosure *const restrict fail_cl)
 {
-	thread_queue_transfer_handle_cl(&pool->task_queue.vacant,
-					&pool->task_queue.complete,
-					fail_cl);
+	thread_queue_transfer_all_handle_cl(&pool->task_queue.complete,
+					    &pool->task_queue.vacant,
+					    fail_cl);
 }
 
 inline void

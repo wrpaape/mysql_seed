@@ -66,7 +66,7 @@ thread_queue_unlock_handle(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_queue_peek(struct ThreadQueue *const restrict queue,
-		  struct ThreadQueueNode *restrict *const restrict node);
+		  struct ThreadQueueNode *restrict *const restrict node_ptr);
 
 /* LIFO push
  *─────────────────────────────────────────────────────────────────────────── */
@@ -83,12 +83,23 @@ thread_queue_push_handle_cl(struct ThreadQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_queue_pop_muffle(struct ThreadQueue *const restrict queue,
-			struct ThreadQueueNode *restrict *const restrict node);
+			struct ThreadQueueNode *restrict *const restrict node_ptr);
 extern inline void
 thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
-			   struct ThreadQueueNode *restrict *const restrict node,
+			   struct ThreadQueueNode *restrict *const restrict node_ptr,
 			   const struct HandlerClosure *const restrict h_cl);
 
+/* atomically pop head from queue1, point node at it, then push into queue2
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
+			     struct ThreadQueue *const restrict queue2,
+			     struct ThreadQueueNode *restrict *const restrict node_ptr);
+extern inline void
+thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
+				struct ThreadQueue *const restrict queue2,
+				struct ThreadQueueNode *restrict *const restrict node_ptr,
+				const struct HandlerClosure *const restrict h_cl);
 
 /* random access delete
  *─────────────────────────────────────────────────────────────────────────── */
@@ -118,12 +129,12 @@ extern inline void
 thread_queue_clear_handle_cl(struct ThreadQueue *const restrict queue,
 			     const struct HandlerClosure *const restrict h_cl);
 
-/* transfer all nodes from queue2 to queue1
+/* transfer all nodes from queue1 to queue2
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-thread_queue_transfer_muffle(struct ThreadQueue *const restrict queue1,
-			     struct ThreadQueue *const restrict queue2);
+thread_queue_transfer_all_muffle(struct ThreadQueue *const restrict queue1,
+				 struct ThreadQueue *const restrict queue2);
 extern inline void
-thread_queue_transfer_handle_cl(struct ThreadQueue *const restrict queue1,
-				struct ThreadQueue *const restrict queue2,
-				const struct HandlerClosure *const restrict h_cl);
+thread_queue_transfer_all_handle_cl(struct ThreadQueue *const restrict queue1,
+				    struct ThreadQueue *const restrict queue2,
+				    const struct HandlerClosure *const restrict h_cl);
