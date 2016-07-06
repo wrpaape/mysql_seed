@@ -28,18 +28,13 @@ void set_one_two_three(void *arg)
 {
 	int *const restrict integer = (int *const restrict) arg;
 
-	printf("in set_one_two_three (%p)\n", (void *) thread_self());
-
 	*integer = 123;
-
-	printf("integer = %d\n", *integer);
 }
 
 void set_four_five_six(void *arg)
 {
 	int *const restrict integer = (int *const restrict) arg;
 
-	printf("in set_four_five_six (%p)\n", (void *) thread_self());
 	*integer = 456;
 }
 
@@ -47,15 +42,13 @@ void set_pi(void *arg)
 {
 	double *const restrict dbl = (double *const restrict) arg;
 
-	printf("in set_pi (%p)\n", (void *) thread_self());
-
 	*dbl = 3.141;
 }
+
 void set_three_fifty(void *arg)
 {
 	double *const restrict dbl = (double *const restrict) arg;
 
-	printf("in set_three_fifty (%p)\n", (void *) thread_self());
 	*dbl = 3.50;
 }
 
@@ -64,8 +57,6 @@ void set_ooga_booga(void *arg)
 	const char *restrict *const restrict
 	string = (const char *restrict *const restrict) arg;
 
-	printf("in set_ooga_booga (%p)\n", (void *) thread_self());
-
 	*string = "ooga_booga";
 }
 
@@ -73,8 +64,6 @@ void set_tastyham(void *arg)
 {
 	const char *restrict *const restrict
 	string = (const char *restrict *const restrict) arg;
-
-	printf("in set_tastyham (%p)\n", (void *) thread_self());
 
 	*string = "tastyham";
 }
@@ -111,10 +100,10 @@ void test_thread_pool(void)
 		.arg	= "first test - creation"
 	};
 
-	struct ThreadPool *const restrict pool = thread_pool_create(NULL,
-								    0lu,
-								    6lu,
-								    4lu,
+	struct ThreadPool *const restrict pool = thread_pool_create(task_ptr,
+								    3lu,
+								    5lu,
+								    12lu,
 								    &fail_cl);
 
 	fail_cl.arg = "first test - start up";
@@ -123,6 +112,8 @@ void test_thread_pool(void)
 			  &fail_cl);
 
 	fail_cl.arg = "first test - pushing first task";
+
+	task_ptr += 3lu;
 
 	thread_pool_push_task(pool,
 			      task_ptr,
@@ -135,28 +126,37 @@ void test_thread_pool(void)
 			  &fail_cl);
 
 	TEST_ASSERT_EQUAL_INT(123, one_two_three);
+	TEST_ASSERT_EQUAL_DOUBLE(3.141,	       qtpi);
+	TEST_ASSERT_EQUAL_STRING("ooga_booga", ooga_booga);
+	TEST_ASSERT_EQUAL_INT(456,	       four_five_six);
 
 
 	fail_cl.arg = "first test - pushing remaining tasks";
 
-	do {
-		++task_ptr;
-		thread_pool_push_task(pool,
-				      task_ptr,
-				      &fail_cl);
 
-	} while (task_ptr < last_ptr);
-
-
-	fail_cl.arg = "first test - awaiting remaining tasks";
+	++task_ptr;
+	thread_pool_push_task(pool,
+			      task_ptr,
+			      &fail_cl);
 
 	thread_pool_await(pool,
 			  &fail_cl);
 
-	TEST_ASSERT_EQUAL_DOUBLE(3.141,	       qtpi);
-	TEST_ASSERT_EQUAL_STRING("ooga_booga", ooga_booga);
-	TEST_ASSERT_EQUAL_INT(456,	       four_five_six);
 	TEST_ASSERT_EQUAL_DOUBLE(3.50,         tree_fitty);
+
+	fail_cl.arg = "first test - awaiting remaining tasks";
+
+	thread_pool_clear_completed(pool,
+				    &fail_cl);
+
+	++task_ptr;
+	thread_pool_push_task(pool,
+			      task_ptr,
+			      &fail_cl);
+
+	thread_pool_await(pool,
+			  &fail_cl);
+
 	TEST_ASSERT_EQUAL_STRING("tastyham",   tastyham);
 
 

@@ -414,6 +414,10 @@ thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
 {
 	struct ThreadQueueNode *restrict node;
 
+	mutex_lock_try_catch_open(&queue2->lock);
+
+	mutex_lock_muffle(&queue2->lock);
+
 	mutex_lock_try_catch_open(&queue1->lock);
 
 	mutex_lock_muffle(&queue1->lock);
@@ -436,11 +440,9 @@ thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
 		node->next = NULL;
 	}
 
-	mutex_lock_try_catch_open(&queue2->lock);
-
-	mutex_lock_muffle(&queue2->lock);
-
 	mutex_unlock_muffle(&queue1->lock);
+
+	mutex_lock_try_catch_close();
 
 	node->prev = queue2->last;
 
@@ -457,8 +459,6 @@ thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
 	*node_ptr = node;
 
 	mutex_unlock_muffle(&queue2->lock);
-
-	mutex_lock_try_catch_close();
 
 	mutex_lock_try_catch_close();
 }
@@ -481,7 +481,6 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 					    &queue1->lock,
 					    h_cl);
 
-
 	node = queue1->head;
 
 	queue1->head = node->next;
@@ -501,6 +500,9 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 
 	mutex_lock_handle_cl(&queue2->lock,
 			     h_cl);
+
+	mutex_unlock_handle_cl(&queue1->lock,
+			       h_cl);
 
 	node->prev = queue2->last;
 
@@ -522,9 +524,6 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 
 	mutex_lock_try_catch_close();
 
-	mutex_unlock_handle_cl(&queue1->lock,
-			       h_cl);
-
 	mutex_lock_try_catch_close();
 }
 
@@ -534,13 +533,17 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 inline void
 thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue)
 {
+	if (queue->head == NULL)
+		return;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_muffle(&queue->lock);
 
-	while (queue->head != NULL)
+	do {
 		thread_cond_await_muffle(&queue->empty,
 					 &queue->lock);
+	} while (queue->head != NULL);
 
 	mutex_unlock_muffle(&queue->lock);
 
@@ -551,15 +554,19 @@ inline void
 thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 				   const struct HandlerClosure *const restrict h_cl)
 {
+	if (queue->head == NULL)
+		return;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
 
-	while (queue->head != NULL)
+	do {
 		thread_cond_await_handle_cl(&queue->empty,
 					    &queue->lock,
 					    h_cl);
+	} while (queue->head != NULL);
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       h_cl);
