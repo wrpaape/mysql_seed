@@ -5,6 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* threads API */
 
+#include <stdio.h>
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -370,8 +371,6 @@ thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
 	mutex_lock_try_catch_close();
 }
 
-#include <stdio.h>
-
 inline void
 thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 			      struct ThreadQueueNode *const restrict node,
@@ -379,13 +378,8 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
-	printf("\tremoving %p\n", queue);
-	fflush(stdout);
-
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
-	printf("\tremoving locked %p\n", queue);
-	fflush(stdout);
 
 	if (node->prev == NULL) {
 		if (node->next == NULL) {
@@ -409,9 +403,6 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       h_cl);
-
-	printf("\tremoving unlocked %p\n", queue);
-	fflush(stdout);
 
 	mutex_lock_try_catch_close();
 }
@@ -515,10 +506,6 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 		node->next = NULL;
 	}
 
-	mutex_unlock_handle_cl(&queue1->lock,
-			       h_cl);
-
-	mutex_lock_try_catch_close();
 
 	node->prev = queue2->last;
 
@@ -534,6 +521,11 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 	}
 
 	*node_ptr = node;
+
+	mutex_unlock_handle_cl(&queue1->lock,
+			       h_cl);
+
+	mutex_lock_try_catch_close();
 
 	mutex_unlock_handle_cl(&queue2->lock,
 			       h_cl);
@@ -568,29 +560,18 @@ inline void
 thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 				   const struct HandlerClosure *const restrict h_cl)
 {
-	printf("await_empty enter %p\n", queue);
-	fflush(stdout);
-
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
 
-	printf("await_empty locked %p\n", queue);
-	fflush(stdout);
-
 	while (queue->head != NULL)
 		thread_cond_await_handle_cl(&queue->empty,
 					    &queue->lock,
 					    h_cl);
-	puts("queue is now empty");
-	fflush(stdout);
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       h_cl);
-
-	printf("await_empty unlocked %p\n", queue);
-	fflush(stdout);
 
 	mutex_lock_try_catch_close();
 }
