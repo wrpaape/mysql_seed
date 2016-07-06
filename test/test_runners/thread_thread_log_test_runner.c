@@ -43,7 +43,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/thread_thread_log_test.c");
-  RUN_TEST(test_thread_log, 32);
+  RUN_TEST(test_thread_log, 31);
 
   return (UnityEnd());
 }

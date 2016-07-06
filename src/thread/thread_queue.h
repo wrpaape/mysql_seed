@@ -278,30 +278,23 @@ thread_queue_pop_muffle(struct ThreadQueue *const restrict queue,
 
 	mutex_lock_muffle(&queue->lock);
 
+	while (queue->head == NULL)
+		thread_cond_await_muffle(&queue->node_ready,
+					 &queue->lock);
+
+	/* more than one node may be dumped into queue atomically, must check
+	 * if queue is empty even after popping a fresh head */
+
+	*node = queue->head;
+
+	queue->head = (*node)->next;
+
 	if (queue->head == NULL) {
-		do {
-			thread_cond_await_muffle(&queue->node_ready,
-						 &queue->lock);
-		} while (queue->head == NULL);
-
-		*node = queue->head;
-
-		queue->head = NULL;
 		queue->last = NULL;
 
 		thread_cond_signal_muffle(&queue->empty);
 	} else {
-		*node = queue->head;
-
-		queue->head = (*node)->next;
-
-		if (queue->head == NULL) {
-			queue->last = NULL;
-
-			thread_cond_signal_muffle(&queue->empty);
-		} else {
-			queue->head->prev = NULL;
-		}
+		queue->head->prev = NULL;
 	}
 
 	mutex_unlock_muffle(&queue->lock);
@@ -319,33 +312,25 @@ thread_queue_pop_handle_cl(struct ThreadQueue *const restrict queue,
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
 
+	while (queue->head == NULL)
+		thread_cond_await_handle_cl(&queue->node_ready,
+					    &queue->lock,
+					    h_cl);
+
+	/* more than one node may be dumped into queue atomically, must check
+	 * if queue is empty even after popping a fresh head */
+
+	*node = queue->head;
+
+	queue->head = (*node)->next;
+
 	if (queue->head == NULL) {
-		do {
-			thread_cond_await_handle_cl(&queue->node_ready,
-						    &queue->lock,
-						    h_cl);
-		} while (queue->head == NULL);
-
-		*node = queue->head;
-
-		queue->head = NULL;
 		queue->last = NULL;
 
 		thread_cond_signal_handle_cl(&queue->empty,
 					     h_cl);
 	} else {
-		*node = queue->head;
-
-		queue->head = (*node)->next;
-
-		if (queue->head == NULL) {
-			queue->last = NULL;
-
-			thread_cond_signal_handle_cl(&queue->empty,
-						     h_cl);
-		} else {
-			queue->head->prev = NULL;
-		}
+		queue->head->prev = NULL;
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
@@ -372,8 +357,8 @@ thread_queue_remove_muffle(struct ThreadQueue *const restrict queue,
 
 			thread_cond_signal_muffle(&queue->empty);
 		} else {
-			node->next->prev = NULL;
-			queue->head	 = node->next;
+			queue->head	  = node->next;
+			queue->head->prev = NULL;
 		}
 	} else {
 		node->prev->next = node->next;
@@ -431,17 +416,13 @@ thread_queue_remove_handle_cl(struct ThreadQueue *const restrict queue,
 inline void
 thread_queue_await_empty_muffle(struct ThreadQueue *const restrict queue)
 {
-	if (queue->head == NULL)
-		return;
-
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_muffle(&queue->lock);
 
-	do {
+	while (queue->head != NULL)
 		thread_cond_await_muffle(&queue->empty,
 					 &queue->lock);
-	} while (queue->head != NULL);
 
 	mutex_unlock_muffle(&queue->lock);
 
@@ -452,19 +433,15 @@ inline void
 thread_queue_await_empty_handle_cl(struct ThreadQueue *const restrict queue,
 				   const struct HandlerClosure *const restrict h_cl)
 {
-	if (queue->head == NULL)
-		return;
-
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
 			     h_cl);
 
-	do {
+	while (queue->head != NULL)
 		thread_cond_await_handle_cl(&queue->empty,
 					    &queue->lock,
 					    h_cl);
-	} while (queue->head != NULL);
 
 	mutex_unlock_handle_cl(&queue->lock,
 			       h_cl);

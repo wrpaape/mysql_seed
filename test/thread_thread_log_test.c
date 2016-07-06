@@ -20,7 +20,6 @@ static const struct HandlerClosure handle_failure= {
 	.arg	= NULL
 };
 
-
 void handle_thread_log_failure(void *arg,
 			       const char *restrict failure)
 {

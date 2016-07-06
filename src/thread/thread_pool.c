@@ -137,14 +137,14 @@ worker_spawn(void *arg)
 /* ThreadQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-task_queues_awaiting_init(struct ThreadQueue *const restrict awaiting,
-			  struct ThreadQueueNode *restrict node,
-			  const struct ProcedureClosure *restrict init_task,
-			  const size_t count_init_tasks);
+task_queue_awaiting_init(struct ThreadQueue *const restrict awaiting,
+			 struct ThreadQueueNode *restrict node,
+			 const struct ProcedureClosure *restrict init_task,
+			 const size_t count_init_tasks);
 extern inline void
-task_queues_vacant_init(struct ThreadQueue *const restrict vacant,
-			struct ThreadQueueNode *restrict node,
-			const size_t count_vacant_tasks);
+task_queue_vacant_init(struct ThreadQueue *const restrict vacant,
+		       struct ThreadQueueNode *restrict node,
+		       const size_t count_vacant_tasks);
 extern inline void
 worker_queue_init(struct ThreadQueue *const restrict worker_queue,
 		  struct ThreadQueueNode *restrict node,
@@ -155,15 +155,14 @@ extern inline void
 worker_queue_start(struct ThreadQueue *const restrict worker_queue,
 		   const struct HandlerClosure *const restrict fail_cl);
 
-/* TaskQueues operations
+/* TaskQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-task_queues_init(struct TaskQueues *const restrict task_queues,
-		 struct ThreadQueueNode *const restrict init_task_nodes,
-		 struct ThreadQueueNode *const restrict vacant_task_nodes,
-		 const struct ProcedureClosure *const restrict init_tasks,
-		 const size_t count_init_tasks,
-		 const size_t count_vacant_tasks);
+task_queue_init(struct TaskQueue *const restrict task_queue,
+		struct ThreadQueueNode *const restrict task_nodes,
+		const struct ProcedureClosure *const restrict init_tasks,
+		const size_t length_task_queue,
+		const size_t count_init_tasks);
 
 
 /* ThreadPool operations
@@ -171,17 +170,16 @@ task_queues_init(struct TaskQueues *const restrict task_queues,
 extern inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
 		 const struct ProcedureClosure *const restrict init_tasks,
-		 struct ThreadQueueNode *const restrict init_task_nodes,
-		 struct ThreadQueueNode *const restrict vacant_task_nodes,
+		 struct ThreadQueueNode *const restrict task_nodes,
 		 struct ThreadQueueNode *const restrict worker_nodes,
 		 struct Worker *const restrict workers,
 		 const size_t count_init_tasks,
-		 const size_t count_vacant_tasks,
+		 const size_t length_task_queue,
 		 const size_t count_workers);
 extern inline struct ThreadPool *
 thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		   const size_t count_init_tasks,
-		   const size_t count_vacant_tasks,
+		   const size_t length_task_queue,
 		   const size_t count_workers,
 		   const struct HandlerClosure *const restrict fail_cl);
 
@@ -197,8 +195,8 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 		      const struct ProcedureClosure *const restrict task_cl,
 		      const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_clear_completed(struct ThreadPool *restrict pool,
-			    const struct HandlerClosure *const restrict fail_cl);
+thread_pool_reset_task_queue(struct ThreadPool *restrict pool,
+			     const struct HandlerClosure *const restrict fail_cl);
 extern inline void
 thread_pool_stop(struct ThreadPool *restrict pool,
 		 const struct HandlerClosure *const restrict fail_cl);

@@ -31,6 +31,8 @@ void set_one_two_three(void *arg)
 	printf("in set_one_two_three (%p)\n", (void *) thread_self());
 
 	*integer = 123;
+
+	printf("integer = %d\n", *integer);
 }
 
 void set_four_five_six(void *arg)
@@ -92,93 +94,77 @@ void test_thread_pool(void)
 	const char *restrict tastyham;
 	const char *restrict ooga_booga;
 
-	const struct ProcedureClosure init_tasks[] = {
+	const struct ProcedureClosure tasks[] = {
 		{ .fun = &set_one_two_three, .arg = (void *) &one_two_three },
 		{ .fun = &set_pi,	     .arg = (void *) &qtpi },
-		{ .fun = &set_ooga_booga,    .arg = (void *) &ooga_booga }
-	};
-
-	const struct ProcedureClosure extra_tasks[] = {
+		{ .fun = &set_ooga_booga,    .arg = (void *) &ooga_booga },
 		{ .fun = &set_four_five_six, .arg = (void *) &four_five_six },
 		{ .fun = &set_three_fifty,   .arg = (void *) &tree_fitty },
 		{ .fun = &set_tastyham,	     .arg = (void *) &tastyham }
 	};
+
+	const struct ProcedureClosure *restrict task_ptr       = &tasks[0];
+	const struct ProcedureClosure *const restrict last_ptr = &tasks[5];
 
 	struct HandlerClosure fail_cl = {
 		.handle = &thread_pool_handle_failure,
 		.arg	= "first test - creation"
 	};
 
-	struct ThreadPool *const restrict
-	pool = thread_pool_create(&init_tasks[0],
-				  3lu,
-				  2lu,
-				  4lu,
-				  &fail_cl);
+	struct ThreadPool *const restrict pool = thread_pool_create(NULL,
+								    0lu,
+								    5lu,
+								    4lu,
+								    &fail_cl);
 
 	fail_cl.arg = "first test - start up";
 
 	thread_pool_start(pool,
 			  &fail_cl);
 
-	fail_cl.arg = "first test - awaiting initial tasks";
+	fail_cl.arg = "first test - pushing first task";
+
+	thread_pool_push_task(pool,
+			      task_ptr,
+			      &fail_cl);
+
+	fail_cl.arg = "first test - awaiting first task";
 
 	thread_pool_await(pool,
 			  &fail_cl);
 
-	TEST_ASSERT_EQUAL_INT(123,	     one_two_three);
+	TEST_ASSERT_EQUAL_INT(123, one_two_three);
 
-	TEST_ASSERT_EQUAL_DOUBLE(3.141,	     qtpi);
 
+	fail_cl.arg = "first test - pushing remaining tasks";
+
+	do {
+		++task_ptr;
+		thread_pool_push_task(pool,
+				      task_ptr,
+				      &fail_cl);
+
+	} while (task_ptr < last_ptr);
+
+	fail_cl.arg = "first test - awaiting remaining tasks";
+
+	thread_pool_await(pool,
+			  &fail_cl);
+
+	TEST_ASSERT_EQUAL_DOUBLE(3.141,	       qtpi);
 	TEST_ASSERT_EQUAL_STRING("ooga_booga", ooga_booga);
-
-	fail_cl.arg = "first test - pushing first extra task";
-
-	thread_pool_push_task(pool,
-			      &extra_tasks[0],
-			      &fail_cl);
-
-	fail_cl.arg = "first test - awaiting first extra task";
-
-	thread_pool_await(pool,
-			  &fail_cl);
-
 	TEST_ASSERT_EQUAL_INT(456,	       four_five_six);
+	TEST_ASSERT_EQUAL_DOUBLE(3.50,         tree_fitty);
+	TEST_ASSERT_EQUAL_STRING("tastyham",   tastyham);
 
-	fail_cl.arg = "first test - clearing completed tasks";
-
-	thread_pool_clear_completed(pool,
-				    &fail_cl);
-
-	fail_cl.arg = "first test - pushing second extra task";
-
-	thread_pool_push_task(pool,
-			      &extra_tasks[1],
-			      &fail_cl);
-
-	fail_cl.arg = "first test - pushing third extra task";
-
-	thread_pool_push_task(pool,
-			      &extra_tasks[2],
-			      &fail_cl);
-
-	fail_cl.arg = "first test - awaiting second and third extra tasks";
-
-	thread_pool_await(pool,
-			  &fail_cl);
-
-	TEST_ASSERT_EQUAL_DOUBLE(3.50,       tree_fitty);
-
-	TEST_ASSERT_EQUAL_STRING("tastyham", tastyham);
 
 	fail_cl.arg = "first test - shutdown";
-
-	sleep(1);
 
 	thread_pool_stop(pool,
 			 &fail_cl);
 
 	thread_pool_destroy(pool);
 
-	TEST_PASS();
+	/* thread_pool_reset_task_queue(pool, */
+	/* 			     &fail_cl); */
 }
