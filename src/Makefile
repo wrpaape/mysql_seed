@@ -292,6 +292,7 @@ UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
 UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_pattern)
+UTILS_TYPES_ACTION_HDR		:= $(call HELPER_HEADER_PATH,utils types action)
 UTILS_WORD_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils word_attrs)
 UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
 STRING_INT_STRING_ATTRS_HDR	:= $(call HELPER_HEADER_PATH,string int_string_attrs)
@@ -658,6 +659,45 @@ TARGETS			+= $(SYSTEM_FILE_UTILS_OBJ)					\
 			   $(SYSTEM_FILE_UTILS_TRNR_OBJ)				\
 			   $(SYSTEM_FILE_UTILS_TEST_OBJ)				\
 			   $(SYSTEM_FILE_UTILS_TEST_BIN)
+
+
+# system/exit_utils
+# ──────────────────────────────────────────────────────────────────────────────
+SYSTEM_EXIT_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_HDR		:= $(call HELPER_HEADER_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,system exit_utils)
+SYSTEM_EXIT_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,system exit_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+SYSTEM_EXIT_UTILS_OBJ_PREQS		:= $(SYSTEM_EXIT_UTILS_SRC) 			\
+			   		   $(SYSTEM_EXIT_UTILS_HDR)			\
+			   		   $(SYSTEM_FILE_UTILS_HDR)			\
+			   		   $(STRING_STRING_UTILS_HDR)			\
+					   $(UTILS_TYPES_ACTION_HDR)
+SYSTEM_EXIT_UTILS_OBJ_GROUP		:= $(SYSTEM_EXIT_UTILS_OBJ)			\
+					   $(SYSTEM_FILE_UTILS_OBJ_GROUP)		\
+					   $(STRING_STRING_UTILS_OBJ_GROUP)
+SYSTEM_EXIT_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_EXIT_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+SYSTEM_EXIT_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_EXIT_UTILS_TEST_SRC)		\
+			   		   $(SYSTEM_EXIT_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+SYSTEM_EXIT_UTILS_TRNR_OBJ_PREQS	:= $(SYSTEM_EXIT_UTILS_TRNR_SRC)		\
+			   		   $(SYSTEM_EXIT_UTILS_TEST_OBJ_PREQS)
+SYSTEM_EXIT_UTILS_TEST_BIN_PREQS	:= $(SYSTEM_EXIT_UTILS_TRNR_OBJ)		\
+			   		   $(SYSTEM_EXIT_UTILS_TEST_OBJ)		\
+			   		   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(SYSTEM_EXIT_UTILS_TEST_BIN)
+TARGETS			+= $(SYSTEM_EXIT_UTILS_OBJ)					\
+			   $(SYSTEM_EXIT_UTILS_TRNR_SRC)				\
+			   $(SYSTEM_EXIT_UTILS_TRNR_OBJ)				\
+			   $(SYSTEM_EXIT_UTILS_TEST_OBJ)				\
+			   $(SYSTEM_EXIT_UTILS_TEST_BIN)
 
 
 # thread/thread_utils
@@ -1232,6 +1272,11 @@ $(SYSTEM_SYSTEM_UTILS_OBJ): $(SYSTEM_SYSTEM_UTILS_OBJ_PREQS)
 $(SYSTEM_FILE_UTILS_OBJ): $(SYSTEM_FILE_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make system/exit_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_EXIT_UTILS_OBJ): $(SYSTEM_EXIT_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make string/string_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
@@ -1489,6 +1534,26 @@ $(SYSTEM_FILE_UTILS_TEST_OBJ): $(SYSTEM_FILE_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(SYSTEM_FILE_UTILS_TRNR_SRC): $(SYSTEM_FILE_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for system/exit_utils
+# make:
+# 	system_exit_utils_test		binary,
+# 	system_exit_utils_test_runner 	object,
+# 	system_exit_utils_test		object, and
+# 	system_exit_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_EXIT_UTILS_TEST_BIN): $(SYSTEM_EXIT_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(SYSTEM_EXIT_UTILS_TRNR_OBJ): $(SYSTEM_EXIT_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_EXIT_UTILS_TEST_OBJ): $(SYSTEM_EXIT_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_EXIT_UTILS_TRNR_SRC): $(SYSTEM_EXIT_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

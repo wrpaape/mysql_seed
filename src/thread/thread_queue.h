@@ -440,8 +440,6 @@ thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
 
 	mutex_lock_muffle(&queue2->lock);
 
-	mutex_unlock_muffle(&queue1->lock);
-
 	node->prev = queue2->last;
 
 	if (queue2->last == NULL) {
@@ -459,6 +457,8 @@ thread_queue_pop_push_muffle(struct ThreadQueue *const restrict queue1,
 	mutex_unlock_muffle(&queue2->lock);
 
 	mutex_lock_try_catch_close();
+
+	mutex_unlock_muffle(&queue1->lock);
 
 	mutex_lock_try_catch_close();
 }
@@ -480,7 +480,6 @@ thread_queue_pop_push_handle_cl(struct ThreadQueue *const restrict queue1,
 		thread_cond_await_handle_cl(&queue1->node_ready,
 					    &queue1->lock,
 					    h_cl);
-
 
 	node = queue1->head;
 

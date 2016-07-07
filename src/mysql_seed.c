@@ -2,12 +2,11 @@
 
 int main(int argc, char *argv[])
 {
-
-	struct SeedMode mode;
-
-	seed_cli_parse_input(&mode, argc, &argv[0]);
-
-	(*mode.handle)(&mode.spec);
+	if (argc == 1) {
+		seed_mode_set_exit_failure(mode,
+					    ERROR_NO_INPUT_MESSAGE);
+		return;
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -34,11 +33,6 @@ seed_cli_parse_input(struct SeedMode *const restrict mode,
 		     const int argc,
 		     char *const restrict *const restrict argv)
 {
-	if (argc == 1) {
-		seed_mode_set_exit_failure(mode,
-					    ERROR_NO_INPUT_MESSAGE);
-		return;
-	}
 
 	const char *const restrict opt = argv[1];
 
