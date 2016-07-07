@@ -131,6 +131,27 @@ put_string_until(char *restrict buffer,
 		 const char *restrict string,
 		 char *const restrict until_ptr);
 
+extern inline char *
+put_char_times_length(char *restrict buffer,
+		      const char byte,
+		      size_t times,
+		      size_t length);
+
+extern inline char *
+put_char_times(char *const restrict buffer,
+	       const char byte,
+	       const size_t times);
+
+extern inline char *
+put_char_times_until(char *restrict buffer,
+		     const char byte,
+		     size_t times,
+		     char *const restrict until_ptr);
+
+extern inline char *
+put_string_inspect(char *restrict buffer,
+		   const char *restrict string,
+		   const size_t length);
 extern inline int
 string_compare(const char *restrict string1,
 	       const char *restrict string2);

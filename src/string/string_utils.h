@@ -512,12 +512,19 @@ put_string_until(char *restrict buffer,
 }
 
 
-#if (WORD_SIZE == 1lu)
 inline char *
 put_char_times(char *restrict buffer,
 	       const char byte,
 	       size_t times)
 {
+}
+
+inline char *
+put_char_times(char *const restrict buffer,
+	       const char byte,
+	       const size_t times)
+{
+#if (WORD_SIZE == 1lu)
 	while (times > 0lu) {
 		*buffer = byte;
 		++buffer;
@@ -525,15 +532,7 @@ put_char_times(char *restrict buffer,
 	}
 
 	return buffer;
-}
-
 #else
-inline char *
-put_char_times(char *const restrict buffer,
-	       const char byte,
-	       const size_t times)
-{
-
 	union WordPatternPtr ptr = (union WordPatternPtr) buffer;
 
 	size_t length_words   = DIV_WORD_SIZE(times);
@@ -541,48 +540,48 @@ put_char_times(char *const restrict buffer,
 
 	if (length_words == 0lu)
 		switch (rem_size) {
-#	if (WORD_SIZE > 15lu)
+#		if (WORD_SIZE > 15lu)
 		case 15: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 15) */
-#	if (WORD_SIZE > 14lu)
+#		endif /* if (WORD_SIZE > 15) */
+#		if (WORD_SIZE > 14lu)
 		case 14: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 14) */
-#	if (WORD_SIZE > 13lu)
+#		endif /* if (WORD_SIZE > 14) */
+#		if (WORD_SIZE > 13lu)
 		case 13: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 13) */
-#	if (WORD_SIZE > 12lu)
+#		endif /* if (WORD_SIZE > 13) */
+#		if (WORD_SIZE > 12lu)
 		case 12: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 12) */
-#	if (WORD_SIZE > 11lu)
+#		endif /* if (WORD_SIZE > 12) */
+#		if (WORD_SIZE > 11lu)
 		case 11: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 11) */
-#	if (WORD_SIZE > 10lu)
+#		endif /* if (WORD_SIZE > 11) */
+#		if (WORD_SIZE > 10lu)
 		case 10: *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 10) */
-#	if (WORD_SIZE > 9lu)
+#		endif /* if (WORD_SIZE > 10) */
+#		if (WORD_SIZE > 9lu)
 		case 9:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 9) */
-#	if (WORD_SIZE > 8lu)
+#		endif /* if (WORD_SIZE > 9) */
+#		if (WORD_SIZE > 8lu)
 		case 8:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 8) */
-#	if (WORD_SIZE > 7lu)
+#		endif /* if (WORD_SIZE > 8) */
+#		if (WORD_SIZE > 7lu)
 		case 7:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 7) */
-#	if (WORD_SIZE > 6lu)
+#		endif /* if (WORD_SIZE > 7) */
+#		if (WORD_SIZE > 6lu)
 		case 6:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 6) */
-#	if (WORD_SIZE > 5lu)
+#		endif /* if (WORD_SIZE > 6) */
+#		if (WORD_SIZE > 5lu)
 		case 5:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 5) */
-#	if (WORD_SIZE > 4lu)
+#		endif /* if (WORD_SIZE > 5) */
+#		if (WORD_SIZE > 4lu)
 		case 4:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 4) */
-#	if (WORD_SIZE > 3lu)
+#		endif /* if (WORD_SIZE > 4) */
+#		if (WORD_SIZE > 3lu)
 		case 3:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 3) */
-#	if (WORD_SIZE > 2lu)
+#		endif /* if (WORD_SIZE > 3) */
+#		if (WORD_SIZE > 2lu)
 		case 2:  *(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 2) */
+#		endif /* if (WORD_SIZE > 2) */
 		case 1:  *(ptr.string++) = byte;
 		default: return ptr.string;
 		}
@@ -591,93 +590,93 @@ put_char_times(char *const restrict buffer,
 
 	*(ptr.string++) = byte;
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 2lu)
+#		if (WORD_SIZE > 2lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 3lu)
+#		if (WORD_SIZE > 3lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 4lu)
+#		if (WORD_SIZE > 4lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 5lu)
+#		if (WORD_SIZE > 5lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 6lu)
+#		if (WORD_SIZE > 6lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 7lu)
+#		if (WORD_SIZE > 7lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 8lu)
+#		if (WORD_SIZE > 8lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 9lu)
+#		if (WORD_SIZE > 9lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 10lu)
+#		if (WORD_SIZE > 10lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 11lu)
+#		if (WORD_SIZE > 11lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 12lu)
+#		if (WORD_SIZE > 12lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 13lu)
+#		if (WORD_SIZE > 13lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 14lu)
+#		if (WORD_SIZE > 14lu)
 	*(ptr.string++) = byte;
-#	if (WORD_SIZE > 15lu)
+#		if (WORD_SIZE > 15lu)
 	*(ptr.string++) = byte;
-#	endif /* if (WORD_SIZE > 15lu) */
-#	endif /* if (WORD_SIZE > 14lu) */
-#	endif /* if (WORD_SIZE > 13lu) */
-#	endif /* if (WORD_SIZE > 12lu) */
-#	endif /* if (WORD_SIZE > 11lu) */
-#	endif /* if (WORD_SIZE > 10lu) */
-#	endif /* if (WORD_SIZE > 9lu) */
-#	endif /* if (WORD_SIZE > 8lu) */
-#	endif /* if (WORD_SIZE > 7lu) */
-#	endif /* if (WORD_SIZE > 6lu) */
-#	endif /* if (WORD_SIZE > 5lu) */
-#	endif /* if (WORD_SIZE > 4lu) */
-#	endif /* if (WORD_SIZE > 3lu) */
-#	endif /* if (WORD_SIZE > 2lu) */
+#		endif /* if (WORD_SIZE > 15lu) */
+#		endif /* if (WORD_SIZE > 14lu) */
+#		endif /* if (WORD_SIZE > 13lu) */
+#		endif /* if (WORD_SIZE > 12lu) */
+#		endif /* if (WORD_SIZE > 11lu) */
+#		endif /* if (WORD_SIZE > 10lu) */
+#		endif /* if (WORD_SIZE > 9lu) */
+#		endif /* if (WORD_SIZE > 8lu) */
+#		endif /* if (WORD_SIZE > 7lu) */
+#		endif /* if (WORD_SIZE > 6lu) */
+#		endif /* if (WORD_SIZE > 5lu) */
+#		endif /* if (WORD_SIZE > 4lu) */
+#		endif /* if (WORD_SIZE > 3lu) */
+#		endif /* if (WORD_SIZE > 2lu) */
 
 	switch (rem_size) {
 	case 1:  *(ptr.size_1++)  = *(base.size_1);  break;
-#	if (WORD_SIZE > 2lu)
+#		if (WORD_SIZE > 2lu)
 	case 2:  *(ptr.size_2++)  = *(base.size_2);  break;
-#	if (WORD_SIZE > 3lu)
+#		if (WORD_SIZE > 3lu)
 	case 3:  *(ptr.size_3++)  = *(base.size_3);  break;
-#	if (WORD_SIZE > 4lu)
+#		if (WORD_SIZE > 4lu)
 	case 4:  *(ptr.size_4++)  = *(base.size_4);  break;
-#	if (WORD_SIZE > 5lu)
+#		if (WORD_SIZE > 5lu)
 	case 5:  *(ptr.size_5++)  = *(base.size_5);  break;
-#	if (WORD_SIZE > 6lu)
+#		if (WORD_SIZE > 6lu)
 	case 6:  *(ptr.size_6++)  = *(base.size_6);  break;
-#	if (WORD_SIZE > 7lu)
+#		if (WORD_SIZE > 7lu)
 	case 7:  *(ptr.size_7++)  = *(base.size_7);  break;
-#	if (WORD_SIZE > 8lu)
+#		if (WORD_SIZE > 8lu)
 	case 8:  *(ptr.size_8++)  = *(base.size_8);  break;
-#	if (WORD_SIZE > 9lu)
+#		if (WORD_SIZE > 9lu)
 	case 9:  *(ptr.size_9++)  = *(base.size_9);  break;
-#	if (WORD_SIZE > 10lu)
+#		if (WORD_SIZE > 10lu)
 	case 10: *(ptr.size_10++) = *(base.size_10); break;
-#	if (WORD_SIZE > 11lu)
+#		if (WORD_SIZE > 11lu)
 	case 11: *(ptr.size_11++) = *(base.size_11); break;
-#	if (WORD_SIZE > 12lu)
+#		if (WORD_SIZE > 12lu)
 	case 12: *(ptr.size_12++) = *(base.size_12); break;
-#	if (WORD_SIZE > 13lu)
+#		if (WORD_SIZE > 13lu)
 	case 13: *(ptr.size_13++) = *(base.size_13); break;
-#	if (WORD_SIZE > 14lu)
+#		if (WORD_SIZE > 14lu)
 	case 14: *(ptr.size_14++) = *(base.size_14); break;
-#	if (WORD_SIZE > 15lu)
+#		if (WORD_SIZE > 15lu)
 	case 15: *(ptr.size_15++) = *(base.size_15);
-#	endif /* if (WORD_SIZE > 15lu) */
-#	endif /* if (WORD_SIZE > 14lu) */
-#	endif /* if (WORD_SIZE > 13lu) */
-#	endif /* if (WORD_SIZE > 12lu) */
-#	endif /* if (WORD_SIZE > 11lu) */
-#	endif /* if (WORD_SIZE > 10lu) */
-#	endif /* if (WORD_SIZE > 9lu) */
-#	endif /* if (WORD_SIZE > 8lu) */
-#	endif /* if (WORD_SIZE > 7lu) */
-#	endif /* if (WORD_SIZE > 6lu) */
-#	endif /* if (WORD_SIZE > 5lu) */
-#	endif /* if (WORD_SIZE > 4lu) */
-#	endif /* if (WORD_SIZE > 3lu) */
-#	endif /* if (WORD_SIZE > 2lu) */
+#		endif /* if (WORD_SIZE > 15lu) */
+#		endif /* if (WORD_SIZE > 14lu) */
+#		endif /* if (WORD_SIZE > 13lu) */
+#		endif /* if (WORD_SIZE > 12lu) */
+#		endif /* if (WORD_SIZE > 11lu) */
+#		endif /* if (WORD_SIZE > 10lu) */
+#		endif /* if (WORD_SIZE > 9lu) */
+#		endif /* if (WORD_SIZE > 8lu) */
+#		endif /* if (WORD_SIZE > 7lu) */
+#		endif /* if (WORD_SIZE > 6lu) */
+#		endif /* if (WORD_SIZE > 5lu) */
+#		endif /* if (WORD_SIZE > 4lu) */
+#		endif /* if (WORD_SIZE > 3lu) */
+#		endif /* if (WORD_SIZE > 2lu) */
 	default: /* fall through */;
 	}
 
@@ -685,8 +684,8 @@ put_char_times(char *const restrict buffer,
 		*(ptr.word++) = *(base.word);
 
 	return ptr.string;
-}
 #endif /* if (WORD_SIZE == 1lu) */
+}
 
 inline char *
 put_char_times_length(char *restrict buffer,
@@ -709,6 +708,29 @@ put_char_times_until(char *restrict buffer,
 				     byte,
 				     times,
 				     until_ptr - buffer);
+}
+
+inline char *
+put_string_inspect(char *restrict buffer,
+		   const char *restrict string,
+		   const size_t length)
+{
+	while (1) {
+		if (*string == '\0')
+			return buffer;
+
+		if (length == 0lu) {
+			PUT_CHAR_BUFFER(buffer,
+					"...",
+					3);
+			return buffer;
+		}
+
+		*buffer = *string;
+		++buffer;
+		++string;
+		--length;
+	}
 }
 
 inline int
