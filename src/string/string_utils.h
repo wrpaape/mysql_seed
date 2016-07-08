@@ -524,7 +524,7 @@ put_string_until(char *restrict buffer,
 
 inline char *
 put_string_size(char *restrict buffer,
-		const char *restrict string,
+		const char *const restrict string,
 		const size_t size)
 {
 	return (char *) memory_put(buffer,

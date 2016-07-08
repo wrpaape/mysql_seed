@@ -7,13 +7,15 @@
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
-#define DB_NAME_MAX_LENGTH 64lu
+#define DB_NAME_LENGTH_MAX 64lu
 
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define INVALID_DATABASE_FLAG_HEADER INVALID_FLAG_HEADER("DATABASE")
-#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_MESSAGE("DATABASE")
+#define NO_DATABASE_FLAG_MESSAGE     NO_FLAG_MESSAGE("DATABASE")
+#define INVALID_DB_NAME_HEADER	     INVALID_SPEC_HEADER("DB_NAME")
+#define NO_DB_NAME_MESSAGE	     NO_SPEC_MESSAGE("DB_NAME")
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
@@ -30,7 +32,7 @@ print_no_database_flag(void)
 inline int
 print_invalid_database_flag(char *const restrict database_flag)
 {
-	char buffer[128] = {
+	char buffer[ERROR_BUFFER_SIZE] = {
 		INVALID_DATABASE_FLAG_HEADER
 	};
 
@@ -39,9 +41,9 @@ print_invalid_database_flag(char *const restrict database_flag)
 				 database_flag,
 				 FLAG_LENGTH_MAX);
 
-	ptr = (char *restrict) memory_put(ptr,
-					  MORE_INFO_MESSAGE,
-					  sizeof(MORE_INFO_MESSAGE) - 1lu);
+	ptr = put_string_size(ptr,
+			      MORE_INFO_MESSAGE,
+			      sizeof(MORE_INFO_MESSAGE) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],

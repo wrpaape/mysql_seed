@@ -133,7 +133,7 @@ put_string_until(char *restrict buffer,
 
 extern inline char *
 put_string_size(char *restrict buffer,
-		const char *restrict string,
+		const char *const restrict string,
 		const size_t size);
 
 extern inline char *

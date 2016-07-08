@@ -75,7 +75,7 @@ print_no_mode_flag(void)
 inline int
 print_invalid_mode_flag(char *const restrict mode_flag)
 {
-	static char buffer[128] = {
+	static char buffer[ERROR_BUFFER_SIZE] = {
 		INVALID_MODE_FLAG_HEADER
 	};
 
@@ -84,9 +84,9 @@ print_invalid_mode_flag(char *const restrict mode_flag)
 				 mode_flag,
 				 FLAG_LENGTH_MAX);
 
-	ptr = (char *restrict) memory_put(ptr,
-					  MORE_INFO_MESSAGE,
-					  sizeof(MORE_INFO_MESSAGE) - 1lu);
+	ptr = put_string_size(ptr,
+			      MORE_INFO_MESSAGE,
+			      sizeof(MORE_INFO_MESSAGE) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],

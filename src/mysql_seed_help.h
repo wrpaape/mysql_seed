@@ -84,6 +84,10 @@ _H2_("mysql_seed <-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
 _H1_("MYSQL_ARGS")							\
 _P1_("TODO")
 
+/* error messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define INVALID_MODE_HEADER INVALID_SPEC_HEADER("MODE")
+
 
 /* print help then exit on success
  *─────────────────────────────────────────────────────────────────────────── */
@@ -168,6 +172,32 @@ print_help_load(void)
 }
 
 
+/* print error messsage and return 'EXIT_FAILURE'
+ *─────────────────────────────────────────────────────────────────────────── */
+inline int
+print_invalid_mode(char *const restrict mode)
+{
+	char buffer[ERROR_BUFFER_SIZE] = {
+		INVALID_MODE_HEADER
+	};
+
+	char *restrict
+	ptr = put_string_inspect(&buffer[sizeof(INVALID_MODE_HEADER)],
+				 mode,
+				 SPEC_LENGTH_MAX);
+
+	ptr = put_string_size(ptr,
+			      MORE_INFO_MESSAGE,
+			      sizeof(MORE_INFO_MESSAGE));
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+
+	return EXIT_FAILURE;
+}
+
+
 /* dispatch help mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
@@ -183,13 +213,13 @@ help_dispatch(char *const restrict *const restrict arg_ptr,
 	switch (*mode) {
 	case 'g': return ((*rem == '\0') || strings_equal("enerate", rem))
 		       ? print_help_generate()
-		       : print_help_usage();
+		       : print_invalid_mode(mode);
 
 	case 'l': return ((*rem == '\0') || strings_equal("oad", rem))
 		       ? print_help_load()
-		       : print_help_usage();
+		       : print_invalid_mode(mode);
 
-	default:  return print_help_usage();
+	default:  return print_invalid_mode(mode);
 	}
 }
 

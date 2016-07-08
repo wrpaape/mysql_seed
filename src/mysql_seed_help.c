@@ -20,6 +20,11 @@ print_help_generate(void);
 extern inline int
 print_help_load(void);
 
+/* print error messsage and return 'EXIT_FAILURE'
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline int
+print_invalid_mode(char *const restrict mode);
+
 
 /* dispatch help mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */

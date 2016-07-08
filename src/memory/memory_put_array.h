@@ -63,7 +63,8 @@ PUT_WORDS_LOOP_LENGTH(X, Y, LENGTH,					\
 
 #define PUT_WORDS_AND_REM_BODY(X, Y, LENGTH_WORDS, REM_SIZE)		\
 PUT_WORDS_LOOP_LENGTH(X, Y, LENGTH_WORDS,				\
-		      WORD_REM_SWITCH(REM_SIZE, HANDLE_PUT_REM, X, Y))
+		      WORD_REM_SWITCH(REM_SIZE, HANDLE_PUT_REM, X,	\
+				      (((const word_t *restrict) Y) + 1l)))
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * FUNCTION-LIKE MACROS

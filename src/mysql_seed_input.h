@@ -8,7 +8,8 @@
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
 #define FLAG_LENGTH_MAX (sizeof("--generate") * 2lu)
-#define INVALID_FLAG_BUFFER_SIZE
+#define SPEC_LENGTH_MAX (sizeof("NAME_FIRST") * 2lu)
+#define ERROR_BUFFER_SIZE 128lu
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -17,11 +18,11 @@
 #define INVALID_SPEC_HEADER(SPEC)					\
 ERROR_WRAP("error - invalid " SPEC ": ")
 
-#define INVALID_FLAG_HEADER(FLAG)					\
-ERROR_WRAP("error - invalid " FLAG " flag: ")
+#define NO_SPEC_MESSAGE(SPEC)						\
+ERROR_WRAP("error - no " SPEC " specified") MORE_INFO_MESSAGE
 
-#define NO_FLAG_MESSAGE(FLAG)						\
-ERROR_WRAP("error - no " FLAG " flag specified") MORE_INFO_MESSAGE
+#define INVALID_FLAG_HEADER(FLAG) INVALID_SPEC_HEADER(FLAG " flag")
+#define NO_FLAG_MESSAGE(FLAG)	  NO_SPEC_MESSAGE(FLAG " flag")
 
 
 /* typedefs, struct declarations
