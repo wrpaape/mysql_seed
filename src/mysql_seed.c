@@ -84,13 +84,13 @@ print_invalid_mode_flag(char *const restrict mode_flag)
 				 mode_flag,
 				 FLAG_LENGTH_MAX);
 
-	(void) memcpy(ptr,
-		      MORE_INFO_MESSAGE,
-		      sizeof(MORE_INFO_MESSAGE) - 1lu);
+	ptr = (char *restrict) memory_put(ptr,
+					  MORE_INFO_MESSAGE,
+					  sizeof(MORE_INFO_MESSAGE) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
-		     (ptr - &buffer[0]) + sizeof(MORE_INFO_MESSAGE));
+		     ptr - &buffer[0]);
 
 	return EXIT_FAILURE;
 }

@@ -5,7 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <pthread.h>			/* threads API */
 #include <limits.h>			/* PTHREAD_THREADS_MAX */
-#include <string.h>			/* memcpy */
+#include "memory/memory_copy_array.h"	/* memory_copy */
 #include "time/time_utils.h"		/* time utils */
 #include "utils/types/routine.h"	/* Routine */
 #include "utils/types/procedure.h"	/* Procedure */
@@ -78,7 +78,7 @@ pthread_mutex_unlock(MUTEX)
 pthread_mutex_trylock(MUTEX)
 
 #define mutex_init_imp(MUTEX)						\
-(void) memcpy(MUTEX, &mutex_prototype, sizeof(mutex_prototype))
+memory_copy(MUTEX, &mutex_prototype, sizeof(mutex_prototype))
 
 #define thread_attr_init_imp(ATTR)					\
 pthread_attr_init(ATTR)
@@ -90,7 +90,7 @@ pthread_attr_setdetachstate(ATTR, STATE)
 pthread_attr_destroy(ATTR)
 
 #define thread_cond_init_imp(COND)					\
-(void) memcpy(COND, &thread_cond_prototype, sizeof(thread_cond_prototype))
+memory_copy(COND, &thread_cond_prototype, sizeof(thread_cond_prototype))
 
 #define thread_cond_signal_imp(COND)					\
 pthread_cond_signal(COND)

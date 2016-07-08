@@ -132,6 +132,11 @@ put_string_until(char *restrict buffer,
 		 char *const restrict until_ptr);
 
 extern inline char *
+put_string_size(char *restrict buffer,
+		const char *restrict string,
+		const size_t size);
+
+extern inline char *
 put_char_times_length(char *restrict buffer,
 		      const char byte,
 		      size_t times,

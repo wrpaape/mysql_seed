@@ -295,6 +295,11 @@ UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_patte
 UTILS_TYPES_ACTION_HDR		:= $(call HELPER_HEADER_PATH,utils types action)
 UTILS_WORD_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils word_attrs)
 UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
+MEMORY_MEMORY_SET_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_set_width)
+MEMORY_MEMORY_GET_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_get_width)
+MEMORY_MEMORY_PUT_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_put_width)
+MEMORY_MEMORY_SWAP_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_swap_width)
+MEMORY_WORD_REM_UTILS_HDR	:= $(call HELPER_HEADER_PATH,memory word_rem_utils)
 STRING_INT_STRING_ATTRS_HDR	:= $(call HELPER_HEADER_PATH,string int_string_attrs)
 STRING_PTR_STRING_ATTRS_HDR	:= $(call HELPER_HEADER_PATH,string ptr_string_attrs)
 STRING_STRING_TOKEN_HDR		:= $(call HELPER_HEADER_PATH,string string_token)
@@ -406,11 +411,84 @@ TARGETS			+= $(MEMORY_MEMORY_UTILS_OBJ)			\
 			   $(MEMORY_MEMORY_UTILS_TEST_BIN)
 
 
+# memory/memory_copy_array
+# ──────────────────────────────────────────────────────────────────────────────
+MEMORY_MEMORY_COPY_ARRAY_SRC 		:= $(call HELPER_SOURCE_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_HDR		:= $(call HELPER_HEADER_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_OBJ 		:= $(call HELPER_OBJECT_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_copy_array)
+MEMORY_MEMORY_COPY_ARRAY_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_copy_array)
+# ─────────────── target prequisites ───────────────────────────────────────────
+MEMORY_MEMORY_COPY_ARRAY_OBJ_PREQS	:= $(MEMORY_MEMORY_COPY_ARRAY_SRC) 		\
+			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_HDR)		\
+			   	   	   $(MEMORY_MEMORY_SET_WIDTH_HDR)		\
+			   	   	   $(MEMORY_WORD_REM_UTILS_HDR)
+MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP	:= $(MEMORY_MEMORY_COPY_ARRAY_OBJ)		\
+					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)
+MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_COPY_ARRAY_TEST_SRC)		\
+					   $(TEST_RUNNER_SOURCE_DIR)
+MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_COPY_ARRAY_TEST_SRC)		\
+					   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_PREQS) 	\
+					   $(UNITY_OBJ_PREQS)
+MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ_PREQS	:= $(MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC)		\
+					   $(MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ_PREQS)
+MEMORY_MEMORY_COPY_ARRAY_TEST_BIN_PREQS	:= $(MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ)		\
+					   $(MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ)		\
+					   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)	\
+					   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(MEMORY_MEMORY_COPY_ARRAY_TEST_BIN)
+TARGETS			+= $(MEMORY_MEMORY_COPY_ARRAY_OBJ)		\
+			   $(MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC)		\
+			   $(MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ)		\
+			   $(MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ)		\
+			   $(MEMORY_MEMORY_COPY_ARRAY_TEST_BIN)
+
+
+# memory/memory_put_array
+# ──────────────────────────────────────────────────────────────────────────────
+MEMORY_MEMORY_PUT_ARRAY_SRC 		:= $(call HELPER_SOURCE_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_HDR		:= $(call HELPER_HEADER_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_OBJ 		:= $(call HELPER_OBJECT_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_put_array)
+MEMORY_MEMORY_PUT_ARRAY_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_put_array)
+# ─────────────── target prequisites ───────────────────────────────────────────
+MEMORY_MEMORY_PUT_ARRAY_OBJ_PREQS	:= $(MEMORY_MEMORY_PUT_ARRAY_SRC) 		\
+			   	   	   $(MEMORY_MEMORY_PUT_ARRAY_HDR)		\
+			   	   	   $(MEMORY_MEMORY_PUT_WIDTH_HDR)		\
+			   	   	   $(MEMORY_WORD_REM_UTILS_HDR)
+MEMORY_MEMORY_PUT_ARRAY_OBJ_GROUP	:= $(MEMORY_MEMORY_PUT_ARRAY_OBJ)		\
+					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)
+MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_PUT_ARRAY_TEST_SRC)		\
+					   $(TEST_RUNNER_SOURCE_DIR)
+MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_PUT_ARRAY_TEST_SRC)		\
+					   $(MEMORY_MEMORY_PUT_ARRAY_OBJ_PREQS) 	\
+					   $(UNITY_OBJ_PREQS)
+MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ_PREQS	:= $(MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC)		\
+					   $(MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ_PREQS)
+MEMORY_MEMORY_PUT_ARRAY_TEST_BIN_PREQS	:= $(MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ)		\
+					   $(MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ)		\
+					   $(MEMORY_MEMORY_PUT_ARRAY_OBJ_GROUP)		\
+					   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(MEMORY_MEMORY_PUT_ARRAY_TEST_BIN)
+TARGETS			+= $(MEMORY_MEMORY_PUT_ARRAY_OBJ)		\
+			   $(MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC)		\
+			   $(MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ)		\
+			   $(MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ)		\
+			   $(MEMORY_MEMORY_PUT_ARRAY_TEST_BIN)
+
+
 # memory/memory_swap
 # ──────────────────────────────────────────────────────────────────────────────
 MEMORY_MEMORY_SWAP_SRC 		:= $(call HELPER_SOURCE_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_HDR		:= $(call HELPER_HEADER_PATH,memory memory_swap)
-MEMORY_MEMORY_SWAP_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_swap_width)
 MEMORY_MEMORY_SWAP_OBJ 		:= $(call HELPER_OBJECT_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_swap)
 MEMORY_MEMORY_SWAP_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_swap)
@@ -420,9 +498,10 @@ MEMORY_MEMORY_SWAP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_swap
 # ─────────────── target prequisites ───────────────────────────────────────────
 MEMORY_MEMORY_SWAP_OBJ_PREQS		:= $(MEMORY_MEMORY_SWAP_SRC) 		\
 			   	   	   $(MEMORY_MEMORY_SWAP_HDR)		\
-			   	   	   $(MEMORY_MEMORY_SWAP_WIDTH_HDR)
+			   	   	   $(MEMORY_MEMORY_SWAP_WIDTH_HDR)	\
+					   $(MEMORY_MEMORY_COPY_ARRAY_HDR)
 MEMORY_MEMORY_SWAP_OBJ_GROUP		:= $(MEMORY_MEMORY_SWAP_OBJ)		\
-					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)
+					   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)
 MEMORY_MEMORY_SWAP_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_SWAP_TEST_SRC)	\
 					   $(TEST_RUNNER_SOURCE_DIR)
 MEMORY_MEMORY_SWAP_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_SWAP_TEST_SRC)	\
@@ -598,6 +677,7 @@ STRING_STRING_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,string string_ut
 # ─────────────── target prequisites ───────────────────────────────────────────
 STRING_STRING_UTILS_OBJ_PREQS		:= $(STRING_STRING_UTILS_SRC) 			\
 			   		   $(STRING_STRING_UTILS_HDR)			\
+			   		   $(MEMORY_MEMORY_PUT_ARRAY_HDR)		\
 			   		   $(UTILS_TYPES_WORD_PATTERN_HDR)		\
 			   		   $(STRING_INT_STRING_ATTRS_HDR)		\
 			   		   $(STRING_PTR_STRING_ATTRS_HDR)		\
@@ -605,6 +685,7 @@ STRING_STRING_UTILS_OBJ_PREQS		:= $(STRING_STRING_UTILS_SRC) 			\
 			   		   $(STRING_UTF8_UTILS_HDR)			\
 			   		   $(STRING_STRING_MACROS_HDR)
 STRING_STRING_UTILS_OBJ_GROUP		:= $(STRING_STRING_UTILS_OBJ)			\
+			   		   $(MEMORY_MEMORY_PUT_ARRAY_OBJ_GROUP)		\
 					   $(STRING_ASCII_UTILS_OBJ_GROUP)		\
 					   $(STRING_UTF8_UTILS_OBJ_GROUP)
 STRING_STRING_UTILS_TRNR_SRC_PREQS	:= $(STRING_STRING_UTILS_TEST_SRC)		\
@@ -750,11 +831,13 @@ THREAD_THREAD_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_uti
 # ─────────────── target prequisites ───────────────────────────────────────────
 THREAD_THREAD_UTILS_OBJ_PREQS		:= $(THREAD_THREAD_UTILS_SRC)			\
 			   	   	   $(THREAD_THREAD_UTILS_HDR)			\
+			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_HDR)		\
 			   	   	   $(TIME_TIME_UTILS_HDR)			\
 			   	   	   $(UTILS_HANDLE_UTILS_HDR)			\
 			   	   	   $(UTILS_FAIL_SWITCH_CLOSE_HDR)
 THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_UTILS_OBJ)			\
-			   	   	   $(TIME_TIME_UTILS_OBJ)
+			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)	\
+			   	   	   $(TIME_TIME_UTILS_OBJ_GROUP)
 THREAD_THREAD_UTILS_TRNR_SRC_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 THREAD_THREAD_UTILS_TEST_OBJ_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
@@ -1331,6 +1414,16 @@ $(RANDOM_RANDOM_OBJ): $(RANDOM_RANDOM_OBJ_PREQS)
 $(RANDOM_PCG_BASIC_OBJ): $(RANDOM_PCG_BASIC_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make memory/memory_put_array object
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_PUT_ARRAY_OBJ): $(MEMORY_MEMORY_PUT_ARRAY_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make memory/memory_copy_array object
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_COPY_ARRAY_OBJ): $(MEMORY_MEMORY_COPY_ARRAY_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make memory/memory_swap object
 # ──────────────────────────────────────────────────────────────────────────────
 $(MEMORY_MEMORY_SWAP_OBJ): $(MEMORY_MEMORY_SWAP_OBJ_PREQS)
@@ -1746,6 +1839,46 @@ $(RANDOM_PCG_BASIC_TEST_OBJ): $(RANDOM_PCG_BASIC_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(RANDOM_PCG_BASIC_TRNR_SRC): $(RANDOM_PCG_BASIC_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for memory/memory_put_array
+# make:
+# 	memory_memory_put_array_test		binary,
+# 	memory_memory_put_array_test_runner 	object,
+# 	memory_memory_put_array_test		object, and
+# 	memory_memory_put_array_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_PUT_ARRAY_TEST_BIN): $(MEMORY_MEMORY_PUT_ARRAY_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ): $(MEMORY_MEMORY_PUT_ARRAY_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ): $(MEMORY_MEMORY_PUT_ARRAY_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC): $(MEMORY_MEMORY_PUT_ARRAY_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for memory/memory_copy_array
+# make:
+# 	memory_memory_copy_array_test		binary,
+# 	memory_memory_copy_array_test_runner 	object,
+# 	memory_memory_copy_array_test		object, and
+# 	memory_memory_copy_array_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_COPY_ARRAY_TEST_BIN): $(MEMORY_MEMORY_COPY_ARRAY_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ): $(MEMORY_MEMORY_COPY_ARRAY_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ): $(MEMORY_MEMORY_COPY_ARRAY_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC): $(MEMORY_MEMORY_COPY_ARRAY_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

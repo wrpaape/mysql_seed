@@ -1,11 +1,11 @@
-#ifndef MEMORY_UTILS_MEMORY_UTILS_H_
-#define MEMORY_UTILS_MEMORY_UTILS_H_
+#ifndef MYSQL_SEED_MEMORY_MEMORY_UTILS_H_
+#define MYSQL_SEED_MEMORY_MEMORY_UTILS_H_
 
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #include "utils/utils.h"	/* m/c/realloc/free */
-#include "utils/types/width.h"	/* OCTET_CHAR, word_t, WORD_WIDTH/SIZE */
+#include "utils/types/width.h"	/* OCTET_CHAR, word_t */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
@@ -81,4 +81,4 @@ inline void *memory_offset(const void *const restrict pointer,
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * HELPER FUNCTIONS */
 
-#endif /* ifndef MEMORY_UTILS_MEMORY_UTILS_H_ */
+#endif /* ifndef MYSQL_SEED_MEMORY_MEMORY_UTILS_H_ */

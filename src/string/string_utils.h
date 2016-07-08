@@ -4,8 +4,8 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include <stddef.h>			/* size_t */
 #include <unistd.h>			/* ssize_t */
+#include "memory/memory_put_array.h"	/* memory_put, size_t */
 #include "utils/types/word_pattern.h"	/* WordPattern/Ptr, word_attrs */
 #include "string/int_string_attrs.h"	/* integer string attributes */
 #include "string/ptr_string_attrs.h"	/* pointer string attributes */
@@ -520,6 +520,16 @@ put_string_until(char *restrict buffer,
 	}
 
 	return buffer;
+}
+
+inline char *
+put_string_size(char *restrict buffer,
+		const char *restrict string,
+		const size_t size)
+{
+	return (char *) memory_put(buffer,
+				   string,
+				   size);
 }
 
 inline char *

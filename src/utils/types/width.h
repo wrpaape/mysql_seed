@@ -15,8 +15,7 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #ifndef OCTET_CHAR
-#	error "Width<WIDTH> types are not defined - "
-	      "unsupported CHAR_BIT"
+#	error "Width<WIDTH> types are not defined - unsupported CHAR_BIT"
 #endif /* ifndef WORD_SIZE */
 
 /* byte buffers where sizeof(Width<WIDTH>) = WIDTH

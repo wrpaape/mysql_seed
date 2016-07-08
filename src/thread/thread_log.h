@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "thread/thread_utils.h"	/* Mutex, memcpy  */
+#include "thread/thread_utils.h"	/* Mutex */
 #include "string/string_utils.h"	/* string utils */
 #include "system/file_utils.h"		/* write */
 
@@ -384,16 +384,15 @@ thread_log_init(struct ThreadLog *const restrict log,
 {
 	mutex_init(&log->lock);
 
-	(void) memcpy(&log->buffer[0],
-		      &thread_log_buffer_prototype,
-		      sizeof(thread_log_buffer_prototype));
+	log->current_ptr = put_string_size(&log->buffer[0],
+					   &thread_log_buffer_prototype,
+					   sizeof(thread_log_buffer_prototype));
 
 	thread_log_init_label(log,
 			      name);
 
-	log->current_ptr =
-		put_string(&log->buffer[sizeof(THREAD_LOG_OPEN_HEADER) - 1],
-			   &log->label[0]);
+	log->current_ptr = put_string(log->current_ptr,
+				      &log->label[0]);
 
 	log->current_ptr = put_string(log->current_ptr,
 				      THREAD_LOG_HEADER_2);

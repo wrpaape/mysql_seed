@@ -1,5 +1,5 @@
-#ifndef MEMORY_UTILS_MEMORY_SWAP_H_
-#define MEMORY_UTILS_MEMORY_SWAP_H_
+#ifndef MYSQL_SEED_MEMORY_MEMORY_SWAP_H_
+#define MYSQL_SEED_MEMORY_MEMORY_SWAP_H_
 
 /* macros defined with leading underscores used for keeping consistency between
  * declarations and definitions with 'memory_swap.c', not needed for interface */
@@ -8,6 +8,7 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #include "memory/memory_swap_width.h" /* Width<WIDTH>, MEMORY_SWAP_WIDTH */
+#include "memory/memory_copy_array.h" /* Width<WIDTH>, memory_copy */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
@@ -66,9 +67,9 @@ inline void memory_swap_width(void *const restrict x,
 			      const size_t width)
 {
 	Width1 buffer[width];
-	memcpy(&buffer[0l], x,		 width);
-	memcpy(x,	    y,		 width);
-	memcpy(y,	    &buffer[0l], width);
+	memory_copy(&buffer[0l], x,	      width);
+	memory_copy(x,		 y,	      width);
+	memory_copy(y,		 &buffer[0l], width);
 }
 
 /* same as 'memory_swap_width' except 'buffer' is provided by caller, not
@@ -78,9 +79,9 @@ inline void memory_swap_buffer(void *const restrict x,
 			       void *const restrict buffer,
 			       const size_t width)
 {
-	memcpy(buffer, x,      width);
-	memcpy(x,      y,      width);
-	memcpy(y,      buffer, width);
+	memory_copy(buffer, x,      width);
+	memory_copy(x,      y,      width);
+	memory_copy(y,      buffer, width);
 }
 
 inline MemorySwap *assign_memory_swap(const size_t width)
@@ -200,4 +201,4 @@ inline void memory_swap16(void *const restrict x,
  * HELPER FUNCTIONS */
 
 
-#endif /* ifndef MEMORY_UTILS_MEMORY_SWAP_H_ */
+#endif /* ifndef MYSQL_SEED_MEMORY_MEMORY_SWAP_H_ */

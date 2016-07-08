@@ -12,9 +12,9 @@ is_utf8_code_point(const char *const restrict bytes);
 extern bool
 is_utf8_string(const char *const restrict bytes);
 
-static inline size_t
+extern inline size_t
 utf8_string_size(const char *const restrict bytes);
 
-static inline size_t
+extern inline size_t
 utf8_string_size_length(const char *const restrict bytes,
-			size_t length)
+			size_t length);

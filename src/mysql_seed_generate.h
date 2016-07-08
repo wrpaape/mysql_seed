@@ -13,22 +13,49 @@
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define INVALID_DATABASE_FLAG_HEADER INVALID_FLAG_HEADER("DATABASE")
-#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_HEADER("DATABASE")
+#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_MESSAGE("DATABASE")
 
-/* print error  messsage and return 'EXIT_FAILURE'
+/* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-static inline int
-print_no_database_flag(void);
+inline int
+print_no_database_flag(void)
+{
+	write_muffle(STDERR_FILENO,
+		     NO_DATABASE_FLAG_MESSAGE,
+		     sizeof(NO_DATABASE_FLAG_MESSAGE));
 
-static inline int
-print_invalid_database_flag(char *const restrict database_flag);
+	return EXIT_FAILURE;
+}
+
+inline int
+print_invalid_database_flag(char *const restrict database_flag)
+{
+	char buffer[128] = {
+		INVALID_DATABASE_FLAG_HEADER
+	};
+
+	char *restrict
+	ptr = put_string_inspect(&buffer[sizeof(INVALID_DATABASE_FLAG_HEADER)],
+				 database_flag,
+				 FLAG_LENGTH_MAX);
+
+	ptr = (char *restrict) memory_put(ptr,
+					  MORE_INFO_MESSAGE,
+					  sizeof(MORE_INFO_MESSAGE) - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+
+	return EXIT_FAILURE;
+}
 
 
 /* dispatch generate mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 generate_dispatch(char *const restrict *const restrict arg_ptr,
-		  char *const restrict *const restrict until_ptr);
+		  char *const restrict *const restrict until_ptr)
 {
 	if (arg_ptr == until_ptr)
 		return print_no_database_flag();

@@ -4,6 +4,7 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
+#include <stddef.h>		/* size_t */
 #include <errno.h>		/* errno */
 #include <stdbool.h>		/* bool */
 #include "utils/types/octet.h"	/* stdint, octet_t */

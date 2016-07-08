@@ -6,7 +6,6 @@
 #include <pthread.h>		/* threads API */
 #include <errno.h>		/* error codes, errno */
 #include <limits.h>		/* PTHREAD_THREADS_MAX */
-#include <string.h>		/* memcpy */
 #include <stdbool.h>		/* bool */
 #include "time/time_utils.h"	/* timespec, time utils */
 #include "mysql_seed_exit.h"	/* SeedExitSpec, string helper macros */
@@ -104,7 +103,7 @@ pthread_mutex_lock(MUTEX)
 pthread_mutex_unlock(MUTEX)
 
 #define seed_mutex_init_imp(MUTEX)				\
-memcpy(MUTEX, &seed_mutex_prototype, sizeof(seed_mutex_prototype))
+memory_copy(MUTEX, &seed_mutex_prototype, sizeof(seed_mutex_prototype))
 
 #define seed_thread_attr_init_imp(ATTR)				\
 pthread_attr_init(ATTR)
@@ -116,7 +115,7 @@ pthread_attr_setdetachstate(ATTR, STATE)
 pthread_attr_destroy(ATTR)
 
 #define seed_thread_cond_init_imp(COND)				\
-memcpy(COND, &seed_thread_cond_prototype, sizeof(seed_thread_cond_prototype))
+memory_copy(COND, &seed_thread_cond_prototype, sizeof(seed_thread_cond_prototype))
 
 #define seed_thread_cond_signal_imp(COND)			\
 pthread_cond_signal(COND)
