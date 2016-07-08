@@ -11,59 +11,14 @@ exit_help_load(void);
 
 /* print help message, return success status
  *─────────────────────────────────────────────────────────────────────────── */
-inline int
-print_help_usage(void)
-{
-	const char *restrict failure;
+extern inline int
+print_help_usage(void);
 
-	if (write_report(STDOUT_FILENO,
-			 HELP_USAGE_MESSAGE,
-			 sizeof(HELP_USAGE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
+extern inline int
+print_help_generate(void);
 
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
-
-inline int
-print_help_generate(void)
-{
-	const char *restrict failure;
-
-	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
-
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
-
-inline int
-print_help_load(void)
-{
-	const char *restrict failure;
-
-	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
-
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
+extern inline int
+print_help_load(void);
 
 
 /* dispatch help mode according to 'arg_ptr'

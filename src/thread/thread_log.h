@@ -385,7 +385,7 @@ thread_log_init(struct ThreadLog *const restrict log,
 	mutex_init(&log->lock);
 
 	log->current_ptr = put_string_size(&log->buffer[0],
-					   &thread_log_buffer_prototype,
+					   &thread_log_buffer_prototype[0],
 					   sizeof(thread_log_buffer_prototype));
 
 	thread_log_init_label(log,

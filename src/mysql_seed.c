@@ -36,7 +36,7 @@ mode_dispatch(char *restrict *const restrict arg_ptr,
 		       : print_invalid_mode_flag(mode_flag);
 
 	case 'l': return (*rem == '\0')
-		       ? generate_load(arg_ptr + 1l, until_ptr)
+		       ? load_dispatch(arg_ptr + 1l, until_ptr)
 		       : print_invalid_mode_flag(mode_flag);
 
 	default:  return print_invalid_mode_flag(mode_flag);
@@ -53,7 +53,7 @@ mode_dispatch(char *restrict *const restrict arg_ptr,
 		       : print_invalid_mode_flag(mode_flag);
 
 	case 'l': return strings_equal("oad",	  rem + 1l)
-		       ? generate_load(arg_ptr + 1l, until_ptr)
+		       ? load_dispatch(arg_ptr + 1l, until_ptr)
 		       : print_invalid_mode_flag(mode_flag);
 
 	default:  return print_invalid_mode_flag(mode_flag);

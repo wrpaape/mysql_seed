@@ -10,7 +10,7 @@
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define INVALID_MODE_FLAG_HEADER INVALID_FLAG_HEADER("MODE")
-#define NO_MODE_FLAG_MESSAGE NO_FLAG_HEADER("MODE")
+#define NO_MODE_FLAG_MESSAGE NO_FLAG_MESSAGE("MODE")
 
 static inline int
 mode_dispatch(char *restrict *const restrict arg_ptr,

@@ -11,7 +11,7 @@
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define INVALID_DATABASE_FLAG_HEADER INVALID_FLAG_HEADER("DATABASE")
-#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_HEADER("DATABASE")
+#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_MESSAGE("DATABASE")
 
 /* print error  messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
