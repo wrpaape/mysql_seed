@@ -3,7 +3,8 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "system/exit_utils.h"	/* exit, file, string utils */
+#include "mysql_seed_input.h"	/* handle input strings */
+
 
 #define _H1_(STRING) UNDERLINE_WRAP(STRING) "\n"
 #define _H2_(STRING) "\t" ANSI_WRAP(BRIGHT, STRING) "\n"
@@ -84,62 +85,6 @@ _H1_("MYSQL_ARGS")							\
 _P1_("TODO")
 
 
-/* print help, return success status
- *─────────────────────────────────────────────────────────────────────────── */
-inline int
-print_help_usage(void)
-{
-	const char *restrict failure;
-
-	if (write_report(STDOUT_FILENO,
-			 HELP_USAGE_MESSAGE,
-			 sizeof(HELP_USAGE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
-
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
-
-inline int
-print_help_generate(void)
-{
-	const char *restrict failure;
-
-	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
-
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
-
-inline int
-print_help_load(void)
-{
-	const char *restrict failure;
-
-	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
-			 &failure))
-		return EXIT_SUCCESS;
-
-	write_muffle(STDERR_FILENO,
-		     failure,
-		     string_size(failure));
-
-	return EXIT_FAILURE;
-}
-
 /* print help then exit on success
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -166,7 +111,19 @@ exit_help_load(void)
 	__builtin_unreachable();
 }
 
-/* dispatch help according to 'arg_ptr'
+/* print help message, return success status
+ *─────────────────────────────────────────────────────────────────────────── */
+static inline int
+print_help_usage(void);
+
+static inline int
+print_help_generate(void);
+
+static inline int
+print_help_load(void);
+
+
+/* dispatch help mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 help_dispatch(char *const restrict *const restrict arg_ptr,
@@ -176,10 +133,9 @@ help_dispatch(char *const restrict *const restrict arg_ptr,
 		return print_help_usage();
 
 	char *const restrict mode = *arg_ptr;
-	char *const restrict rem	= mode + 1l;
+	char *const restrict rem  = mode + 1l;
 
 	switch (*mode) {
-
 	case 'g': return ((*rem == '\0') || strings_equal("enerate", rem))
 		       ? print_help_generate()
 		       : print_help_usage();

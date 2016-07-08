@@ -10,6 +10,7 @@
 #include "string/int_string_attrs.h"	/* integer string attributes */
 #include "string/ptr_string_attrs.h"	/* pointer string attributes */
 #include "string/ascii_utils.h"		/* bool, ascii macros, groups, sets */
+#include "string/utf8_utils.h"		/* utf8 validators, utils */
 #include "string/string_macros.h"	/* string helper macros */
 
 #if !HAVE_INT_STRING_ATTRS

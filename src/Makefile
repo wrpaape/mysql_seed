@@ -550,6 +550,41 @@ TARGETS			+= $(STRING_ASCII_UTILS_OBJ)					\
 			   $(STRING_ASCII_UTILS_TEST_BIN)
 
 
+# string/utf8_utils
+# ──────────────────────────────────────────────────────────────────────────────
+STRING_UTF8_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string utf8_utils)
+STRING_UTF8_UTILS_HDR		:= $(call HELPER_HEADER_PATH,string utf8_utils)
+STRING_UTF8_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,string utf8_utils)
+STRING_UTF8_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,string utf8_utils)
+STRING_UTF8_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,string utf8_utils)
+STRING_UTF8_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,string utf8_utils)
+STRING_UTF8_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,string utf8_utils)
+STRING_UTF8_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string utf8_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+STRING_UTF8_UTILS_OBJ_PREQS		:= $(STRING_UTF8_UTILS_SRC) 			\
+			   		   $(STRING_UTF8_UTILS_HDR)			\
+					   $(UTILS_TYPES_OCTET_HDR)
+STRING_UTF8_UTILS_OBJ_GROUP		:= $(STRING_UTF8_UTILS_OBJ)
+STRING_UTF8_UTILS_TRNR_SRC_PREQS	:= $(STRING_UTF8_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+STRING_UTF8_UTILS_TEST_OBJ_PREQS	:= $(STRING_UTF8_UTILS_TEST_SRC)		\
+			   		   $(STRING_UTF8_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+STRING_UTF8_UTILS_TRNR_OBJ_PREQS	:= $(STRING_UTF8_UTILS_TRNR_SRC)		\
+			   		   $(STRING_UTF8_UTILS_TEST_OBJ_PREQS)
+STRING_UTF8_UTILS_TEST_BIN_PREQS	:= $(STRING_UTF8_UTILS_TRNR_OBJ)		\
+			   		   $(STRING_UTF8_UTILS_TEST_OBJ)		\
+			   		   $(STRING_UTF8_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(STRING_UTF8_UTILS_TEST_BIN)
+TARGETS			+= $(STRING_UTF8_UTILS_OBJ)					\
+			   $(STRING_UTF8_UTILS_TRNR_SRC)				\
+			   $(STRING_UTF8_UTILS_TRNR_OBJ)				\
+			   $(STRING_UTF8_UTILS_TEST_OBJ)				\
+			   $(STRING_UTF8_UTILS_TEST_BIN)
+
+
 # string/string_utils
 # ──────────────────────────────────────────────────────────────────────────────
 STRING_STRING_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string string_utils)
@@ -567,9 +602,11 @@ STRING_STRING_UTILS_OBJ_PREQS		:= $(STRING_STRING_UTILS_SRC) 			\
 			   		   $(STRING_INT_STRING_ATTRS_HDR)		\
 			   		   $(STRING_PTR_STRING_ATTRS_HDR)		\
 			   		   $(STRING_ASCII_UTILS_HDR)			\
+			   		   $(STRING_UTF8_UTILS_HDR)			\
 			   		   $(STRING_STRING_MACROS_HDR)
 STRING_STRING_UTILS_OBJ_GROUP		:= $(STRING_STRING_UTILS_OBJ)			\
-					   $(STRING_ASCII_UTILS_OBJ_GROUP)
+					   $(STRING_ASCII_UTILS_OBJ_GROUP)		\
+					   $(STRING_UTF8_UTILS_OBJ_GROUP)
 STRING_STRING_UTILS_TRNR_SRC_PREQS	:= $(STRING_STRING_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 STRING_STRING_UTILS_TEST_OBJ_PREQS	:= $(STRING_STRING_UTILS_TEST_SRC)		\
@@ -982,74 +1019,112 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 
 ## PROJECT MODULES
 # ══════════════════════════════════════════════════════════════════════════════
+# mysql_seed_input
+# ──────────────────────────────────────────────────────────────────────────────
+INPUT_SRC 		:= $(call PROJECT_SOURCE_PATH,input)
+INPUT_HDR		:= $(call PROJECT_HEADER_PATH,input)
+INPUT_OBJ 		:= $(call PROJECT_OBJECT_PATH,input)
+INPUT_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,input)
+INPUT_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,input)
+INPUT_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,input)
+INPUT_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,input)
+INPUT_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,input)
+# ─────────────── target prequisites ───────────────────────────────────────────
+INPUT_OBJ_PREQS		:= $(INPUT_SRC) 				\
+			   $(INPUT_HDR) 				\
+			   $(SYSTEM_EXIT_UTILS_HDR)
+INPUT_OBJ_GROUP		:= $(INPUT_OBJ)					\
+			   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)
+INPUT_TRNR_SRC_PREQS	:= $(INPUT_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+INPUT_TEST_OBJ_PREQS	:= $(INPUT_TEST_SRC)				\
+			   $(INPUT_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+INPUT_TRNR_OBJ_PREQS	:= $(INPUT_TRNR_SRC)				\
+			   $(INPUT_TEST_OBJ_PREQS)
+INPUT_TEST_BIN_PREQS	:= $(INPUT_TRNR_OBJ)				\
+			   $(INPUT_TEST_OBJ)				\
+			   $(INPUT_OBJ_GROUP)				\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(INPUT_TEST_BIN)
+TARGETS			+= $(INPUT_OBJ)					\
+			   $(INPUT_TRNR_SRC)				\
+			   $(INPUT_TRNR_OBJ)				\
+			   $(INPUT_TEST_OBJ)				\
+			   $(INPUT_TEST_BIN)
+
+
 # mysql_seed_generate
 # ──────────────────────────────────────────────────────────────────────────────
-# GENERATE_SRC 		:= $(call PROJECT_SOURCE_PATH,generate)
-# GENERATE_HDR		:= $(call PROJECT_HEADER_PATH,generate)
-# GENERATE_OBJ 		:= $(call PROJECT_OBJECT_PATH,generate)
-# GENERATE_TEST_SRC	:= $(call PROJECT_TEST_SOURCE_PATH,generate)
-# GENERATE_TRNR_SRC	:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,generate)
-# GENERATE_TRNR_OBJ	:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,generate)
-# GENERATE_TEST_OBJ	:= $(call PROJECT_TEST_OBJECT_PATH,generate)
-# GENERATE_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,generate)
-# # ─────────────── target prequisites ───────────────────────────────────────────
-# GENERATE_OBJ_PREQS	:= $(GENERATE_SRC) 				\
-# 			   $(GENERATE_HDR) 				\
-# 			   $(MODE_HDR)
-# GENERATE_OBJ_GROUP	:= $(GENERATE_OBJ)
-# GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_TEST_SRC)				\
-# 			   $(TEST_RUNNER_SOURCE_DIR)
-# GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_TEST_SRC)				\
-# 			   $(GENERATE_OBJ_PREQS) 			\
-# 			   $(UNITY_OBJ_PREQS)
-# GENERATE_TRNR_OBJ_PREQS	:= $(GENERATE_TRNR_SRC)				\
-# 			   $(GENERATE_TEST_OBJ_PREQS)
-# GENERATE_TEST_BIN_PREQS	:= $(GENERATE_TRNR_OBJ)				\
-# 			   $(GENERATE_TEST_OBJ)				\
-# 			   $(GENERATE_OBJ_GROUP)			\
-# 			   $(UNITY_OBJ)
-# # ─────────────── targets ──────────────────────────────────────────────────────
-# TEST_BINARIES		+= $(GENERATE_TEST_BIN)
-# TARGETS			+= $(GENERATE_OBJ)				\
-# 			   $(GENERATE_TRNR_SRC)				\
-# 			   $(GENERATE_TRNR_OBJ)				\
-# 			   $(GENERATE_TEST_OBJ)				\
-# 			   $(GENERATE_TEST_BIN)
+GENERATE_SRC 		:= $(call PROJECT_SOURCE_PATH,generate)
+GENERATE_HDR		:= $(call PROJECT_HEADER_PATH,generate)
+GENERATE_OBJ 		:= $(call PROJECT_OBJECT_PATH,generate)
+GENERATE_TEST_SRC	:= $(call PROJECT_TEST_SOURCE_PATH,generate)
+GENERATE_TRNR_SRC	:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,generate)
+GENERATE_TRNR_OBJ	:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,generate)
+GENERATE_TEST_OBJ	:= $(call PROJECT_TEST_OBJECT_PATH,generate)
+GENERATE_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,generate)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_OBJ_PREQS	:= $(GENERATE_SRC) 				\
+			   $(GENERATE_HDR) 				\
+			   $(INPUT_HDR)
+GENERATE_OBJ_GROUP	:= $(GENERATE_OBJ)				\
+			   $(INPUT_OBJ_GROUP)
+GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_TEST_SRC)				\
+			   $(GENERATE_OBJ_PREQS) 			\
+			   $(UNITY_OBJ_PREQS)
+GENERATE_TRNR_OBJ_PREQS	:= $(GENERATE_TRNR_SRC)				\
+			   $(GENERATE_TEST_OBJ_PREQS)
+GENERATE_TEST_BIN_PREQS	:= $(GENERATE_TRNR_OBJ)				\
+			   $(GENERATE_TEST_OBJ)				\
+			   $(GENERATE_OBJ_GROUP)			\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_TEST_BIN)
+TARGETS			+= $(GENERATE_OBJ)				\
+			   $(GENERATE_TRNR_SRC)				\
+			   $(GENERATE_TRNR_OBJ)				\
+			   $(GENERATE_TEST_OBJ)				\
+			   $(GENERATE_TEST_BIN)
 
 
 # mysql_seed_load
 # ──────────────────────────────────────────────────────────────────────────────
-# LOAD_SRC 		:= $(call PROJECT_SOURCE_PATH,load)
-# LOAD_HDR		:= $(call PROJECT_HEADER_PATH,load)
-# LOAD_OBJ 		:= $(call PROJECT_OBJECT_PATH,load)
-# LOAD_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,load)
-# LOAD_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,load)
-# LOAD_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,load)
-# LOAD_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,load)
-# LOAD_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,load)
-# # ─────────────── target prequisites ───────────────────────────────────────────
-# LOAD_OBJ_PREQS		:= $(LOAD_SRC) 					\
-# 			   $(LOAD_HDR) 					\
-# 			   $(MODE_HDR)
-# LOAD_OBJ_GROUP		:= $(LOAD_OBJ)
-# LOAD_TRNR_SRC_PREQS	:= $(LOAD_TEST_SRC)				\
-# 			   $(TEST_RUNNER_SOURCE_DIR)
-# LOAD_TEST_OBJ_PREQS	:= $(LOAD_TEST_SRC)				\
-# 			   $(LOAD_OBJ_PREQS) 				\
-# 			   $(UNITY_OBJ_PREQS)
-# LOAD_TRNR_OBJ_PREQS	:= $(LOAD_TRNR_SRC)				\
-# 			   $(LOAD_TEST_OBJ_PREQS)
-# LOAD_TEST_BIN_PREQS	:= $(LOAD_TRNR_OBJ)				\
-# 			   $(LOAD_TEST_OBJ)				\
-# 			   $(LOAD_OBJ)					\
-# 			   $(UNITY_OBJ)
-# # ─────────────── targets ──────────────────────────────────────────────────────
-# TEST_BINARIES		+= $(LOAD_TEST_BIN)
-# TARGETS			+= $(LOAD_OBJ)					\
-# 			   $(LOAD_TRNR_SRC)				\
-# 			   $(LOAD_TRNR_OBJ)				\
-# 			   $(LOAD_TEST_OBJ)				\
-# 			   $(LOAD_TEST_BIN)
+LOAD_SRC 		:= $(call PROJECT_SOURCE_PATH,load)
+LOAD_HDR		:= $(call PROJECT_HEADER_PATH,load)
+LOAD_OBJ 		:= $(call PROJECT_OBJECT_PATH,load)
+LOAD_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,load)
+LOAD_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,load)
+LOAD_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,load)
+LOAD_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,load)
+LOAD_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,load)
+# ─────────────── target prequisites ───────────────────────────────────────────
+LOAD_OBJ_PREQS		:= $(LOAD_SRC) 					\
+			   $(LOAD_HDR) 					\
+			   $(INPUT_HDR)
+LOAD_OBJ_GROUP		:= $(LOAD_OBJ)					\
+			   $(INPUT_OBJ_GROUP)
+LOAD_TRNR_SRC_PREQS	:= $(LOAD_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+LOAD_TEST_OBJ_PREQS	:= $(LOAD_TEST_SRC)				\
+			   $(LOAD_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+LOAD_TRNR_OBJ_PREQS	:= $(LOAD_TRNR_SRC)				\
+			   $(LOAD_TEST_OBJ_PREQS)
+LOAD_TEST_BIN_PREQS	:= $(LOAD_TRNR_OBJ)				\
+			   $(LOAD_TEST_OBJ)				\
+			   $(LOAD_OBJ)					\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(LOAD_TEST_BIN)
+TARGETS			+= $(LOAD_OBJ)					\
+			   $(LOAD_TRNR_SRC)				\
+			   $(LOAD_TRNR_OBJ)				\
+			   $(LOAD_TEST_OBJ)				\
+			   $(LOAD_TEST_BIN)
 
 
 # mysql_seed_help
@@ -1065,9 +1140,9 @@ HELP_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,help)
 # ─────────────── target prequisites ───────────────────────────────────────────
 HELP_OBJ_PREQS		:= $(HELP_SRC) 					\
 			   $(HELP_HDR) 					\
-			   $(SYSTEM_EXIT_UTILS_HDR)
+			   $(INPUT_HDR)
 HELP_OBJ_GROUP		:= $(HELP_OBJ)					\
-			   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)
+			   $(INPUT_OBJ_GROUP)
 HELP_TRNR_SRC_PREQS	:= $(HELP_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 HELP_TEST_OBJ_PREQS	:= $(HELP_TEST_SRC)				\
@@ -1097,8 +1172,9 @@ PROJECT_OBJ 		:= $(call OBJECT_PATH,$(PROJECT))
 PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
 # ─────────────── target prequisites ───────────────────────────────────────────
 PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
-			   $(HELP_OBJ_GROUP) 
-			   # $(LOAD_OBJ_GROUP)				\
+			   $(HELP_OBJ_GROUP) 				\
+			   $(GENERATE_OBJ_GROUP) 			\
+			   $(LOAD_OBJ_GROUP)				\
 			   # $(HELP_OBJ_GROUP)
 			   # $(GEN_GEN_COUNT_STRING_OBJ) 			\
 			   # $(GEN_GEN_NAMES_OBJ) 			\
@@ -1160,20 +1236,24 @@ $(PROJECT_BIN): $(PROJECT_BIN_PREQS)
 $(PROJECT_OBJ): $(PROJECT_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-
 # make mysql_seed_generate object
 # ──────────────────────────────────────────────────────────────────────────────
-# $(GENERATE_OBJ): $(GENERATE_OBJ_PREQS)
-# 	$(CC) $(CC_FLAGS) -c $< -o $@
+$(GENERATE_OBJ): $(GENERATE_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_load object
 # ──────────────────────────────────────────────────────────────────────────────
-# $(LOAD_OBJ): $(LOAD_OBJ_PREQS)
-# 	$(CC) $(CC_FLAGS) -c $< -o $@
+$(LOAD_OBJ): $(LOAD_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_help object
 # ──────────────────────────────────────────────────────────────────────────────
 $(HELP_OBJ): $(HELP_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_input object
+# ──────────────────────────────────────────────────────────────────────────────
+$(INPUT_OBJ): $(INPUT_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make thread/thread_pool object
@@ -1236,6 +1316,11 @@ $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
 $(STRING_ASCII_UTILS_OBJ): $(STRING_ASCII_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make string/utf8_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(STRING_UTF8_UTILS_OBJ): $(STRING_UTF8_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make random/random object
 # ──────────────────────────────────────────────────────────────────────────────
 $(RANDOM_RANDOM_OBJ): $(RANDOM_RANDOM_OBJ_PREQS)
@@ -1291,17 +1376,17 @@ $(TEST_RUNNER_SOURCE_DIR):
 # 	mysql_seed_generate_test		object, and
 # 	mysql_seed_generate_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-# $(GENERATE_TEST_BIN): $(GENERATE_TEST_BIN_PREQS)
-# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+$(GENERATE_TEST_BIN): $(GENERATE_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-# $(GENERATE_TRNR_OBJ): $(GENERATE_TRNR_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_TRNR_OBJ): $(GENERATE_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GENERATE_TEST_OBJ): $(GENERATE_TEST_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_TEST_OBJ): $(GENERATE_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GENERATE_TRNR_SRC): $(GENERATE_TRNR_SRC_PREQS)
-# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+$(GENERATE_TRNR_SRC): $(GENERATE_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
 # for mysql_seed_load
@@ -1311,17 +1396,17 @@ $(TEST_RUNNER_SOURCE_DIR):
 # 	mysql_seed_load_test		object, and
 # 	mysql_seed_load_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-# $(LOAD_TEST_BIN): $(LOAD_TEST_BIN_PREQS)
-# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+$(LOAD_TEST_BIN): $(LOAD_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-# $(LOAD_TRNR_OBJ): $(LOAD_TRNR_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(LOAD_TRNR_OBJ): $(LOAD_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(LOAD_TEST_OBJ): $(LOAD_TEST_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(LOAD_TEST_OBJ): $(LOAD_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(LOAD_TRNR_SRC): $(LOAD_TRNR_SRC_PREQS)
-# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+$(LOAD_TRNR_SRC): $(LOAD_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
 # for mysql_seed_help
@@ -1341,6 +1426,26 @@ $(HELP_TEST_OBJ): $(HELP_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(HELP_TRNR_SRC): $(HELP_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for mysql_seed_input
+# make:
+# 	mysql_seed_input_test		binary,
+# 	mysql_seed_input_test_runner 	object,
+# 	mysql_seed_input_test		object, and
+# 	mysql_seed_input_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(INPUT_TEST_BIN): $(INPUT_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(INPUT_TRNR_OBJ): $(INPUT_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(INPUT_TEST_OBJ): $(INPUT_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(INPUT_TRNR_SRC): $(INPUT_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
@@ -1521,6 +1626,26 @@ $(STRING_ASCII_UTILS_TEST_OBJ): $(STRING_ASCII_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(STRING_ASCII_UTILS_TRNR_SRC): $(STRING_ASCII_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for string/utf8_utils
+# make:
+# 	string_utf8_utils_test		binary,
+# 	string_utf8_utils_test_runner 	object,
+# 	string_utf8_utils_test		object, and
+# 	string_utf8_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(STRING_UTF8_UTILS_TEST_BIN): $(STRING_UTF8_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(STRING_UTF8_UTILS_TRNR_OBJ): $(STRING_UTF8_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(STRING_UTF8_UTILS_TEST_OBJ): $(STRING_UTF8_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(STRING_UTF8_UTILS_TRNR_SRC): $(STRING_UTF8_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
