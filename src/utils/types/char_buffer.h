@@ -34,15 +34,6 @@ typedef struct CharBuffer16 { char chars[16]; } CharBuffer16;
  *
  * HELPER MACROS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
-
-#define PUT_CHAR_BUFFER(PTR, BUFFER, WIDTH)			\
-do {								\
-	*((CharBuffer ## WIDTH *restrict) PTR)			\
-	= (CharBuffer ## WIDTH) BUFFER;				\
-	PTR = (__type_of__(PTR))				\
-	      (((CharBuffer ## WIDTH *restrict) PTR) + 1l);	\
-} while (0)
-
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * HELPER MACROS */
 #endif /* ifndef UTILS_TYPES_CHAR_BUFFER_H_ */

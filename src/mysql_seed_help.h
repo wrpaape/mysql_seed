@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "system/exit_utils.h"		/* exit utils, string utils */
+#include "system/exit_utils.h"	/* exit, file, string utils */
 
 #define _H1_(STRING) UNDERLINE_WRAP(STRING) "\n"
 #define _H2_(STRING) "\t" ANSI_WRAP(BRIGHT, STRING) "\n"
@@ -37,8 +37,8 @@ _P3_("mysql_seed --generate --database foo_forum --table users 500 "	\
 _P3_("mysql_seed -g -d baz_shop -t products 100000 -c name STRING"	\
      "-c price FLOAT MIN 0.10")						\
 _H2_("load\t<-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
-_P2_("loads seed files found in directory 'db" PATH_DELIM "DB_NAME' "	\
-     " into the mysql database 'DB_NAME'")				\
+_P2_("loads seed files found in directory 'db" PATH_DELIM_STRING	\
+     "DB_NAME' into the mysql database 'DB_NAME'")			\
 _P2_("examples:")							\
 _P3_("TODO")								\
 "\n"									\
@@ -84,7 +84,63 @@ _H1_("MYSQL_ARGS")							\
 _P1_("TODO")
 
 
-/* help dispatch
+/* print help, return success status
+ *─────────────────────────────────────────────────────────────────────────── */
+inline int
+print_help_usage(void)
+{
+	const char *restrict failure;
+
+	if (write_report(STDOUT_FILENO,
+			 HELP_USAGE_MESSAGE,
+			 sizeof(HELP_USAGE_MESSAGE),
+			 &failure))
+		return EXIT_SUCCESS;
+
+	write_muffle(STDERR_FILENO,
+		     failure,
+		     string_size(failure));
+
+	return EXIT_FAILURE;
+}
+
+inline int
+print_help_generate(void)
+{
+	const char *restrict failure;
+
+	if (write_report(STDOUT_FILENO,
+			 HELP_GENERATE_MESSAGE,
+			 sizeof(HELP_GENERATE_MESSAGE),
+			 &failure))
+		return EXIT_SUCCESS;
+
+	write_muffle(STDERR_FILENO,
+		     failure,
+		     string_size(failure));
+
+	return EXIT_FAILURE;
+}
+
+inline int
+print_help_load(void)
+{
+	const char *restrict failure;
+
+	if (write_report(STDOUT_FILENO,
+			 HELP_GENERATE_MESSAGE,
+			 sizeof(HELP_GENERATE_MESSAGE),
+			 &failure))
+		return EXIT_SUCCESS;
+
+	write_muffle(STDERR_FILENO,
+		     failure,
+		     string_size(failure));
+
+	return EXIT_FAILURE;
+}
+
+/* print help then exit on success
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 exit_help_usage(void)
@@ -108,6 +164,32 @@ exit_help_load(void)
 	exit_success_dump_buffer(HELP_LOAD_MESSAGE,
 				 sizeof(HELP_LOAD_MESSAGE));
 	__builtin_unreachable();
+}
+
+/* dispatch help according to 'arg_ptr'
+ *─────────────────────────────────────────────────────────────────────────── */
+inline int
+help_dispatch(char *const restrict *const restrict arg_ptr,
+	      char *const restrict *const restrict until_ptr)
+{
+	if (arg_ptr == until_ptr)
+		return print_help_usage();
+
+	char *const restrict mode = *arg_ptr;
+	char *const restrict rem	= mode + 1l;
+
+	switch (*mode) {
+
+	case 'g': return ((*rem == '\0') || strings_equal("enerate", rem))
+		       ? print_help_generate()
+		       : print_help_usage();
+
+	case 'l': return ((*rem == '\0') || strings_equal("oad", rem))
+		       ? print_help_load()
+		       : print_help_usage();
+
+	default:  return print_help_usage();
+	}
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_HELP_H_ */

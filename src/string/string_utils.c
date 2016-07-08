@@ -151,7 +151,7 @@ put_char_times_until(char *restrict buffer,
 extern inline char *
 put_string_inspect(char *restrict buffer,
 		   const char *restrict string,
-		   const size_t length);
+		   size_t length);
 extern inline int
 string_compare(const char *restrict string1,
 	       const char *restrict string2);

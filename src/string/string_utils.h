@@ -29,6 +29,16 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
 
 
+/* helper macros
+ *─────────────────────────────────────────────────────────────────────────── */
+#define PUT_STRING_WIDTH(PTR, STRING, WIDTH)				\
+do {									\
+	*((CharBuffer ## WIDTH *restrict) PTR)				\
+	= *((const CharBuffer ## WIDTH *const restrict) STRING);	\
+	PTR = (char *restrict)						\
+	      (((CharBuffer ## WIDTH *restrict) PTR) + 1l);		\
+} while (0)
+
 /* helper functions
  *─────────────────────────────────────────────────────────────────────────── */
 #if HAVE_INT_STRING_ATTRS
@@ -511,14 +521,6 @@ put_string_until(char *restrict buffer,
 	return buffer;
 }
 
-
-inline char *
-put_char_times(char *restrict buffer,
-	       const char byte,
-	       size_t times)
-{
-}
-
 inline char *
 put_char_times(char *const restrict buffer,
 	       const char byte,
@@ -713,16 +715,16 @@ put_char_times_until(char *restrict buffer,
 inline char *
 put_string_inspect(char *restrict buffer,
 		   const char *restrict string,
-		   const size_t length)
+		   size_t length)
 {
 	while (1) {
 		if (*string == '\0')
 			return buffer;
 
 		if (length == 0lu) {
-			PUT_CHAR_BUFFER(buffer,
-					"...",
-					3);
+			PUT_STRING_WIDTH(buffer,
+					 "...",
+					 3);
 			return buffer;
 		}
 

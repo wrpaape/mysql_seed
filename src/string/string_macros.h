@@ -14,11 +14,14 @@
 /* system-dependent path-delimiter */
 #ifdef WIN32
 #	define PATH_DELIM '\\'
+#	define PATH_DELIM_STRING "\\"
 #else
 #	define PATH_DELIM '/'
+#	define PATH_DELIM_STRING "/"
 #endif /* ifdef WIN32 */
 
 #define PUT_PATH_DELIM(PTR) PUT_CHAR(PTR, PATH_DELIM)
+
 
 /* ANSI escape macros
  *─────────────────────────────────────────────────────────────────────────── */
@@ -32,7 +35,7 @@
 /* error macros
  *─────────────────────────────────────────────────────────────────────────── */
 #define ERROR_OPEN		ANSI_BRIGHT ANSI_RED
-#define ERROR_WRAP(STRING)	ERROR_OPEN(STRING) ANSI_RESET
+#define ERROR_WRAP(STRING)	ERROR_OPEN STRING ANSI_RESET
 
 #define ERROR_HEADER_OPEN(SOURCE, TYPE, ...)				\
 "\n" ERROR_OPEN UNDERLINE_WRAP(SOURCE " " TYPE) __VA_ARGS__  "\n"
