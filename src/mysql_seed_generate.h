@@ -43,7 +43,7 @@ print_invalid_database_flag(char *const restrict database_flag)
 
 	ptr = put_string_size(ptr,
 			      MORE_INFO_MESSAGE,
-			      sizeof(MORE_INFO_MESSAGE) - 1lu);
+			      sizeof(MORE_INFO_MESSAGE));
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
