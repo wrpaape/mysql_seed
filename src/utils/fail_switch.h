@@ -55,9 +55,11 @@ _FS_HANDLE_FAILURE_STATUS(STATUS,					\
 								R2,	\
 								R3,	\
 								R4))
+#define FAIL_SWITCH_STATUS_DEFAULT_CASE()				\
+_FS_HANDLE_DEFAULT_CASE()
 
 #define FAIL_SWITCH_STATUS_CLOSE()					\
-_FS_HANDLE_DEFAULT_CASE()						\
+FAIL_SWITCH_STATUS_DEFAULT_CASE()					\
 }
 
 
@@ -92,8 +94,11 @@ _FS_HANDLE_FAILURE_STATUS(ERRNO,					\
 							        R3,	\
 							        R4))
 
+#define FAIL_SWITCH_ERRNO_DEFAULT_CASE()				\
+_FS_HANDLE_DEFAULT_CASE()
+
 #define FAIL_SWITCH_ERRNO_CLOSE()					\
-_FS_HANDLE_DEFAULT_CASE()						\
+FAIL_SWITCH_ERRNO_DEFAULT_CASE()					\
 }
 
 #endif /* ifndef MYSQL_SEED_UTILS_FAIL_SWITCH_H_ */

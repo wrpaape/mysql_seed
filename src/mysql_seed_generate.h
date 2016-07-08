@@ -7,7 +7,7 @@
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
-#define DB_NAME_MAX_LENGTH
+#define DB_NAME_MAX_LENGTH 64lu
 
 
 /* error messages
