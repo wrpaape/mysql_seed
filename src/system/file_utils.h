@@ -81,6 +81,81 @@
  *
  * FUNCTION-LIKE MACROS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
+
+#ifdef WIN32
+/* open a file */
+#	define open_absolute_imp(ABSOLUTE_PATH,				\
+				 OPEN_FLAG)				\
+	_open(ABSOLUTE_PATH, OPEN_FLAG)
+#	define open_absolute_mode_imp(ABSOLUTE_PATH,			\
+				      OPEN_FLAG,			\
+				      MODE)				\
+	_open(ABSOLUTE_PATH, OPEN_FLAG, MODE)
+#	undef open_relative_imp
+#	warning "open_relative undefined"
+#	undef open_relative_mode_imp
+#	warning "open_relative_mode undefined"
+
+/* close a file */
+#	define close_imp(FILE_DESCRIPTOR)				\
+	_close(FILE_DESCRIPTOR)
+#	define close_imp(FILE_DESCRIPTOR)				\
+
+/* make a directory */
+#	define mkdir_absolute_imp(ABSOLUTE_PATH,			\
+				  MODE)					\
+	_mkdir(ABSOLUTE_PATH)
+#	undef mkdir_relative_imp
+#	warning "mkdir_relative undefined"
+
+/* delete a file */
+#	define unlink_absolute_imp(ABSOLUTE_PATH)			\
+	_unlink(ABSOLUTE_PATH)
+#	undef unlink_relative_imp
+#	warning "unlink_relative undefined"
+
+
+#else
+/* open a file */
+#	define open_absolute_imp(ABSOLUTE_PATH,				\
+				 OPEN_FLAG)				\
+	open(ABSOLUTE_PATH, OPEN_FLAG)
+#	define open_absolute_mode_imp(ABSOLUTE_PATH,			\
+				      OPEN_FLAG,			\
+				      MODE)				\
+	open(ABSOLUTE_PATH, OPEN_FLAG, MODE)
+#	define open_relative_imp(DIRECTORY_DESCRIPTOR,			\
+				      RELATIVE_PATH,			\
+				      OPEN_FLAG)			\
+	openat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, OPEN_FLAG)
+#	define open_relative_mode_imp(DIRECTORY_DESCRIPTOR,		\
+				      RELATIVE_PATH,			\
+				      OPEN_FLAG,			\
+				      MODE)				\
+	openat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, OPEN_FLAG, MODE)
+
+/* close a file */
+#	define close_imp(FILE_DESCRIPTOR)				\
+	close(FILE_DESCRIPTOR)
+
+/* make a directory */
+#	define mkdir_absolute_imp(ABSOLUTE_PATH,			\
+				  MODE)					\
+	mkdir(ABSOLUTE_PATH, MODE)
+#	define mkdir_relative_imp(DIRECTORY_DESCRIPTOR,			\
+				  RELATIVE_PATH				\
+				  MODE)					\
+	mkdirat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, MODE)
+
+/* delete a file */
+#	define unlink_absolute_imp(ABSOLUTE_PATH)			\
+	unlink(ABSOLUTE_PATH)
+#	define unlink_relative_imp(DIRECTORY_DESCRIPTOR,		\
+				   RELATIVE_PATH			\
+				   UNLINK_FLAG)				\
+	unlinkat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, UNLINK_FLAG)
+#endif /* ifdef WIN32 */
+
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * FUNCTION-LIKE MACROS
  *
@@ -232,20 +307,20 @@ inline bool
 open_absolute_status(const char *const absolute_path,
 		     const int open_flag)
 {
-	return open(absolute_path,
-		    open_flag) >= 0;
+	return open_absolute_imp(absolute_path,
+				 open_flag) >= 0;
 }
 
 inline void
 open_absolute_muffle(const char *const absolute_path,
 		     const int open_flag)
 {
-	(void) open(absolute_path,
-		    open_flag);
+	(void) open_absolute_imp(absolute_path,
+				 open_flag);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE open
+#define FAIL_SWITCH_ROUTINE open_absolute_imp
 inline bool
 open_absolute_report(const char *const absolute_path,
 		     const int open_flag,
@@ -284,8 +359,8 @@ open_absolute_report(const char *const absolute_path,
 				 "Path points outside the process's allocated "
 				 "address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The open() operation is interrupted by a "
-				 "signal.")
+				 "The open_absolute() operation is interrupted "
+				 "by a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
@@ -351,8 +426,8 @@ open_absolute_report(const char *const absolute_path,
 				 "system, and the file is to be modified.")
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the open() "
-				 "call requests write access.")
+				 "file that is being executed and the "
+				 "open_absolute() call requests write access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "The path argument does not specify an "
 				 "absolute path.")
@@ -401,9 +476,9 @@ open_absolute_mode_status(const char *const absolute_path,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	return open(absolute_path,
-		    open_flag,
-		    mode) >= 0;
+	return open_absolute_mode_imp(absolute_path,
+				      open_flag,
+				      mode) >= 0;
 }
 
 inline void
@@ -411,11 +486,13 @@ open_absolute_mode_muffle(const char *const absolute_path,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	(void) open(absolute_path,
-		    open_flag,
-		    mode);
+	(void) open_absolute_mode_imp(absolute_path,
+				      open_flag,
+				      mode);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE open_absolute_mode_imp
 inline bool
 open_absolute_mode_report(const char *const absolute_path,
 			  const int open_flag,
@@ -456,8 +533,8 @@ open_absolute_mode_report(const char *const absolute_path,
 				 "Path points outside the process's allocated "
 				 "address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The open() operation is interrupted by a "
-				 "signal.")
+				 "The open_absolute_mode() operation is "
+				 "interrupted by a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
@@ -523,8 +600,9 @@ open_absolute_mode_report(const char *const absolute_path,
 				 "system, and the file is to be modified.")
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the open() "
-				 "call requests write access.")
+				 "file that is being executed and the "
+				 "open_absolute_mode() call requests write "
+				 "access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "The path argument does not specify an "
 				 "absolute path.")
@@ -570,14 +648,14 @@ open_absolute_mode_handle_cl(const char *const absolute_path,
 	__builtin_unreachable();
 }
 
-
+#ifndef WIN32
 /* open (relative path, no mode) */
 inline bool
 open_relative_status(const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag)
 {
-	return openat(directory_descriptor,
+	return open_relative_imp(directory_descriptor,
 		      relative_path,
 		      open_flag) >= 0;
 }
@@ -587,13 +665,13 @@ open_relative_muffle(const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag)
 {
-	(void) openat(directory_descriptor,
+	(void) open_relative_imp(directory_descriptor,
 		      relative_path,
 		      open_flag);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE openat
+#define FAIL_SWITCH_ROUTINE open_relative_imp
 inline bool
 open_relative_report(const int directory_descriptor,
 		     const char *const relative_path,
@@ -634,7 +712,7 @@ open_relative_report(const int directory_descriptor,
 				 "Path points outside the process's allocated "
 				 "address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The openat() operation is interrupted by a "
+				 "The open_relative() operation is interrupted by a "
 				 "signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
@@ -703,8 +781,8 @@ open_relative_report(const int directory_descriptor,
 				 "system, and the file is to be modified.")
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the openat("
-				 ") call requests write access.")
+				 "file that is being executed and the "
+				 "open_relative() call requests write access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "'directory_descriptor' is neither 'AT_FDCWD' "
 				 "nor a valid file descriptor open for "
@@ -759,10 +837,10 @@ open_relative_mode_status(const int directory_descriptor,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	return openat(directory_descriptor,
-		      relative_path,
-		      open_flag,
-		      mode) >= 0;
+	return open_relative_mode_imp(directory_descriptor,
+				      relative_path,
+				      open_flag,
+				      mode) >= 0;
 }
 
 inline void
@@ -771,12 +849,14 @@ open_relative_mode_muffle(const int directory_descriptor,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	(void) openat(directory_descriptor,
-		      relative_path,
-		      open_flag,
-		      mode);
+	(void) open_relative_mode_imp(directory_descriptor,
+				      relative_path,
+				      open_flag,
+				      mode);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE open_relative_mode_imp
 inline bool
 open_relative_mode_report(const int directory_descriptor,
 			  const char *const relative_path,
@@ -819,8 +899,8 @@ open_relative_mode_report(const int directory_descriptor,
 				 "Path points outside the process's allocated "
 				 "address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The openat() operation is interrupted by a "
-				 "signal.")
+				 "The open_relative_mode() operation is "
+				 "interrupted by a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
@@ -888,8 +968,9 @@ open_relative_mode_report(const int directory_descriptor,
 				 "system, and the file is to be modified.")
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the openat("
-				 ") call requests write access.")
+				 "file that is being executed and the "
+				 "open_relative_mode() call requests write "
+				 "access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "'directory_descriptor' is neither 'AT_FDCWD' "
 				 "nor a valid file descriptor open for "
@@ -939,22 +1020,23 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 			failure);
 	__builtin_unreachable();
 }
+#endif /* ifndef WIN32 */
 
 /* close */
 inline bool
 close_status(const int file_descriptor)
 {
-	return close(file_descriptor) == 0;
+	return close_imp(file_descriptor) == 0;
 }
 
 inline void
 close_muffle(const int file_descriptor)
 {
-	(void) close(file_descriptor);
+	(void) close_imp(file_descriptor);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE close
+#define FAIL_SWITCH_ROUTINE close_imp
 inline bool
 close_report(const int file_descriptor,
 	     const char *restrict *const restrict failure)
@@ -1008,20 +1090,20 @@ inline bool
 mkdir_absolute_status(const char *const restrict absolute_path,
 		      const mode_t mode)
 {
-	return mkdir(absolute_path,
-		     mode) == 0;
+	return mkdir_absolute_imp(absolute_path,
+				  mode) == 0;
 }
 
 inline void
 mkdir_absolute_muffle(const char *const restrict absolute_path,
 		      const mode_t mode)
 {
-	(void) mkdir(absolute_path,
-		     mode);
+	(void) mkdir_absolute_imp(absolute_path,
+				  mode);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE mkdir
+#define FAIL_SWITCH_ROUTINE mkdir_absolute_imp
 inline bool
 mkdir_absolute_report(const char *const restrict absolute_path,
 		      const mode_t mode,
@@ -1117,15 +1199,16 @@ mkdir_absolute_handle_cl(const char *const restrict absolute_path,
 }
 
 
+#ifndef WIN32
 /* mkdir (relative path) */
 inline bool
 mkdir_relative_status(const int directory_descriptor,
 		      const char *const restrict relative_path,
 		      const mode_t mode)
 {
-	return mkdirat(directory_descriptor,
-		       relative_path,
-		       mode) == 0;
+	return mkdir_relative_imp(directory_descriptor,
+				  relative_path,
+				  mode) == 0;
 }
 
 inline void
@@ -1133,13 +1216,13 @@ mkdir_relative_muffle(const int directory_descriptor,
 		      const char *const restrict relative_path,
 		      const mode_t mode)
 {
-	(void) mkdirat(directory_descriptor,
-		       relative_path,
-		       mode);
+	(void) mkdir_relative_imp(directory_descriptor,
+				  relative_path,
+				  mode);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE mkdirat
+#define FAIL_SWITCH_ROUTINE mkdir_relative_imp
 inline bool
 mkdir_relative_report(const int directory_descriptor,
 		      const char *const restrict relative_path,
@@ -1247,6 +1330,7 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 			failure);
 	__builtin_unreachable();
 }
+#endif /* ifndef WIN32 */
 
 
 /* inspect file permissions (10 chars long) */

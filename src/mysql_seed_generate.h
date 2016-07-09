@@ -3,11 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_input.h"	/* handle input strings */
-
-/* cap reads on input strings
- *─────────────────────────────────────────────────────────────────────────── */
-#define DB_NAME_LENGTH_MAX 64lu
+#include "mysql_seed_file.h"	/* handle input strings */
 
 
 /* error messages

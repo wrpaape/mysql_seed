@@ -19,6 +19,14 @@
 #	include <errno.h>	/* errno (checking return of stroumax) */
 #endif	/* if !HAVE_INT_STRING_ATTRS */
 
+
+/* typedefs, struct declarations
+ *─────────────────────────────────────────────────────────────────────────── */
+struct String {
+	const char *bytes;
+	size_t size;
+};
+
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 #if HAVE_INT_STRING_ATTRS
@@ -28,7 +36,6 @@ extern const uintmax_t ten_pow_map[DIGIT_COUNT_UINTMAX_MAX];
 #if HAVE_PTR_STRING_ATTRS
 extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
-
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */

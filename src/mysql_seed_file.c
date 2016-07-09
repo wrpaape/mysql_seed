@@ -1,4 +1,4 @@
-#include "mysql_seed_input.h"
+#include "mysql_seed_file.h"
 
 extern inline bool
 string_init_utf8_length_report(struct String *const restrict string,

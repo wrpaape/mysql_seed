@@ -73,6 +73,7 @@ open_absolute_mode_handle_cl(const char *const absolute_path,
 			     const mode_t mode,
 			     const struct HandlerClosure *const restrict fail_cl);
 
+#ifndef WIN32
 /* open (relative path, no mode) */
 extern inline bool
 open_relative_status(const int directory_descriptor,
@@ -130,6 +131,8 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 			     const int open_flag,
 			     const mode_t mode,
 			     const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifndef WIN32 */
+
 /* close */
 extern inline bool
 close_status(const int file_descriptor);
@@ -167,6 +170,7 @@ mkdir_absolute_handle_cl(const char *const restrict absolute_path,
 			 const mode_t mode,
 			 const struct HandlerClosure *const restrict fail_cl);
 
+#ifndef WIN32
 /* mkdir (relative path) */
 extern inline bool
 mkdir_relative_status(const int directory_descriptor,
@@ -192,6 +196,7 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 			 const char *const restrict relative_path,
 			 const mode_t mode,
 			 const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifndef WIN32 */
 
 /* inspect file permissions */
 extern inline char *

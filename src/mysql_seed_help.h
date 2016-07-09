@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_input.h"	/* handle input strings */
+#include "mysql_seed_file.h"	/* handle input strings */
 
 
 #define _H1_(STRING) UNDERLINE_WRAP(STRING) "\n"

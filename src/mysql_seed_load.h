@@ -3,10 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_input.h"	/* exit, file, string utils */
-
-/* cap reads on input strings
- *─────────────────────────────────────────────────────────────────────────── */
+#include "mysql_seed_file.h"	/* exit, file, string utils */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
