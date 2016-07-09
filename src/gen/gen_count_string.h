@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "gen/gen_strings.h"	/* string utils, log, parallelization utils */
+#include "gen/gen_strings.h"	/* string utils, parallelization utils */
 
 
 /* macro constants
@@ -28,7 +28,7 @@
 #define GCS_ALLOC_FAILURE_MESSAGE_1					\
 "\n\nfailed to allocate count string memory for 'upto' of "
 
-#define GCS_ALLOC_FAILURE_MESSAGE_2				\
+#define GCS_ALLOC_FAILURE_MESSAGE_2					\
 " ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
 
 #define GCS_INIT_FAILURE_MESSAGE					\

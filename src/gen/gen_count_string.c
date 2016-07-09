@@ -29,7 +29,6 @@ count_string_log_alloc_failure(const size_t upto,
 extern inline void
 count_buffer_increment(char *restrict digit);
 
-
 extern inline void
 count_string_set_internals(struct CountString *const restrict string);
 

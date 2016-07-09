@@ -112,6 +112,31 @@ thread_key_create_handle_cl(ThreadKey *const key,
 			    Procedure *const cleanup,
 			    const struct HandlerClosure *const restrict cl);
 
+/* thread_key_get */
+extern inline void *
+thread_key_get(ThreadKey key);
+
+/* thread_key_set */
+extern inline bool
+thread_key_set_status(ThreadKey key,
+		      const void *value);
+extern inline void
+thread_key_set_muffle(ThreadKey key,
+		      const void *value);
+extern inline bool
+thread_key_set_report(ThreadKey key,
+		      const void *value,
+		      const char *restrict *const restrict failure);
+extern inline void
+thread_key_set_handle(ThreadKey key,
+		      const void *value,
+		      Handler *const handle,
+		      void *arg);
+extern inline void
+thread_key_set_handle_cl(ThreadKey key,
+			 const void *value,
+			 const struct HandlerClosure *const restrict cl);
+
 /* thread_key_delete */
 extern inline bool
 thread_key_delete_status(ThreadKey key);

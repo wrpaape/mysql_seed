@@ -65,6 +65,12 @@ pthread_cleanup_pop(EXECUTE)
 #define thread_key_create_imp(KEY, CLEANUP)				\
 pthread_key_create(KEY, CLEANUP)
 
+#define thread_key_get_imp(KEY)						\
+pthread_getspecific(KEY)
+
+#define thread_key_set_imp(KEY, VALUE)					\
+pthread_setspecific(KEY, VALUE)
+
 #define thread_key_delete_imp(KEY)					\
 pthread_key_delete(KEY)
 
@@ -454,6 +460,81 @@ thread_key_create_handle_cl(ThreadKey *const key,
 	__builtin_unreachable();
 }
 
+/* thread_key_get */
+inline void *
+thread_key_get(ThreadKey key)
+{
+	return thread_key_get_imp(key);
+}
+
+/* thread_key_set */
+inline bool
+thread_key_set_status(ThreadKey key,
+		      const void *value)
+{
+	return thread_key_set_imp(key,
+				  value) == 0;
+}
+
+inline void
+thread_key_set_muffle(ThreadKey key,
+		      const void *value)
+{
+	(void) thread_key_set_imp(key,
+				  value);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE thread_key_set_imp
+inline bool
+thread_key_set_report(ThreadKey key,
+		      const void *value,
+		      const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_STATUS_OPEN(key,
+				value)
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "the value of Thread 'key' is invalid.")
+	FAIL_SWITCH_STATUS_CASE_1(ENOMEM,
+				  "Insufficient memory exists to associate "
+				  "'value' with 'key'.")
+	FAIL_SWITCH_STATUS_CLOSE()
+}
+
+inline void
+thread_key_set_handle(ThreadKey key,
+		      const void *value,
+		      Handler *const handle,
+		      void *arg)
+{
+	const char *restrict failure;
+
+	if (thread_key_set_report(key,
+				  value,
+				  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+thread_key_set_handle_cl(ThreadKey key,
+			 const void *value,
+			 const struct HandlerClosure *const restrict cl)
+{
+	const char *restrict failure;
+
+	if (thread_key_set_report(key,
+				  value,
+				  &failure))
+		return;
+
+	cl->handle(cl->arg,
+		   failure);
+	__builtin_unreachable();
+}
 
 /* thread_key_delete */
 inline bool
