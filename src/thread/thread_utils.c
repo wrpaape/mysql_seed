@@ -74,6 +74,9 @@ thread_cancel_handle_cl(Thread thread,
 
 /* thread_exit */
 extern inline void
+thread_exit(void);
+
+extern inline void
 thread_exit_detached(void);
 
 extern inline void
@@ -266,30 +269,11 @@ extern inline void
 mutex_unlock_handle_cl(Mutex *const restrict lock,
 		       const struct HandlerClosure *const restrict cl);
 
-/* mutex_ensure_unlocked */
-extern inline bool
-mutex_ensure_unlocked_status(Mutex *const restrict lock);
-extern inline void
-mutex_ensure_unlocked_muffle(Mutex *const restrict lock);
-extern inline bool
-mutex_ensure_unlocked_report(Mutex *const restrict lock,
-			     const char *restrict *const restrict failure);
-extern inline void
-mutex_ensure_unlocked_handle(Mutex *const restrict lock,
-			     Handler *const handle,
-			     void *arg);
-extern inline void
-mutex_ensure_unlocked_handle_cl(Mutex *const restrict lock,
-				const struct HandlerClosure *const restrict cl);
-
 /* mutex_lock_cleanup */
 void
 mutex_lock_cleanup(void *arg)
 {
-	Mutex *const restrict lock = (Mutex *const restrict) arg;
-
-	if (mutex_try_lock_muffle(lock))
-		mutex_unlock_muffle(lock);
+	mutex_unlock_muffle((Mutex *const restrict) arg);
 }
 
 /* ThreadCond operations

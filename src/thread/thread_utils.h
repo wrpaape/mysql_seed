@@ -50,6 +50,9 @@ pthread_equal(THREAD1, THREAD2)
 #define thread_cancel_imp(THREAD)					\
 pthread_cancel(THREAD)
 
+#define thread_exit_imp()						\
+pthread_exit(NULL)
+
 #define thread_exit_detached_imp()					\
 pthread_exit(NULL)
 
@@ -334,6 +337,12 @@ thread_cancel_handle_cl(Thread thread,
 
 
 /* thread_exit */
+inline void
+thread_exit(void)
+{
+	thread_exit_imp();
+}
+
 inline void
 thread_exit_detached(void)
 {
@@ -929,16 +938,17 @@ mutex_try_lock_handle_cl(Mutex *const restrict lock,
 }
 
 
+/* mutex_unlock */
 inline bool
 mutex_unlock_status(Mutex *const restrict lock)
 {
-	return mutex_lock_imp(lock) == 0;
+	return mutex_unlock_imp(lock) == 0;
 }
 
 inline void
 mutex_unlock_muffle(Mutex *const restrict lock)
 {
-	(void) mutex_lock_imp(lock);
+	(void) mutex_unlock_imp(lock);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
@@ -989,71 +999,6 @@ mutex_unlock_handle_cl(Mutex *const restrict lock,
 
 	__builtin_unreachable();
 }
-
-/* mutex_ensure_unlocked */
-inline bool
-mutex_ensure_unlocked_status(Mutex *const restrict lock)
-{
-	switch (mutex_try_lock_status(lock)) {
-	case THREAD_TRUE:
-		return mutex_unlock_status(lock);
-
-	case THREAD_FALSE:
-		return true;
-
-	default:
-		return false;
-	}
-}
-
-inline void
-mutex_ensure_unlocked_muffle(Mutex *const restrict lock)
-{
-	if (mutex_try_lock_muffle(lock))
-		mutex_unlock_muffle(lock);
-}
-
-inline bool
-mutex_ensure_unlocked_report(Mutex *const restrict lock,
-			     const char *restrict *const restrict failure)
-{
-	switch (mutex_try_lock_report(lock,
-				      failure)) {
-	case THREAD_TRUE:
-		return mutex_unlock_report(lock,
-					   failure);
-
-	case THREAD_FALSE:
-		return true;
-
-	default:
-		return false;
-	}
-}
-
-inline void
-mutex_ensure_unlocked_handle(Mutex *const restrict lock,
-			     Handler *const handle,
-			     void *arg)
-{
-	if (mutex_try_lock_handle(lock,
-				  handle,
-				  arg))
-		mutex_unlock_handle(lock,
-				    handle,
-				    arg);
-}
-
-inline void
-mutex_ensure_unlocked_handle_cl(Mutex *const restrict lock,
-				const struct HandlerClosure *const restrict cl)
-{
-	if (mutex_try_lock_handle_cl(lock,
-				     cl))
-		mutex_unlock_handle_cl(lock,
-				    cl);
-}
-
 
 /* mutex_lock_cleanup */
 void

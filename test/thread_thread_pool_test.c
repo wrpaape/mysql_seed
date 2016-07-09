@@ -169,5 +169,18 @@ void test_thread_pool(void)
 	thread_pool_stop(pool,
 			 &fail_cl);
 
+	TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,
+			      thread_pool_exit_status(pool,
+						      &fail_cl));
+
+	/* fail_cl.arg = "first test - exit on failure"; */
+
+	/* thread_pool_exit_on_failure(pool, */
+	/* 			    "OOGA BOOGA"); */
+
+	/* TEST_ASSERT_EQUAL_INT(EXIT_FAILURE, */
+	/* 		      thread_pool_exit_status(pool, */
+						      /* &fail_cl)); */
+
 	thread_pool_destroy(pool);
 }
