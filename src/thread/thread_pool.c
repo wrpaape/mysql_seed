@@ -48,7 +48,7 @@ worker_crew_init(struct WorkerCrew *const restrict worker_crew,
 		  struct ThreadPool *const restrict pool);
 extern inline void
 worker_crew_start(struct WorkerCrew *const restrict worker_crew,
-		   const struct HandlerClosure *const restrict fail_cl);
+		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
 worker_crew_cancel_failure(struct WorkerCrew *const restrict worker_crew);
 extern inline void
@@ -87,8 +87,10 @@ extern inline void
 thread_pool_status_set_success(struct ThreadPoolStatus *const restrict status,
 			       const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_status_await(struct ThreadPoolStatus *const restrict status,
-			 const struct HandlerClosure *const restrict fail_cl);
+thread_pool_status_await_failure(struct ThreadPoolStatus *const restrict status);
+extern inline void
+thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
+				 const struct HandlerClosure *const restrict fail_cl);
 
 /* Supervisor operations, SupervisorEvents
  *─────────────────────────────────────────────────────────────────────────── */
@@ -211,8 +213,10 @@ extern inline void
 thread_pool_stop(struct ThreadPool *restrict pool,
 		 const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_await_exit(struct ThreadPool *restrict pool,
-		       const struct HandlerClosure *const restrict fail_cl);
+thread_pool_await_exit_failure(struct ThreadPool *restrict pool);
+extern inline void
+thread_pool_await_exit_success(struct ThreadPool *restrict pool,
+			       const struct HandlerClosure *const restrict fail_cl);
 extern inline int
 thread_pool_exit_status(struct ThreadPool *restrict pool,
 			const struct HandlerClosure *const restrict fail_cl);

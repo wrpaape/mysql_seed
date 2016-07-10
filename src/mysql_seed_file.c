@@ -120,3 +120,25 @@ dir_handle_cleanup(void *arg)
 {
 	dir_handle_remove_muffle((const struct DirHandle *const restrict) arg);
 }
+
+
+/* Input operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+flag_match(char *restrict arg,
+	   const char short_flag,
+	   const char *const restrict long_flag);
+extern inline size_t
+flag_count_until(char *const restrict *restrict arg_ptr,
+		 char *const restrict *const restrict until_ptr,
+		 const char short_flag,
+		 const char *const restrict long_flag);
+extern inline char **
+flag_next_until(char *const restrict *restrict arg_ptr,
+		char *const restrict *const restrict until_ptr,
+		const char short_flag,
+		const char *const restrict long_flag);
+
+
+
+

@@ -24,7 +24,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 struct String {
 	const char *bytes;
-	size_t size;
+	size_t length;
 };
 
 /* global variables

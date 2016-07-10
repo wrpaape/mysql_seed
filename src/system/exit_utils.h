@@ -7,7 +7,7 @@
 
 #include <stdlib.h>			/* exit, exitat */
 #include "system/file_utils.h"		/* STDOUT/ERR_FILENO, handlers */
-#include "string/string_utils.h"	/* string_size */
+#include "string/string_utils.h"	/* string_length */
 #include "utils/types/action.h"		/* Action function type */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -59,14 +59,14 @@ inline void
 exit_success_print_message(const char *const restrict message)
 {
 	exit_success_dump_buffer(message,
-				 string_size(message));
+				 string_length(message));
 }
 
 inline void
 exit_failure_print_message(const char *const restrict message)
 {
 	exit_failure_dump_buffer(message,
-				 string_size(message));
+				 string_length(message));
 }
 
 /* push 'exit_action' to the top of the callback stack to be executed on exit */

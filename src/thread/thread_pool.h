@@ -70,6 +70,10 @@ struct ThreadPool {
 	struct WorkerCrew worker_crew;
 };
 
+struct ThreadPoolGrid {
+	const struct ThreadPool *until_ptr;
+	struct ThreadPool *pools;
+};
 
 
 /* Worker operations
@@ -344,8 +348,24 @@ thread_pool_status_set_success(struct ThreadPoolStatus *const restrict status,
 }
 
 inline void
-thread_pool_status_await(struct ThreadPoolStatus *const restrict status,
-			 const struct HandlerClosure *const restrict fail_cl)
+thread_pool_status_await_failure(struct ThreadPoolStatus *const restrict status)
+{
+	mutex_lock_try_catch_open(&status->processing);
+
+	mutex_lock_muffle(&status->processing);
+
+	while (status->busy)
+		thread_cond_await_muffle(&status->done,
+					 &status->processing);
+
+	mutex_unlock_muffle(&status->processing);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
+				 const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&status->processing);
 
@@ -362,6 +382,7 @@ thread_pool_status_await(struct ThreadPoolStatus *const restrict status,
 
 	mutex_lock_try_catch_close();
 }
+
 
 /* Supervisor operations, SupervisorEvents
  *─────────────────────────────────────────────────────────────────────────── */
@@ -720,19 +741,25 @@ thread_pool_stop(struct ThreadPool *restrict pool,
 }
 
 inline void
-thread_pool_await_exit(struct ThreadPool *restrict pool,
-		       const struct HandlerClosure *const restrict fail_cl)
+thread_pool_await_exit_success(struct ThreadPool *restrict pool,
+			       const struct HandlerClosure *const restrict fail_cl)
 {
-	thread_pool_status_await(&pool->status,
-				 fail_cl);
+	thread_pool_status_await_success(&pool->status,
+					 fail_cl);
+}
+
+inline void
+thread_pool_await_exit_failure(struct ThreadPool *restrict pool)
+{
+	thread_pool_status_await_failure(&pool->status);
 }
 
 inline int
 thread_pool_exit_status(struct ThreadPool *restrict pool,
 			const struct HandlerClosure *const restrict fail_cl)
 {
-	thread_pool_status_await(&pool->status,
-				 fail_cl);
+	thread_pool_status_await_success(&pool->status,
+					 fail_cl);
 
 	return pool->status.exit;
 }

@@ -23,6 +23,6 @@ extern inline int
 print_no_mode_flag(void);
 
 static inline int
-print_invalid_mode_flag(char *const restrict mode_flag);
+print_invalid_mode_flag(char *const restrict flag);
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_H_ */

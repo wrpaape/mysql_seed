@@ -11,6 +11,7 @@
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: all test clean
 
+
 # String Utils
 # ──────────────────────────────────────────────────────────────────────────────
 EMPTY	       :=
@@ -22,6 +23,12 @@ define NEWLINE :=
 
 
 endef
+
+
+# Development Mode
+# ──────────────────────────────────────────────────────────────────────────────
+# toggles certain utility flags, make targets
+DEVELOPMENT_MODE = T
 
 
 # SYSTEM CONFIG
@@ -226,7 +233,13 @@ UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity fra
 # ──────────────────────────────────────────────────────────────────────────────
 CC		:= gcc
 CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ $(SYS_ENV_FLAGS)
-CC_FLAGS	:= -g -O2 -std=c99 -Wall -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
+CC_BASE_FLAGS	:= -std=c99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
+
+ifeq (T,$(DEVELOPMENT_MODE))
+CC_FLAGS	:= -g -Wall $(CC_BASE_FLAGS)
+else
+CC_FLAGS	:= -O2 -funroll-loops $(CC_BASE_FLAGS)
+endif
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld

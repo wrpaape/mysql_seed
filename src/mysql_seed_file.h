@@ -243,7 +243,7 @@ file_handle_write_status(const struct FileHandle *const restrict file)
 {
 	return write_status(file->descriptor,
 			    file->contents.bytes,
-			    file->contents.size);
+			    file->contents.length);
 }
 
 inline void
@@ -251,7 +251,7 @@ file_handle_write_muffle(const struct FileHandle *const restrict file)
 {
 	write_muffle(file->descriptor,
 		     file->contents.bytes,
-		     file->contents.size);
+		     file->contents.length);
 }
 
 inline bool
@@ -260,7 +260,7 @@ file_handle_write_report(const struct FileHandle *const restrict file,
 {
 	return write_report(file->descriptor,
 			    file->contents.bytes,
-			    file->contents.size,
+			    file->contents.length,
 			    failure);
 }
 
@@ -271,7 +271,7 @@ file_handle_write_handle(const struct FileHandle *const restrict file,
 {
 	write_handle(file->descriptor,
 		     file->contents.bytes,
-		     file->contents.size,
+		     file->contents.length,
 		     handle,
 		     arg);
 }
@@ -282,7 +282,7 @@ file_handle_write_handle_cl(const struct FileHandle *const restrict file,
 {
 	write_handle_cl(file->descriptor,
 			file->contents.bytes,
-			file->contents.size,
+			file->contents.length,
 			fail_cl);
 }
 
@@ -482,5 +482,71 @@ dir_handle_remove_handle_cl(const struct DirHandle *const restrict dir,
 void
 dir_handle_cleanup(void *arg);
 
+
+/* Input operations
+ * ────────────────────────────────────────────────────────────────────────── */
+inline bool
+flag_match(char *restrict arg,
+	   const char short_flag,
+	   const char *const restrict long_flag)
+{
+	if (*arg != '-')
+		return false;
+
+	++arg;
+
+	/* check short flag match (i.e. -h) */
+	if (*arg == short_flag) {
+		++arg;
+
+		if (*arg == '\0')
+			return true;
+	}
+
+	if (*arg != '-')
+		return false;
+
+	++arg;
+
+	/* check long flag match (i.e. --help) */
+	return strings_equal(arg,
+			     long_flag);
+}
+
+inline size_t
+flag_count_until(char *const restrict *restrict arg_ptr,
+		 char *const restrict *const restrict until_ptr,
+		 const char short_flag,
+		 const char *const restrict long_flag)
+{
+	size_t count_flags;
+
+	for (count_flags = 0lu; arg_ptr < until_ptr; ++arg_ptr)
+		if (flag_match(*arg_ptr,
+			       short_flag,
+			       long_flag))
+			++count_flags;
+
+	return count_flags;
+}
+
+inline char **
+flag_next_until(char *const restrict *restrict arg_ptr,
+		char *const restrict *const restrict until_ptr,
+		const char short_flag,
+		const char *const restrict long_flag)
+{
+	while (arg_ptr < until_ptr) {
+
+		if (flag_match(*arg_ptr,
+			       short_flag,
+			       long_flag))
+			return arg_ptr;
+
+		++arg_ptr;
+	}
+
+	return until_ptr;
+}
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */
