@@ -8,6 +8,7 @@
 #include <errno.h>		/* errno */
 #include <stdbool.h>		/* bool */
 #include "utils/types/octet.h"	/* stdint, octet_t */
+#include "utils/char_attrs.h"	/* OCTET_CHAR */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
@@ -17,7 +18,12 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #define UTF8_WIDTH_MAX 4ul
-#define UTF8_SIZE_MAX (UTF8_WIDTH_MAX * sizeof(octet_t))
+
+#if HAVE_CHAR_ATTRS
+#	define UTF8_SIZE_MAX (UTF8_WIDTH_MAX * OCTET_CHAR)
+#else
+#	warning "UTF8_SIZE_MAX unknown at compile time"
+#endif /* if HAVE_CHAR_ATTRS */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * CONSTANTS

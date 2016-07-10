@@ -293,6 +293,7 @@ UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
 UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_pattern)
 UTILS_TYPES_ACTION_HDR		:= $(call HELPER_HEADER_PATH,utils types action)
+UTILS_CHAR_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils char_attrs)
 UTILS_WORD_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils word_attrs)
 UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
 MEMORY_MEMORY_SET_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_set_width)
@@ -642,7 +643,8 @@ STRING_UTF8_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string utf8_utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 STRING_UTF8_UTILS_OBJ_PREQS		:= $(STRING_UTF8_UTILS_SRC) 			\
 			   		   $(STRING_UTF8_UTILS_HDR)			\
-					   $(UTILS_TYPES_OCTET_HDR)
+					   $(UTILS_TYPES_OCTET_HDR)			\
+					   $(UTILS_CHAR_ATTRS_HDR)
 STRING_UTF8_UTILS_OBJ_GROUP		:= $(STRING_UTF8_UTILS_OBJ)
 STRING_UTF8_UTILS_TRNR_SRC_PREQS	:= $(STRING_UTF8_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
@@ -1104,20 +1106,22 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # ══════════════════════════════════════════════════════════════════════════════
 # mysql_seed_file
 # ──────────────────────────────────────────────────────────────────────────────
-FILE_SRC 		:= $(call PROJECT_SOURCE_PATH,input)
-FILE_HDR		:= $(call PROJECT_HEADER_PATH,input)
-FILE_OBJ 		:= $(call PROJECT_OBJECT_PATH,input)
-FILE_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,input)
-FILE_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,input)
-FILE_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,input)
-FILE_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,input)
-FILE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,input)
+FILE_SRC 		:= $(call PROJECT_SOURCE_PATH,file)
+FILE_HDR		:= $(call PROJECT_HEADER_PATH,file)
+FILE_OBJ 		:= $(call PROJECT_OBJECT_PATH,file)
+FILE_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,file)
+FILE_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,file)
+FILE_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,file)
+FILE_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,file)
+FILE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,file)
 # ─────────────── target prequisites ───────────────────────────────────────────
-FILE_OBJ_PREQS		:= $(FILE_SRC) 				\
-			   $(FILE_HDR) 				\
-			   $(SYSTEM_EXIT_UTILS_HDR)
+FILE_OBJ_PREQS		:= $(FILE_SRC) 					\
+			   $(FILE_HDR) 					\
+			   $(SYSTEM_EXIT_UTILS_HDR)			\
+			   $(MEMORY_MEMORY_COPY_ARRAY_HDR)
 FILE_OBJ_GROUP		:= $(FILE_OBJ)					\
-			   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)
+			   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)		\
+			   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)
 FILE_TRNR_SRC_PREQS	:= $(FILE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 FILE_TEST_OBJ_PREQS	:= $(FILE_TEST_SRC)				\

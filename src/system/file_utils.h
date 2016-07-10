@@ -84,79 +84,115 @@
 
 #ifdef WIN32
 /* open a file */
-#	define open_absolute_imp(ABSOLUTE_PATH,				\
-				 OPEN_FLAG)				\
-	_open(ABSOLUTE_PATH, OPEN_FLAG)
-#	define open_absolute_mode_imp(ABSOLUTE_PATH,			\
-				      OPEN_FLAG,			\
-				      MODE)				\
-	_open(ABSOLUTE_PATH, OPEN_FLAG, MODE)
+#	define open_imp(PATH,						\
+			OPEN_FLAG)					\
+	_open(PATH,							\
+	      OPEN_FLAG)
+#	define open_mode_imp(PATH,					\
+			     OPEN_FLAG,					\
+			     MODE)					\
+	_open(PATH,							\
+	      OPEN_FLAG,						\
+	      MODE)
 #	undef open_relative_imp
 #	warning "open_relative undefined"
 #	undef open_relative_mode_imp
 #	warning "open_relative_mode undefined"
+
+/* write to a file */
+#	define write_imp(FILE_DESCRIPTOR,				\
+			 BUFFER,					\
+			 SIZE)						\
+	_write(FILE_DESCRIPTOR,						\
+	       BUFFER,							\
+	       (unsigned int) (SIZE))
 
 /* close a file */
 #	define close_imp(FILE_DESCRIPTOR)				\
 	_close(FILE_DESCRIPTOR)
 #	define close_imp(FILE_DESCRIPTOR)				\
 
-/* make a directory */
-#	define mkdir_absolute_imp(ABSOLUTE_PATH,			\
-				  MODE)					\
-	_mkdir(ABSOLUTE_PATH)
-#	undef mkdir_relative_imp
-#	warning "mkdir_relative undefined"
-
 /* delete a file */
-#	define unlink_absolute_imp(ABSOLUTE_PATH)			\
-	_unlink(ABSOLUTE_PATH)
+#	define unlink_imp(PATH)						\
+	_unlink(PATH)
 #	undef unlink_relative_imp
 #	warning "unlink_relative undefined"
 
+/* make a directory */
+#	define mkdir_imp(PATH,						\
+			 MODE)						\
+	_mkdir(PATH)
+#	undef mkdir_relative_imp
+#	warning "mkdir_relative undefined"
+
 /* delete a directory */
-#	define rmdir_absolute_imp(ABSOLUTE_PATH)
-	_rmdir(ABSOLUTE_PATH)
+#	define rmdir_imp(PATH)						\
+	_rmdir(PATH)
 
 #else
 /* open a file */
-#	define open_absolute_imp(ABSOLUTE_PATH,				\
-				 OPEN_FLAG)				\
-	open(ABSOLUTE_PATH, OPEN_FLAG)
-#	define open_absolute_mode_imp(ABSOLUTE_PATH,			\
-				      OPEN_FLAG,			\
-				      MODE)				\
-	open(ABSOLUTE_PATH, OPEN_FLAG, MODE)
+#	define open_imp(PATH,						\
+			OPEN_FLAG)					\
+	open(PATH,							\
+	     OPEN_FLAG)
+#	define open_mode_imp(PATH,					\
+			     OPEN_FLAG,					\
+			     MODE)					\
+	open(PATH,							\
+	     OPEN_FLAG,							\
+	     MODE)
 #	define open_relative_imp(DIRECTORY_DESCRIPTOR,			\
-				      RELATIVE_PATH,			\
-				      OPEN_FLAG)			\
-	openat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, OPEN_FLAG)
+				 RELATIVE_PATH,				\
+				 OPEN_FLAG)				\
+	openat(DIRECTORY_DESCRIPTOR,					\
+	       RELATIVE_PATH,						\
+	       OPEN_FLAG)
 #	define open_relative_mode_imp(DIRECTORY_DESCRIPTOR,		\
 				      RELATIVE_PATH,			\
 				      OPEN_FLAG,			\
 				      MODE)				\
-	openat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, OPEN_FLAG, MODE)
+	openat(DIRECTORY_DESCRIPTOR,					\
+	       RELATIVE_PATH,						\
+	       OPEN_FLAG,						\
+	       MODE)
+
+/* write to a file */
+#	define write_imp(FILE_DESCRIPTOR,				\
+			 BUFFER,					\
+			 SIZE)						\
+	write(FILE_DESCRIPTOR,						\
+	      BUFFER,							\
+	      SIZE)
 
 /* close a file */
 #	define close_imp(FILE_DESCRIPTOR)				\
 	close(FILE_DESCRIPTOR)
 
-/* make a directory */
-#	define mkdir_absolute_imp(ABSOLUTE_PATH,			\
-				  MODE)					\
-	mkdir(ABSOLUTE_PATH, MODE)
-#	define mkdir_relative_imp(DIRECTORY_DESCRIPTOR,			\
-				  RELATIVE_PATH				\
-				  MODE)					\
-	mkdirat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, MODE)
-
 /* delete a file */
-#	define unlink_absolute_imp(ABSOLUTE_PATH)			\
-	unlink(ABSOLUTE_PATH)
+#	define unlink_imp(PATH)						\
+	unlink(PATH)
 #	define unlink_relative_imp(DIRECTORY_DESCRIPTOR,		\
-				   RELATIVE_PATH			\
+				   RELATIVE_PATH,			\
 				   UNLINK_FLAG)				\
-	unlinkat(DIRECTORY_DESCRIPTOR, RELATIVE_PATH, UNLINK_FLAG)
+	unlinkat(DIRECTORY_DESCRIPTOR,					\
+		 RELATIVE_PATH,						\
+		 UNLINK_FLAG)
+
+/* make a directory */
+#	define mkdir_imp(PATH,						\
+			 MODE)						\
+	mkdir(PATH,							\
+	      MODE)
+#	define mkdir_relative_imp(DIRECTORY_DESCRIPTOR,			\
+				  RELATIVE_PATH,			\
+				  MODE)					\
+	mkdirat(DIRECTORY_DESCRIPTOR,					\
+		RELATIVE_PATH,						\
+		MODE)
+
+/* delete a directory */
+#	define rmdir_imp(PATH)						\
+	rmdir(PATH)
 #endif /* ifdef WIN32 */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -170,167 +206,41 @@
 #define FAIL_SWITCH_ERRNO_FAILURE	-1
 #define FAIL_SWITCH_FAILURE_POINTER	failure
 
-/* write */
+/* open (absolute or relative path, no mode) */
 inline bool
-write_status(const int file_descriptor,
-	     const void *const restrict buffer,
-	     const size_t size)
+open_status(int *const restrict file_descriptor,
+	    const char *const path,
+	    const int open_flag)
 {
-	return write(file_descriptor,
-		     buffer,
-		     size) != -1;
+	*file_descriptor = open_imp(path,
+				    open_flag);
+
+	return *file_descriptor >= 0;
 }
 
 inline void
-write_muffle(const int file_descriptor,
-	     const void *const restrict buffer,
-	     const size_t size)
+open_muffle(int *const restrict file_descriptor,
+	    const char *const path,
+	    const int open_flag)
 {
-	(void) write(file_descriptor,
-		     buffer,
-		     size);
+	*file_descriptor = open_imp(path,
+				    open_flag);
 }
 
-#define FAIL_SWITCH_ROUTINE write
+#define FAIL_SWITCH_ROUTINE open_imp
 inline bool
-write_report(const int file_descriptor,
-	     const void *const restrict buffer,
-	     const size_t size,
-	     const char *restrict *const restrict failure)
+open_report(int *const restrict file_descriptor,
+	    const char *const path,
+	    const int open_flag,
+	    const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(file_descriptor,
-			       buffer,
-			       size)
-	FAIL_SWITCH_ERRNO_CASE_1(EDQUOT,
-				 "The user's quota of disk blocks on the file "
-				 "system containing the file was exhausted.")
-	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Part of 'iov' or data to be written to the "
-				 "file points outside the process's allocated "
-				 "address space.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "The pointer associated with 'file_descriptor'"
-				 " is negative.")
-	FAIL_SWITCH_ERRNO_CASE_1(ESPIPE,
-				 "The file descriptor is associated with a pipe"
-				 ", socket, or FIFO.")
-	FAIL_SWITCH_ERRNO_CASE_3(EAGAIN,
-				 "The file is marked for non-blocking I/O, and "
-				 "no data could be written immediately.",
-				 "The file descriptor is for a socket, is "
-				 "marked 'O_NONBLOCK', and write would block.",
-				 "The file descriptor is for a socket, is "
-				 "marked 'O_NONBLOCK', and write would block.")
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "'file_descriptor' is not a valid file "
-				 "descriptor open for writing.")
-	FAIL_SWITCH_ERRNO_CASE_1(ECONNRESET,
-				 "A write was attempted on a socket that is not"
-				 " connected.")
-	FAIL_SWITCH_ERRNO_CASE_2(EFBIG,
-				 "An attempt was made to write a file that "
-				 "exceeds the process's file size, limit, or "
-				 "the maximum file size.",
-				 "The file is a regular file, 'size' is "
-				 "greater than 0, and the starting position is "
-				 "greater than or equal to the offset maximum "
-				 "established in the open file description "
-				 "associated with 'file_descriptor'.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "A signal interruptted the write before it could"
-				 " be completed.")
-	FAIL_SWITCH_ERRNO_CASE_1(EIO,
-				 "An I/O error occurred while reading from or "
-				 "writing to the file system.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENETDOWN,
-				 "A write is attempted on a socket and the "
-				 "local network interface used to reach the "
-				 "destination is down.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENETUNREACH,
-				 "A write was attempted on a socket and no "
-				 "route to the network is present.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOSPC,
-				 "There was no free space remaining on the file"
-				 " system containing the file.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENXIO,
-				 "A request was made of a nonexistent device, "
-				 "or the request was outside the capabilities "
-				 "of the device.")
-	FAIL_SWITCH_ERRNO_CASE_2(EPIPE,
-				 "An attempt was made to write to a pipe that "
-				 "is not open for reading by any process.",
-				 "An attempt was made to write to a socket of "
-				 "type 'SOCK_STREAM' that is not connected to a"
-				 " peer socket.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
+	*file_descriptor = open_imp(path,
+				    open_flag);
 
-inline void
-write_handle(const int file_descriptor,
-	     const void *const restrict buffer,
-	     const size_t size,
-	     Handler *const handle,
-	     void *arg)
-{
-	const char *restrict failure;
+	if (*file_descriptor >= 0)
+		return true;
 
-	if (write_report(file_descriptor,
-			 buffer,
-			 size,
-			 &failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-write_handle_cl(const int file_descriptor,
-		const void *const restrict buffer,
-		const size_t size,
-		const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (write_report(file_descriptor,
-			 buffer,
-			 size,
-			 &failure))
-		return;
-
-	fail_cl->handle(fail_cl->arg,
-			failure);
-	__builtin_unreachable();
-}
-
-
-/* open (absolute path, no mode) */
-inline bool
-open_absolute_status(const char *const absolute_path,
-		     const int open_flag)
-{
-	return open_absolute_imp(absolute_path,
-				 open_flag) >= 0;
-}
-
-inline void
-open_absolute_muffle(const char *const absolute_path,
-		     const int open_flag)
-{
-	(void) open_absolute_imp(absolute_path,
-				 open_flag);
-}
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE open_absolute_imp
-inline bool
-open_absolute_report(const char *const absolute_path,
-		     const int open_flag,
-		     const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
-			       open_flag)
+	switch (errno) {
 	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
@@ -359,11 +269,11 @@ open_absolute_report(const char *const absolute_path,
 				 "'O_CREAT' and 'O_EXCL' are specified and the "
 				 "file exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The open_absolute() operation is interrupted "
-				 "by a signal.")
+				 "The open() operation is interrupted by a "
+				 "signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
@@ -429,25 +339,28 @@ open_absolute_report(const char *const absolute_path,
 				 "system, and the file is to be modified.")
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the "
-				 "open_absolute() call requests write access.")
+				 "file that is being executed and the open() "
+				 "call requests write access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "The path argument does not specify an "
 				 "absolute path.")
-	FAIL_SWITCH_ERRNO_CLOSE()
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
 }
 
 inline void
-open_absolute_handle(const char *const absolute_path,
-		     const int open_flag,
-		     Handler *const handle,
-		     void *arg)
+open_handle(int *const restrict file_descriptor,
+	    const char *const path,
+	    const int open_flag,
+	    Handler *const handle,
+	    void *arg)
 {
 	const char *restrict failure;
 
-	if (open_absolute_report(absolute_path,
-				 open_flag,
-				 &failure))
+	if (open_report(file_descriptor,
+			path,
+			open_flag,
+			&failure))
 		return;
 
 	handle(arg,
@@ -456,15 +369,17 @@ open_absolute_handle(const char *const absolute_path,
 }
 
 inline void
-open_absolute_handle_cl(const char *const absolute_path,
-			const int open_flag,
-			const struct HandlerClosure *const restrict fail_cl)
+open_handle_cl(int *const restrict file_descriptor,
+	       const char *const path,
+	       const int open_flag,
+	       const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (open_absolute_report(absolute_path,
-				 open_flag,
-				 &failure))
+	if (open_report(file_descriptor,
+			path,
+			open_flag,
+			&failure))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -473,38 +388,48 @@ open_absolute_handle_cl(const char *const absolute_path,
 }
 
 
-/* open (absolute path, provide mode) */
+/* open (absolute or relative path, provide mode) */
 inline bool
-open_absolute_mode_status(const char *const absolute_path,
-			  const int open_flag,
-			  const mode_t mode)
+open_mode_status(int *const restrict file_descriptor,
+		 const char *const path,
+		 const int open_flag,
+		 const mode_t mode)
 {
-	return open_absolute_mode_imp(absolute_path,
-				      open_flag,
-				      mode) >= 0;
+	*file_descriptor = open_mode_imp(path,
+					 open_flag,
+					 mode);
+
+	return *file_descriptor >= 0;
 }
 
 inline void
-open_absolute_mode_muffle(const char *const absolute_path,
-			  const int open_flag,
-			  const mode_t mode)
+open_mode_muffle(int *const restrict file_descriptor,
+		 const char *const path,
+		 const int open_flag,
+		 const mode_t mode)
 {
-	(void) open_absolute_mode_imp(absolute_path,
-				      open_flag,
-				      mode);
+	*file_descriptor = open_mode_imp(path,
+					 open_flag,
+					 mode);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE open_absolute_mode_imp
+#define FAIL_SWITCH_ROUTINE open_mode_imp
 inline bool
-open_absolute_mode_report(const char *const absolute_path,
-			  const int open_flag,
-			  const mode_t mode,
-			  const char *restrict *const restrict failure)
+open_mode_report(int *const restrict file_descriptor,
+		 const char *const path,
+		 const int open_flag,
+		 const mode_t mode,
+		 const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
-			       open_flag,
-			       mode)
+	*file_descriptor = open_mode_imp(path,
+					 open_flag,
+					 mode);
+
+	if (*file_descriptor >= 0)
+		return true;
+
+	switch(errno) {
 	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
@@ -533,10 +458,10 @@ open_absolute_mode_report(const char *const absolute_path,
 				 "'O_CREAT' and 'O_EXCL' are specified and the "
 				 "file exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The open_absolute_mode() operation is "
+				 "The open_mode() operation is "
 				 "interrupted by a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
@@ -604,27 +529,30 @@ open_absolute_mode_report(const char *const absolute_path,
 	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
 				 "The file is a pure procedure (shared text) "
 				 "file that is being executed and the "
-				 "open_absolute_mode() call requests write "
+				 "open_mode() call requests write "
 				 "access.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
 				 "The path argument does not specify an "
 				 "absolute path.")
-	FAIL_SWITCH_ERRNO_CLOSE()
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
 }
 
 inline void
-open_absolute_mode_handle(const char *const absolute_path,
-			  const int open_flag,
-			  const mode_t mode,
-			  Handler *const handle,
-			  void *arg)
+open_mode_handle(int *const restrict file_descriptor,
+		 const char *const path,
+		 const int open_flag,
+		 const mode_t mode,
+		 Handler *const handle,
+		 void *arg)
 {
 	const char *restrict failure;
 
-	if (open_absolute_mode_report(absolute_path,
-				      open_flag,
-				      mode,
-				      &failure))
+	if (open_mode_report(file_descriptor,
+			     path,
+			     open_flag,
+			     mode,
+			     &failure))
 		return;
 
 	handle(arg,
@@ -633,17 +561,19 @@ open_absolute_mode_handle(const char *const absolute_path,
 }
 
 inline void
-open_absolute_mode_handle_cl(const char *const absolute_path,
-			     const int open_flag,
-			     const mode_t mode,
-			     const struct HandlerClosure *const restrict fail_cl)
+open_mode_handle_cl(int *const restrict file_descriptor,
+		    const char *const path,
+		    const int open_flag,
+		    const mode_t mode,
+		    const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (open_absolute_mode_report(absolute_path,
-				      open_flag,
-				      mode,
-				      &failure))
+	if (open_mode_report(file_descriptor,
+			     path,
+			     open_flag,
+			     mode,
+			     &failure))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -654,36 +584,46 @@ open_absolute_mode_handle_cl(const char *const absolute_path,
 #ifndef WIN32
 /* open (relative path, no mode) */
 inline bool
-open_relative_status(const int directory_descriptor,
+open_relative_status(int *const restrict file_descriptor,
+		     const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag)
 {
-	return open_relative_imp(directory_descriptor,
-		      relative_path,
-		      open_flag) >= 0;
+	*file_descriptor = open_relative_imp(directory_descriptor,
+					     relative_path,
+					     open_flag);
+
+	return *file_descriptor >= 0;
 }
 
 inline void
-open_relative_muffle(const int directory_descriptor,
+open_relative_muffle(int *const restrict file_descriptor,
+		     const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag)
 {
-	(void) open_relative_imp(directory_descriptor,
-		      relative_path,
-		      open_flag);
+	*file_descriptor = open_relative_imp(directory_descriptor,
+					     relative_path,
+					     open_flag);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE open_relative_imp
 inline bool
-open_relative_report(const int directory_descriptor,
+open_relative_report(int *const restrict file_descriptor,
+		     const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag,
 		     const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
-			       relative_path,
-			       open_flag)
+	*file_descriptor = open_relative_imp(directory_descriptor,
+					     relative_path,
+					     open_flag);
+
+	if (*file_descriptor >= 0)
+		return true;
+
+	switch(errno) {
 	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
@@ -712,11 +652,11 @@ open_relative_report(const int directory_descriptor,
 				 "'O_CREAT' and 'O_EXCL' are specified and the "
 				 "file exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "The open_relative() operation is interrupted by a "
-				 "signal.")
+				 "The open_relative() operation is interrupted "
+				 "by a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
 				 "The value of 'open_flag' is not valid.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
@@ -790,11 +730,13 @@ open_relative_report(const int directory_descriptor,
 				 "'directory_descriptor' is neither 'AT_FDCWD' "
 				 "nor a valid file descriptor open for "
 				 "searching.")
-	FAIL_SWITCH_ERRNO_CLOSE()
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
 }
 
 inline void
-open_relative_handle(const int directory_descriptor,
+open_relative_handle(int *const restrict file_descriptor,
+		     const int directory_descriptor,
 		     const char *const relative_path,
 		     const int open_flag,
 		     Handler *const handle,
@@ -802,7 +744,8 @@ open_relative_handle(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_report(directory_descriptor,
+	if (open_relative_report(file_descriptor,
+				 directory_descriptor,
 				 relative_path,
 				 open_flag,
 				 &failure))
@@ -814,14 +757,16 @@ open_relative_handle(const int directory_descriptor,
 }
 
 inline void
-open_relative_handle_cl(const int directory_descriptor,
+open_relative_handle_cl(int *const restrict file_descriptor,
+			const int directory_descriptor,
 			const char *const relative_path,
 			const int open_flag,
 			const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (open_relative_report(directory_descriptor,
+	if (open_relative_report(file_descriptor,
+				 directory_descriptor,
 				 relative_path,
 				 open_flag,
 				 &failure))
@@ -835,42 +780,52 @@ open_relative_handle_cl(const int directory_descriptor,
 
 /* open (relative path, provide mode) */
 inline bool
-open_relative_mode_status(const int directory_descriptor,
+open_relative_mode_status(int *const restrict file_descriptor,
+			  const int directory_descriptor,
 			  const char *const relative_path,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	return open_relative_mode_imp(directory_descriptor,
-				      relative_path,
-				      open_flag,
-				      mode) >= 0;
+	*file_descriptor = open_relative_mode_imp(directory_descriptor,
+						  relative_path,
+						  open_flag,
+						  mode);
+
+	return *file_descriptor >= 0;
 }
 
 inline void
-open_relative_mode_muffle(const int directory_descriptor,
+open_relative_mode_muffle(int *const restrict file_descriptor,
+			  const int directory_descriptor,
 			  const char *const relative_path,
 			  const int open_flag,
 			  const mode_t mode)
 {
-	(void) open_relative_mode_imp(directory_descriptor,
-				      relative_path,
-				      open_flag,
-				      mode);
+	*file_descriptor = open_relative_mode_imp(directory_descriptor,
+						  relative_path,
+						  open_flag,
+						  mode);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE open_relative_mode_imp
 inline bool
-open_relative_mode_report(const int directory_descriptor,
+open_relative_mode_report(int *const restrict file_descriptor,
+			  const int directory_descriptor,
 			  const char *const relative_path,
 			  const int open_flag,
 			  const mode_t mode,
 			  const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
-			       relative_path,
-			       open_flag,
-			       mode)
+	*file_descriptor = open_relative_mode_imp(directory_descriptor,
+						  relative_path,
+						  open_flag,
+						  mode);
+
+	if (*file_descriptor >= 0)
+		return true;
+
+	switch(errno) {
 	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
@@ -899,8 +854,8 @@ open_relative_mode_report(const int directory_descriptor,
 				 "'O_CREAT' and 'O_EXCL' are specified and the "
 				 "file exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
 				 "The open_relative_mode() operation is "
 				 "interrupted by a signal.")
@@ -978,11 +933,13 @@ open_relative_mode_report(const int directory_descriptor,
 				 "'directory_descriptor' is neither 'AT_FDCWD' "
 				 "nor a valid file descriptor open for "
 				 "searching.")
-	FAIL_SWITCH_ERRNO_CLOSE()
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
 }
 
 inline void
-open_relative_mode_handle(const int directory_descriptor,
+open_relative_mode_handle(int *const restrict file_descriptor,
+			  const int directory_descriptor,
 			  const char *const relative_path,
 			  const int open_flag,
 			  const mode_t mode,
@@ -991,7 +948,8 @@ open_relative_mode_handle(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_mode_report(directory_descriptor,
+	if (open_relative_mode_report(file_descriptor,
+				      directory_descriptor,
 				      relative_path,
 				      open_flag,
 				      mode,
@@ -1004,7 +962,8 @@ open_relative_mode_handle(const int directory_descriptor,
 }
 
 inline void
-open_relative_mode_handle_cl(const int directory_descriptor,
+open_relative_mode_handle_cl(int *const restrict file_descriptor,
+			     const int directory_descriptor,
 			     const char *const relative_path,
 			     const int open_flag,
 			     const mode_t mode,
@@ -1012,7 +971,8 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_mode_report(directory_descriptor,
+	if (open_relative_mode_report(file_descriptor,
+				      directory_descriptor,
 				      relative_path,
 				      open_flag,
 				      mode,
@@ -1024,6 +984,144 @@ open_relative_mode_handle_cl(const int directory_descriptor,
 	__builtin_unreachable();
 }
 #endif /* ifndef WIN32 */
+
+
+/* write */
+inline bool
+write_status(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size)
+{
+	return write_imp(file_descriptor,
+			 buffer,
+			 size) != -1;
+}
+
+inline void
+write_muffle(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size)
+{
+	(void) write_imp(file_descriptor,
+			 buffer,
+			 size);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE write_imp
+inline bool
+write_report(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(file_descriptor,
+			       buffer,
+			       size)
+	FAIL_SWITCH_ERRNO_CASE_1(EDQUOT,
+				 "The user's quota of disk blocks on the file "
+				 "system containing the file was exhausted.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "Part of 'iov' or data to be written to the "
+				 "file points outside the process's allocated "
+				 "address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The pointer associated with 'file_descriptor'"
+				 " is negative.")
+	FAIL_SWITCH_ERRNO_CASE_1(ESPIPE,
+				 "The file descriptor is associated with a pipe"
+				 ", socket, or FIFO.")
+	FAIL_SWITCH_ERRNO_CASE_3(EAGAIN,
+				 "The file is marked for non-blocking I/O, and "
+				 "no data could be written immediately.",
+				 "The file descriptor is for a socket, is "
+				 "marked 'O_NONBLOCK', and write would block.",
+				 "The file descriptor is for a socket, is "
+				 "marked 'O_NONBLOCK', and write would block.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'file_descriptor' is not a valid file "
+				 "descriptor open for writing.")
+	FAIL_SWITCH_ERRNO_CASE_1(ECONNRESET,
+				 "A write was attempted on a socket that is not"
+				 " connected.")
+	FAIL_SWITCH_ERRNO_CASE_2(EFBIG,
+				 "An attempt was made to write a file that "
+				 "exceeds the process's file size, limit, or "
+				 "the maximum file size.",
+				 "The file is a regular file, 'size' is "
+				 "greater than 0, and the starting position is "
+				 "greater than or equal to the offset maximum "
+				 "established in the open file description "
+				 "associated with 'file_descriptor'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "A signal interruptted the write before it could"
+				 " be completed.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENETDOWN,
+				 "A write is attempted on a socket and the "
+				 "local network interface used to reach the "
+				 "destination is down.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENETUNREACH,
+				 "A write was attempted on a socket and no "
+				 "route to the network is present.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOSPC,
+				 "There was no free space remaining on the file"
+				 " system containing the file.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENXIO,
+				 "A request was made of a nonexistent device, "
+				 "or the request was outside the capabilities "
+				 "of the device.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPIPE,
+				 "An attempt was made to write to a pipe that "
+				 "is not open for reading by any process.",
+				 "An attempt was made to write to a socket of "
+				 "type 'SOCK_STREAM' that is not connected to a"
+				 " peer socket.")
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+write_handle(const int file_descriptor,
+	     const void *const restrict buffer,
+	     const size_t size,
+	     Handler *const handle,
+	     void *arg)
+{
+	const char *restrict failure;
+
+	if (write_report(file_descriptor,
+			 buffer,
+			 size,
+			 &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+write_handle_cl(const int file_descriptor,
+		const void *const restrict buffer,
+		const size_t size,
+		const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (write_report(file_descriptor,
+			 buffer,
+			 size,
+			 &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
 
 /* close */
 inline bool
@@ -1088,31 +1186,268 @@ close_handle_cl(const int file_descriptor,
 }
 
 
-/* mkdir (absolute path) */
+/* unlink (absolute or relative path) */
 inline bool
-mkdir_absolute_status(const char *const restrict absolute_path,
-		      const mode_t mode)
+unlink_status(const char *const restrict path)
 {
-	return mkdir_absolute_imp(absolute_path,
-				  mode) == 0;
+	return unlink_imp(path) == 0;
 }
 
 inline void
-mkdir_absolute_muffle(const char *const restrict absolute_path,
-		      const mode_t mode)
+unlink_muffle(const char *const restrict path)
 {
-	(void) mkdir_absolute_imp(absolute_path,
-				  mode);
+	(void) unlink_imp(path);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE mkdir_absolute_imp
+#define FAIL_SWITCH_ROUTINE unlink_imp
 inline bool
-mkdir_absolute_report(const char *const restrict absolute_path,
-		      const mode_t mode,
-		      const char *restrict *const restrict failure)
+unlink_report(const char *const restrict path,
+	      const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(absolute_path,
+	FAIL_SWITCH_ERRNO_OPEN(path)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied on the directory "
+				 "containing the link to be removed.")
+	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
+				 "The entry to be unlinked is the mount point "
+				 "for a mounted file system.",
+				 "The file named by 'path' cannot be unlinked "
+				 "because it is being used by the system or by "
+				 "another process.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'path' points outside the process's allocated"
+				 " address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while deleting the "
+				 "directory entry or deallocating the inode.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of 'path' exceeds {NAME_MAX} "
+				 "characters, or the entire path name exceeds "
+				 "{PATH_MAX} characters (possibly as a result "
+				 "of expanding a symlink).")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "The named file is a directory and the "
+				 "effective user ID of the process is not the "
+				 "super-user.",
+				 "The directory containing the file is marked "
+				 "sticky, and neither the containing directory "
+				 "nor the file to be removed are owned by the "
+				 "effective user ID.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+unlink_handle(const char *const restrict path,
+	      Handler *const handle,
+	      void *arg)
+{
+	const char *restrict failure;
+
+	if (unlink_report(path,
+			  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+unlink_handle_cl(const char *const restrict path,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (unlink_report(path,
+			  &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+#ifndef WIN32
+/* unlink (relative path) */
+inline bool
+unlink_relative_status(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag)
+{
+	return unlink_relative_imp(directory_descriptor,
+				   relative_path,
+				   unlink_flag) == 0;
+}
+
+inline void
+unlink_relative_muffle(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag)
+{
+	(void) unlink_relative_imp(directory_descriptor,
+				   relative_path,
+				   unlink_flag);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE unlink_relative_imp
+inline bool
+unlink_relative_report(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag,
+		       const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(directory_descriptor,
+			       relative_path,
+			       unlink_flag)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied on the directory "
+				 "containing the link to be removed.")
+	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
+				 "The entry to be unlinked is the mount point "
+				 "for a mounted file system.",
+				 "The file named by 'relative_path' cannot be "
+				 "unlinked because it is being used by the "
+				 "system or by another process.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'relative_path' points outside the process's "
+				 "allocated address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while deleting the "
+				 "directory entry or deallocating the inode.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of 'relative_path' exceeds "
+				 "{NAME_MAX} characters, or an entire path name"
+				 " exceeds {PATH_MAX} characters (possibly as a"
+				 " result of expanding a symlink).")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_3(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "The 'unlink_flag' parameter has the '"
+				 "AT_REMOVEDIR' bit set and 'relative_path' "
+				 "does not name a directory.",
+				 "'relative_path' is not an absolute path and '"
+				 "directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a file descriptor associated with a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "The named file is a directory and the "
+				 "effective user ID of the process is not the "
+				 "super-user.",
+				 "The directory containing the file is marked "
+				 "sticky, and neither the containing directory "
+				 "nor the file to be removed are owned by the "
+				 "effective user ID.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'relative_path' does not specify an "
+				 "absolute path and the 'directory_descriptor' "
+				 "argument is neither 'AT_FDCWD' nor a valid "
+				 "file descriptor open for searching.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTEMPTY,
+				 "The 'unlink_flag' parameter has the '"
+				 "AT_REMOVEDIR' bit set and the path argument "
+				 "names a directory that is not an empty "
+				 "directory.",
+				 "There are hard links to the directory other "
+				 "than 'dot' or a single entry in 'dot-dot'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'unlink_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+unlink_relative_handle(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag,
+		       Handler *const handle,
+		       void *arg)
+{
+	const char *restrict failure;
+
+	if (unlink_relative_report(directory_descriptor,
+				   relative_path,
+				   unlink_flag,
+				   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+unlink_relative_handle_cl(const int directory_descriptor,
+			  const char *const restrict relative_path,
+			  const int unlink_flag,
+			  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (unlink_relative_report(directory_descriptor,
+				   relative_path,
+				   unlink_flag,
+				   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+#endif /* ifndef WIN32 */
+
+
+/* mkdir (absolute or relative path) */
+inline bool
+mkdir_status(const char *const restrict path,
+	     const mode_t mode)
+{
+	return mkdir_imp(path,
+			 mode) == 0;
+}
+
+inline void
+mkdir_muffle(const char *const restrict path,
+		      const mode_t mode)
+{
+	(void) mkdir_imp(path,
+			 mode);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mkdir_imp
+inline bool
+mkdir_report(const char *const restrict path,
+	     const mode_t mode,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(path,
 			       mode)
 	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
 				 "Search permission is denied for a component "
@@ -1130,8 +1465,8 @@ mkdir_absolute_report(const char *const restrict absolute_path,
 	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
 				 "The named file exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_2(EIO,
 				 "An I/O error occurred while making the "
 				 "directory entry or allocating the inode.",
@@ -1167,16 +1502,16 @@ mkdir_absolute_report(const char *const restrict absolute_path,
 }
 
 inline void
-mkdir_absolute_handle(const char *const restrict absolute_path,
-		      const mode_t mode,
-		      Handler *const handle,
-		      void *arg)
+mkdir_handle(const char *const restrict path,
+	     const mode_t mode,
+	     Handler *const handle,
+	     void *arg)
 {
 	const char *restrict failure;
 
-	if (mkdir_absolute_report(absolute_path,
-				  mode,
-				  &failure))
+	if (mkdir_report(path,
+			 mode,
+			 &failure))
 		return;
 
 	handle(arg,
@@ -1185,22 +1520,21 @@ mkdir_absolute_handle(const char *const restrict absolute_path,
 }
 
 inline void
-mkdir_absolute_handle_cl(const char *const restrict absolute_path,
-			 const mode_t mode,
-			 const struct HandlerClosure *const restrict fail_cl)
+mkdir_handle_cl(const char *const restrict path,
+		const mode_t mode,
+		const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (mkdir_absolute_report(absolute_path,
-				  mode,
-				  &failure))
+	if (mkdir_report(path,
+			 mode,
+			 &failure))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
 			failure);
 	__builtin_unreachable();
 }
-
 
 #ifndef WIN32
 /* mkdir (relative path) */
@@ -1250,10 +1584,10 @@ mkdir_relative_report(const int directory_descriptor,
 				 " on which the directory is being created has "
 				 "been exhausted.")
 	FAIL_SWITCH_ERRNO_CASE_1(EEXIST,
-				 "The named file exists.")
+				 "The named directory exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "Path points outside the process's allocated "
-				 "address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_2(EIO,
 				 "An I/O error occurred while making the "
 				 "directory entry or allocating the inode.",
@@ -1336,80 +1670,75 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 #endif /* ifndef WIN32 */
 
 
-/* unlink (absolute path) */
+/* rmdir (absolute or relative path) */
 inline bool
-unlink_absolute_status(const char *const restrict absolute_path)
+rmdir_status(const char *const restrict path)
 {
-	return unlink_absolute_imp(absolute_path) == 0;
+	return rmdir_imp(path);
 }
 
 inline void
-unlink_absolute_muffle(const char *const restrict absolute_path)
+rmdir_muffle(const char *const restrict path)
 {
-	(void) unlink_absolute_imp(absolute_path);
+	(void) rmdir_imp(path);
 }
 
 #undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE unlink_absolute_imp
-inline void
-unlink_absolute_report(const char *const restrict absolute_path,
-		       const char *restrict *const restrict failure)
+#define FAIL_SWITCH_ROUTINE rmdir_imp
+inline bool
+rmdir_report(const char *const restrict path,
+	     const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(absolute_path)
+	FAIL_SWITCH_ERRNO_OPEN(path)
 	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
-				 "Write permission is denied on the directory "
-				 "containing the link to be removed.")
-	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
-				 "The entry to be unlinked is the mount point "
-				 "for a mounted file system.",
-				 "The file named by 'absolute_path' cannot be "
-				 "unlinked because it is being used by the "
-				 "system or by another process.")
+				 "Write permission is denied for the parent "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBUSY,
+				 "The directory to be removed is the mount "
+				 "point for a mounted file system.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "'absolute_path' points outside the process's "
-				 "allocated address space.")
+				 "'path' points outside the process's allocated"
+				 " address space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
-				 "An I/O error occurred while deleting the "
+				 "An I/O error occurred while making the "
 				 "directory entry or deallocating the inode.")
 	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
-				 "Too many symbolic links are encountered in "
+				 "Too many symbolic links were encountered in "
 				 "translating the pathname. This is taken to be"
 				 " indicative of a looping symbolic link.")
 	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
-				 "A component of 'absolute_path' exceeds "
-				 "{NAME_MAX} characters, or an entire path name"
-				 " exceeds {PATH_MAX} characters (possibly as a"
-				 " result of expanding a symlink).")
+				 "A component of a pathname exceeded {NAME_MAX}"
+				 " characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
 	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
-				 "The named file does not exist.")
+				 "The named directory does not exists.")
 	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
-				 "A component of the path prefix is not a "
-				 "directory.")
-	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
-				 "The named file is a directory and the "
-				 "effective user ID of the process is not the "
-				 "super-user.",
-				 "The directory containing the file is marked "
-				 "sticky, and neither the containing directory "
-				 "nor the file to be removed are owned by the "
-				 "effective user ID.")
+				 "A component of the path is not a directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTEMPTY,
+				 "The named directory contains files other than"
+				 " '.' and '..' in it.")
+	FAIL_SWITCH_ERRNO_CASE_1(EPERM,
+				 "The directory containing the directory to be "
+				 "removed is marked sticky, and neither the "
+				 "containing directory nor the directory to be "
+				 "removed are owned by the effective user ID.")
 	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
-				 "The named file resides on a read-only file "
-				 "system.")
+				 "The directory entry to be removed resides on "
+				 "a read-only file system.")
 	FAIL_SWITCH_ERRNO_CLOSE()
 }
 
 inline void
-unlink_absolute_handle(const char *const restrict absolute_path,
-		       Handler *const handle,
-		       void *arg)
+rmdir_handle(const char *const restrict path,
+	     Handler *const handle,
+	     void *arg)
 {
 	const char *restrict failure;
 
-	if (unlink_absolute_report(absolute_path,
-				   &failure))
+	if (rmdir_report(path,
+			 &failure))
 		return;
 
 	handle(arg,
@@ -1418,150 +1747,19 @@ unlink_absolute_handle(const char *const restrict absolute_path,
 }
 
 inline void
-unlink_absolute_handle_cl(const char *const restrict absolute_path,
-			  const struct HandlerClosure *const restrict fail_cl)
+rmdir_handle_cl(const char *const restrict path,
+		const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (unlink_absolute_report(absolute_path,
-				   &failure))
+	if (rmdir_report(path,
+			 &failure))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
 			failure);
 	__builtin_unreachable();
 }
-
-
-#ifndef WIN32
-/* unlink (relative path) */
-inline bool
-unlink_relative_status(const int directory_descriptor,
-		       const char *const restrict relative_path,
-		       const int unlink_flag)
-{
-	return unlink_relative_imp(relative_path) == 0;
-}
-
-inline void
-unlink_relative_muffle(const int directory_descriptor,
-		       const char *const restrict relative_path,
-		       const int unlink_flag)
-{
-	(void) unlink_relative_imp(relative_path);
-}
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE unlink_relative_imp
-inline void
-unlink_relative_report(const int directory_descriptor,
-		       const char *const restrict relative_path,
-		       const int unlink_flag,
-		       const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(relative_path)
-	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
-				 "Search permission is denied for a component "
-				 "of the path prefix.",
-				 "Write permission is denied on the directory "
-				 "containing the link to be removed.")
-	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
-				 "The entry to be unlinked is the mount point "
-				 "for a mounted file system.",
-				 "The file named by 'relative_path' cannot be "
-				 "unlinked because it is being used by the "
-				 "system or by another process.")
-	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "'relative_path' points outside the process's "
-				 "allocated address space.")
-	FAIL_SWITCH_ERRNO_CASE_1(EIO,
-				 "An I/O error occurred while deleting the "
-				 "directory entry or deallocating the inode.")
-	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
-				 "Too many symbolic links are encountered in "
-				 "translating the pathname. This is taken to be"
-				 " indicative of a looping symbolic link.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
-				 "A component of 'relative_path' exceeds "
-				 "{NAME_MAX} characters, or an entire path name"
-				 " exceeds {PATH_MAX} characters (possibly as a"
-				 " result of expanding a symlink).")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
-				 "The named file does not exist.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
-				 "A component of the path prefix is not a "
-				 "directory.")
-	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
-				 "The named file is a directory and the "
-				 "effective user ID of the process is not the "
-				 "super-user.",
-				 "The directory containing the file is marked "
-				 "sticky, and neither the containing directory "
-				 "nor the file to be removed are owned by the "
-				 "effective user ID.")
-	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
-				 "The named file resides on a read-only file "
-				 "system.")
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "'relative_path' does not specify an "
-				 "absolute path and the 'directory_descriptor' "
-				 "argument is neither 'AT_FDCWD' nor a valid "
-				 "file descriptor open for searching.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTEMPTY,
-				 "The 'unlink_flag' parameter has the '"
-				 "AT_REMOVEDIR' bit set and the path argument "
-				 "names a directory that is not an empty "
-				 "directory.",
-				 "There are hard links to the directory other "
-				 "than 'dot' or a single entry in 'dot-dot'.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
-				 "The 'unlink_flag' parameter has the '"
-				 "AT_REMOVEDIR' bit set and 'relative_path' "
-				 "does not name a directory.",
-				 "'relative_path' is not an absolute path and '"
-				 "directory_descriptor' is neither 'AT_FDCWD' "
-				 "nor a file descriptor associated with a "
-				 "directory.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "The value of 'unlink_flag' is not valid.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
-
-inline void
-unlink_relative_handle(const int directory_descriptor,
-		       const char *const restrict relative_path,
-		       const int unlink_flag,
-		       Handler *const handle,
-		       void *arg)
-{
-	const char *restrict failure;
-
-	if (unlink_relative_report(relative_path,
-				   &failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-unlink_relative_handle_cl(const int directory_descriptor,
-			  const char *const restrict relative_path,
-			  const int unlink_flag,
-			  const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (unlink_relative_report(relative_path,
-				   &failure))
-		return;
-
-	fail_cl->handle(fail_cl->arg,
-			failure);
-	__builtin_unreachable();
-}
-#endif /* ifndef WIN32 */
 
 
 
