@@ -48,6 +48,84 @@ print_invalid_database_flag(char *const restrict database_flag)
 	return EXIT_FAILURE;
 }
 
+/* Init File/DirHandles from input
+ *─────────────────────────────────────────────────────────────────────────── */
+/* inline void */
+/* db_basic_handles_init(struct DirHandle *const restrict db_dir, */
+/* 		      struct FileHandle *const restrict loader, */
+/* 		      const char *const restrict db_name, */
+/* 		      const struct HandlerClosure *const restrict fail_cl) */
+/* { */
+/* 	const char *restrict failure; */
+
+/* 	size_t size; */
+
+/* 	if (!validate_utf8_input_size(&size, */
+/* 				      db_name, */
+/* 				      DB_NAME_LENGTH_MAX, */
+/* 				      &failure)) { */
+/* 		fail_cl->handle(fail_cl->arg, */
+/* 				failure); */
+/* 		__builtin_unreachable(); */
+/* 	} */
+
+/* 	memory_copy(&db_dir->name.buffer[0], */
+/* 		    db_name, */
+/* 		    size); */
+
+/* 	db_dir->name.length = size - 1lu; */
+
+/* 	db_dir->path.length = db_dir->name.length + DB_DIRPATH_PFX_LENGTH; */
+
+/* 	char *restrict ptr = &db_dir->path.buffer[0]; */
+
+/* 	PUT_STRING_WIDTH(ptr, */
+/* 			 DB_DIRPATH_PFX */
+/* 			 DB_DIRPATH_PFX_NN_WIDTH); */
+
+/* 	memory_copy(ptr, */
+/* 		    db_name, */
+/* 		    size); */
+/* } */
+/* inline void */
+/* table_file_init(struct FileHandle *const restrict loader_file, */
+/* 		 struct DirHandle *const restrict db_dir) */
+/* { */
+/* 	char *restrict ptr = &loader_file->name.buffer[0]; */
+
+/* 	PUT_STRING_WIDTH(ptr, */
+/* 			 LOADER_FILENAME_PFX, */
+/* 			 LOADER_FILENAME_PFX_NN_WIDTH); */
+
+/* 	ptr = put_string_size(ptr, */
+/* 			      &db_dir->name.buffer[0], */
+/* 			      db_dir->name.length); */
+
+/* 	SET_STRING_WIDTH(ptr, */
+/* 			 LOADER_FILENAME_SFX, */
+/* 			 LOADER_FILENAME_SFX_WIDTH); */
+
+/* 	loader_file->name.length = LOADER_FILENAME_PFX_LENGTH */
+/* 				 + db_dir->name.length */
+/* 				 + LOADER_FILENAME_SFX_LENGTH; */
+
+/* 	const name_size = loader_file->name.length + 1lu; */
+
+/* 	loader_file->path.length = name_size */
+/* 				 + db_dir->path.length; */
+
+/* 	ptr = put_string_size(&loader_file->path.buffer[0], */
+/* 			      &db_dir->path.buffer[0], */
+/* 			      db_dir->path.length); */
+
+/* 	*ptr = PATH_DELIM; */
+/* 	++ptr; */
+
+/* 	memory_copy(ptr, */
+/* 		    &loader_file->name.buffer[0], */
+/* 		    name_size); */
+/* } */
+
 
 /* dispatch generate mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */

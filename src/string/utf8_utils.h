@@ -4,11 +4,12 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include <stddef.h>		/* size_t */
-#include <errno.h>		/* errno */
-#include <stdbool.h>		/* bool */
-#include "utils/types/octet.h"	/* stdint, octet_t */
-#include "utils/char_attrs.h"	/* OCTET_CHAR */
+#include <stddef.h>			/* size_t */
+#include <stdbool.h>			/* bool */
+#include "string/string_macros.h"	/* error macros */
+#include "utils/types/handler.h"	/* Handler, HandlerClosure */
+#include "utils/types/octet.h"		/* stdint, octet_t */
+#include "utils/char_attrs.h"		/* OCTET_CHAR */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
@@ -143,9 +144,71 @@ utf8_string_size(const char *const restrict bytes)
 	}
 }
 
-inline size_t
-utf8_string_size_length(const char *const restrict bytes,
-			size_t length)
+inline bool
+utf8_string_size_length_status(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length)
+{
+	const octet_t *restrict octets = (const octet_t *restrict) bytes;
+
+	unsigned int width;
+
+	while (1) {
+		width = utf8_width(octets);
+
+		if (width == 0u)
+			return false;
+
+		if (*octets == '\0')
+			*size = (octets + 1l)
+			      - ((const octet_t *const restrict) bytes);
+			return true;
+
+		if (length == 0lu)
+			return false;
+
+		--length;
+
+		octets += width;
+	}
+}
+
+inline void
+utf8_string_size_length_muffle(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length)
+{
+
+	const octet_t *restrict octets = (const octet_t *restrict) bytes;
+
+	unsigned int width;
+
+	while (1) {
+		width = utf8_width(octets);
+
+		if (width == 0u)
+			return;
+
+		if (*octets == '\0') {
+			*size = (octets + 1l)
+			      - ((const octet_t *const restrict) bytes);
+			return;
+		}
+
+		if (length == 0lu)
+			return;
+
+		--length;
+
+		octets += width;
+	}
+}
+
+inline bool
+utf8_string_size_length_report(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length,
+			       const char *restrict *const restrict failure)
 {
 
 	const octet_t *restrict octets = (const octet_t *restrict) bytes;
@@ -156,17 +219,26 @@ utf8_string_size_length(const char *const restrict bytes,
 		width = utf8_width(octets);
 
 		if (width == 0u) {
-			errno = EINVAL;
-			return 0lu;
+			*failure = FAILURE_REASON("utf8_string_size_length",
+						  "'bytes' contains byte "
+						  "sequence(s) that are not "
+						  "valid UTF-8 code points");
+			return false;
 		}
 
-		if (*octets == '\0')
-			return (octets + 1l)
-			     - ((const octet_t *const restrict) bytes);
+		if (*octets == '\0') {
+			*size = (octets + 1l)
+			      - ((const octet_t *const restrict) bytes);
+
+			return true;
+		}
 
 		if (length == 0lu) {
-			errno = EOVERFLOW;
-			return 0lu;
+			*failure = FAILURE_REASON("utf8_string_size_length",
+						  "'bytes' exceeds maximum "
+						  "UTF-8 code point length '"
+						  "length'");
+			return false;
 		}
 
 		--length;
@@ -174,6 +246,46 @@ utf8_string_size_length(const char *const restrict bytes,
 		octets += width;
 	}
 }
+
+inline void
+utf8_string_size_length_handle(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length,
+			       Handler *const handle,
+			       void *arg)
+{
+	const char *restrict failure;
+
+	if (utf8_string_size_length_report(size,
+					   bytes,
+					   length,
+					   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+utf8_string_size_length_handle_cl(size_t *const restrict size,
+				  const char *const restrict bytes,
+				  size_t length,
+				  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (utf8_string_size_length_report(size,
+					   bytes,
+					   length,
+					   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
 
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲

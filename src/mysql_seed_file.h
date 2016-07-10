@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "system/exit_utils.h"		/* exit, file, string utils */
-#include "memory/memory_copy_array.h"	/* memory_copy */
+#include "thread/thread_utils.h"	/* memory_copy, parallelization utils */
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
@@ -14,15 +14,13 @@
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */
-#define DB_NAME_LENGTH_MAX     64lu /* UTF8 length */
-#define DB_NAME_NN_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
-#define DB_NAME_NN_SIZE_MAX    (UTF8_SIZE_MAX * DB_NAME_NN_LENGTH_MAX)
-#define DB_NAME_SIZE_MAX       (DB_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
+#define DB_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
+#define DB_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * DB_NAME_LENGTH_MAX)
+#define DB_NAME_SIZE_MAX    (DB_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
 
-#define COL_NAME_LENGTH_MAX    64lu /* UTF8 length */
-#define COL_NAME_NN_LENGTH_MAX 63lu /* non-null UTF8 codepoints */
-#define COL_NAME_NN_SIZE_MAX   (UTF8_SIZE_MAX * COL_NAME_NN_LENGTH_MAX)
-#define COL_NAME_SIZE_MAX      (COL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
+#define COL_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
+#define COL_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * COL_NAME_LENGTH_MAX)
+#define COL_NAME_SIZE_MAX    (COL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
 
 
 /* file naming conventions
@@ -31,12 +29,14 @@
 #define DB_ROOT_DIRNAME		 "database"
 #define DB_ROOT_DIRNAME_WIDTH	 9
 #define DB_ROOT_DIRNAME_SIZE	 9lu
+#define DB_ROOT_DIRNAME_LENGTH	 8lu
 #define DB_ROOT_DIRNAME_NN_WIDTH 8
 #define DB_ROOT_DIRNAME_NN_SIZE  8lu
 
 /* database directory */
 #define DB_DIRNAME_SIZE_MAX	DB_NAME_SIZE_MAX
-#define DB_DIRNAME_LENGTH_MAX	DB_DIRNAME_LENGTH_MAX
+#define DB_DIRNAME_NN_SIZE_MAX	DB_NAME_NN_SIZE_MAX
+#define DB_DIRNAME_LENGTH_MAX	DB_NAME_LENGTH_MAX
 
 #define DB_DIRPATH_PFX		DB_ROOT_DIRNAME PATH_DELIM
 #define DB_DIRPATH_PFX_WIDTH	10
@@ -44,8 +44,12 @@
 #define DB_DIRPATH_PFX_NN_WIDTH 9
 #define DB_DIRPATH_PFX_NN_SIZE	9lu
 #define DB_DIRPATH_PFX_LENGTH	9lu
-#define DB_DIRPATH_LENGTH_MAX	DB_DIRNAME_LENGTH_MAX
-#define DB_DIRPATH_SIZE_MAX	(  DB_DIRPATH_NN_SIZE_MAX		\
+#define DB_DIRPATH_LENGTH_MAX	(  DB_ROOT_DIRNAME_LENGTH		\
+				+ DB_DIRNAME_LENGTH_MAX)
+#define DB_DIRPATH_NN_SIZE_MAX	(  DB_ROOT_DIRNAME_NN_SIZE		\
+				 + 1lu	/* PATH_DELIM */		\
+				 + DB_DIRNAME_NN_SIZE_MAX)
+#define DB_DIRPATH_SIZE_MAX	( DB_DIRPATH_NN_SIZE_MAX		\
 				 + 1lu)	/* '\0' */
 
 /* table loader script */
@@ -169,157 +173,274 @@ struct FileHandle {
 	struct Filepath path;
 };
 
+/* create and open file for writing only, fail if it already exists */
+#define FILE_HANDLE_OPEN_FLAG (O_EXCL | O_CREAT | O_WRONLY)
 
+/* all can read, only owner can write */
+#define FILE_HANDLE_MODE (S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH)
 
-#define FAIL_SWITCH_ERRNO_FAILURE	0lu
-#define FAIL_SWITCH_FAILURE_POINTER	failure
+#define DIR_HANDLE_MODE FILE_HANDLE_MODE
 
-
-#define FAIL_SWITCH_FAILURE_ROUTINE	utf8_string_size_length
+/* FileHandle Operations
+ * ────────────────────────────────────────────────────────────────────────── */
+/* open */
 inline bool
-validate_utf8_input_size(size_t *const restrict size,
-			 const char *const restrict bytes,
-			 const size_t length_max,
+file_handle_open_status(struct FileHandle *const restrict file)
+{
+	return open_mode_status(&file->descriptor,
+				&file->path.buffer[0],
+				FILE_HANDLE_OPEN_FLAG,
+				FILE_HANDLE_MODE);
+}
+
+inline void
+file_handle_open_muffle(struct FileHandle *const restrict file)
+{
+	open_mode_muffle(&file->descriptor,
+			 &file->path.buffer[0],
+			 FILE_HANDLE_OPEN_FLAG,
+			 FILE_HANDLE_MODE);
+}
+
+inline bool
+file_handle_open_report(struct FileHandle *const restrict file,
+			const char *restrict *const restrict failure)
+{
+	return open_mode_report(&file->descriptor,
+				&file->path.buffer[0],
+				FILE_HANDLE_OPEN_FLAG,
+				FILE_HANDLE_MODE,
+				failure);
+}
+
+inline void
+file_handle_open_handle(struct FileHandle *const restrict file,
+			Handler *const handle,
+			void *arg)
+{
+	open_mode_handle(&file->descriptor,
+			 &file->path.buffer[0],
+			 FILE_HANDLE_OPEN_FLAG,
+			 FILE_HANDLE_MODE,
+			 handle,
+			 arg);
+}
+
+inline void
+file_handle_open_handle_cl(struct FileHandle *const restrict file,
+			   const struct HandlerClosure *const restrict fail_cl)
+{
+	open_mode_handle_cl(&file->descriptor,
+			    &file->path.buffer[0],
+			    FILE_HANDLE_OPEN_FLAG,
+			    FILE_HANDLE_MODE,
+			    fail_cl);
+}
+
+/* write */
+inline bool
+file_handle_write_status(const struct FileHandle *const restrict file)
+{
+	return write_status(file->descriptor,
+			    file->contents.bytes,
+			    file->contents.size);
+}
+
+inline void
+file_handle_write_muffle(const struct FileHandle *const restrict file)
+{
+	write_muffle(file->descriptor,
+		     file->contents.bytes,
+		     file->contents.size);
+}
+
+inline bool
+file_handle_write_report(const struct FileHandle *const restrict file,
 			 const char *restrict *const restrict failure)
 {
-	*size = utf8_string_size_length(bytes,
-					length_max);
-	if (*size > 0lu)
-		return true;
-
-	switch(errno) {
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'bytes' contains byte sequence(s) that are "
-				 "not valid UTF-8 code points")
-	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
-				 "'bytes' exceeds maximum UTF-8 code point "
-				 "length 'length'")
-	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
-	}
-}
-
-#undef FAIL_SWITCH_ERRNO_FAILURE
-#undef FAIL_SWITCH_FAILURE_POINTER
-#undef FAIL_SWITCH_FAILURE_ROUTINE
-
-
-
-inline void
-db_basic_handles_init(struct DirHandle *const restrict db_dir,
-		      struct FileHandle *const restrict loader,
-		      const char *const restrict db_name,
-		      const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	size_t size;
-
-	if (!validate_utf8_input_size(&size,
-				      db_name,
-				      DB_NAME_LENGTH_MAX,
-				      &failure)) {
-		fail_cl->handle(fail_cl->arg,
-				failure);
-		__builtin_unreachable();
-	}
-
-	memory_copy(&db_dir->name.buffer[0],
-		    db_name,
-		    size);
-
-	db_dir->name.length = size - 1lu;
-
-	db_dir->path.length = db_dir->name.length + DB_DIRPATH_PFX_LENGTH;
-
-	char *restrict ptr = &db_dir->path.buffer[0];
-
-	PUT_STRING_WIDTH(ptr,
-			 DB_DIRPATH_PFX
-			 DB_DIRPATH_PFX_NN_WIDTH);
-
-	memory_copy(ptr,
-		    db_name,
-		    size);
+	return write_report(file->descriptor,
+			    file->contents.bytes,
+			    file->contents.size,
+			    failure);
 }
 
 inline void
-loader_file_init(struct FileHandle *const restrict loader_file,
-		 struct DirHandle *const restrict db_dir)
+file_handle_write_handle(const struct FileHandle *const restrict file,
+			Handler *const handle,
+			void *arg)
 {
-	char *restrict ptr = &loader_file->name.buffer[0];
-
-	PUT_STRING_WIDTH(ptr,
-			 LOADER_FILENAME_PFX,
-			 LOADER_FILENAME_PFX_NN_WIDTH);
-
-	ptr = put_string_size(ptr,
-			      &db_dir->name.buffer[0],
-			      db_dir->name.length);
-
-	SET_STRING_WIDTH(ptr,
-			 LOADER_FILENAME_SFX,
-			 LOADER_FILENAME_SFX_WIDTH);
-
-	loader_file->name.length = LOADER_FILENAME_PFX_LENGTH
-				 + db_dir->name.length
-				 + LOADER_FILENAME_SFX_LENGTH;
-
-	const name_size = loader_file->name.length + 1lu;
-
-	loader_file->path.length = name_size
-				 + db_dir->path.length;
-
-	ptr = put_string_size(&loader_file->path.buffer[0],
-			      &db_dir->path.buffer[0],
-			      db_dir->path.length);
-
-	*ptr = PATH_DELIM;
-	++ptr;
-
-	memory_copy(ptr,
-		    &loader_file->name.buffer[0],
-		    name_size);
+	write_handle(file->descriptor,
+		     file->contents.bytes,
+		     file->contents.size,
+		     handle,
+		     arg);
 }
-
 
 inline void
-table_file_init(struct FileHandle *const restrict loader_file,
-		 struct DirHandle *const restrict db_dir)
+file_handle_write_handle_cl(const struct FileHandle *const restrict file,
+			    const struct HandlerClosure *const restrict fail_cl)
 {
-	char *restrict ptr = &loader_file->name.buffer[0];
-
-	PUT_STRING_WIDTH(ptr,
-			 LOADER_FILENAME_PFX,
-			 LOADER_FILENAME_PFX_NN_WIDTH);
-
-	ptr = put_string_size(ptr,
-			      &db_dir->name.buffer[0],
-			      db_dir->name.length);
-
-	SET_STRING_WIDTH(ptr,
-			 LOADER_FILENAME_SFX,
-			 LOADER_FILENAME_SFX_WIDTH);
-
-	loader_file->name.length = LOADER_FILENAME_PFX_LENGTH
-				 + db_dir->name.length
-				 + LOADER_FILENAME_SFX_LENGTH;
-
-	const name_size = loader_file->name.length + 1lu;
-
-	loader_file->path.length = name_size
-				 + db_dir->path.length;
-
-	ptr = put_string_size(&loader_file->path.buffer[0],
-			      &db_dir->path.buffer[0],
-			      db_dir->path.length);
-
-	*ptr = PATH_DELIM;
-	++ptr;
-
-	memory_copy(ptr,
-		    &loader_file->name.buffer[0],
-		    name_size);
+	write_handle_cl(file->descriptor,
+			file->contents.bytes,
+			file->contents.size,
+			fail_cl);
 }
+
+
+/* close */
+inline bool
+file_handle_close_status(const struct FileHandle *const restrict file)
+{
+	return close_status(file->descriptor);
+}
+
+inline void
+file_handle_close_muffle(const struct FileHandle *const restrict file)
+{
+	close_muffle(file->descriptor);
+}
+
+inline bool
+file_handle_close_report(const struct FileHandle *const restrict file,
+			 const char *restrict *const restrict failure)
+{
+	return close_report(file->descriptor,
+			    failure);
+}
+
+inline void
+file_handle_close_handle(const struct FileHandle *const restrict file,
+			 Handler *const handle,
+			 void *arg)
+{
+	close_handle(file->descriptor,
+		     handle,
+		     arg);
+}
+
+inline void
+file_handle_close_handle_cl(const struct FileHandle *const restrict file,
+			    const struct HandlerClosure *const restrict fail_cl)
+{
+	close_handle_cl(file->descriptor,
+			fail_cl);
+}
+
+
+/* cleanup */
+void
+file_handle_cleanup(void *arg);
+
+
+/* atomic create-open-write-close */
+inline void
+file_handle_process(struct FileHandle *const restrict file,
+		    const struct HandlerClosure *const restrict fail_cl)
+{
+	thread_try_catch_open(&file_handle_cleanup,
+			      file);
+
+	file_handle_open_handle_cl(file,
+				   fail_cl);
+
+	file_handle_write_handle_cl(file,
+				    fail_cl);
+
+	file_handle_close_handle_cl(file,
+				    fail_cl);
+
+	thread_try_catch_close()
+}
+
+
+/* DirHandle Operations
+ * ────────────────────────────────────────────────────────────────────────── */
+/* make */
+inline bool
+dir_handle_make_status(const struct DirHandle *const restrict dir)
+{
+	return mkdir_status(&dir->path.buffer[0],
+			    DIR_HANDLE_MODE);
+}
+
+inline void
+dir_handle_make_muffle(const struct DirHandle *const restrict dir)
+{
+	mkdir_muffle(&dir->path.buffer[0],
+		     DIR_HANDLE_MODE);
+}
+
+inline bool
+dir_handle_make_report(const struct DirHandle *const restrict dir,
+		       const char *restrict *const restrict failure)
+{
+	return mkdir_report(&dir->path.buffer[0],
+			    DIR_HANDLE_MODE,
+			    failure);
+}
+
+inline void
+dir_handle_make_handle(const struct DirHandle *const restrict dir,
+		       Handler *const handle,
+		       void *arg)
+{
+	mkdir_handle(&dir->path.buffer[0],
+		     DIR_HANDLE_MODE,
+		     handle,
+		     arg);
+}
+
+inline void
+dir_handle_make_handle_cl(const struct DirHandle *const restrict dir,
+			  const struct HandlerClosure *const restrict fail_cl)
+{
+	mkdir_handle_cl(&dir->path.buffer[0],
+			DIR_HANDLE_MODE,
+			fail_cl);
+}
+
+/* remove */
+inline bool
+dir_handle_remove_status(const struct DirHandle *const restrict dir)
+{
+	return rmdir_status(&dir->path.buffer[0]);
+}
+
+inline void
+dir_handle_remove_muffle(const struct DirHandle *const restrict dir)
+{
+	rmdir_muffle(&dir->path.buffer[0]);
+}
+
+inline bool
+dir_handle_remove_report(const struct DirHandle *const restrict dir,
+			 const char *restrict *const restrict failure)
+{
+	return rmdir_report(&dir->path.buffer[0],
+			    failure);
+}
+
+inline void
+dir_handle_remove_handle(const struct DirHandle *const restrict dir,
+			 Handler *const handle,
+			 void *arg)
+{
+	rmdir_handle(&dir->path.buffer[0],
+		     handle,
+		     arg);
+}
+
+inline void
+dir_handle_remove_handle_cl(const struct DirHandle *const restrict dir,
+			    const struct HandlerClosure *const restrict fail_cl)
+{
+	rmdir_handle_cl(&dir->path.buffer[0],
+			fail_cl);
+}
+
+/* cleanup */
+void
+dir_handle_cleanup(void *arg);
 
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */

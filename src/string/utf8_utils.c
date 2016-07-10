@@ -18,3 +18,28 @@ utf8_string_size(const char *const restrict bytes);
 extern inline size_t
 utf8_string_size_length(const char *const restrict bytes,
 			size_t length);
+
+extern inline bool
+utf8_string_size_length_status(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length);
+extern inline void
+utf8_string_size_length_muffle(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length);
+extern inline bool
+utf8_string_size_length_report(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length,
+			       const char *restrict *const restrict failure);
+extern inline void
+utf8_string_size_length_handle(size_t *const restrict size,
+			       const char *const restrict bytes,
+			       size_t length,
+			       Handler *const handle,
+			       void *arg);
+extern inline void
+utf8_string_size_length_handle_cl(size_t *const restrict size,
+				  const char *const restrict bytes,
+				  size_t length,
+				  const struct HandlerClosure *const restrict fail_cl);

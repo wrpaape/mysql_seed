@@ -291,6 +291,7 @@ TARGETS			+= $(UNITY_OBJ)					\
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
+UTILS_TYPES_HANDLER_HDR		:= $(call HELPER_HEADER_PATH,utils types handler)
 UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_pattern)
 UTILS_TYPES_ACTION_HDR		:= $(call HELPER_HEADER_PATH,utils types action)
 UTILS_CHAR_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils char_attrs)
@@ -643,6 +644,8 @@ STRING_UTF8_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,string utf8_utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 STRING_UTF8_UTILS_OBJ_PREQS		:= $(STRING_UTF8_UTILS_SRC) 			\
 			   		   $(STRING_UTF8_UTILS_HDR)			\
+					   $(STRING_STRING_MACROS_HDR)			\
+					   $(UTILS_TYPES_HANDLER_HDR)			\
 					   $(UTILS_TYPES_OCTET_HDR)			\
 					   $(UTILS_CHAR_ATTRS_HDR)
 STRING_UTF8_UTILS_OBJ_GROUP		:= $(STRING_UTF8_UTILS_OBJ)
@@ -1118,10 +1121,10 @@ FILE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,file)
 FILE_OBJ_PREQS		:= $(FILE_SRC) 					\
 			   $(FILE_HDR) 					\
 			   $(SYSTEM_EXIT_UTILS_HDR)			\
-			   $(MEMORY_MEMORY_COPY_ARRAY_HDR)
+			   $(THREAD_THREAD_UTILS_HDR)
 FILE_OBJ_GROUP		:= $(FILE_OBJ)					\
 			   $(SYSTEM_EXIT_UTILS_OBJ_GROUP)		\
-			   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)
+			   $(THREAD_THREAD_UTILS_OBJ_GROUP)
 FILE_TRNR_SRC_PREQS	:= $(FILE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 FILE_TEST_OBJ_PREQS	:= $(FILE_TEST_SRC)				\
