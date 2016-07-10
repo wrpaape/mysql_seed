@@ -39,6 +39,10 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
+#define SET_STRING_WIDTH(PTR, STRING, WIDTH)				\
+*((CharBuffer ## WIDTH *restrict) PTR)					\
+= *((const CharBuffer ## WIDTH *const restrict) STRING)
+
 #define PUT_STRING_WIDTH(PTR, STRING, WIDTH)				\
 do {									\
 	*((CharBuffer ## WIDTH *restrict) PTR)				\
