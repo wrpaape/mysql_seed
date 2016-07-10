@@ -327,6 +327,46 @@ file_handle_close_handle_cl(const struct FileHandle *const restrict file,
 }
 
 
+/* unlink */
+inline bool
+file_handle_unlink_status(const struct FileHandle *const restrict file)
+{
+	return unlink_status(&file->path.buffer[0]);
+}
+
+inline void
+file_handle_unlink_muffle(const struct FileHandle *const restrict file)
+{
+	unlink_muffle(&file->path.buffer[0]);
+}
+
+inline bool
+file_handle_unlink_report(const struct FileHandle *const restrict file,
+			 const char *restrict *const restrict failure)
+{
+	return unlink_report(&file->path.buffer[0],
+			     failure);
+}
+
+inline void
+file_handle_unlink_handle(const struct FileHandle *const restrict file,
+			 Handler *const handle,
+			 void *arg)
+{
+	unlink_handle(&file->path.buffer[0],
+		      handle,
+		      arg);
+}
+
+inline void
+file_handle_unlink_handle_cl(const struct FileHandle *const restrict file,
+			    const struct HandlerClosure *const restrict fail_cl)
+{
+	unlink_handle_cl(&file->path.buffer[0],
+			 fail_cl);
+}
+
+
 /* cleanup */
 void
 file_handle_cleanup(void *arg);

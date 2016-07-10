@@ -50,11 +50,28 @@ extern inline void
 file_handle_close_handle_cl(const struct FileHandle *const restrict file,
 			    const struct HandlerClosure *const restrict fail_cl);
 
+/* unlink */
+extern inline bool
+file_handle_unlink_status(const struct FileHandle *const restrict file);
+extern inline void
+file_handle_unlink_muffle(const struct FileHandle *const restrict file);
+extern inline bool
+file_handle_unlink_report(const struct FileHandle *const restrict file,
+			 const char *restrict *const restrict failure);
+extern inline void
+file_handle_unlink_handle(const struct FileHandle *const restrict file,
+			 Handler *const handle,
+			 void *arg);
+extern inline void
+file_handle_unlink_handle_cl(const struct FileHandle *const restrict file,
+			    const struct HandlerClosure *const restrict fail_cl);
+
 /* cleanup */
 void
 file_handle_cleanup(void *arg)
 {
 	file_handle_close_muffle((const struct FileHandle *const restrict) arg);
+	file_handle_unlink_muffle((const struct FileHandle *const restrict) arg);
 }
 
 /* atomic create-open-write-close */
