@@ -114,6 +114,9 @@
 #	undef unlink_relative_imp
 #	warning "unlink_relative undefined"
 
+/* delete a directory */
+#	define rmdir_absolute_imp(ABSOLUTE_PATH)
+	_rmdir(ABSOLUTE_PATH)
 
 #else
 /* open a file */
@@ -1331,6 +1334,235 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 	__builtin_unreachable();
 }
 #endif /* ifndef WIN32 */
+
+
+/* unlink (absolute path) */
+inline bool
+unlink_absolute_status(const char *const restrict absolute_path)
+{
+	return unlink_absolute_imp(absolute_path) == 0;
+}
+
+inline void
+unlink_absolute_muffle(const char *const restrict absolute_path)
+{
+	(void) unlink_absolute_imp(absolute_path);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE unlink_absolute_imp
+inline void
+unlink_absolute_report(const char *const restrict absolute_path,
+		       const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(absolute_path)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied on the directory "
+				 "containing the link to be removed.")
+	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
+				 "The entry to be unlinked is the mount point "
+				 "for a mounted file system.",
+				 "The file named by 'absolute_path' cannot be "
+				 "unlinked because it is being used by the "
+				 "system or by another process.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'absolute_path' points outside the process's "
+				 "allocated address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while deleting the "
+				 "directory entry or deallocating the inode.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of 'absolute_path' exceeds "
+				 "{NAME_MAX} characters, or an entire path name"
+				 " exceeds {PATH_MAX} characters (possibly as a"
+				 " result of expanding a symlink).")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "The named file is a directory and the "
+				 "effective user ID of the process is not the "
+				 "super-user.",
+				 "The directory containing the file is marked "
+				 "sticky, and neither the containing directory "
+				 "nor the file to be removed are owned by the "
+				 "effective user ID.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+unlink_absolute_handle(const char *const restrict absolute_path,
+		       Handler *const handle,
+		       void *arg)
+{
+	const char *restrict failure;
+
+	if (unlink_absolute_report(absolute_path,
+				   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+unlink_absolute_handle_cl(const char *const restrict absolute_path,
+			  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (unlink_absolute_report(absolute_path,
+				   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+#ifndef WIN32
+/* unlink (relative path) */
+inline bool
+unlink_relative_status(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag)
+{
+	return unlink_relative_imp(relative_path) == 0;
+}
+
+inline void
+unlink_relative_muffle(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag)
+{
+	(void) unlink_relative_imp(relative_path);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE unlink_relative_imp
+inline void
+unlink_relative_report(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag,
+		       const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(relative_path)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.",
+				 "Write permission is denied on the directory "
+				 "containing the link to be removed.")
+	FAIL_SWITCH_ERRNO_CASE_2(EBUSY,
+				 "The entry to be unlinked is the mount point "
+				 "for a mounted file system.",
+				 "The file named by 'relative_path' cannot be "
+				 "unlinked because it is being used by the "
+				 "system or by another process.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'relative_path' points outside the process's "
+				 "allocated address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while deleting the "
+				 "directory entry or deallocating the inode.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of 'relative_path' exceeds "
+				 "{NAME_MAX} characters, or an entire path name"
+				 " exceeds {PATH_MAX} characters (possibly as a"
+				 " result of expanding a symlink).")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "The named file is a directory and the "
+				 "effective user ID of the process is not the "
+				 "super-user.",
+				 "The directory containing the file is marked "
+				 "sticky, and neither the containing directory "
+				 "nor the file to be removed are owned by the "
+				 "effective user ID.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'relative_path' does not specify an "
+				 "absolute path and the 'directory_descriptor' "
+				 "argument is neither 'AT_FDCWD' nor a valid "
+				 "file descriptor open for searching.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTEMPTY,
+				 "The 'unlink_flag' parameter has the '"
+				 "AT_REMOVEDIR' bit set and the path argument "
+				 "names a directory that is not an empty "
+				 "directory.",
+				 "There are hard links to the directory other "
+				 "than 'dot' or a single entry in 'dot-dot'.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "The 'unlink_flag' parameter has the '"
+				 "AT_REMOVEDIR' bit set and 'relative_path' "
+				 "does not name a directory.",
+				 "'relative_path' is not an absolute path and '"
+				 "directory_descriptor' is neither 'AT_FDCWD' "
+				 "nor a file descriptor associated with a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The value of 'unlink_flag' is not valid.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+unlink_relative_handle(const int directory_descriptor,
+		       const char *const restrict relative_path,
+		       const int unlink_flag,
+		       Handler *const handle,
+		       void *arg)
+{
+	const char *restrict failure;
+
+	if (unlink_relative_report(relative_path,
+				   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+unlink_relative_handle_cl(const int directory_descriptor,
+			  const char *const restrict relative_path,
+			  const int unlink_flag,
+			  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (unlink_relative_report(relative_path,
+				   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+#endif /* ifndef WIN32 */
+
 
 
 /* inspect file permissions (10 chars long) */
