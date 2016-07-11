@@ -1101,4 +1101,26 @@ parse_int_stop(intmax_t *const restrict n,
 #endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
+/* String operations
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+string_init(struct String *const restrict string,
+	    char *const restrict bytes,
+	    const size_t length)
+{
+	string->bytes  = bytes;
+	string->length = length;
+}
+
+/* StringInterval operations
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+string_interval_init(struct StringInterval *const restrict interval,
+		     char *const restrict from,
+		     const char *const restrict until)
+{
+	interval->from	= from;
+	interval->until = until;
+}
+
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */

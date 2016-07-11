@@ -33,7 +33,7 @@ _P2_("generates seed files for N databases according to their "		\
      "specification, 'DB_SPEC'")					\
 _P2_("examples:")							\
 _P3_("mysql_seed --generate --database foo_forum --table users 500 "	\
-     "--column name STRING NAME_FULL --column age UNSIGNED RANGE 18 "	\
+     "--column name STRING NAME FULL --column age UNSIGNED RANGE 18 "	\
      "99 --column email STRING EMAIL")					\
 _P3_("mysql_seed -g -d baz_shop -t products 100000 -c name STRING"	\
      "-c price FLOAT MIN 0.10")						\

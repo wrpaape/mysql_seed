@@ -10,7 +10,8 @@
 #include <sys/types.h>		/* ssize_t, chmod API */
 #include <sys/stat.h>		/* mkdir */
 #include <sys/param.h>		/* MAXPATHLEN */
-#include "utils/handle_utils.h"	/* stdbool, errno, Handler, FAIL_SWITCH */
+#include "utils/fail_switch.h"	/* stdbool, errno, FAIL_SWITCH */
+#include "utils/closure.h"	/* HandlerClosure */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES

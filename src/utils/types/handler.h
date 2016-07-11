@@ -15,11 +15,6 @@ Handler(void *arg,
 	const char *restrict message)
 __attribute__((noreturn));
 
-struct HandlerClosure {
-	Handler *handle;
-	void *arg;
-};
-
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TYPEDEFS, ENUM AND STRUCT DEFINITIONS

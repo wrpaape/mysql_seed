@@ -76,6 +76,8 @@ struct ThreadPoolGrid {
 };
 
 
+
+
 /* Worker operations
  *─────────────────────────────────────────────────────────────────────────── */
 void
@@ -87,9 +89,11 @@ inline void
 worker_init(struct Worker *const restrict worker,
 	    struct ThreadPool *const restrict pool)
 {
-	worker->fail_cl.handle = &worker_exit_on_failure;
-	worker->fail_cl.arg    = worker;
-	worker->pool	       = pool;
+	handler_closure_init(&worker->fail_cl,
+			     &worker_exit_on_failure,
+			     worker);
+
+	worker->pool = pool;
 }
 
 inline void
@@ -504,8 +508,9 @@ supervisor_init(struct Supervisor *const restrict supervisor,
 	thread_cond_init(&supervisor->trigger);
 	mutex_init(&supervisor->listening);
 
-	supervisor->fail_cl.handle = &supervisor_exit_on_failure;
-	supervisor->fail_cl.arg	   = supervisor;
+	handler_closure_init(&supervisor->fail_cl,
+			     &supervisor_exit_on_failure,
+			     supervisor);
 
 	supervisor->pool = pool;
 }

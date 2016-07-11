@@ -210,3 +210,17 @@ extern inline char *
 parse_int_stop(intmax_t *const restrict n,
 	       char *restrict string,
 	       const char stop);
+
+/* String operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+string_init(struct String *const restrict string,
+	    char *const restrict bytes,
+	    const size_t length);
+
+/* StringInterval operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+string_interval_init(struct StringInterval *const restrict interval,
+		     char *const restrict from,
+		     const char *const restrict until);

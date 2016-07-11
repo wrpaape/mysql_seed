@@ -304,12 +304,14 @@ TARGETS			+= $(UNITY_OBJ)					\
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
 UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
+UTILS_TYPES_ROUTINE_HDR		:= $(call HELPER_HEADER_PATH,utils types routine)
+UTILS_TYPES_PROCEDURE_HDR	:= $(call HELPER_HEADER_PATH,utils types procedure)
 UTILS_TYPES_HANDLER_HDR		:= $(call HELPER_HEADER_PATH,utils types handler)
 UTILS_TYPES_WORD_PATTERN_HDR	:= $(call HELPER_HEADER_PATH,utils types word_pattern)
 UTILS_TYPES_ACTION_HDR		:= $(call HELPER_HEADER_PATH,utils types action)
 UTILS_CHAR_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils char_attrs)
 UTILS_WORD_ATTRS_HDR		:= $(call HELPER_HEADER_PATH,utils word_attrs)
-UTILS_HANDLE_UTILS_HDR		:= $(call HELPER_HEADER_PATH,utils handle_utils)
+UTILS_FAIL_SWITCH_HDR		:= $(call HELPER_HEADER_PATH,utils fail_switch)
 MEMORY_MEMORY_SET_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_set_width)
 MEMORY_MEMORY_GET_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_get_width)
 MEMORY_MEMORY_PUT_WIDTH_HDR	:= $(call HELPER_HEADER_PATH,memory memory_put_width)
@@ -336,7 +338,7 @@ UTILS_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 UTILS_UTILS_OBJ_PREQS		:= $(UTILS_UTILS_SRC) 			\
 			   	   $(UTILS_UTILS_HDR)
-UTILS_UTILS_OBJ_GROUP		:= $(UTILS_OBJ)
+UTILS_UTILS_OBJ_GROUP		:= $(UTILS_UTILS_OBJ)
 UTILS_UTILS_TRNR_SRC_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
 				   $(TEST_RUNNER_SOURCE_DIR)
 UTILS_UTILS_TEST_OBJ_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
@@ -355,6 +357,43 @@ TARGETS			+= $(UTILS_UTILS_OBJ)				\
 			   $(UTILS_UTILS_TRNR_OBJ)			\
 			   $(UTILS_UTILS_TEST_OBJ)			\
 			   $(UTILS_UTILS_TEST_BIN)
+
+
+# utils/closure
+# ──────────────────────────────────────────────────────────────────────────────
+UTILS_CLOSURE_SRC 		:= $(call HELPER_SOURCE_PATH,utils closure)
+UTILS_CLOSURE_HDR		:= $(call HELPER_HEADER_PATH,utils closure)
+UTILS_CLOSURE_OBJ 		:= $(call HELPER_OBJECT_PATH,utils closure)
+UTILS_CLOSURE_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,utils closure)
+UTILS_CLOSURE_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,utils closure)
+UTILS_CLOSURE_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,utils closure)
+UTILS_CLOSURE_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,utils closure)
+UTILS_CLOSURE_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils closure)
+# ─────────────── target prequisites ───────────────────────────────────────────
+UTILS_CLOSURE_OBJ_PREQS		:= $(UTILS_CLOSURE_SRC) 		\
+			   	   $(UTILS_CLOSURE_HDR)			\
+			   	   $(UTILS_TYPES_ROUTINE_HDR)		\
+				   $(UTILS_TYPES_PROCEDURE_HDR)		\
+				   $(UTILS_TYPES_HANDLER_HDR)
+UTILS_CLOSURE_OBJ_GROUP		:= $(UTILS_CLOSURE_OBJ)
+UTILS_CLOSURE_TRNR_SRC_PREQS	:= $(UTILS_CLOSURE_TEST_SRC)		\
+				   $(TEST_RUNNER_SOURCE_DIR)
+UTILS_CLOSURE_TEST_OBJ_PREQS	:= $(UTILS_CLOSURE_TEST_SRC)		\
+			   	   $(UTILS_CLOSURE_OBJ_PREQS) 		\
+			   	   $(UNITY_OBJ_PREQS)
+UTILS_CLOSURE_TRNR_OBJ_PREQS	:= $(UTILS_CLOSURE_TRNR_SRC)		\
+			   	   $(UTILS_CLOSURE_TEST_OBJ_PREQS)
+UTILS_CLOSURE_TEST_BIN_PREQS	:= $(UTILS_CLOSURE_TRNR_OBJ)		\
+				   $(UTILS_CLOSURE_TEST_OBJ)		\
+			   	   $(UTILS_CLOSURE_OBJ_GROUP)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(UTILS_CLOSURE_TEST_BIN)
+TARGETS			+= $(UTILS_CLOSURE_OBJ)				\
+			   $(UTILS_CLOSURE_TRNR_SRC)			\
+			   $(UTILS_CLOSURE_TRNR_OBJ)			\
+			   $(UTILS_CLOSURE_TEST_OBJ)			\
+			   $(UTILS_CLOSURE_TEST_BIN)
 
 # time/time_utils
 # ──────────────────────────────────────────────────────────────────────────────
@@ -739,8 +778,10 @@ SYSTEM_SYSTEM_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,system system_ut
 # ─────────────── target prequisites ───────────────────────────────────────────
 SYSTEM_SYSTEM_UTILS_OBJ_PREQS		:= $(SYSTEM_SYSTEM_UTILS_SRC) 			\
 			   		   $(SYSTEM_SYSTEM_UTILS_HDR)			\
-			   		   $(UTILS_HANDLE_UTILS_HDR)
-SYSTEM_SYSTEM_UTILS_OBJ_GROUP		:= $(SYSTEM_SYSTEM_UTILS_OBJ)
+			   		   $(UTILS_CLOSURE_HDR)				\
+			   		   $(UTILS_FAIL_SWITCH_HDR)
+SYSTEM_SYSTEM_UTILS_OBJ_GROUP		:= $(SYSTEM_SYSTEM_UTILS_OBJ)			\
+					   $(UTILS_CLOSURE_OBJ_GROUP)
 SYSTEM_SYSTEM_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 SYSTEM_SYSTEM_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_SYSTEM_UTILS_TEST_SRC)		\
@@ -851,11 +892,12 @@ THREAD_THREAD_UTILS_OBJ_PREQS		:= $(THREAD_THREAD_UTILS_SRC)			\
 			   	   	   $(THREAD_THREAD_UTILS_HDR)			\
 			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_HDR)		\
 			   	   	   $(TIME_TIME_UTILS_HDR)			\
-			   	   	   $(UTILS_HANDLE_UTILS_HDR)			\
-			   	   	   $(UTILS_FAIL_SWITCH_CLOSE_HDR)
+			   	   	   $(UTILS_CLOSURE_HDR)				\
+			   	   	   $(UTILS_FAIL_SWITCH_HDR)
 THREAD_THREAD_UTILS_OBJ_GROUP		:= $(THREAD_THREAD_UTILS_OBJ)			\
 			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)	\
-			   	   	   $(TIME_TIME_UTILS_OBJ_GROUP)
+			   	   	   $(TIME_TIME_UTILS_OBJ_GROUP)			\
+			   	   	   $(UTILS_CLOSURE_OBJ_GROUP)
 THREAD_THREAD_UTILS_TRNR_SRC_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 THREAD_THREAD_UTILS_TEST_OBJ_PREQS	:= $(THREAD_THREAD_UTILS_TEST_SRC)		\
@@ -1459,6 +1501,11 @@ $(MEMORY_MEMORY_UTILS_OBJ): $(MEMORY_MEMORY_UTILS_OBJ_PREQS)
 $(TIME_TIME_UTILS_OBJ): $(TIME_TIME_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make utils/closure object
+# ──────────────────────────────────────────────────────────────────────────────
+$(UTILS_CLOSURE_OBJ): $(UTILS_CLOSURE_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make utils/utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(UTILS_UTILS_OBJ): $(UTILS_UTILS_OBJ_PREQS)
@@ -1959,6 +2006,26 @@ $(TIME_TIME_UTILS_TEST_OBJ): $(TIME_TIME_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(TIME_TIME_UTILS_TRNR_SRC): $(TIME_TIME_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for utils/closure
+# make:
+# 	utils_closure_test		binary,
+# 	utils_closure_test_runner 	object,
+# 	utils_closure_test		object, and
+# 	utils_closure_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(UTILS_CLOSURE_TEST_BIN): $(UTILS_CLOSURE_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(UTILS_CLOSURE_TRNR_OBJ): $(UTILS_CLOSURE_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UTILS_CLOSURE_TEST_OBJ): $(UTILS_CLOSURE_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UTILS_CLOSURE_TRNR_SRC): $(UTILS_CLOSURE_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

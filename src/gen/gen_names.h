@@ -44,8 +44,11 @@
 ") exceeded\n"
 
 
-/* struct definitions
+/* enum, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
+enum NameKind {
+
+}
 struct NameMap {
 	const char *const *names;
 	const urint_t i_last;

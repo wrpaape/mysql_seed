@@ -7,9 +7,8 @@
 #include <limits.h>			/* PTHREAD_THREADS_MAX */
 #include "memory/memory_copy_array.h"	/* memory_copy */
 #include "time/time_utils.h"		/* time utils */
-#include "utils/types/routine.h"	/* Routine */
-#include "utils/types/procedure.h"	/* Procedure */
-#include "utils/handle_utils.h"		/* bool, errno, error handling macros */
+#include "utils/closure.h"		/* ProcedureClosure, HandlerClosure */
+#include "utils/fail_switch.h"		/* bool, errno, error handling macros */
 
 /* typedefs, declarations
  *─────────────────────────────────────────────────────────────────────────── */
