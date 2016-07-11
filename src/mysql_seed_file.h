@@ -557,4 +557,33 @@ flag_next_until(char *const restrict *restrict arg_ptr,
 	return until_ptr;
 }
 
+/* LengthLock operations
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+length_lock_init(struct LengthLock *const restrict shared,
+		 const size_t length_init)
+{
+	shared->length = length_init;
+	mutex_init(&shared->lock);
+}
+
+inline void
+length_lock_increment(struct LengthLock *const restrict shared,
+		      const size_t increment,
+		      const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&shared->lock);
+
+	mutex_lock_handle_cl(&shared->lock,
+			     fail_cl);
+
+	shared->length += increment;
+
+	mutex_unlock_handle_cl(&shared->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */

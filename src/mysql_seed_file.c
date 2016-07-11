@@ -140,5 +140,12 @@ flag_next_until(char *const restrict *restrict arg_ptr,
 		const char *const restrict long_flag);
 
 
-
-
+/* LengthLock operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+length_lock_init(struct LengthLock *const restrict shared,
+		 const size_t length_init);
+extern inline void
+length_lock_increment(struct LengthLock *const restrict shared,
+		      const size_t increment,
+		      const struct HandlerClosure *const restrict fail_cl);

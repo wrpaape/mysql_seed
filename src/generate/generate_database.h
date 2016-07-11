@@ -50,11 +50,13 @@ struct BlockInterval {
 	const struct Block *restrict until_ptr;
 };
 
+struct Table;
 
 struct Column {
+	struct Table *table;			/* length, counter, cleanup */
 	struct CountString *counter;		/* access to counter */
 	struct RowspanInterval rowspans;	/* X BLK_COUNT */
-	struct CallbackNode cleanup;		/* cleanup self, then table */
+	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct String name;			/* assigned by table */
 };
 
