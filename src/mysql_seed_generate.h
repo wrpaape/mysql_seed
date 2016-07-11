@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generate_db.h" /* file/exit/string/parallelization utils */
+#include "generate/generate_database.h" /* file/exit/string/parallelization utils */
 
 
 /* error messages
@@ -12,18 +12,6 @@
 #define NO_DATABASE_FLAG_MESSAGE     NO_FLAG_MESSAGE("DATABASE")
 #define INVALID_DB_NAME_HEADER	     INVALID_SPEC_HEADER("DB_NAME")
 #define NO_DB_NAME_MESSAGE	     NO_SPEC_MESSAGE("DB_NAME")
-#define DBPG_MALLOC_FAILURE_MESSAGE  MALLOC_FAILURE_MESSAGE("dp_pool_grid_create")
-
-
-/* typedefs, struct declarations
- *─────────────────────────────────────────────────────────────────────────── */
-struct DBPoolGrid {
-	int exit_status;
-	struct ThreadPool **pools;
-	const struct ThreadPool **until_ptr;
-	struct HandlerClosure fail_cl;
-};
-
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
@@ -138,159 +126,6 @@ print_invalid_database_flag(char *const restrict flag)
 /* 		    name_size); */
 /* } */
 
-/* DBPoolGrid operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-db_pool_grid_destroy(struct DBPoolGrid *restrict db_pool_grid)
-{
-	free(db_pool_grid);
-}
-
-/* call only from main thread */
-inline void
-db_pool_grid_shutdown_failure(struct DBPoolGrid *restrict db_pool_grid,
-			      const char *const restrict failure)
-{
-	const struct ThreadPool *restrict *const restrict until_ptr;
-	struct ThreadPool *restrict *restrict pool_ptr;
-
-	until_ptr = db_pool_grid->until_ptr;
-	pool_ptr  = db_pool_grid->pools;
-
-	/* signal shutdown */
-	while ((pool_ptr < until_ptr) && (*pool_ptr != NULL)) {
-		thread_pool_exit_on_failure(*pool_ptr,
-					    failure);
-		++pool_ptr;
-	}
-
-	until_ptr = pool_ptr;
-	pool_ptr  = db_pool_grid->pools;
-
-	/* ensure all shutdown and destroyed */
-	while (pool_ptr < until_ptr) {
-		thread_pool_await_exit_failure(*pool_ptr);
-
-		thread_pool_destroy(*pool_ptr);
-
-		++pool_ptr;
-	}
-}
-
-inline void
-db_pool_grid_shutdown_success(struct DBPoolGrid *restrict db_pool_grid)
-{
-	const struct ThreadPool *restrict *const restrict until_ptr;
-	struct ThreadPool *restrict *restrict pool_ptr;
-
-	until_ptr = db_pool_grid->until_ptr;
-	pool_ptr  = db_pool_grid->pools;
-
-	/* signal shutdown */
-	while (pool_ptr < until_ptr) {
-		thread_pool_stop(*pool_ptr,
-				 &db_pool_grid->fail_cl);
-		++pool_ptr;
-	}
-
-	db_pool_grid->exit_status = EXIT_SUCCESS;
-
-	pool_ptr = db_pool_grid->pools;
-
-	/* ensure all shutdown and destroyed */
-	while (pool_ptr < until_ptr) {
-
-		if (thread_pool_exit_status(*pool_ptr,
-					    &db_pool_grid->fail_cl)
-		    != EXIT_SUCCESS)
-			db_pool_grid->exit_status = EXIT_FAILURE;
-
-		thread_pool_destroy(*pool_ptr);
-
-		++pool_ptr;
-	}
-}
-
-void
-db_pool_grid_exit_on_failure(void *db_pools,
-			     const char *const restrict failure)
-__attribute__((noreturn));
-
-inline void
-db_pool_grid_init(struct DBPoolGrid *const restrict db_pool_grid,
-		  struct ThreadPool *const restrict *const restrict pools,
-		  const size_t count_pools)
-{
-	db_pool_grid->pools	     = pools;
-	db_pool_grid->until_ptr	     = pools + count_pools;
-	db_pool_grid->fail_cl.arg    = db_pool_grid;
-	db_pool_grid->fail_cl.handle = &db_pool_grid_exit_on_failure;
-}
-
-inline struct DBPoolGrid *
-db_pool_grid_create(const size_t count_db_specs)
-{
-	/* malloc buffer for tracking progress of individual database generator
-	 * pools */
-	struct DBPoolGrid *const restrict db_pool_grid
-	= malloc(sizeof(struct DBPoolGrid)
-		 + (sizeof(struct ThreadPool *) * count_db_specs));
-
-	if (db_pool_grid != NULL) {
-		struct ThreadPool *const restrict *const restrict pools
-		= (struct ThreadPool *const restrict *const restrict)
-		  (db_pool_grid + 1l);
-
-		db_pool_grid_init(db_pool_grid,
-				  pools,
-				  count_pools);
-	}
-
-	return db_pool_grid;
-}
-
-inline int
-db_pool_grid_process(struct DBPoolGrid *const restrict db_pool_grid,
-		     char *restrict *const restrict db_spec,
-		     char *restrict *const restrict next_db_spec,
-		     char *const restrict *const restrict until_ptr)
-{
-	const struct ThreadPool *restrict *const restrict until_ptr;
-	struct ThreadPool *restrict *restrict pool_ptr;
-
-	pool_ptr  = db_pool_grid->pools;
-
-	/* create ThreadPool for each db_spec */
-	while (1) {
-		*pool_ptr = generate_database(db_spec,
-					      next_db_spec);
-
-		if (*pool_ptr != NULL)
-			++pool_ptr;
-
-		if (next_db_spec == until_ptr)
-			break;
-
-		db_spec = next_db_spec;
-
-		next_db_spec = flag_next_until(db_spec + DB_SPEC_LENGTH_MIN,
-					       until_ptr,
-					       'd',
-					       "database");
-	}
-
-	db_pool_grid_shutdown_success(db_pool_grid);
-
-	const int exit_status = db_pool_grid->exit_status;
-
-	db_pool_grid_destroy(db_pool_grid);
-
-	return exit_status;
-}
-
-/* create and monitor a ThreadPool for each db_spec
- *─────────────────────────────────────────────────────────────────────────── */
-
 
 
 /* create a container for monitoring independent db generator pools
@@ -308,27 +143,6 @@ process_db_specs(char *restrict *const restrict db_spec,
 						       'd',
 						       "database");
 
-	struct DBPoolGrid *const restrict db_pool_grid =
-	db_pool_grid_create(count_db_specs);
-
-	if (db_pool_grid == NULL) {
-		write_muffle(STDERR_FILENO,
-			     DBPG_MALLOC_FAILURE_MESSAGE,
-			     sizeof(DBPG_MALLOC_FAILURE_MESSAGE) - 1lu);
-		return EXIT_FAILURE;
-	}
-
-
-	char *const restrict *const restrict next_db_spec
-	= flag_next_until(next_db_spec_min,
-			  until_ptr,
-			  'd',
-			  "database");
-
-	return db_pool_grid_process(db_pool_grid,
-				    db_spec,
-				    next_db_spec,
-				    until_ptr);
 }
 
 

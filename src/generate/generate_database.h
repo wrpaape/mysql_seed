@@ -20,27 +20,75 @@
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
+struct CallbackNode {
+	const struct HandlerClosure *parent;	/* cleanup parent */
+	struct HandlerClosure self;		/* cleanup self */
+};
 
+struct Block;
+
+struct Rowspan {
+	struct Block *parent;	/* get row_count, update total block length */
+	char *cell;		/* points to first cell */
+};
+
+struct RowspanInterval {
+	struct Rowspan *restrict start_ptr;
+	const struct Rowspan *restrict until_ptr;
+};
+
+struct Block {
+	struct RowspanInterval rowspans;	/* X COL_COUNT */
+	size_t row_count;			/* either div or mod */
+	struct LengthLock total;		/* total block string length */
+	char *file_contents;			/* points to file contents */
+};
+
+
+struct BlockInterval {
+	struct Block *restrict start_ptr;
+	const struct Block *restrict until_ptr;
+};
+
+
+struct Column {
+	struct CountString *counter;		/* access to counter */
+	struct RowspanInterval rowspans;	/* X BLK_COUNT */
+	struct CallbackNode cleanup;		/* cleanup self, then table */
+	struct String name;			/* assigned by table */
+};
+
+struct ColumnInterval {
+	struct Column *restrict start_ptr;		/* assigned by db */
+	const struct Column *restrict until_ptr;	/* assigned by db */
+};
+
+
+/* Table tasks:					ARG
+ *	build counter		X 1		upto
+ *	build columns, blocks	X COL_COUNT	COL_SPEC
+ *	write blocks to file	X BLK_COUNT	Table
+ *	*/
 struct Table {
-
+	struct LengthLock total;		/* total table length */
+	struct ColumnInterval columns;		/* slice assigned by db */
+	struct BlockInterval blocks;		/* slice assigned by db */
+	struct CallbackNode cleanup;		/* cleanup self, then db */
+	struct CountString counter;		/* ensure 1st task */
+	struct FileHandle file;
 };
 
-struct TableInfo {
-
-	struct Table *tables;
-	const struct Table *until_ptr;
-
+struct TableInterval {
+	struct Table *restrict start_ptr;		/* assigned by main */
+	const struct Table *restrict until_ptr;		/* assigned by main */
 };
 
-struct Loader {
-	int file_descriptor;
-}
 
 struct Database {
-	int directory_descriptor;
-	const char *name;
-	struct ThreadPool *pool;
-	struct TableInfo;
+	struct TableInterval tables;
+	struct CallbackNode cleanup;		/* cleanup self, then main */
+	struct DirHandle dir;
+	struct FileHandle loader;
 };
 
 

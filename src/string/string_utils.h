@@ -27,6 +27,11 @@ struct String {
 	size_t length;
 };
 
+struct StringInterval {
+	char *restrict bytes;
+	const char *restrict until_ptr;
+};
+
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 #if HAVE_INT_STRING_ATTRS

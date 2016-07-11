@@ -173,6 +173,14 @@ struct FileHandle {
 	struct Filepath path;
 };
 
+/* synchronized counter */
+struct LengthLock {
+	size_t length;
+	Mutex lock;
+};
+
+
+
 /* create and open file for writing only, fail if it already exists */
 #define FILE_HANDLE_OPEN_FLAG (O_EXCL | O_CREAT | O_WRONLY)
 
