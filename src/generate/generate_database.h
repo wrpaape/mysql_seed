@@ -21,7 +21,7 @@
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
 
-/* COL_SPEC COMPONENTS
+/* GENERATOR COMPONENT SPECS
  * ──────────────────────────────────────────────────────────────────────────
  * ────────────────────────────────────────────────────────────────────────── */
 /* -c username STRING BASE tastyham		      → tastyham1
@@ -111,7 +111,35 @@ union TypeQualifier {
 
 struct ColSpec {
 	Procedure *build;
+	struct String name;
 	union TypeQualifier type;
+};
+
+struct ColSpecInterval {
+	const struct ColSpec *restrict from;
+	const struct ColSpec *restrict until;
+};
+
+struct TblSpec {
+	size_t row_count;
+	struct String name;
+	struct ColSpecInterval col_specs;
+};
+
+struct TblSpecInterval {
+	const struct TblSpec *restrict from;
+	const struct TblSpec *restrict until;
+};
+
+struct DbSpec {
+	struct DbSpec *next;		/* next valid db_spec */
+	struct String name;
+	struct TblSpecInterval tbl_specs;
+};
+
+struct DbSpecInterval {
+	const struct DbSpec *restrict from;
+	const struct DbSpec *restrict until;
 };
 
 
@@ -147,11 +175,9 @@ struct RowBlockInterval {
 struct Table;
 
 struct Column {
-	struct Table *parent;			/* length, cleanup */
-	struct CountString *counter;		/* access to shared counter */
+	struct ColSpec *spec;			/* from raw input */
+	struct Table *parent;			/* length, counter, cleanup */
 	struct RowspanInterval rowspans;	/* X BLK_COUNT */
-	struct String name;			/* raw input */
-	struct ColSpec spec;			/* raw input */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 };
 
@@ -168,12 +194,12 @@ struct Database;
  *	*/
 
 struct Table {
-	char *contents;				/* table file */
+	char *contents;				/* table file start */
+	struct TblSpec *spec;			/* from raw input */
 	struct Database *parent;
 	struct LengthLock total;		/* total table length */
 	struct ColumnInterval columns;		/* slice assigned by db */
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
-	struct String name;			/* raw input */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
 	struct FileHandle file;
 };
@@ -187,6 +213,7 @@ struct Generator;
 
 struct Database {
 	char *contents;				/* table files and loader */
+	struct DbSpec *spec;			/* from raw input */
 	struct Generator *parent;
 	struct LengthLock total;		/* total database length */
 	struct TableInterval tables;
@@ -203,9 +230,10 @@ struct DatabaseInterval {
 
 struct Generator {
 	char *contents;				/* buffer for all files */
+	struct DbSpecInterval *db_specs;	/* from raw input */
 	struct LengthLock total;		/* total file length */
 	struct DatabaseInterval databases;
-	struct CountString counter;		/* ensure 1st task */
+	struct CountString counter;		/* shared by all */
 	struct ThreadPool pool;			/* all child threads */
 	struct ThreadLog log;
 };
@@ -296,14 +324,12 @@ __attribute__((noreturn));
 inline void
 column_init(struct Column *const restrict column,
 	    struct Table *const restrict parent,
-	    struct CountString *const restrict counter,
 	    struct Rowspan *const restrict rowspans_from,
 	    const struct Rowspan *const restrict rowspans_until,
 	    char *const restrict column_name_bytes,
 	    const size_t column_name_length)
 {
 	column->parent	= parent;
-	column->counter = counter;
 
 	rowspan_interval_init(&column->rowspans,
 			      rowspans_from,

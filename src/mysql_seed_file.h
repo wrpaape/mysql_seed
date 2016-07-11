@@ -8,9 +8,8 @@
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
-#define FLAG_LENGTH_MAX (sizeof("--generate") * 2lu)
-#define SPEC_LENGTH_MAX (sizeof("NAME_FIRST") * 2lu)
-#define ERROR_BUFFER_SIZE 128lu
+#define LENGTH_INSPECT_MAX (sizeof("--generate") * 2lu)
+#define ERROR_BUFFER_SIZE_MIN 128lu
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */
@@ -125,14 +124,18 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
 
-#define INVALID_SPEC_HEADER(SPEC)					\
-ERROR_WRAP("error - invalid " SPEC ": ")
+#define PARSE_ERROR_MESSAGE(...)					\
+ERRROR_HEADER_WRAP("parse", "error", ":" __VA_ARGS__)
 
-#define NO_SPEC_MESSAGE(SPEC)						\
-ERROR_WRAP("error - no " SPEC " specified") MORE_INFO_MESSAGE
+#define PARSE_ERROR_INSPECT_1						\
+PARSE_ERROR_MESSAGE() "\n"
 
-#define INVALID_FLAG_HEADER(FLAG) INVALID_SPEC_HEADER(FLAG " flag")
-#define NO_FLAG_MESSAGE(FLAG)	  NO_SPEC_MESSAGE(FLAG " flag")
+#define PARSE_ERROR_INSPECT_2(REASON)					\
+"\n\n" ERROR_WRAP("reason: " REASON " (IGNORE)") "\n"
+
+
+#define FAILURE_NO_ARG(ARG)						\
+PARSE_FAILURE_MESSAGE(" no " FLAG " (FATAL)") MORE_INFO_MESSAGE
 
 
 /* typedefs, struct declarations
@@ -618,14 +621,24 @@ argv_interval_init(struct ArgvInterval *const restrict interval,
 	return true;
 }
 
-inline bool
-argv_interval_init_sub(struct ArgvInterval *const restrict sub,
-		       const struct ArgvInterval *const restrict main
+inline char *
+put_inspect_args(char *restrict buffer,
+		 char *restrict *const restrict from,
+		 char *const restrict *const restrict until)
+{
+	while (1) {
+		buffer = put_string_inspect(buffer,
+					    from,
+					    LENGTH_INSPECT_MAX);
 
-		   char *const restrict *const restrict from,
-		   const char *const restrict *const restrict until,
-		   const size_t length_min)
+		++from;
 
+		if (from == until)
+			return buffer;
 
+		*from = ' ';
+		++from;
+	}
+}
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */

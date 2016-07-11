@@ -198,16 +198,16 @@ print_invalid_mode(char *const restrict mode)
 }
 
 
-/* dispatch help mode according to 'arg_ptr'
+/* dispatch help mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-help_dispatch(char *const restrict *const restrict arg_ptr,
-	      char *const restrict *const restrict until_ptr)
+help_dispatch(char *const restrict *const restrict arg,
+	      char *const restrict *const restrict until)
 {
-	if (arg_ptr == until_ptr)
+	if (arg == until)
 		return print_help_usage();
 
-	char *const restrict mode = *arg_ptr;
+	char *const restrict mode = *arg;
 	char *const restrict rem  = mode + 1l;
 
 	switch (*mode) {

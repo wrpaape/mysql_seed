@@ -10,14 +10,15 @@
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define FAILURE_NO_DB_SPEC	FAILURE_NO_ARG("DB_SPEC")
-
-#define FAILURE_DB_SPEC_SHORT_1	PARSE_FAILURE_INSPECT_1
-#define FAILURE_DB_SPEC_SHORT_2	PARSE_FAILURE_INSPECT_2("DB_SPEC too short")
-
-#define ERROR_DB_SPEC_SHORT_1	PARSE_ERROR_INSPECT_1
-#define ERROR_DB_SPEC_SHORT_2	PARSE_ERROR_INSPECT_2("DB_SPEC too short")
-
+#define INVALID_DB_SPEC_HEADER	 INVALID_SPEC_HEADER("DB_SPEC")
+#define INVALID_TBL_SPEC_HEADER	 INVALID_SPEC_HEADER("TBL_SPEC")
+#define INVALID_COL_SPEC_HEADER	 INVALID_SPEC_HEADER("COL_SPEC")
+#define INVALID_TBL_SPEC_HEADER	 INVALID_SPEC_HEADER("TBL_SPEC")
+#define NO_DATABASE_FLAG_MESSAGE     NO_FLAG_MESSAGE("DATABASE")
+#define NO_COLUMN_FLAG_MESSAGE	     NO_FLAG_MESSAGE("COLUMN")
+#define NO_TABLE_FLAG_MESSAGE	     NO_FLAG_MESSAGE("TABLE")
+#define INVALID_DB_NAME_HEADER	     INVALID_SPEC_HEADER("DB_NAME")
+#define NO_DB_NAME_MESSAGE	     NO_SPEC_MESSAGE("DB_NAME")
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -61,43 +62,38 @@ generate_scan_state_reset(struct GenerateScanState *const restrict expecting)
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-inline void
-print_no_db_spec(void)
+inline int
+print_no_database_flag(void)
 {
 	write_muffle(STDERR_FILENO,
-		     FAILURE_NO_DB_SPEC,
-		     sizeof(FAILURE_NO_DB_SPEC) - 1lu);
+		     NO_DATABASE_FLAG_MESSAGE,
+		     sizeof(NO_DATABASE_FLAG_MESSAGE) - 1lu);
+
+	return EXIT_FAILURE;
 }
 
-inline void
+inline int
 print_invalid_db_spec(char *restrict *const restrict from,
-		      char *restrict *const restrict until,
-		      const char *const restrict reason,
-		      const size_t length_reason)
+		      char *restrict *const restrict until)
 {
-	const size_t buffer_size = ERROR_BUFFER_SIZE_MIN
-				 + ((until - from)
-				    * (LENGTH_INSPECT_MAX + 1lu));
-
-	char buffer[buffer_size];
+	char buffer[ERROR_BUFFER_SIZE] = {
+		INVALID_DATABASE_FLAG_HEADER
+	};
 
 	char *restrict
-	ptr = put_string_size(&buffer[0],
-			      PARSE_ERROR_INSPECT_1,
-			      sizeof(PARSE_ERROR_INSPECT_1) - 1lu);
-
-	ptr = put_inspect_args(ptr,
-			       from,
-			       until);
+	ptr = put_string_inspect(&buffer[sizeof(INVALID_DATABASE_FLAG_HEADER)],
+				 flag,
+				 FLAG_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
-			      reason,
-			      length_reason);
-
+			      MORE_INFO_MESSAGE,
+			      sizeof(MORE_INFO_MESSAGE) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+
+	return EXIT_FAILURE;
 }
 
 /* Init File/DirHandles from input
@@ -179,6 +175,25 @@ print_invalid_db_spec(char *restrict *const restrict from,
 /* } */
 
 
+
+/* create a container for monitoring independent db generator pools
+ *─────────────────────────────────────────────────────────────────────────── */
+inline int
+process_db_specs(char *restrict *const restrict db_spec,
+		 char *const restrict *const restrict until)
+{
+	char *const restrict *const restrict next_db_spec_min
+	= db_spec + DB_SPEC_LENGTH_MIN;
+
+	const size_t count_db_specs = 1lu
+				    + flag_match_count(next_db_spec_min,
+						       until,
+						       'd',
+						       "database");
+
+}
+
+
 /* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
@@ -243,51 +258,13 @@ inline int
 generate_dispatch(char *restrict *const restrict from,
 		  const char *const restrict *const restrict until)
 {
-	const size_t length_interval = until - from;
-
-	if (length_interval < DB_SPEC_LENGTH_MIN) {
-
-		if (length_interval == 0lu)
-			print_no_db_spec()
-		else
-			print_invalid_db_spec(from,
-					      until,
-					      DB_SPEC_TOO_SHORT,
-					      sizeof(DB_SPEC_TOO_SHORT) - 1lu);
-
-		return EXIT_FAILURE;
-	}
-
-
 	struct GenerateCounter count = {
 		.databases = 0lu;
 		.tables	   = 0lu;
 		.columns   = 0lu;
 	};
 
-
-	/* calculate max required size for all components + their specs
-	 *
-	 *		min args to define
-	 * DB_SPEC	8
-	 * TBL_SPEC	6
-	 * COL_SPEC	3
-	 *
-	 * minimal valid input for GENERATE MODE:
-	 *
-	 *                       ARGV - 9 args
-	 * ┌────────────────────────────────────────────────────────────┐
-	 * │                      DB_SPEC - 8 args                      │
-	 * │  ┌─────────────────────────────────────────────────────────┐
-	 * │  │                           TBL_SPEC - 6 args             │
-	 * │  │          ┌──────────────────────────────────────────────┐
-	 * │  │          │                          COL_SPEC - 3 args   │
-	 * │  │          │                     ┌────────────────────────┐
-	 * │  │          │                     │                        │
-	 * -g -d DB_NAME -t TBL_NAME ROW_COUNT -c COLUMN_NAME COLUMN_TYPE
-	 * */
-
-	const size_t spec_alloc = k
+	const size_t length gen_spec
 
 	generate_scan_specs(&count,
 			    from,

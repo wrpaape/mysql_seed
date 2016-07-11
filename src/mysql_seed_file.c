@@ -161,5 +161,7 @@ argv_interval_init(struct ArgvInterval *const restrict interval,
 		   char *const restrict *const restrict from,
 		   const char *const restrict *const restrict until,
 		   const size_t length_min);
-
-
+extern inline char *
+put_inspect_args(char *restrict buffer,
+		 char *restrict *const restrict from,
+		 char *const restrict *const restrict until);
