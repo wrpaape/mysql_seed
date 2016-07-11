@@ -9,11 +9,12 @@ extern inline int
 print_invalid_database_flag(char *const restrict flag);
 
 
-/* dispatch generate mode according to 'arg_ptr'
+/* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-process_db_specs(char *restrict *const restrict db_spec,
-		 char *const restrict *const restrict until_ptr)
+generate_scan_specs(struct GenerateCounter *const restrict count,
+		    char *restrict *const restrict from,
+		    const char *const restrict *const restrict until);
 extern inline int
-generate_dispatch(char *const restrict *const restrict arg_ptr,
-		  char *const restrict *const restrict until_ptr);
+generate_dispatch(char *const restrict *const restrict from,
+		  char *const restrict *const restrict until);

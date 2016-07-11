@@ -179,6 +179,11 @@ struct LengthLock {
 	Mutex lock;
 };
 
+/* an interval of argv */
+struct ArgvInterval {
+	char *restrict *restrict from;
+	const char *restrict *restrict until:
+};
 
 
 /* create and open file for writing only, fail if it already exists */
@@ -491,8 +496,47 @@ void
 dir_handle_cleanup(void *arg);
 
 
+/* LengthLock operations
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+length_lock_init(struct LengthLock *const restrict shared,
+		 const size_t length_init)
+{
+	shared->length = length_init;
+	mutex_init(&shared->lock);
+}
+
+inline void
+length_lock_increment(struct LengthLock *const restrict shared,
+		      const size_t increment,
+		      const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&shared->lock);
+
+	mutex_lock_handle_cl(&shared->lock,
+			     fail_cl);
+
+	shared->length += increment;
+
+	mutex_unlock_handle_cl(&shared->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+
 /* Input operations
  * ────────────────────────────────────────────────────────────────────────── */
+inline char **
+flag_next(char *const restrict *restrict from,
+	  const char *const restrict *const restrict until)
+{
+	while ((from < until) && (**from != '-'))
+		++from;
+
+	return from;
+}
+
 inline bool
 flag_match(char *restrict arg,
 	   const char short_flag,
@@ -522,15 +566,15 @@ flag_match(char *restrict arg,
 }
 
 inline size_t
-flag_count_until(char *const restrict *restrict arg_ptr,
-		 char *const restrict *const restrict until_ptr,
+flag_match_count(char *const restrict *restrict from,
+		 char *const restrict *const restrict until,
 		 const char short_flag,
 		 const char *const restrict long_flag)
 {
 	size_t count_flags;
 
-	for (count_flags = 0lu; arg_ptr < until_ptr; ++arg_ptr)
-		if (flag_match(*arg_ptr,
+	for (count_flags = 0lu; from < until; ++from)
+		if (flag_match(*from,
 			       short_flag,
 			       long_flag))
 			++count_flags;
@@ -539,51 +583,49 @@ flag_count_until(char *const restrict *restrict arg_ptr,
 }
 
 inline char **
-flag_next_until(char *const restrict *restrict arg_ptr,
-		char *const restrict *const restrict until_ptr,
+flag_match_next(char *const restrict *restrict from,
+		char *const restrict *const restrict until,
 		const char short_flag,
 		const char *const restrict long_flag)
 {
-	while (arg_ptr < until_ptr) {
+	while (from < until) {
 
-		if (flag_match(*arg_ptr,
+		if (flag_match(*from,
 			       short_flag,
 			       long_flag))
-			return arg_ptr;
+			return from;
 
-		++arg_ptr;
+		++from;
 	}
 
-	return until_ptr;
+	return until;
 }
 
-/* LengthLock operations
+/* ArgvInterval operations
  * ────────────────────────────────────────────────────────────────────────── */
-inline void
-length_lock_init(struct LengthLock *const restrict shared,
-		 const size_t length_init)
+inline bool
+argv_interval_init(struct ArgvInterval *const restrict interval,
+		   char *const restrict *const restrict from,
+		   const char *const restrict *const restrict until,
+		   const size_t length_min)
 {
-	shared->length = length_init;
-	mutex_init(&shared->lock);
+	if ((from + length_min) > until)
+		return false;
+
+	interval->from  = from;
+	interval->until = until;
+
+	return true;
 }
 
-inline void
-length_lock_increment(struct LengthLock *const restrict shared,
-		      const size_t increment,
-		      const struct HandlerClosure *const restrict fail_cl)
-{
-	mutex_lock_try_catch_open(&shared->lock);
+inline bool
+argv_interval_init_sub(struct ArgvInterval *const restrict sub,
+		       const struct ArgvInterval *const restrict main
 
-	mutex_lock_handle_cl(&shared->lock,
-			     fail_cl);
+		   char *const restrict *const restrict from,
+		   const char *const restrict *const restrict until,
+		   const size_t length_min)
 
-	shared->length += increment;
-
-	mutex_unlock_handle_cl(&shared->lock,
-			       fail_cl);
-
-	mutex_lock_try_catch_close();
-}
 
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */

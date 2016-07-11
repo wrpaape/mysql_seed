@@ -13,8 +13,8 @@
 #define NO_MODE_FLAG_MESSAGE NO_FLAG_MESSAGE("MODE")
 
 static inline int
-mode_dispatch(char *restrict *const restrict arg_ptr,
-	      char *const restrict *const restrict until_ptr);
+mode_dispatch(char *restrict *const restrict from,
+	      char *const restrict *const restrict until);
 
 
 /* print error messsage and return 'EXIT_FAILURE'

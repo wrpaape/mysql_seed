@@ -13,6 +13,22 @@
 #define INVALID_DB_NAME_HEADER	     INVALID_SPEC_HEADER("DB_NAME")
 #define NO_DB_NAME_MESSAGE	     NO_SPEC_MESSAGE("DB_NAME")
 
+/* typedefs, struct declarations
+ *─────────────────────────────────────────────────────────────────────────── */
+struct GenerateCounter {
+	size_t databases;
+	size_t tables;
+	size_t columns;
+};
+
+struct GenerateScanState {
+	bool db_spec;
+	bool tbl_spec;
+	bool col_spec;
+	bool value;
+	bool complete;
+};
+
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
@@ -132,37 +148,77 @@ print_invalid_database_flag(char *const restrict flag)
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 process_db_specs(char *restrict *const restrict db_spec,
-		 char *const restrict *const restrict until_ptr)
+		 char *const restrict *const restrict until)
 {
 	char *const restrict *const restrict next_db_spec_min
 	= db_spec + DB_SPEC_LENGTH_MIN;
 
 	const size_t count_db_specs = 1lu
-				    + flag_count_until(next_db_spec_min,
-						       until_ptr,
+				    + flag_match_count(next_db_spec_min,
+						       until,
 						       'd',
 						       "database");
 
 }
 
 
-/* dispatch generate mode according to 'arg_ptr'
+/* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-generate_dispatch(char *const restrict *const restrict arg_ptr,
-		  char *const restrict *const restrict until_ptr)
+generate_scan_specs(struct GenerateCounter *const restrict count,
+		    char *restrict *const restrict from,
+		    const char *const restrict *const restrict until)
 {
-	if (arg_ptr == until_ptr)
-		return print_no_database_flag();
+	struct GenerateScanState expecting = {
+		.db_spec  = true,
+		.tbl_spec = false,
+		.col_spec = false,
+		.value	  = false,
+		.complete = false
+	};
 
-	return flag_match(*arg_ptr,
-			  'd',
-			  "database")
-		/* validate 1st flag of 1st DB_SPEC before continuing */
-	     ?  process_db_specs(arg_ptr,
-				 until_ptr,
-				 count_dbs)
-	     :  print_invalid_database_flag(*arg_ptr)
+	char *restrict arg;
+
+	while (from < until) {
+		arg = *from;
+
+		switch (*next) {
+		case '-': break;	/* parse long mode flag */
+
+		case 'g': return (*rem == '\0')
+			       ? generate_dispatch(from + 1l, until)
+			       : print_invalid_mode_flag(flag);
+
+		case 'h': return (*rem == '\0')
+			       ? help_dispatch(from + 1l, until)
+			       : print_invalid_mode_flag(flag);
+
+		case 'l': return (*rem == '\0')
+			       ? load_dispatch(from + 1l, until)
+			       : print_invalid_mode_flag(flag);
+
+		default:  return print_invalid_mode_flag(flag);
+		}
+	}
+}
+
+
+inline int
+generate_dispatch(char *restrict *const restrict from,
+		  const char *const restrict *const restrict until)
+{
+	struct GenerateCounter count = {
+		.databases = 0lu;
+		.tables	   = 0lu;
+		.columns   = 0lu;
+	};
+
+	generate_scan_specs(&count,
+			    from,
+			    until);
+
+
+	return EXIT_SUCCESS;
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_GENERATE_H_ */

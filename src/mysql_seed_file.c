@@ -122,24 +122,6 @@ dir_handle_cleanup(void *arg)
 }
 
 
-/* Input operations
- * ────────────────────────────────────────────────────────────────────────── */
-extern inline bool
-flag_match(char *restrict arg,
-	   const char short_flag,
-	   const char *const restrict long_flag);
-extern inline size_t
-flag_count_until(char *const restrict *restrict arg_ptr,
-		 char *const restrict *const restrict until_ptr,
-		 const char short_flag,
-		 const char *const restrict long_flag);
-extern inline char **
-flag_next_until(char *const restrict *restrict arg_ptr,
-		char *const restrict *const restrict until_ptr,
-		const char short_flag,
-		const char *const restrict long_flag);
-
-
 /* LengthLock operations
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
@@ -149,3 +131,35 @@ extern inline void
 length_lock_increment(struct LengthLock *const restrict shared,
 		      const size_t increment,
 		      const struct HandlerClosure *const restrict fail_cl);
+
+
+/* Input operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline char **
+flag_next(char *const restrict *restrict from,
+	  const char *const restrict *const restrict until);
+extern inline bool
+flag_match(char *restrict arg,
+	   const char short_flag,
+	   const char *const restrict long_flag);
+extern inline size_t
+flag_match_count(char *const restrict *restrict from,
+		 char *const restrict *const restrict until,
+		 const char short_flag,
+		 const char *const restrict long_flag);
+extern inline char **
+flag_match_next(char *const restrict *restrict from,
+		char *const restrict *const restrict until,
+		const char short_flag,
+		const char *const restrict long_flag);
+
+
+/* ArgvInterval operations
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+argv_interval_init(struct ArgvInterval *const restrict interval,
+		   char *const restrict *const restrict from,
+		   const char *const restrict *const restrict until,
+		   const size_t length_min);
+
+
