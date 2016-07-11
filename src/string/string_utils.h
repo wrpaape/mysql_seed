@@ -28,8 +28,8 @@ struct String {
 };
 
 struct StringInterval {
-	char *restrict bytes;
-	const char *restrict until_ptr;
+	char *restrict from;
+	const char *restrict until;
 };
 
 /* global variables
