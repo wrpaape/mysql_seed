@@ -1,4 +1,4 @@
-#include "gen/gen_names.h"
+#include "generate/names.h"
 
 
 /* global variables

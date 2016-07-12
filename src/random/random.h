@@ -1,5 +1,5 @@
-#ifndef RANDOM_RANDOM_H_
-#define RANDOM_RANDOM_H_
+#ifndef MYSQL_SEED_RANDOM_RANDOM_H_
+#define MYSQL_SEED_RANDOM_RANDOM_H_
 
 /* EXTERNAL DEPENDENCIES ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
@@ -13,24 +13,30 @@
 
 rng_t glob_rng; /* global random number generator state */
 
-void glob_rng_ctor(void) __attribute__((constructor));
+void
+glob_rng_ctor(void)
+__attribute__((constructor));
 
-inline void glob_rng_init(void)
+inline void
+glob_rng_init(void)
 {
 	pcg32_srandom_r(&glob_rng, time(NULL), (intptr_t) &glob_rng);
 }
 
-inline urint_t random_uint(void)
+inline urint_t
+random_uint(void)
 {
 	return pcg32_random_r(&glob_rng);
 }
 
-inline bool coin_flip(void)
+inline bool
+coin_flip(void)
 {
 	return (bool) (random_uint() & 1u);
 }
 
-inline urint_t random_uint_upto(const urint_t rbound)
+inline urint_t
+random_uint_upto(const urint_t rbound)
 {
 	const urint_t range_length = rbound + 1u;
 	const urint_t valid_limit  = URINT_MAX - (URINT_MAX % range_length);
@@ -45,8 +51,9 @@ inline urint_t random_uint_upto(const urint_t rbound)
 	return (urint_t) (random % range_length);
 }
 
-inline rint_t random_int_in_range(const rint_t lbound,
-				  const rint_t rbound)
+inline rint_t
+random_int_in_range(const rint_t lbound,
+		    const rint_t rbound)
 {
 
 	const urint_t range_length = rbound - lbound + 1u;
@@ -62,32 +69,37 @@ inline rint_t random_int_in_range(const rint_t lbound,
 	return ((rint_t) (random % range_length)) + lbound;
 }
 
-inline double random_dbl_upto(const double rbound)
+inline double
+random_dbl_upto(const double rbound)
 {
 	return (((double) random_uint())
 		/ ((double) URINT_MAX)) * rbound;
 }
 
-inline double random_dbl_in_range(const double lbound,
-				  const double rbound)
+inline double
+random_dbl_in_range(const double lbound,
+		    const double rbound)
 {
 	return ((((double) random_uint()) / ((double) URINT_MAX))
 	       * (rbound - lbound))
 	       + lbound;
 }
 
-void shuffle_array_by_width(void *const restrict array,
-			    const urint_t length,
-			    const size_t width);
+void
+shuffle_array_by_width(void *const restrict array,
+		       const urint_t length,
+		       const size_t width);
 
-void shuffle_array_by_swap(void *const restrict array,
-			   const urint_t length,
-			   const size_t width,
-			   MemorySwap *swap);
+void
+shuffle_array_by_swap(void *const restrict array,
+		      const urint_t length,
+		      const size_t width,
+		      MemorySwap *swap);
 
-inline void shuffle_array(void *const restrict array,
-			  const urint_t length,
-			  const size_t width)
+inline void
+shuffle_array(void *const restrict array,
+	      const urint_t length,
+	      const size_t width)
 {
 	if (length == 0u)
 		return;
@@ -100,14 +112,16 @@ inline void shuffle_array(void *const restrict array,
 		shuffle_array_by_swap(array, length, width, swap);
 }
 
-inline void init_random_int_array(rint_t *const restrict array,
-				  const size_t length)
+inline void
+init_random_int_array(rint_t *const restrict array,
+		      const size_t length)
 {
 	for (size_t i = 0lu; i < length; ++i)
 		array[i] = (rint_t) random_uint();
 }
 
-inline rint_t *create_random_int_array(const size_t length)
+inline rint_t *
+create_random_int_array(const size_t length)
 {
 	rint_t *const restrict array = malloc(sizeof(rint_t) * length);
 
@@ -118,18 +132,20 @@ inline rint_t *create_random_int_array(const size_t length)
 }
 
 
-inline void init_random_int_array_in_range(rint_t *const restrict array,
-					   const size_t length,
-					   const rint_t lbound,
-					   const rint_t rbound)
+inline void
+init_random_int_array_in_range(rint_t *const restrict array,
+			       const size_t length,
+			       const rint_t lbound,
+			       const rint_t rbound)
 {
 	for (size_t i = 0lu; i < length; ++i)
 		array[i] = random_int_in_range(lbound, rbound);
 }
 
-inline rint_t *create_random_int_array_in_range(const size_t length,
-						const rint_t lbound,
-						const rint_t rbound)
+inline rint_t *
+create_random_int_array_in_range(const size_t length,
+				 const rint_t lbound,
+				 const rint_t rbound)
 {
 	rint_t *const restrict array = malloc(sizeof(rint_t) * length);
 
@@ -139,4 +155,4 @@ inline rint_t *create_random_int_array_in_range(const size_t length,
 	return array;
 }
 
-#endif /* ifndef RANDOM_RANDOM_IMP_H_ */
+#endif /* ifndef MYSQL_SEED_RANDOM_RANDOM_H_ */

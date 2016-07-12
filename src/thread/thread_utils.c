@@ -394,20 +394,20 @@ thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 extern inline void
 thread_attr_prototype_init(void);
 
-inline void
+extern inline void
 thread_attr_prototype_destroy(void);
 
 
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
 void
-parallel_start(void)
+thread_utils_start(void)
 {
 	thread_attr_prototype_init();
 }
 
 void
-parallel_stop(void)
+thread_utils_stop(void)
 {
 	thread_attr_prototype_destroy();
 }

@@ -14,11 +14,11 @@ struct ThreadQueueNode {
 };
 
 struct ThreadQueue {
-	struct ThreadQueueNode *restrict head;
-	struct ThreadQueueNode *restrict last;
 	Mutex lock;
 	ThreadCond node_ready;
 	ThreadCond empty;
+	struct ThreadQueueNode *restrict head;
+	struct ThreadQueueNode *restrict last;
 };
 
 

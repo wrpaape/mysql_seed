@@ -112,7 +112,7 @@ void test_flag_match(void)
 				     "help"));
 }
 
-void test_flag_count_until(void)
+void test_flag_match_count(void)
 {
 	char *test_input[10] = {
 		"ooga",		/* bad */
@@ -128,7 +128,7 @@ void test_flag_count_until(void)
 	};
 
 	TEST_ASSERT_EQUAL_UINT(5lu,
-			       flag_count_until(&test_input[0],
+			       flag_match_count(&test_input[0],
 						&test_input[0] + 10l,
 						'h',
 						"help"));

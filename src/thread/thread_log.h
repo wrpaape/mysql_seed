@@ -10,7 +10,7 @@
 
 /* cap log buffer at 1kb
  *─────────────────────────────────────────────────────────────────────────── */
-#define THREAD_LOG_LABEL_LENGTH 128lu
+#define THREAD_LOG_LABEL_SIZE_MAX 128lu
 #define THREAD_LOG_BUFFER_LENGTH 1024lu
 #define THREAD_LOG_HEADER_1(ACTION) ANSI_BRIGHT ANSI_BLACK_BG "\n\n"	\
 ANSI_YELLOW "THREAD LOG " ACTION " FOR:\t"
@@ -25,12 +25,17 @@ ANSI_YELLOW "THREAD LOG " ACTION " FOR:\t"
 
 /* declarations
  *─────────────────────────────────────────────────────────────────────────── */
+struct ThreadLogLabel {
+	char buffer[THREAD_LOG_LABEL_SIZE_MAX];
+	size_t length;
+};
+
 struct ThreadLog {
-	char *restrict current_ptr;
-	char *restrict until_ptr;
 	Mutex lock;
-	char label[THREAD_LOG_LABEL_LENGTH];
+	struct ThreadLogLabel label;
 	char buffer[THREAD_LOG_BUFFER_LENGTH];
+	char *restrict current;
+	char *restrict until;
 };
 
 
@@ -49,25 +54,25 @@ thread_log_buffer_ptr(struct ThreadLog *const restrict log)
 inline char *
 thread_log_current_ptr(struct ThreadLog *const restrict log)
 {
-	return log->current_ptr;
+	return log->current;
 }
 
 inline char *
 thread_log_end_ptr(struct ThreadLog *const restrict log)
 {
-	return log->until_ptr;
+	return log->until;
 }
 
 inline size_t
 thread_log_remaining_characters(struct ThreadLog *const restrict log)
 {
-	return log->until_ptr - log->current_ptr;
+	return log->until - log->current;
 }
 
 inline size_t
 thread_log_buffer_size(struct ThreadLog *const restrict log)
 {
-	return log->current_ptr - &log->buffer[0];
+	return log->current - &log->buffer[0];
 }
 
 /* locking the log... */
@@ -248,36 +253,47 @@ inline void
 thread_log_append_string(struct ThreadLog *const restrict log,
 			 const char *const restrict string)
 {
-	log->current_ptr = put_string_until(log->current_ptr,
+	log->current = put_string_until(log->current,
 					    string,
-					    log->until_ptr);
+					    log->until);
 }
 
 inline void
 thread_log_append_uint(struct ThreadLog *const restrict log,
 		       const uintmax_t n)
 {
-	log->current_ptr = put_uint_until(log->current_ptr,
+	log->current = put_uint_until(log->current,
 					  n,
-					  log->until_ptr);
+					  log->until);
 }
 
 inline void
 thread_log_append_int(struct ThreadLog *const restrict log,
 		      const intmax_t n)
 {
-	log->current_ptr = put_int_until(log->current_ptr,
+	log->current = put_int_until(log->current,
 					 n,
-					 log->until_ptr);
+					 log->until);
 }
 
 inline void
 thread_log_append_pointer_id(struct ThreadLog *const restrict log,
 			     void *const restrict pointer)
 {
-	log->current_ptr = put_pointer_id_until(log->current_ptr,
+	log->current = put_pointer_id_until(log->current,
 						pointer,
-						log->until_ptr);
+						log->until);
+}
+
+inline void
+thread_log_append_string_size(struct ThreadLog *const restrict log,
+			      const char *const restrict string,
+			      const size_t size)
+{
+	log->current = put_string_size_until(log->current,
+					     string,
+					     size,
+					     log->until);
 }
 
 inline void
@@ -285,13 +301,13 @@ thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length)
 {
-	char *const restrict length_ptr = log->current_ptr
+	char *const restrict length_ptr = log->current
 					+ length;
 
-	log->current_ptr = put_string_until(log->current_ptr,
+	log->current = put_string_until(log->current,
 					    string,
-					    (length_ptr > log->until_ptr)
-					    ? log->until_ptr
+					    (length_ptr > log->until)
+					    ? log->until
 					    : length_ptr);
 }
 
@@ -300,13 +316,13 @@ thread_log_append_uint_length(struct ThreadLog *const restrict log,
 			      const uintmax_t n,
 			      const size_t length)
 {
-	char *const restrict length_ptr = log->current_ptr
+	char *const restrict length_ptr = log->current
 					+ length;
 
-	log->current_ptr = put_uint_until(log->current_ptr,
+	log->current = put_uint_until(log->current,
 					  n,
-					  (length_ptr > log->until_ptr)
-					  ? log->until_ptr
+					  (length_ptr > log->until)
+					  ? log->until
 					  : length_ptr);
 }
 
@@ -315,13 +331,13 @@ thread_log_append_int_length(struct ThreadLog *const restrict log,
 			     const intmax_t n,
 			     const size_t length)
 {
-	char *const restrict length_ptr = log->current_ptr
+	char *const restrict length_ptr = log->current
 					+ length;
 
-	log->current_ptr = put_int_until(log->current_ptr,
+	log->current = put_int_until(log->current,
 					 n,
-					 (length_ptr > log->until_ptr)
-					 ? log->until_ptr
+					 (length_ptr > log->until)
+					 ? log->until
 					 : length_ptr);
 }
 
@@ -330,52 +346,58 @@ thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
 				    void *const restrict pointer,
 				    const size_t length)
 {
-	char *const restrict length_ptr = log->current_ptr
+	char *const restrict length_ptr = log->current
 					+ length;
 
-	log->current_ptr = put_pointer_id_until(log->current_ptr,
+	log->current = put_pointer_id_until(log->current,
 						pointer,
-						(length_ptr > log->until_ptr)
-						? log->until_ptr
+						(length_ptr > log->until)
+						? log->until
 						: length_ptr);
 }
 
 inline void
 thread_log_append_close(struct ThreadLog *const restrict log)
 {
-	thread_log_append_string(log,
-				 THREAD_LOG_CLOSE_HEADER);
+	thread_log_append_string_size(log,
+				      THREAD_LOG_CLOSE_HEADER,
+				      sizeof(THREAD_LOG_CLOSE_HEADER) - 1lu);
 
-	thread_log_append_string(log,
-				 &log->label[0]);
+	thread_log_append_string_size(log,
+				      &log->label.buffer[0],
+				      log->label.length);
 
-	thread_log_append_string(log,
-				 THREAD_LOG_HEADER_2);
+	thread_log_append_string_size(log,
+				      THREAD_LOG_HEADER_2,
+				      sizeof(THREAD_LOG_HEADER_2) - 1lu);
 }
 
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-thread_log_init_label(struct ThreadLog *const restrict log,
+thread_log_label_init(struct ThreadLogLabel *const restrict label,
 		      const char *const restrict name)
 {
-	char *const restrict until_ptr = &log->label[THREAD_LOG_LABEL_LENGTH
-						     - 1];
+	char *const restrict until = &label->buffer[0]
+				   + THREAD_LOG_LABEL_SIZE_MAX;
 
-	char *restrict ptr = put_string(&log->label[0],
-					THREAD_LOG_LABEL_1);
-	ptr  = put_string_until(ptr,
-				name,
-				until_ptr);
+	char *restrict ptr = put_string_size(&label->buffer[0],
+					     THREAD_LOG_LABEL_1,
+					     sizeof(THREAD_LOG_LABEL_1) - 1lu);
+	ptr = put_string_until(ptr,
+			       name,
+			       until);
 
-	ptr  = put_string_until(ptr,
-				THREAD_LOG_LABEL_2,
-				until_ptr);
+	ptr = put_string_size_until(ptr,
+				    THREAD_LOG_LABEL_2,
+				    sizeof(THREAD_LOG_LABEL_2) - 1lu,
+				    until);
 
-	ptr  = put_pointer_id_until(ptr,
-				    log,
-				    until_ptr);
-	*ptr = '\0';
+	ptr = put_pointer_id_until(ptr,
+				   label,
+				   until);
+
+	label->length = ptr - &label->buffer[0];
 }
 
 inline void
@@ -388,17 +410,21 @@ thread_log_init(struct ThreadLog *const restrict log,
 		    &thread_log_buffer_prototype[0],
 		    sizeof(thread_log_buffer_prototype));
 
-	thread_log_init_label(log,
+	thread_log_label_init(&log->label,
 			      name);
 
-	log->current_ptr
-	= put_string(&log->buffer[sizeof(THREAD_LOG_OPEN_HEADER) - 1],
-		     &log->label[0]);
+	log->until = &log->buffer[THREAD_LOG_BUFFER_LENGTH - 1];
 
-	log->current_ptr = put_string(log->current_ptr,
-				      THREAD_LOG_HEADER_2);
+	log->current
+	= put_string_size_until(&log->buffer[sizeof(THREAD_LOG_OPEN_HEADER)
+					     - 1],
+				&log->label.buffer[0],
+				log->label.length,
+				log->until);
 
-	log->until_ptr   = &log->buffer[THREAD_LOG_BUFFER_LENGTH - 1];
+	thread_log_append_string_size(log,
+				      THREAD_LOG_HEADER_2,
+				      sizeof(THREAD_LOG_HEADER_2) - 1lu);
 }
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_LOG_H_ */

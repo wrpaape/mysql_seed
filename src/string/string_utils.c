@@ -87,7 +87,7 @@ put_uint_length(char *restrict buffer,
 extern inline char *
 put_uint_until(char *restrict buffer,
 	       const uintmax_t n,
-	       char *const restrict until_ptr);
+	       char *const restrict until);
 
 extern inline char *
 put_int(char *restrict buffer,
@@ -101,7 +101,7 @@ put_int_length(char *restrict buffer,
 extern inline char *
 put_int_until(char *restrict buffer,
 	      const intmax_t n,
-	      char *const restrict until_ptr);
+	      char *const restrict until);
 
 extern inline char *
 put_pointer_id(char *restrict buffer,
@@ -115,7 +115,7 @@ put_pointer_id_length(char *restrict buffer,
 extern inline char *
 put_pointer_id_until(char *restrict buffer,
 		     void *const restrict pointer,
-		     char *const restrict until_ptr);
+		     char *const restrict until);
 
 extern inline char *
 put_string(char *restrict buffer,
@@ -129,12 +129,18 @@ put_string_length(char *restrict buffer,
 extern inline char *
 put_string_until(char *restrict buffer,
 		 const char *restrict string,
-		 char *const restrict until_ptr);
+		 char *const restrict until);
 
 extern inline char *
 put_string_size(char *restrict buffer,
 		const char *const restrict string,
 		const size_t size);
+
+extern inline char *
+put_string_size_until(char *restrict buffer,
+		      const char *const restrict string,
+		      const size_t size,
+		      char *const restrict until);
 
 extern inline char *
 put_char_times_length(char *restrict buffer,
@@ -151,7 +157,7 @@ extern inline char *
 put_char_times_until(char *restrict buffer,
 		     const char byte,
 		     size_t times,
-		     char *const restrict until_ptr);
+		     char *const restrict until);
 
 extern inline char *
 put_string_inspect(char *restrict buffer,

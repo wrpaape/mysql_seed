@@ -103,6 +103,10 @@ extern inline void
 thread_log_append_pointer_id(struct ThreadLog *const restrict log,
 			     void *const restrict pointer);
 extern inline void
+thread_log_append_string_size(struct ThreadLog *const restrict log,
+			      const char *const restrict string,
+			      const size_t size);
+extern inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length);
@@ -123,6 +127,9 @@ thread_log_append_close(struct ThreadLog *const restrict log);
 
 /* initialize, reset
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+thread_log_label_init(struct ThreadLogLabel *const restrict label,
+		      const char *const restrict name);
 extern inline void
 thread_log_init(struct ThreadLog *const restrict log,
 		const char *const restrict label);

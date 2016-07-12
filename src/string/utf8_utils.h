@@ -7,7 +7,7 @@
 #include <stddef.h>			/* size_t */
 #include <stdbool.h>			/* bool */
 #include "string/string_macros.h"	/* error macros */
-#include "utils/types/handler.h"	/* Handler, HandlerClosure */
+#include "utils/closure.h"		/* Handler, HandlerClosure */
 #include "utils/types/octet.h"		/* stdint, octet_t */
 #include "utils/char_attrs.h"		/* OCTET_CHAR */
 

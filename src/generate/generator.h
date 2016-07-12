@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_GENERATE_GENERATE_DATABASE_H_
-#define MYSQL_SEED_GENERATE_GENERATE_DATABASE_H_
+#ifndef MYSQL_SEED_GENERATE_GENERATOR_H_
+#define MYSQL_SEED_GENERATE_GENERATOR_H_
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
@@ -34,15 +34,15 @@ struct StringLengthRange {
 };
 
 union StringLengthScale {
+	struct StringLengthRange range;
 	size_t from;
 	size_t upto;
 	size_t fixed;
-	struct StringLengthRange range;
 };
 
 union StringQualifier {
-	const char *base;
 	union StringLengthScale length_scale;
+	const char *base;
 };
 
 /* -c temperature UNSIGNED RANGE 500 200000	      → 580
@@ -55,10 +55,10 @@ struct IntegerUnsignedRange {
 };
 
 union IntegerUnsignedScale {
+	struct IntegerUnsignedRange range;
 	uintmax_t from;
 	uintmax_t upto;
 	uintmax_t fixed;
-	struct IntegerUnsignedRange range;
 };
 
 /* -c temperature SIGNED RANGE -100 100		      → 45
@@ -71,10 +71,10 @@ struct IntegerSignedRange {
 };
 
 union IntegerSignedScale {
+	struct IntegerSignedRange range;
 	intmax_t from;
 	intmax_t upto;
 	intmax_t fixed;
-	struct IntegerSignedRange range;
 };
 
 union IntegerQualifier {
@@ -99,20 +99,20 @@ union FloatScale {
 };
 
 struct FloatQualifier {
-	unsigned int precision;
 	union FloatScale scale;
+	unsigned int precision;
 };
 
 union TypeQualifier {
 	union StringQualifier string;
 	union IntegerQualifier integer;
-	union FloatQualifier flt_pt;
+	struct FloatQualifier flt_pt;
 };
 
 struct ColSpec {
-	Procedure *build;
 	struct String name;
 	union TypeQualifier type;
+	Procedure *build;
 };
 
 struct ColSpecInterval {
@@ -121,8 +121,8 @@ struct ColSpecInterval {
 };
 
 struct TblSpec {
-	size_t row_count;
 	struct String name;
+	size_t row_count;
 	struct ColSpecInterval col_specs;
 };
 
@@ -132,9 +132,9 @@ struct TblSpecInterval {
 };
 
 struct DbSpec {
-	struct DbSpec *next;		/* next valid db_spec */
 	struct String name;
 	struct TblSpecInterval tbl_specs;
+	struct DbSpec *next;		/* next valid db_spec */
 };
 
 struct DbSpecInterval {
@@ -160,10 +160,10 @@ struct RowspanInterval {
 };
 
 struct RowBlock {
+	struct LengthLock total;		/* total block string length */
 	char *contents;				/* table file block */
 	struct RowspanInterval rowspans;	/* X COL_COUNT */
 	size_t row_count;			/* either div or mod */
-	struct LengthLock total;		/* total block string length */
 };
 
 
@@ -176,9 +176,9 @@ struct Table;
 
 struct Column {
 	struct ColSpec *spec;			/* from raw input */
-	struct Table *parent;			/* length, counter, cleanup */
 	struct RowspanInterval rowspans;	/* X BLK_COUNT */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
+	struct Table *parent;			/* length, counter, cleanup */
 };
 
 struct ColumnInterval {
@@ -194,14 +194,14 @@ struct Database;
  *	*/
 
 struct Table {
+	struct FileHandle file;
+	struct LengthLock total;		/* total table length */
 	char *contents;				/* table file start */
 	struct TblSpec *spec;			/* from raw input */
-	struct Database *parent;
-	struct LengthLock total;		/* total table length */
 	struct ColumnInterval columns;		/* slice assigned by db */
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
-	struct FileHandle file;
+	struct Database *parent;
 };
 
 struct TableInterval {
@@ -212,15 +212,15 @@ struct TableInterval {
 struct Generator;
 
 struct Database {
-	char *contents;				/* table files and loader */
-	struct DbSpec *spec;			/* from raw input */
-	struct Generator *parent;
-	struct LengthLock total;		/* total database length */
-	struct TableInterval tables;
-	struct String name;			/* raw input */
-	struct HandlerClosure fail_cl;		/* cleanup self, then main */
-	struct DirHandle dir;
 	struct FileHandle loader;
+	struct DirHandle dir;
+	struct LengthLock total;		/* total database length */
+	char *contents;				/* table files and loader */
+	struct String name;			/* raw input */
+	struct DbSpec *spec;			/* from raw input */
+	struct TableInterval tables;
+	struct HandlerClosure fail_cl;		/* cleanup self, then main */
+	struct Generator *parent;
 };
 
 struct DatabaseInterval {
@@ -228,14 +228,27 @@ struct DatabaseInterval {
 	const struct Database *restrict until;	/* assigned by main */
 };
 
+struct Counter {
+	SeedMutex processing;	/* condition lock */
+	SeedThreadCond done;	/* broadcasted once 'pointers' are set */
+	bool incomplete;	/* flipped false once 'pointers' are set */
+	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
+	char **pointers;	/* digit pointers */
+	size_t upto;		/* final and max stringified number */
+	size_t size_digits;	/* sizeof("1", "2", ... "$(upto)") */
+	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
+	struct HandlerClosure fail_cl;	/* cleanup self, then main */
+	struct Generator *parent;
+};
+
 struct Generator {
-	char *contents;				/* buffer for all files */
-	struct DbSpecInterval *db_specs;	/* from raw input */
-	struct LengthLock total;		/* total file length */
-	struct DatabaseInterval databases;
-	struct CountString counter;		/* shared by all */
 	struct ThreadPool pool;			/* all child threads */
 	struct ThreadLog log;
+	struct Counter counter;			/* shared by all */
+	struct LengthLock total;		/* total file length */
+	struct DatabaseInterval databases;
+	struct DbSpecInterval *db_specs;	/* from raw input */
+	char *contents;				/* buffer for all files */
 };
 
 /* error messages
@@ -253,6 +266,11 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 #define DATABASE_FAILURE_MESSAGE_1					\
 "\n" ANSI_UNDERLINE "DATABASE " ANSI_BRIGHT
 #define DATABASE_FAILURE_MESSAGE_2					\
+ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
+
+#define COUNTER_FAILURE_MESSAGE_1					\
+"\n" ANSI_UNDERLINE "COUNTER " ANSI_BRIGHT
+#define COUNTER_FAILURE_MESSAGE_2					\
 ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
 #define GENERATOR_FAILURE_MESSAGE_1					\
@@ -442,5 +460,31 @@ database_init(struct Database *const restrict database,
 }
 
 
+/* Counter Operations
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+counter_init(struct Counter *const restrict counter,
+	     struct Generator *const restrict parent,
+	     const size_t upto)
+{
+	mutex_init(&counter->processing);
+	thread_cond_init(&counter->done);
 
-#endif /* ifndef MYSQL_SEED_GENERATE_GENERATE_DATABASE_H_ */
+	counter->incomplete = true;
+	counter->upto	    = upto;
+
+	handler_closure_init(&counter->fail_cl,
+			     counter_exit_on_failuer)
+
+}
+
+
+/* Generator Operations
+ *─────────────────────────────────────────────────────────────────────────── */
+void
+generator_exit_on_failure(void *arg,
+			  const char *restrict failure)
+__attribute__((noreturn));
+
+
+#endif /* ifndef MYSQL_SEED_GENERATE_GENERATOR_H_ */

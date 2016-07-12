@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_GEN_GEN_NAMES_H_
-#define MYSQL_SEED_GEN_GEN_NAMES_H_
+#ifndef MYSQL_SEED_GENERATE_NAMES_H_
+#define MYSQL_SEED_GENERATE_NAMES_H_
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
@@ -46,9 +46,6 @@
 
 /* enum, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
-enum NameKind {
-
-}
 struct NameMap {
 	const char *const *names;
 	const urint_t i_last;
@@ -269,4 +266,4 @@ gen_full_names(const size_t count)
 }
 
 
-#endif	/* ifndef MYSQL_SEED_GEN_GEN_NAMES_H_ */
+#endif	/* ifndef MYSQL_SEED_GENERATE_NAMES_H_ */

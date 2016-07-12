@@ -1397,11 +1397,11 @@ thread_attr_prototype_destroy(void)
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
 void
-parallel_start(void)
+thread_utils_start(void)
 __attribute__((constructor));
 
 void
-parallel_stop(void)
+thread_utils_stop(void)
 __attribute__((destructor));
 
 

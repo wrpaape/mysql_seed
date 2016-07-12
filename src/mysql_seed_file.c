@@ -135,9 +135,9 @@ length_lock_increment(struct LengthLock *const restrict shared,
 
 /* Input operations
  * ────────────────────────────────────────────────────────────────────────── */
-extern inline char **
+extern inline char *const restrict *restrict
 flag_next(char *const restrict *restrict from,
-	  const char *const restrict *const restrict until);
+	  char *const restrict *const restrict until);
 extern inline bool
 flag_match(char *restrict arg,
 	   const char short_flag,
@@ -147,21 +147,16 @@ flag_match_count(char *const restrict *restrict from,
 		 char *const restrict *const restrict until,
 		 const char short_flag,
 		 const char *const restrict long_flag);
-extern inline char **
+inline char *const restrict *restrict
 flag_match_next(char *const restrict *restrict from,
 		char *const restrict *const restrict until,
 		const char short_flag,
 		const char *const restrict long_flag);
 
 
-/* ArgvInterval operations
+/* Argv operations
  * ────────────────────────────────────────────────────────────────────────── */
-extern inline bool
-argv_interval_init(struct ArgvInterval *const restrict interval,
-		   char *const restrict *const restrict from,
-		   const char *const restrict *const restrict until,
-		   const size_t length_min);
 extern inline char *
 put_inspect_args(char *restrict buffer,
-		 char *restrict *const restrict from,
+		 char *const restrict *restrict from,
 		 char *const restrict *const restrict until);

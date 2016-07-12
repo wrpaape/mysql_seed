@@ -283,12 +283,12 @@ put_uint(char *restrict buffer,
 	 uintmax_t n)
 {
 #if HAVE_INT_STRING_ATTRS
-	char *const restrict until_ptr = buffer + uint_digit_count(n);
+	char *const restrict until = buffer + uint_digit_count(n);
 
-	do_put_uint(until_ptr - 1l,
+	do_put_uint(until - 1l,
 		    n);
 
-	return until_ptr;
+	return until;
 #else
 	return buffer + sprintf(buffer,
 				"%zu",
@@ -308,22 +308,22 @@ put_uint_length(char *restrict buffer,
 
 	const unsigned int count_digits = uint_digit_count(n);
 
-	char *restrict until_ptr;
+	char *restrict until;
 
 	if (count_digits > length) {
 
-		until_ptr = buffer + length;
+		until = buffer + length;
 
 		n /= ten_pow_map[count_digits - length];
 	} else {
 
-		until_ptr = buffer + count_digits;
+		until = buffer + count_digits;
 	}
 
-	do_put_uint(until_ptr - 1l,
+	do_put_uint(until - 1l,
 		    n);
 
-	return until_ptr;
+	return until;
 #else
 	const unsigned int count_digits = snprintf(buffer,
 						   length,
@@ -339,13 +339,13 @@ put_uint_length(char *restrict buffer,
 inline char *
 put_uint_until(char *restrict buffer,
 	       const uintmax_t n,
-	       char *const restrict until_ptr)
+	       char *const restrict until)
 {
-	return (buffer > until_ptr)
-	     ? until_ptr
+	return (buffer > until)
+	     ? until
 	     : put_uint_length(buffer,
 			       n,
-			       until_ptr - buffer);
+			       until - buffer);
 }
 
 inline char *
@@ -383,13 +383,13 @@ put_int_length(char *restrict buffer,
 inline char *
 put_int_until(char *restrict buffer,
 	      const intmax_t n,
-	      char *const restrict until_ptr)
+	      char *const restrict until)
 {
-	return (buffer > until_ptr)
-	     ? until_ptr
+	return (buffer > until)
+	     ? until
 	     : put_int_length(buffer,
 			      n,
-			      until_ptr - buffer);
+			      until - buffer);
 }
 
 inline char *
@@ -397,13 +397,13 @@ put_pointer_id(char *restrict buffer,
 	       void *const restrict pointer)
 {
 #if HAVE_PTR_STRING_ATTRS
-	char *const restrict until_ptr = buffer
+	char *const restrict until = buffer
 				       + pointer_id_length((uintptr_t) pointer);
 
-	do_put_pointer_id(until_ptr - 1l,
+	do_put_pointer_id(until - 1l,
 			  (uintptr_t) pointer);
 
-	return until_ptr;
+	return until;
 #else
 	char id_buffer[64lu];
 
@@ -437,22 +437,22 @@ put_pointer_id_length(char *restrict buffer,
 
 	const unsigned int length_id = pointer_id_length(ptr_n);
 
-	char *restrict until_ptr;
+	char *restrict until;
 
 	if (length_id > length) {
 
-		until_ptr = buffer + length;
+		until = buffer + length;
 
 		ptr_n /= ninety_five_pow_map[length_id - length];
 	} else {
 
-		until_ptr = buffer + length_id;
+		until = buffer + length_id;
 	}
 
-	do_put_pointer_id(until_ptr - 1l,
+	do_put_pointer_id(until - 1l,
 			  ptr_n);
 
-	return until_ptr;
+	return until;
 #else
 	char id_buffer[64lu];
 
@@ -463,7 +463,7 @@ put_pointer_id_length(char *restrict buffer,
 
 	const size_t length_id = last_ptr - id_ptr;
 
-	char *const restrict until_ptr = id_ptr + ((length_id > length)
+	char *const restrict until = id_ptr + ((length_id > length)
 						   ? length
 						   : length_id);
 
@@ -482,13 +482,13 @@ put_pointer_id_length(char *restrict buffer,
 inline char *
 put_pointer_id_until(char *restrict buffer,
 		     void *const restrict pointer,
-		     char *const restrict until_ptr)
+		     char *const restrict until)
 {
-	return (buffer > until_ptr)
-	     ? until_ptr
+	return (buffer > until)
+	     ? until
 	     : put_pointer_id_length(buffer,
 				     pointer,
-				     until_ptr - buffer);
+				     until - buffer);
 }
 
 
@@ -527,9 +527,9 @@ put_string_length(char *restrict buffer,
 inline char *
 put_string_until(char *restrict buffer,
 		 const char *restrict string,
-		 char *const restrict until_ptr)
+		 char *const restrict until)
 {
-	while ((buffer != until_ptr) && (*string != '\0')) {
+	while ((buffer != until) && (*string != '\0')) {
 		*buffer = *string;
 		++buffer;
 		++string;
@@ -546,6 +546,19 @@ put_string_size(char *restrict buffer,
 	return (char *) memory_put(buffer,
 				   string,
 				   size);
+}
+
+inline char *
+put_string_size_until(char *restrict buffer,
+		      const char *const restrict string,
+		      const size_t size,
+		      char *const restrict until)
+{
+	const size_t rem_size = until - buffer;
+
+	return put_string_size(buffer,
+			       string,
+			       (size > rem_size) ? rem_size : size);
 }
 
 inline char *
@@ -731,12 +744,12 @@ inline char *
 put_char_times_until(char *restrict buffer,
 		     const char byte,
 		     size_t times,
-		     char *const restrict until_ptr)
+		     char *const restrict until)
 {
 	return put_char_times_length(buffer,
 				     byte,
 				     times,
-				     until_ptr - buffer);
+				     until - buffer);
 }
 
 inline char *
@@ -897,10 +910,10 @@ do_parse_digits(uintmax_t *const restrict n,
 
 	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
 
-	const uintptr_t *const restrict until_ptr = &ten_pow_map[count_digits];
+	const uintptr_t *const restrict until = &ten_pow_map[count_digits];
 
 
-	while (pow_ptr < until_ptr) {
+	while (pow_ptr < until) {
 
 		--string;
 
@@ -969,10 +982,10 @@ do_parse_digits_stop(uintmax_t *const restrict n,
 
 	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
 
-	const uintptr_t *const restrict until_ptr = &ten_pow_map[count_digits];
+	const uintptr_t *const restrict until = &ten_pow_map[count_digits];
 
 
-	while (pow_ptr < until_ptr) {
+	while (pow_ptr < until) {
 
 		--string;
 

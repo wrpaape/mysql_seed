@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generate_database.h" /* file/exit/string/parallelization utils */
+#include "generate/generator.h" /* file/exit/string/parallelization utils */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */

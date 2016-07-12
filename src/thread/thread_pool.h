@@ -33,14 +33,14 @@ struct Supervisor {
 	SupervisorEvent *event;
 	ThreadCond trigger;
 	Mutex listening;
-	struct ThreadPool *pool;
 	struct HandlerClosure fail_cl;
+	struct ThreadPool *pool;
 };
 
 struct Worker {
 	Thread thread;
-	struct ThreadPool *pool;
 	struct HandlerClosure fail_cl;
+	struct ThreadPool *pool;
 };
 
 struct TaskQueue {
@@ -56,10 +56,10 @@ struct WorkerCrew {
 };
 
 struct ThreadPoolStatus {
-	int exit;
-	bool busy;
-	ThreadCond done;
 	Mutex processing;
+	ThreadCond done;
+	bool busy;
+	int exit;
 };
 
 struct ThreadPool {
@@ -306,9 +306,9 @@ task_queue_init(struct TaskQueue *const restrict task_queue,
 inline void
 thread_pool_status_init(struct ThreadPoolStatus *const restrict status)
 {
-	status->busy = true;
-	thread_cond_init(&status->done);
 	mutex_init(&status->processing);
+	thread_cond_init(&status->done);
+	status->busy = true;
 }
 
 inline void

@@ -184,12 +184,6 @@ struct LengthLock {
 	Mutex lock;
 };
 
-/* an interval of argv */
-struct ArgvInterval {
-	char *restrict *restrict from;
-	const char *restrict *restrict until:
-};
-
 
 /* create and open file for writing only, fail if it already exists */
 #define FILE_HANDLE_OPEN_FLAG (O_EXCL | O_CREAT | O_WRONLY)
@@ -532,9 +526,9 @@ length_lock_increment(struct LengthLock *const restrict shared,
 
 /* Input operations
  * ────────────────────────────────────────────────────────────────────────── */
-inline char **
+inline char *const restrict *restrict
 flag_next(char *const restrict *restrict from,
-	  const char *const restrict *const restrict until)
+	  char *const restrict *const restrict until)
 {
 	while ((from < until) && (**from != '-'))
 		++from;
@@ -587,7 +581,7 @@ flag_match_count(char *const restrict *restrict from,
 	return count_flags;
 }
 
-inline char **
+inline char *const restrict *restrict
 flag_match_next(char *const restrict *restrict from,
 		char *const restrict *const restrict until,
 		const char short_flag,
@@ -606,31 +600,16 @@ flag_match_next(char *const restrict *restrict from,
 	return until;
 }
 
-/* ArgvInterval operations
+/* Argv operations
  * ────────────────────────────────────────────────────────────────────────── */
-inline bool
-argv_interval_init(struct ArgvInterval *const restrict interval,
-		   char *const restrict *const restrict from,
-		   const char *const restrict *const restrict until,
-		   const size_t length_min)
-{
-	if ((from + length_min) > until)
-		return false;
-
-	interval->from  = from;
-	interval->until = until;
-
-	return true;
-}
-
 inline char *
 put_inspect_args(char *restrict buffer,
-		 char *restrict *const restrict from,
+		 char *const restrict *restrict from,
 		 char *const restrict *const restrict until)
 {
 	while (1) {
 		buffer = put_string_inspect(buffer,
-					    from,
+					    *from,
 					    LENGTH_INSPECT_MAX);
 
 		++from;
@@ -638,8 +617,8 @@ put_inspect_args(char *restrict buffer,
 		if (from == until)
 			return buffer;
 
-		*from = ' ';
-		++from;
+		*buffer = ' ';
+		++buffer;
 	}
 }
 
