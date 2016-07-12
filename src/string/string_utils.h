@@ -27,6 +27,11 @@ struct String {
 	size_t length;
 };
 
+struct Label {
+	const char *bytes;
+	unsigned int width; /* 1 - 16 bytes */
+};
+
 struct StringInterval {
 	char *restrict from;
 	const char *restrict until;
@@ -559,6 +564,86 @@ put_string_size_until(char *restrict buffer,
 	return put_string_size(buffer,
 			       string,
 			       (size > rem_size) ? rem_size : size);
+}
+
+inline char *
+put_string_width(char *const restrict buffer,
+		 const *const restrict string,
+		 const unsigned int width);
+{
+	switch (width) {
+	case  1u: *buffer = *string;
+		  return buffer + 1l;
+
+	case  2u:   *((CharBuffer2 *const restrict) buffer)
+		  = *((CharBuffer2 *const restrict) string);
+		  return buffer + 2l;
+
+	case  3u:   *((CharBuffer3 *const restrict) buffer)
+		  = *((CharBuffer3 *const restrict) string);
+		  return buffer + 3l;
+
+	case  4u:   *((CharBuffer4 *const restrict) buffer)
+		  = *((CharBuffer4 *const restrict) string);
+		  return buffer + 4l;
+
+	case  5u:   *((CharBuffer5 *const restrict) buffer)
+		  = *((CharBuffer5 *const restrict) string);
+		  return buffer + 5l;
+
+	case  6u:   *((CharBuffer6 *const restrict) buffer)
+		  = *((CharBuffer6 *const restrict) string);
+		  return buffer + 6l;
+
+	case  7u:   *((CharBuffer7 *const restrict) buffer)
+		  = *((CharBuffer7 *const restrict) string);
+		  return buffer + 7l;
+
+	case  8u:   *((CharBuffer8 *const restrict) buffer)
+		  = *((CharBuffer8 *const restrict) string);
+		  return buffer + 8l;
+
+	case  9u:   *((CharBuffer9 *const restrict) buffer)
+		  = *((CharBuffer9 *const restrict) string);
+		  return buffer + 9l;
+
+	case 10u:   *((CharBuffer10 *const restrict) buffer)
+		  = *((CharBuffer10 *const restrict) string);
+		  return buffer + 10l;
+
+	case 11u:   *((CharBuffer11 *const restrict) buffer)
+		  = *((CharBuffer11 *const restrict) string);
+		  return buffer + 11l;
+
+	case 12u:   *((CharBuffer12 *const restrict) buffer)
+		  = *((CharBuffer12 *const restrict) string);
+		  return buffer + 12l;
+
+	case 13u:   *((CharBuffer13 *const restrict) buffer)
+		  = *((CharBuffer13 *const restrict) string);
+		  return buffer + 13l;
+
+	case 14u:   *((CharBuffer14 *const restrict) buffer)
+		  = *((CharBuffer14 *const restrict) string);
+		  return buffer + 14l;
+
+	case 15u:   *((CharBuffer15 *const restrict) buffer)
+		  = *((CharBuffer15 *const restrict) string);
+		  return buffer + 15l;
+
+	default:    *((CharBuffer16 *const restrict) buffer)
+		  = *((CharBuffer16 *const restrict) string);
+		  return buffer + 16l;
+	}
+}
+
+extern inline char *
+put_label(char *const restrict buffer,
+	  const struct Label *const restrict label)
+{
+	return put_string_width(buffer,
+				label->bytes,
+				label-width);
 }
 
 inline char *

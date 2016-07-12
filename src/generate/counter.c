@@ -33,24 +33,25 @@ extern inline void
 counter_free_internals(struct Counter *const restrict counter);
 
 void
-counter_do_init(void *arg)
+counter_create(void *arg)
 {
 	struct Counter *const restrict
 	counter = (struct Counter *const restrict) arg;
 
-	seed_mutex_handle_lock(&counter->processing);
+	mutex_lock_try_catch_open(&counter->processing);
 
+	mutex_lock_handle_cl(&counter->processing,
+			     &counter->fail_cl);
 
 	counter_init_internals(counter);
 
-	counter->incomplete = false;
-
-	seed_mutex_handle_unlock(&counter->processing);
+	counter->ready = true;
 
 	thread_cond_broadcast_handle_cl(&counter->done,
 					&counter->fail_cl);
-}
 
-extern inline void
-counter_init(struct Counter *const restrict counter,
-	     const size_t upto);
+	mutex_unlock_handle_cl(&counter->processing,
+			       &counter->fail_cl);
+
+	mutex_lock_try_catch_close();
+}

@@ -199,23 +199,6 @@ PROJECT_TEST_RUNNER_OBJECT_PATH	= $(call OBJECT_FILE_PATH,$(TEST_RUNNER_OBJECT_D
 PROJECT_TEST_BINARY_PATH 	= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),$(PROJECT)_$1_test)# binary executable output
 
 
-# Generator Module
-GEN_PREFIX			= $(call PATH_JOIN,gen $(call TRIM,gen_$1))
-# ─────────────── source ───────────────────────────────────────────────────────
-GEN_SOURCE_PATH			= $(call SOURCE_PATH,$(call GEN_PREFIX,$1))# implementation
-GEN_HEADER_PATH			= $(call HEADER_PATH,$(call GEN_PREFIX,$1))# interface
-# ─────────────── build ────────────────────────────────────────────────────────
-GEN_OBJECT_PATH   		= $(call OBJECT_PATH,gen_gen_$1)# object files
-
-# Generator Module Testing
-# ─────────────── source ───────────────────────────────────────────────────────
-GEN_TEST_SOURCE_PATH		= $(call SOURCE_FILE_PATH,$(TEST_SOURCE_DIR),gen_gen_$1_test)# Unity unit test implementation
-GEN_TEST_HEADER_PATH		= $(call HEADER_FILE_PATH,$(TEST_HEADER_DIR),gen_gen_$1_test)# Unity unit test interface
-GEN_TEST_RUNNER_SOURCE_PATH	= $(call SOURCE_FILE_PATH,$(TEST_RUNNER_SOURCE_DIR),gen_gen_$1_test_runner)# Unity test runners
-# ─────────────── build ────────────────────────────────────────────────────────
-GEN_TEST_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(TEST_OBJECT_DIR),gen_gen_$1_test)# Unity unit test object files
-GEN_TEST_RUNNER_OBJECT_PATH	= $(call OBJECT_FILE_PATH,$(TEST_RUNNER_OBJECT_DIR),gen_gen_$1_test_runner)# Unity test runner object files
-GEN_TEST_BINARY_PATH 		= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),gen_gen_$1_test)# binary executable output
 
 # Unity Test Framework
 # ─────────────── source ───────────────────────────────────────────────────────
@@ -1034,83 +1017,37 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 
 
 
-# ## GENERATOR MODULES
-# # ══════════════════════════════════════════════════════════════════════════════
-# # gen/gen_strings
-# # ──────────────────────────────────────────────────────────────────────────────
-# GEN_GEN_STRINGS_SRC 		:= $(call GEN_SOURCE_PATH,strings)
-# GEN_GEN_STRINGS_HDR		:= $(call GEN_HEADER_PATH,strings)
-# GEN_GEN_STRINGS_OBJ 		:= $(call GEN_OBJECT_PATH,strings)
-# GEN_GEN_STRINGS_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,strings)
-# GEN_GEN_STRINGS_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,strings)
-# GEN_GEN_STRINGS_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,strings)
-# GEN_GEN_STRINGS_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,strings)
-# GEN_GEN_STRINGS_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,strings)
-# # ─────────────── target prequisites ───────────────────────────────────────────
-# GEN_GEN_STRINGS_OBJ_PREQS	:= $(GEN_GEN_STRINGS_SRC) 		\
-# 			   	   $(GEN_GEN_STRINGS_HDR)		\
-# 			   	   $(THREAD_THREAD_LOG_HDR)
-# GEN_GEN_STRINGS_TRNR_SRC_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
-# 				   $(TEST_RUNNER_SOURCE_DIR)
-# GEN_GEN_STRINGS_TEST_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TEST_SRC)		\
-# 			   	   $(GEN_GEN_STRINGS_OBJ_PREQS) 	\
-# 			   	   $(UNITY_OBJ_PREQS)
-# GEN_GEN_STRINGS_TRNR_OBJ_PREQS	:= $(GEN_GEN_STRINGS_TRNR_SRC)		\
-# 			   	   $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
-# GEN_GEN_STRINGS_TEST_BIN_PREQS	:= $(GEN_GEN_STRINGS_TRNR_OBJ)		\
-# 				   $(GEN_GEN_STRINGS_TEST_OBJ)		\
-# 			   	   $(GEN_GEN_STRINGS_OBJ)		\
-# 			   	   $(THREAD_THREAD_LOG_OBJ)				\
-# 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   $(HELP_OBJ)				\
-# 			   	   $(TIME_TIME_UTILS_OBJ)		\
-# 			   	   $(STRING_STRING_UTILS_OBJ)				\
-# 			   	   $(UNITY_OBJ)
-# # ─────────────── targets ──────────────────────────────────────────────────────
-# TEST_BINARIES		+= $(GEN_GEN_STRINGS_TEST_BIN)
-# TARGETS			+= $(GEN_GEN_STRINGS_OBJ)		\
-# 			   $(GEN_GEN_STRINGS_TRNR_SRC)		\
-# 			   $(GEN_GEN_STRINGS_TRNR_OBJ)		\
-# 			   $(GEN_GEN_STRINGS_TEST_OBJ)		\
-# 			   $(GEN_GEN_STRINGS_TEST_BIN)
+## GENERATOR MODULES
+# ══════════════════════════════════════════════════════════════════════════════
 
-
-# # gen/gen_names
-# # ──────────────────────────────────────────────────────────────────────────────
-# GEN_GEN_NAMES_SRC 		:= $(call GEN_SOURCE_PATH,names)
-# GEN_GEN_NAMES_HDR		:= $(call GEN_HEADER_PATH,names)
-# GEN_GEN_NAMES_OBJ 		:= $(call GEN_OBJECT_PATH,names)
-# GEN_GEN_NAMES_TEST_SRC		:= $(call GEN_TEST_SOURCE_PATH,names)
-# GEN_GEN_NAMES_TRNR_SRC		:= $(call GEN_TEST_RUNNER_SOURCE_PATH,names)
-# GEN_GEN_NAMES_TRNR_OBJ		:= $(call GEN_TEST_RUNNER_OBJECT_PATH,names)
-# GEN_GEN_NAMES_TEST_OBJ		:= $(call GEN_TEST_OBJECT_PATH,names)
-# GEN_GEN_NAMES_TEST_BIN		:= $(call GEN_TEST_BINARY_PATH,names)
+# generate/names
+# ──────────────────────────────────────────────────────────────────────────────
+# GENERATE_NAMES_SRC 	:= $(call HELPER_SOURCE_PATH,generate names)
+# GENERATE_NAMES_HDR	:= $(call HELPER_HEADER_PATH,generate names)
+# GENERATE_NAMES_OBJ 	:= $(call HELPER_OBJECT_PATH,generate names)
+# GENERATE_NAMES_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate names)
+# GENERATE_NAMES_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate names)
+# GENERATE_NAMES_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate names)
+# GENERATE_NAMES_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate names)
+# GENERATE_NAMES_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate names)
 # # ─────────────── target prequisites ───────────────────────────────────────────
-# GEN_GEN_NAMES_OBJ_PREQS		:= $(GEN_GEN_NAMES_SRC) 		\
-# 			     	   $(GEN_GEN_NAMES_HDR)			\
-# 			     	   $(GEN_GEN_STRINGS_HDR)		\
+# GENERATE_NAMES_OBJ_PREQS	:= $(GENERATE_NAMES_SRC) 		\
+# 			     	   $(GENERATE_NAMES_HDR)		\
+# 			     	   $(GENERATE_STRINGS_HDR)		\
 # 			      	   $(RANDOM_RANDOM_HDR)
-# GEN_GEN_NAMES_TRNR_SRC_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
+# GENERATE_NAMES_OBJ_GROUP	:= $(GENERATE_NAMES_OBJ) 		\
+# 				   $(RANDOM_RANDOM_OBJ_GROUP)		\
+# 				   $(GENERATE_GENERATOR_OBJ_GROUP)
+# GENERATE_NAMES_TRNR_SRC_PREQS	:= $(GENERATE_NAMES_TEST_SRC)		\
 # 				   $(TEST_RUNNER_SOURCE_DIR)
-# GEN_GEN_NAMES_TEST_OBJ_PREQS	:= $(GEN_GEN_NAMES_TEST_SRC)		\
-# 			   	   $(GEN_GEN_NAMES_OBJ_PREQS)		\
+# GENERATE_NAMES_TEST_OBJ_PREQS	:= $(GENERATE_NAMES_TEST_SRC)		\
+# 			   	   $(GENERATE_NAMES_OBJ_PREQS)		\
 # 			   	   $(UNITY_OBJ_PREQS)
-# GEN_GEN_NAMES_TRNR_OBJ_PREQS	:= $(GEN_GEN_NAMES_TRNR_SRC)		\
-# 			   	   $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
-# GEN_GEN_NAMES_TEST_BIN_PREQS	:= $(GEN_GEN_NAMES_TRNR_OBJ)		\
-# 				   $(GEN_GEN_NAMES_TEST_OBJ)		\
-# 			   	   $(GEN_GEN_NAMES_OBJ)			\
-# 			   	   $(GEN_GEN_STRINGS_OBJ)		\
-# 			   	   $(THREAD_THREAD_LOG_OBJ)				\
-# 			   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   $(HELP_OBJ)				\
-# 			   	   $(TIME_TIME_UTILS_OBJ)		\
-# 			   	   $(STRING_STRING_UTILS_OBJ)				\
-# 			   	   $(RANDOM_RANDOM_OBJ)			\
-# 			   	   $(RANDOM_PCG_BASIC_OBJ)		\
-# 			   	   $(MEMORY_MEMORY_SWAP_OBJ)		\
-# 			   	   $(MEMORY_MEMORY_UTILS_OBJ)		\
-# 				   $(UTILS_UTILS_OBJ_GROUP)		\
+# GENERATE_NAMES_TRNR_OBJ_PREQS	:= $(GENERATE_NAMES_TRNR_SRC)		\
+# 			   	   $(GENERATE_NAMES_TEST_OBJ_PREQS)
+# GENERATE_NAMES_TEST_BIN_PREQS	:= $(GENERATE_NAMES_TRNR_OBJ)		\
+# 				   $(GENERATE_NAMES_TEST_OBJ)		\
+# 			   	   $(GENERATE_NAMES_OBJ_GROUP)		\
 # 			   	   $(UNITY_OBJ)
 # # ─────────────── targets ──────────────────────────────────────────────────────
 # TEST_BINARIES		+= $(GEN_GEN_NAMES_TEST_BIN)
@@ -1121,44 +1058,40 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 # 			   $(GEN_GEN_NAMES_TEST_BIN)
 
 
-# # gen/gen_count_string
-# # ──────────────────────────────────────────────────────────────────────────────
-# GEN_GEN_COUNT_STRING_SRC 	:= $(call GEN_SOURCE_PATH,count_string)
-# GEN_GEN_COUNT_STRING_HDR	:= $(call GEN_HEADER_PATH,count_string)
-# GEN_GEN_COUNT_STRING_OBJ 	:= $(call GEN_OBJECT_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TEST_SRC	:= $(call GEN_TEST_SOURCE_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TRNR_SRC	:= $(call GEN_TEST_RUNNER_SOURCE_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TRNR_OBJ	:= $(call GEN_TEST_RUNNER_OBJECT_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TEST_OBJ	:= $(call GEN_TEST_OBJECT_PATH,count_string)
-# GEN_GEN_COUNT_STRING_TEST_BIN	:= $(call GEN_TEST_BINARY_PATH,count_string)
-# # ─────────────── target prequisites ───────────────────────────────────────────
-# GEN_GEN_COUNT_STRING_OBJ_PREQS		:= $(GEN_GEN_COUNT_STRING_SRC) 		\
-# 				   	   $(GEN_GEN_COUNT_STRING_HDR) 		\
-# 				   	   $(GEN_GEN_STRINGS_HDR)
-# GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
-# 			   	   	   $(TEST_RUNNER_SOURCE_DIR)
-# GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TEST_SRC)	\
-# 			   	   	   $(GEN_GEN_COUNT_STRING_OBJ_PREQS) 	\
-# 			   	   	   $(UNITY_OBJ_PREQS)
-# GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_SRC)	\
-# 			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
-# GEN_GEN_COUNT_STRING_TEST_BIN_PREQS	:= $(GEN_GEN_COUNT_STRING_TRNR_OBJ)	\
-# 			   	   	   $(GEN_GEN_COUNT_STRING_TEST_OBJ)	\
-# 			   	   	   $(GEN_GEN_COUNT_STRING_OBJ)		\
-# 			   	   	   $(GEN_GEN_STRINGS_OBJ)		\
-# 			   	   	   $(THREAD_THREAD_LOG_OBJ)				\
-# 			   	   	   $(THREAD_THREAD_UTILS_OBJ)			\
-# 			   	   	   $(HELP_OBJ)				\
-# 			   	   	   $(TIME_TIME_UTILS_OBJ)		\
-# 			   	   	   $(STRING_STRING_UTILS_OBJ)				\
-# 			           	   $(UNITY_OBJ)
-# # ─────────────── targets ──────────────────────────────────────────────────────
-# TEST_BINARIES		+= $(GEN_GEN_COUNT_STRING_TEST_BIN)
-# TARGETS			+= $(GEN_GEN_COUNT_STRING_OBJ)			\
-# 			   $(GEN_GEN_COUNT_STRING_TRNR_SRC)		\
-# 			   $(GEN_GEN_COUNT_STRING_TRNR_OBJ)		\
-# 			   $(GEN_GEN_COUNT_STRING_TEST_OBJ)		\
-# 			   $(GEN_GEN_COUNT_STRING_TEST_BIN)
+# generate/counter
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COUNTER_SRC 		:= $(call HELPER_SOURCE_PATH,generate counter)
+GENERATE_COUNTER_HDR		:= $(call HELPER_HEADER_PATH,generate counter)
+GENERATE_COUNTER_OBJ 		:= $(call HELPER_OBJECT_PATH,generate counter)
+GENERATE_COUNTER_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate counter)
+GENERATE_COUNTER_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate counter)
+GENERATE_COUNTER_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate counter)
+GENERATE_COUNTER_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate counter)
+GENERATE_COUNTER_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate counter)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COUNTER_OBJ_PREQS	:= $(GENERATE_COUNTER_SRC) 		\
+				   $(GENERATE_COUNTER_HDR) 		\
+				   $(GENERATE_GENERATOR_HDR)
+GENERATE_COUNTER_OBJ_GROUP	:= $(GENERATE_OBJ) 			\
+				   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_COUNTER_TRNR_SRC_PREQS	:= $(GENERATE_COUNTER_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COUNTER_TEST_OBJ_PREQS	:= $(GENERATE_COUNTER_TEST_SRC)		\
+			   	   $(GENERATE_COUNTER_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+GENERATE_COUNTER_TRNR_OBJ_PREQS	:= $(GENERATE_COUNTER_TRNR_SRC)		\
+			   	   $(GENERATE_COUNTER_TEST_OBJ_PREQS)
+GENERATE_COUNTER_TEST_BIN_PREQS	:= $(GENERATE_COUNTER_TRNR_OBJ)		\
+			   	   $(GENERATE_COUNTER_TEST_OBJ)		\
+			   	   $(GENERATE_COUNTER_OBJ_GROUP)	\
+			           $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COUNTER_TEST_BIN)
+TARGETS			+= $(GENERATE_COUNTER_OBJ)			\
+			   $(GENERATE_COUNTER_TRNR_SRC)			\
+			   $(GENERATE_COUNTER_TRNR_OBJ)			\
+			   $(GENERATE_COUNTER_TEST_OBJ)			\
+			   $(GENERATE_COUNTER_TEST_BIN)
 
 
 ## PROJECT MODULES
@@ -1214,9 +1147,9 @@ GENERATE_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,generate)
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_OBJ_PREQS	:= $(GENERATE_SRC) 				\
 			   $(GENERATE_HDR) 				\
-			   $(FILE_HDR)
+			   $(GENERATE_GENERATOR_HDR)
 GENERATE_OBJ_GROUP	:= $(GENERATE_OBJ)				\
-			   $(FILE_OBJ_GROUP)
+			   $(GENERATE_GENERATOR_OBJ_GROUP)
 GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_TEST_SRC)				\
@@ -1422,20 +1355,16 @@ $(THREAD_THREAD_QUEUE_OBJ): $(THREAD_THREAD_QUEUE_OBJ_PREQS)
 $(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# # make gen/gen_count_string object
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_COUNT_STRING_OBJ): $(GEN_GEN_COUNT_STRING_OBJ_PREQS)
-# 	$(CC) $(CC_FLAGS) -c $< -o $@
+# make generate/counter object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COUNTER_OBJ): $(GENERATE_COUNTER_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# # make gen/gen_names object
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_NAMES_OBJ): $(GEN_GEN_NAMES_OBJ_PREQS)
-# 	$(CC) $(CC_FLAGS) -c $< -o $@
+# make generate/names object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_NAMES_OBJ): $(GENERATE_NAMES_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# # make gen/gen_strings object
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_STRINGS_OBJ): $(GEN_GEN_STRINGS_OBJ_PREQS)
-# 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make system/system_utils object
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1810,63 +1739,43 @@ $(STRING_UTF8_UTILS_TRNR_SRC): $(STRING_UTF8_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# # for gen/gen_count_string
-# # make:
-# # 	gen_gen_count_string_test		binary,
-# # 	gen_gen_count_string_test_runner 	object,
-# # 	gen_gen_count_string_test		object, and
-# # 	gen_gen_count_string_test_runner	source
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_COUNT_STRING_TEST_BIN): $(GEN_GEN_COUNT_STRING_TEST_BIN_PREQS)
-# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+# for generate/counter
+# make:
+# 	generate_counter_test		binary,
+# 	generate_counter_test_runner 	object,
+# 	generate_counter_test		object, and
+# 	generate_counter_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COUNTER_TEST_BIN): $(GENERATE_COUNTER_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-# $(GEN_GEN_COUNT_STRING_TRNR_OBJ): $(GEN_GEN_COUNT_STRING_TRNR_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_COUNTER_TRNR_OBJ): $(GENERATE_COUNTER_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GEN_GEN_COUNT_STRING_TEST_OBJ): $(GEN_GEN_COUNT_STRING_TEST_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_COUNTER_TEST_OBJ): $(GENERATE_COUNTER_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GEN_GEN_COUNT_STRING_TRNR_SRC): $(GEN_GEN_COUNT_STRING_TRNR_SRC_PREQS)
-# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+$(GENERATE_COUNTER_TRNR_SRC): $(GENERATE_COUNTER_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
-# # for gen/gen_names
-# # make:
-# # 	gen_gen_names_test		binary,
-# # 	gen_gen_names_test_runner 	object,
-# # 	gen_gen_names_test		object, and
-# # 	gen_gen_names_test_runner	source
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_NAMES_TEST_BIN): $(GEN_GEN_NAMES_TEST_BIN_PREQS)
-# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+# for generate/names
+# make:
+# 	generate_names_test		binary,
+# 	generate_names_test_runner 	object,
+# 	generate_names_test		object, and
+# 	generate_names_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_NAMES_TEST_BIN): $(GENERATE_NAMES_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-# $(GEN_GEN_NAMES_TRNR_OBJ): $(GEN_GEN_NAMES_TRNR_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_NAMES_TRNR_OBJ): $(GENERATE_NAMES_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GEN_GEN_NAMES_TEST_OBJ): $(GEN_GEN_NAMES_TEST_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+$(GENERATE_NAMES_TEST_OBJ): $(GENERATE_NAMES_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-# $(GEN_GEN_NAMES_TRNR_SRC): $(GEN_GEN_NAMES_TRNR_SRC_PREQS)
-# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
-
-
-# # for gen/gen_strings
-# # make:
-# # 	gen_gen_strings_test		binary,
-# # 	gen_gen_strings_test_runner 	object,
-# # 	gen_gen_strings_test		object, and
-# # 	gen_gen_strings_test_runner	source
-# # ──────────────────────────────────────────────────────────────────────────────
-# $(GEN_GEN_STRINGS_TEST_BIN): $(GEN_GEN_STRINGS_TEST_BIN_PREQS)
-# 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
-
-# $(GEN_GEN_STRINGS_TRNR_OBJ): $(GEN_GEN_STRINGS_TRNR_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
-
-# $(GEN_GEN_STRINGS_TEST_OBJ): $(GEN_GEN_STRINGS_TEST_OBJ_PREQS)
-# 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
-
-# $(GEN_GEN_STRINGS_TRNR_SRC): $(GEN_GEN_STRINGS_TRNR_SRC_PREQS)
-# 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+$(GENERATE_NAMES_TRNR_SRC): $(GENERATE_NAMES_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
 

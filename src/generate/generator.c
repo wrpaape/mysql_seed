@@ -18,7 +18,7 @@ rowspan_interval_init(struct RowspanInterval *const restrict interval,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 row_block_init(struct RowBlock *const restrict row_block,
-	       struct Rowspan *const restrict rowspans_from,
+	       struct Rowspan *restrict rowspan,
 	       const struct Rowspan *const restrict rowspans_until,
 	       const size_t row_count);
 
@@ -48,14 +48,17 @@ column_exit_on_failure(void *arg,
 
 	mutex_lock_muffle(&generator_log->lock);
 
-	thread_log_append_string(generator_log,
-				 COLUMN_FAILURE_MESSAGE_1);
+	thread_log_append_string_size(generator_log,
+				      COLUMN_FAILURE_MESSAGE_1,
+				      sizeof(COLUMN_FAILURE_MESSAGE_1) - 1lu);
 
-	thread_log_append_string(generator_log,
-				 column->name.bytes);
+	thread_log_append_string_size(generator_log,
+				      column->spec.name.bytes,
+				      column->spec.name.length);
 
-	thread_log_append_string(generator_log,
-				 COLUMN_FAILURE_MESSAGE_2);
+	thread_log_append_string_size(generator_log,
+				      COLUMN_FAILURE_MESSAGE_2,
+				      sizeof(COLUMN_FAILURE_MESSAGE_2) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);
@@ -103,14 +106,17 @@ table_exit_on_failure(void *arg,
 
 	mutex_lock_muffle(&generator_log->lock);
 
-	thread_log_append_string(generator_log,
-				 TABLE_FAILURE_MESSAGE_1);
+	thread_log_append_string_size(generator_log,
+				      TABLE_FAILURE_MESSAGE_1,
+				      sizeof(TABLE_FAILURE_MESSAGE_1) - 1lu);
 
-	thread_log_append_string(generator_log,
-				 table->name.bytes);
+	thread_log_append_string_size(generator_log,
+				      table->name.bytes,
+				      table->name.length);
 
-	thread_log_append_string(generator_log,
-				 TABLE_FAILURE_MESSAGE_2);
+	thread_log_append_string_size(generator_log,
+				      TABLE_FAILURE_MESSAGE_2,
+				      sizeof(TABLE_FAILURE_MESSAGE_2) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);
@@ -158,14 +164,17 @@ database_exit_on_failure(void *arg,
 
 	mutex_lock_muffle(&generator_log->lock);
 
-	thread_log_append_string(generator_log,
-				 DATABASE_FAILURE_MESSAGE_1);
+	thread_log_append_string_size(generator_log,
+				      DATABASE_FAILURE_MESSAGE_1,
+				      sizeof(DATABASE_FAILURE_MESSAGE_1) - 1lu);
 
-	thread_log_append_string(generator_log,
-				 database->name.bytes);
+	thread_log_append_string_size(generator_log,
+				      database->name.bytes,
+				      database->name.length);
 
-	thread_log_append_string(generator_log,
-				 DATABASE_FAILURE_MESSAGE_2);
+	thread_log_append_string_size(generator_log,
+				      DATABASE_FAILURE_MESSAGE_2,
+				      sizeof(DATABASE_FAILURE_MESSAGE_2) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);
@@ -188,7 +197,7 @@ counter_init(struct Counter *const restrict counter,
 
 void
 counter_exit_on_failure(void *arg,
-			 const char *restrict failure)
+			const char *restrict failure)
 {
 	struct Counter *const restrict counter
 	= (struct Counter *const restrict) arg;
@@ -203,14 +212,9 @@ counter_exit_on_failure(void *arg,
 
 	mutex_lock_muffle(&generator_log->lock);
 
-	thread_log_append_string(generator_log,
-				 COUNTER_FAILURE_MESSAGE_1);
-
-	thread_log_append_string(generator_log,
-				 counter->name.bytes);
-
-	thread_log_append_string(generator_log,
-				 COUNTER_FAILURE_MESSAGE_2);
+	thread_log_append_string_size(generator_log,
+				      COUNTER_FAILURE_MESSAGE,
+				      sizeof(COUNTER_FAILURE_MESSAGE) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);
@@ -241,14 +245,9 @@ generator_exit_on_failure(void *arg,
 
 	mutex_lock_muffle(&generator_log->lock);
 
-	thread_log_append_string(generator_log,
-				 GENERATOR_FAILURE_MESSAGE_1);
-
-	thread_log_append_string(generator_log,
-				 generator->name.bytes);
-
-	thread_log_append_string(generator_log,
-				 GENERATOR_FAILURE_MESSAGE_2);
+	thread_log_append_string_size(generator_log,
+				      GENERATOR_FAILURE_MESSAGE,
+				      sizeof(GENERATOR_FAILURE_MESSAGE) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);

@@ -5,18 +5,18 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdint.h>			/* SIZE_MAX, UINT32_MAX */
 #include "random/random.h"		/* urint_t, random_uint_upto */
-#include "gen/gen_strings.h"		/* string utils, log */
+#include "generate/generator.h"		/* string/parallelization utils */
 
 #define FIRST_NAMES_COUNT 200lu
 #define LAST_NAMES_COUNT  200lu
 #define FIRST_NAMES_MAP_I_LAST 199l
 #define LAST_NAMES_MAP_I_LAST  199l
 
-#define SIZE_FIRST_NAME_MAX 12lu	/* 11 chars + '\0' */
-#define SIZE_LAST_NAME_MAX 11lu		/* 10 chars + '\0' */
-#define SIZE_FULL_NAME_MAX (((SIZE_FIRST_NAME_MAX) * 2lu)	\
-			    + SIZE_LAST_NAME_MAX		\
-			    + 2lu)	/* 2 spaces */
+#define FIRST_NAME_SIZE_MAX 12lu	/* 11 chars + '\0' */
+#define LAST_NAME_SIZE_MAX  11lu	/* 10 chars + '\0' */
+#define FULL_NAME_SIZE_MAX  (((FIRST_NAME_SIZE_MAX) * 2lu)	\
+			     + LAST_NAME_SIZE_MAX		\
+			     + 2lu)	/* 2 spaces */
 
 #if (SIZE_MAX < UINT32_MAX)
 #	define FIRST_NAMES_COUNT_MAX SIZE_MAX
@@ -32,45 +32,48 @@
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define FIRST_NCM_EXCEEDED_FAIL_MSG					\
-"'FIRST_NAMES_COUNT_MAX' (" EXPAND_STRINGIFY(FIRST_NAMES_COUNT_MAX)	\
-") exceeded\n"
+FAILURE_REASON("last_names_column",					\
+	       "'FIRST_NAMES_COUNT_MAX' ("				\
+	       EXPAND_STRINGIFY(FIRST_NAMES_COUNT_MAX) ") exceeded\n")
 
 #define LAST_NCM_EXCEEDED_FAIL_MSG					\
-"'LAST_NAMES_COUNT_MAX' (" EXPAND_STRINGIFY(LAST_NAMES_COUNT_MAX)	\
-") exceeded\n"
+FAILURE_REASON("last_names_column",					\
+	       "'LAST_NAMES_COUNT_MAX' ("				\
+	       EXPAND_STRINGIFY(LAST_NAMES_COUNT_MAX) ") exceeded\n")
 
 #define FULL_NCM_EXCEEDED_FAIL_MSG					\
-"'FULL_NAMES_COUNT_MAX' (" EXPAND_STRINGIFY(FULL_NAMES_COUNT_MAX)	\
-") exceeded\n"
+FAILURE_REASON("full_names_column",					\
+	       "'FULL_NAMES_COUNT_MAX' ("				\
+	       EXPAND_STRINGIFY(FULL_NAMES_COUNT_MAX) ") exceeded\n")
 
 
 /* enum, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct NameMap {
-	const char *const *names;
+	const struct Label *names;
 	const urint_t i_last;
 };
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-extern const char *const first_names[FIRST_NAMES_COUNT];
-extern const char *const last_names[LAST_NAMES_COUNT];
+extern const struct Label first_names[FIRST_NAMES_COUNT];
+extern const struct Label last_names[LAST_NAMES_COUNT];
 
 extern const struct NameMap first_name_map;
 extern const struct NameMap last_name_map;
 
 inline char *
-put_random_initial(char *restrict string)
+put_random_initial(char *const restrict string)
 {
 	*string = (char) random_int_in_range((rint_t) 'A',
 					     (rint_t) 'Z');
 	return string + 1l;
 }
 
-inline const char *
+inline const struct Label *
 name_map_sample(const struct NameMap *const restrict map)
 {
-	return map->names[ random_uint_upto(map->i_last) ];
+	return &map->names[ random_uint_upto(map->i_last) ];
 }
 
 inline size_t
@@ -86,8 +89,8 @@ single_names_init(char *restrict *const name_ptrs_base,
 	while (1) {
 		*name_ptrs = names;
 
-		names = put_string(names,
-				   name_map_sample(map));
+		names = put_label(names,
+				  name_map_sample(map));
 		*names = '\0';
 
 		++name_ptrs;
@@ -113,22 +116,22 @@ full_names_init(char *restrict *const name_ptrs_base,
 	while (1) {
 		*name_ptrs = names;
 
-		names = put_string(names,
-				   name_map_sample(&first_name_map));
+		names = put_label(names,
+				  name_map_sample(&first_name_map));
 
 		PUT_CHAR(names, ' ');
 
 		if (coin_flip()) {
 			names = coin_flip()
 			      ? put_random_initial(names)
-			      : put_string(names,
-					   name_map_sample(&first_name_map));
+			      : put_label(names,
+					  name_map_sample(&first_name_map));
 
 			PUT_CHAR(names, ' ');
 		}
 
-		names = put_string(names,
-				   name_map_sample(&last_name_map));
+		names = put_label(names,
+				  name_map_sample(&last_name_map));
 
 		*names = '\0';
 
@@ -226,44 +229,8 @@ gen_last_names(const size_t count)
 }
 
 
-inline char **
-gen_full_names(const size_t count)
-{
-	if (count > FULL_NAMES_COUNT_MAX) {
-		gen_strings_log_alloc_failure(count,
-					      0lu,
-					      FULL_NCM_EXCEEDED_FAIL_MSG);
-		return NULL;
-	}
-
-	/* 'count' + 1 (NULL terminated) pointers + (max * count) chars */
-	const size_t size_est  = (sizeof(char *) * (count + 1lu))
-			       + (FULL_NAMES_COUNT_MAX * count);
-
-	char **const name_ptrs_base = malloc(size_est);
-
-	if (name_ptrs_base == NULL) {
-		gen_strings_log_alloc_failure(count,
-					      size_est,
-					      MALLOC_FAILURE_MESSAGE);
-		return NULL;
-	}
-
-	const size_t size_act = full_names_init(name_ptrs_base,
-						count);
-
-	char **const realloc_size_act = realloc(name_ptrs_base,
-						size_act);
-
-	if (realloc_size_act == NULL) {
-		gen_strings_log_realloc_failure(count,
-						size_est,
-						size_act);
-		return name_ptrs_base;
-	}
-
-	return realloc_size_act;
-}
+void
+full_names_column(void *arg);
 
 
 #endif	/* ifndef MYSQL_SEED_GENERATE_NAMES_H_ */

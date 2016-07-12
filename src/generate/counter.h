@@ -23,13 +23,15 @@
 
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define UPTO_MAX_EXCEEDED_FAILURE_MESSAGE "'UPTO_MAX' exceeded\n"
+#define COUNTER_CREATE_FAILURE_MESSAGE(REASON)				\
+FAILURE_REASON("counter_create", REASON)
 
-#define COUNTER_ALLOC_FAILURE_MESSAGE_1					\
-"\n\nfailed to allocate counter memory for 'upto' of "
+#define CC_UPTO_MAX_EXCEEDED_FAILURE_MESSAGE				\
+COUNTER_CREATE_FAILURE_MESSAGE("'UPTO_MAX' of "				\
+			       EXPAND_STRINGIFY(UPTO_MAX) " exceeded\n")
 
-#define COUNTER_ALLOC_FAILURE_MESSAGE_2					\
-" ('UPTO_MAX' = " EXPAND_STRINGIFY(UPTO_MAX) ")\nreason:\n\t"
+#define CC_ALLOC_FAILURE_MESSAGE					\
+COUNTER_CREATE_FAILURE_MESSAGE(MALLOC_FAILURE_REASON)
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -302,29 +304,29 @@ inline void
 counter_init_internals(struct Counter *const restrict counter)
 {
 	if (counter->upto > UPTO_MAX) {
-		counter_log_alloc_failure(counter->upto,
-					  UPTO_MAX_EXCEEDED_FAILURE_MESSAGE);
-		counter->pointers = NULL;
-		return;
+		handler_closure_call(&counter->fail_cl,
+				     CC_UPTO_MAX_EXCEEDED_FAILURE_MESSAGE);
+		__builtin_unreachable();
 	}
 
 	counter_size_internals(counter);
 
-	seed_worker_try_catch_open(free,
-				   counter->pointers);
+	thread_try_catch_open(free,
+			      counter->pointers);
 
 	/* 'upto' pointers + 'size_digits' ascii chars */
 	counter->pointers = malloc((sizeof(char *) * counter->upto)
-				  + counter->size_digits);
+				   + counter->size_digits);
 
+	if (counter->pointers == NULL) {
+		handler_closure_call(&counter->fail_cl,
+				     CC_ALLOC_FAILURE_MESSAGE);
+		__builtin_unreachable();
+	}
 
-	if (counter->pointers == NULL)
-		counter_log_alloc_failure(counter->upto,
-					       MALLOC_FAILURE_MESSAGE);
-	else
-		counter_set_internals(counter);
+	counter_set_internals(counter);
 
-	seed_worker_try_catch_close();
+	thread_try_catch_close();
 }
 
 /* top-level functions
@@ -337,19 +339,22 @@ counter_free_internals(struct Counter *const restrict counter)
 }
 
 void
-counter_do_init(void *arg);
+counter_create(void *arg);
 
 
 inline void
 counter_await(struct Counter *const restrict counter,
 	      const struct HandlerClosure *const restrict fail_cl)
 {
+	if (counter->ready)
+		return;
+
 	mutex_lock_try_catch_open(&counter->processing);
 
 	mutex_lock_handle_cl(&counter->processing,
 			     fail_cl);
 
-	while (counter->incomplete)
+	while (!counter->ready)
 		thread_cond_await_handle_cl(&counter->done,
 					    &counter->processing,
 					    fail_cl);

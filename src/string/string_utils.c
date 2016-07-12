@@ -143,15 +143,24 @@ put_string_size_until(char *restrict buffer,
 		      char *const restrict until);
 
 extern inline char *
-put_char_times_length(char *restrict buffer,
-		      const char byte,
-		      size_t times,
-		      size_t length);
+put_string_width(char *const restrict buffer,
+		 const *const restrict string,
+		 const size_t width);
+
+extern inline char *
+put_label(char *const restrict buffer,
+	  const struct Label *const restrict label);
 
 extern inline char *
 put_char_times(char *const restrict buffer,
 	       const char byte,
 	       const size_t times);
+
+extern inline char *
+put_char_times_length(char *restrict buffer,
+		      const char byte,
+		      size_t times,
+		      size_t length);
 
 extern inline char *
 put_char_times_until(char *restrict buffer,

@@ -3,7 +3,8 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_file.h" /* file/exit/string/parallelization utils */
+#include "mysql_seed_file.h"	/* file/exit/string/parallelization utils */
+#include "thread/thread_pool.h"	/* ThreadPool */
 
 
 /* minimum valid spec lengths
@@ -161,9 +162,9 @@ struct RowspanInterval {
 
 struct RowBlock {
 	struct LengthLock total;		/* total block string length */
-	char *contents;				/* table file block */
 	struct RowspanInterval rowspans;	/* X COL_COUNT */
 	size_t row_count;			/* either div or mod */
+	char *contents;				/* table file block */
 };
 
 
@@ -175,7 +176,8 @@ struct RowBlockInterval {
 struct Table;
 
 struct Column {
-	struct ColSpec *spec;			/* from raw input */
+	const struct ColSpec *spec;		/* from raw input */
+	char *contents;
 	struct RowspanInterval rowspans;	/* X BLK_COUNT */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
@@ -229,9 +231,9 @@ struct DatabaseInterval {
 };
 
 struct Counter {
-	SeedMutex processing;	/* condition lock */
-	SeedThreadCond done;	/* broadcasted once 'pointers' are set */
-	bool incomplete;	/* flipped false once 'pointers' are set */
+	Mutex processing;	/* condition lock */
+	ThreadCond done;	/* broadcasted once 'pointers' are set */
+	bool ready;	/* flipped true once 'pointers' are set */
 	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
 	char **pointers;	/* digit pointers */
 	size_t upto;		/* final and max stringified number */
@@ -268,15 +270,11 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 #define DATABASE_FAILURE_MESSAGE_2					\
 ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
-#define COUNTER_FAILURE_MESSAGE_1					\
-"\n" ANSI_UNDERLINE "COUNTER " ANSI_BRIGHT
-#define COUNTER_FAILURE_MESSAGE_2					\
-ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
+#define COUNTER_FAILURE_MESSAGE						\
+"\n" ANSI_UNDERLINE "COUNTER EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
-#define GENERATOR_FAILURE_MESSAGE_1					\
-"\n" ANSI_UNDERLINE "GENERATOR " ANSI_BRIGHT
-#define GENERATOR_FAILURE_MESSAGE_2					\
-ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
+#define GENERATOR_FAILURE_MESSAGE					\
+"\n" ANSI_UNDERLINE "GENERATOR EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
 /* Rowspan Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -302,21 +300,25 @@ rowspan_interval_init(struct RowspanInterval *const restrict interval,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 row_block_init(struct RowBlock *const restrict row_block,
-	       struct Rowspan *const restrict rowspans_from,
+	       struct Rowspan *restrict rowspan,
 	       const struct Rowspan *const restrict rowspans_until,
 	       const size_t row_count)
 {
-	rowspan_init(rowspans_from,
-		     row_block);
-
-	rowspan_interval_init(&row_block->rowspans,
-			      rowspans_from,
-			      rowspans_until);
-
-	row_block->row_count = row_count;
-
 	length_lock_init(&row_block->total,
 			 0lu);
+
+	rowspan_interval_init(&row_block->rowspans,
+			      rowspan,
+			      rowspans_until);
+
+	do {
+		rowspan_init(rowspan,
+			     row_block);
+		++rowspan;
+	} while (rowspan < rowspans_until);
+
+
+	row_block->row_count = row_count;
 }
 
 
@@ -341,25 +343,24 @@ __attribute__((noreturn));
 
 inline void
 column_init(struct Column *const restrict column,
-	    struct Table *const restrict parent,
+	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
 	    const struct Rowspan *const restrict rowspans_until,
-	    char *const restrict column_name_bytes,
-	    const size_t column_name_length)
+	    struct Table *const restrict parent)
 {
-	column->parent	= parent;
+	column->spec = spec;
+
+	column->contents = NULL; /* no-op in free on early exit */
 
 	rowspan_interval_init(&column->rowspans,
 			      rowspans_from,
 			      rowspans_until);
 
-	string_init(&column->name,
-		    column_name_bytes,
-		    column_name_length);
-
 	handler_closure_init(&column->fail_cl,
 			     &column_exit_on_failure,
 			     column);
+
+	column->parent = parent;
 }
 
 /* ColumnInterval Operations
@@ -470,13 +471,18 @@ counter_init(struct Counter *const restrict counter,
 	mutex_init(&counter->processing);
 	thread_cond_init(&counter->done);
 
-	counter->incomplete = true;
-	counter->upto	    = upto;
+	counter->ready = false;
+	counter->upto  = upto;
 
 	handler_closure_init(&counter->fail_cl,
-			     counter_exit_on_failuer)
-
+			     &counter_exit_on_failure,
+			     counter);
 }
+
+void
+counter_exit_on_failure(void *arg,
+			const char *restrict failure)
+__attribute__((noreturn));
 
 
 /* Generator Operations
