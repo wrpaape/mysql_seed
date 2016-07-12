@@ -8,8 +8,10 @@
 
 /* cap reads on input strings
  *─────────────────────────────────────────────────────────────────────────── */
+#define ARGC_INSPECT_MAX 10lu
 #define LENGTH_INSPECT_MAX (sizeof("--generate") * 2lu)
-#define ERROR_BUFFER_SIZE_MIN 128lu
+#define ARGV_INSPECT_BUFFER_SIZE (((LENGTH_INSPECT_MAX + 4lu)		\
+				   * ARGC_INSPECT_MAX) + 128lu))
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */

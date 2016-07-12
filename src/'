@@ -75,12 +75,11 @@ print_invalid_db_spec(char *restrict *const restrict from,
 		      const char *const restrict reason,
 		      const size_t length_reason)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+	const size_t buffer_size = ERROR_BUFFER_SIZE_MIN
+				 + ((until - from)
+				    * (LENGTH_INSPECT_MAX + 1lu));
 
-	const char *const restrict *const restrict until_max = from
-							     + ARGC_INSPECT_MAX;
-	if (until > until_max)
-		until = until_max;
+	char buffer[buffer_size];
 
 	char *restrict
 	ptr = put_string_size(&buffer[0],
@@ -294,7 +293,8 @@ generate_dispatch(char *restrict *const restrict from,
 	 *	Table	 and TblSpec X TBL_CNT = DB_CNT  +  ((mac % 8) / 6)
 	 *	Column	 and ColSpec X COL_CNT = TBL_CNT + (((mac % 8) % 6) / 3)
 	 *	                                           └───────────────────┘
-	 *	with                                             always 0
+	 *	                                                  always 0
+	 *	with
 	 *
 	 *	((mac % 8) % 6) % 3
 	 *
@@ -307,7 +307,8 @@ generate_dispatch(char *restrict *const restrict from,
 	 *	Table	 and TblSpec X TBL_CNT = (mac - 2) / 6
 	 *	Column	 and ColSpec X COL_CNT = TBL_CNT + (((mac - 2) % 6) / 3)
 	 *	                                           └───────────────────┘
-	 *	with                                           always 1 or 0
+	 *	                                                always 1 or 0
+	 *	with
 	 *
 	 *	((mac - 2) % 6) % 3
 	 *
@@ -316,18 +317,13 @@ generate_dispatch(char *restrict *const restrict from,
 	 *
 	 * COL_SPEC count maximized, need memory for:
 	 *
-	 *	Database and DbSpec	X DB_CNT =  1
-	 *	Table	 and TblSpec	X TBL_CNT = 1
-	 *	Column	 and ColSpec	X COL_CNT = (margc - 5) / 3
+	 *	Database and DbSpec	X 1
+	 *	Table	 and TblSpec	X 1
+	 *	Column	 and ColSpec	X ((margc - 5) / 3)
 	 *
 	 *	with
 	 *
-	 *	(margc - 5) % 3
-	 *
-	 *	args leftover for COL_TYPE_Qs
-	 *
-	 *
-	 * a malicious user maximizing storage/argc
+	 *	(((mac - 2) % 6) % 3) args leftover for COL_TYPE_Qs
 	 * */
 
 	const size_t spec_alloc = k
