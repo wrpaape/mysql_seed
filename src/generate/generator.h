@@ -198,8 +198,8 @@ struct Database;
 struct Table {
 	struct FileHandle file;
 	struct LengthLock total;		/* total table length */
+	const struct TblSpec *spec;		/* from raw input */
 	char *contents;				/* table file start */
-	struct TblSpec *spec;			/* from raw input */
 	struct ColumnInterval columns;		/* slice assigned by db */
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
@@ -215,11 +215,10 @@ struct Generator;
 
 struct Database {
 	struct FileHandle loader;
-	struct DirHandle dir;
+	struct Dirpath dirpath;
 	struct LengthLock total;		/* total database length */
+	const struct DbSpec *spec;		/* raw input */
 	char *contents;				/* table files and loader */
-	struct String name;			/* raw input */
-	struct DbSpec *spec;			/* from raw input */
 	struct TableInterval tables;
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 	struct Generator *parent;
@@ -275,6 +274,97 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
 #define GENERATOR_FAILURE_MESSAGE					\
 "\n" ANSI_UNDERLINE "GENERATOR EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
+
+
+/* init Generator FileHandle, Dirpath
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+database_dirpath_init(struct Dirpath *const restrict dirpath,
+		      const struct String *const restrict db_name)
+{
+	SET_STRING_WIDTH(&dirpath->buffer[0],
+			 DB_DIRPATH_PFX,
+			 DB_DIRPATH_PFX_NN_WIDTH);
+
+	memory_copy(&dirpath->buffer[DB_DIRPATH_PFX_SIZE],
+		    db_name->bytes,
+		    db_name->length + 1lu);
+
+	dirpath->length = DB_DIRPATH_PFX_LENGTH
+			+ db_name->length;
+}
+
+inline void
+table_file_init(struct FileHandle *const restrict file,
+		const struct String *const restrict tbl_name,
+		const struct Dirpath *const restrict db_dirpath)
+{
+	char *restrict ptr;
+
+	ptr = put_string_size(&file->name.buffer[0],
+			      tbl_name->bytes,
+			      tbl_name->length);
+
+	SET_STRING_WIDTH(ptr,
+			 TABLE_FILENAME_SFX,
+			 TABLE_FILENAME_SFX_WIDTH);
+
+	file->name.length = tbl_name->length
+			  + TABLE_FILENAME_SFX_LENGTH;
+
+	const size_t filename_size = file->name.length + 1lu;
+
+	file->path.length = db_dir_path->length + filename_size;
+
+
+	ptr = put_string_size(&file->path.buffer[0],
+			      &db_path->buffer[0],
+			      db_path->length);
+
+	PUT_PATH_DELIM(ptr);
+
+	memory_copy(ptr,
+		    &file->name.buffer[0],
+		    filename_size);
+}
+
+inline void
+loader_file_init(struct FileHandle *const restrict file,
+		 const struct String *const restrict db_name,
+		 const struct Dirpath *const restrict db_dirpath)
+{
+	char *restrict ptr;
+
+	SET_STRING_WIDTH(&file->name.buffer[0],
+			 LOADER_FILENAME_PFX,
+			 LOADER_FILENAME_PFX_NN_WIDTH);
+
+	ptr = put_string_size(&file->name.buffer[LOADER_FILENAME_PFX_NN_SIZE],
+			      db_name->bytes,
+			      db_name->length);
+
+	SET_STRING_WIDTH(ptr,
+			 LOADER_FILENAME_SFX,
+			 LOADER_FILENAME_SFX_WIDTH);
+
+	file->name.length = LOADER_FILENAME_PFX_LENGTH
+			  + db_name->length
+			  + LOADER_FILENAME_SFX_LENGTH;
+
+	const size_t filename_size = file->name.length + 1lu;
+
+	file->path.length = db_dir_path->length + filename_size;
+
+	ptr = put_string_size(&file->path.buffer[0],
+			      &db_path->buffer[0],
+			      db_path->length);
+
+	PUT_PATH_DELIM(ptr);
+
+	memory_copy(ptr,
+		    &file->name.buffer[0],
+		    filename_size);
+}
 
 /* Rowspan Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -384,34 +474,46 @@ __attribute__((noreturn));
 
 inline void
 table_init(struct Table *const restrict table,
-	   struct Database *const restrict parent,
-	   struct Column *const restrict columns_from,
-	   const struct Column *const restrict columns_until,
-	   struct RowBlock *const restrict rowblocks_from,
-	   const struct RowBlock *const restrict rowblocks_until,
-	   char *const restrict table_name_bytes,
-	   const size_t table_name_length)
+	   const struct TblSpec *const restrict spec,
+	   struct Column *restrict column,
+	   struct Rowspan *restrict rowspan
+	   struct Database *const restrict parent);
 {
-	table->parent = parent;
+
+	table_file_init(&table->file,
+			&spec->name,
+			&parent->dirpath)
 
 	length_lock_init(&table->total,
 			 0lu);
 
+	table->spec = spec;
+
+	table->contents = NULL; /* no-op in free on early exit */
+
 	column_interval_init(&table->columns,
-			     columns_from,
+			     column,
 			     columns_until);
 
-	row_block_interval_init(&table->row_blocks,
-				row_blocks_from,
-				row_blocks_until);
+	struct ColSpec *restrict col_spec = spec->col_specs->from;
 
-	string_init(&table->name,
-		    table_name_bytes,
-		    table_name_length);
+	do {
+		column_init(column,
+			    col_spec,
+			    )
+
+		++column;
+	} while (column < columns_until);
+
+	row_block_interval_init(&table->row_blocks,
+				row_block,
+				row_blocks_until);
 
 	handler_closure_init(&table->fail_cl,
 			     &table_exit_on_failure,
 			     table);
+
+	table->parent = parent;
 }
 
 

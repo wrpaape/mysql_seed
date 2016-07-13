@@ -98,11 +98,9 @@
 #define TABLE_FILEPATH_SIZE_MAX	    (  TABLE_FILEPATH_NN_SIZE_MAX	\
 				     + 1lu)	/* '\0' */
 
-/* DirHandle sizing */
-#define DIR_HANDLE_NAME_SIZE_MAX   DB_DIRNAME_SIZE_MAX
-#define DIR_HANDLE_NAME_LENGTH_MAX DB_DIRNAME_LENGTH_MAX
-#define DIR_HANDLE_PATH_SIZE_MAX   DB_DIRPATH_SIZE_MAX
-#define DIR_HANDLE_PATH_LENGTH_MAX DB_DIRPATH_LENGTH_MAX
+/* Dirpath sizing */
+#define DIRPATH_SIZE_MAX   DB_DIRPATH_SIZE_MAX
+#define DIRPATH_LENGTH_MAX DB_DIRPATH_LENGTH_MAX
 
 /* FileHandle sizing */
 #if (LOADER_FILENAME_SIZE_MAX > TABLE_FILENAME_SIZE_MAX)
@@ -143,19 +141,9 @@ PARSE_FAILURE_MESSAGE(" no " FLAG " (FATAL)") MORE_INFO_MESSAGE
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 /* database/<db_name> */
-struct Dirname {
-	char buffer[DIR_HANDLE_NAME_SIZE_MAX];
-	size_t length;
-};
-
 struct Dirpath {
-	char buffer[DIR_HANDLE_PATH_SIZE_MAX];
+	char buffer[DIRPATH_SIZE_MAX];
 	size_t length;
-};
-
-struct DirHandle {
-	struct Dirname name;
-	struct Dirpath path;
 };
 
 
@@ -405,94 +393,94 @@ file_handle_process(struct FileHandle *const restrict file,
 }
 
 
-/* DirHandle Operations
+/* Dirpath Operations
  * ────────────────────────────────────────────────────────────────────────── */
 /* make */
 inline bool
-dir_handle_make_status(const struct DirHandle *const restrict dir)
+dirpath_make_status(const struct Dirpath *const restrict path)
 {
-	return mkdir_status(&dir->path.buffer[0],
+	return mkdir_status(&path->buffer[0],
 			    DIR_HANDLE_MODE);
 }
 
 inline void
-dir_handle_make_muffle(const struct DirHandle *const restrict dir)
+dirpath_make_muffle(const struct Dirpath *const restrict path)
 {
-	mkdir_muffle(&dir->path.buffer[0],
+	mkdir_muffle(&path->buffer[0],
 		     DIR_HANDLE_MODE);
 }
 
 inline bool
-dir_handle_make_report(const struct DirHandle *const restrict dir,
-		       const char *restrict *const restrict failure)
+dirpath_make_report(const struct Dirpath *const restrict path,
+		    const char *restrict *const restrict failure)
 {
-	return mkdir_report(&dir->path.buffer[0],
+	return mkdir_report(&path->buffer[0],
 			    DIR_HANDLE_MODE,
 			    failure);
 }
 
 inline void
-dir_handle_make_handle(const struct DirHandle *const restrict dir,
-		       Handler *const handle,
-		       void *arg)
+dirpath_make_handle(const struct Dirpath *const restrict path,
+		    Handler *const handle,
+		    void *arg)
 {
-	mkdir_handle(&dir->path.buffer[0],
+	mkdir_handle(&path->buffer[0],
 		     DIR_HANDLE_MODE,
 		     handle,
 		     arg);
 }
 
 inline void
-dir_handle_make_handle_cl(const struct DirHandle *const restrict dir,
-			  const struct HandlerClosure *const restrict fail_cl)
+dirpath_make_handle_cl(const struct Dirpath *const restrict path,
+		       const struct HandlerClosure *const restrict fail_cl)
 {
-	mkdir_handle_cl(&dir->path.buffer[0],
+	mkdir_handle_cl(&path->buffer[0],
 			DIR_HANDLE_MODE,
 			fail_cl);
 }
 
 /* remove */
 inline bool
-dir_handle_remove_status(const struct DirHandle *const restrict dir)
+dirpath_remove_status(const struct Dirpath *const restrict path)
 {
-	return rmdir_status(&dir->path.buffer[0]);
+	return rmdir_status(&path->buffer[0]);
 }
 
 inline void
-dir_handle_remove_muffle(const struct DirHandle *const restrict dir)
+dirpath_remove_muffle(const struct Dirpath *const restrict path)
 {
-	rmdir_muffle(&dir->path.buffer[0]);
+	rmdir_muffle(&path->buffer[0]);
 }
 
 inline bool
-dir_handle_remove_report(const struct DirHandle *const restrict dir,
-			 const char *restrict *const restrict failure)
+dirpath_remove_report(const struct Dirpath *const restrict path,
+		      const char *restrict *const restrict failure)
 {
-	return rmdir_report(&dir->path.buffer[0],
+	return rmdir_report(&path->buffer[0],
 			    failure);
 }
 
 inline void
-dir_handle_remove_handle(const struct DirHandle *const restrict dir,
-			 Handler *const handle,
-			 void *arg)
+dirpath_remove_handle(const struct Dirpath *const restrict path,
+		      Handler *const handle,
+		      void *arg)
 {
-	rmdir_handle(&dir->path.buffer[0],
+	rmdir_handle(&path->buffer[0],
 		     handle,
 		     arg);
 }
 
 inline void
-dir_handle_remove_handle_cl(const struct DirHandle *const restrict dir,
-			    const struct HandlerClosure *const restrict fail_cl)
+dirpath_remove_handle_cl(const struct Dirpath *const restrict path,
+			 const struct HandlerClosure *const restrict fail_cl)
 {
-	rmdir_handle_cl(&dir->path.buffer[0],
+	rmdir_handle_cl(&path->buffer[0],
 			fail_cl);
 }
 
 /* cleanup */
 void
-dir_handle_cleanup(void *arg);
+dirpath_cleanup(void *arg);
 
 
 /* LengthLock operations

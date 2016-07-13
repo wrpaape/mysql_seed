@@ -84,41 +84,41 @@ file_handle_process(struct FileHandle *const restrict file,
  * ────────────────────────────────────────────────────────────────────────── */
 /* make */
 extern inline bool
-dir_handle_make_status(const struct DirHandle *const restrict dir);
+dirpath_make_status(const struct Dirpath *const restrict path);
 extern inline void
-dir_handle_make_muffle(const struct DirHandle *const restrict dir);
+dirpath_make_muffle(const struct Dirpath *const restrict path);
 extern inline bool
-dir_handle_make_report(const struct DirHandle *const restrict dir,
-		       const char *restrict *const restrict failure);
+dirpath_make_report(const struct Dirpath *const restrict path,
+		    const char *restrict *const restrict failure);
 extern inline void
-dir_handle_make_handle(const struct DirHandle *const restrict dir,
-		       Handler *const handle,
-		       void *arg);
+dirpath_make_handle(const struct Dirpath *const restrict path,
+		    Handler *const handle,
+		    void *arg);
 extern inline void
-dir_handle_make_handle_cl(const struct DirHandle *const restrict dir,
-			  const struct HandlerClosure *const restrict fail_cl);
+dirpath_make_handle_cl(const struct Dirpath *const restrict path,
+		       const struct HandlerClosure *const restrict fail_cl);
 
 /* remove */
 extern inline bool
-dir_handle_remove_status(const struct DirHandle *const restrict dir);
+dirpath_remove_status(const struct Dirpath *const restrict path);
 extern inline void
-dir_handle_remove_muffle(const struct DirHandle *const restrict dir);
+dirpath_remove_muffle(const struct Dirpath *const restrict path);
 extern inline bool
-dir_handle_remove_report(const struct DirHandle *const restrict dir,
-			 const char *restrict *const restrict failure);
+dirpath_remove_report(const struct Dirpath *const restrict path,
+		      const char *restrict *const restrict failure);
 extern inline void
-dir_handle_remove_handle(const struct DirHandle *const restrict dir,
-			 Handler *const handle,
-			 void *arg);
+dirpath_remove_handle(const struct Dirpath *const restrict path,
+		      Handler *const handle,
+		      void *arg);
 extern inline void
-dir_handle_remove_handle_cl(const struct DirHandle *const restrict dir,
-			    const struct HandlerClosure *const restrict fail_cl);
+dirpath_remove_handle_cl(const struct Dirpath *const restrict path,
+			 const struct HandlerClosure *const restrict fail_cl);
 
 /* cleanup */
 void
-dir_handle_cleanup(void *arg)
+dirpath_cleanup(void *arg)
 {
-	dir_handle_remove_muffle((const struct DirHandle *const restrict) arg);
+	dirpath_remove_muffle((const struct DirHandle *const restrict) arg);
 }
 
 

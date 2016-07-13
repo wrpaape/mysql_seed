@@ -1,4 +1,19 @@
 #include "generate/generator.h"
+/* init Generator FileHandle, Dirpath
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+database_dirpath_init(struct Dirpath *const restrict dirpath,
+		      const struct String *const restrict db_name);
+
+extern inline void
+table_file_init(struct FileHandle *const restrict file,
+		const struct String *const restrict tbl_name,
+		const struct Dirpath *const restrict db_dirpath);
+
+extern inline void
+loader_file_init(struct FileHandle *const restrict file,
+		 const struct String *const restrict db_name,
+		 const struct Dirpath *const restrict db_dirpath);
 
 /* Rowspan Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -73,12 +88,10 @@ column_exit_on_failure(void *arg,
 }
 extern inline void
 column_init(struct Column *const restrict column,
-	    struct Table *const restrict parent,
-	    struct CountString *const restrict counter,
+	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
 	    const struct Rowspan *const restrict rowspans_until,
-	    char *const restrict column_name_bytes,
-	    const size_t column_name_length);
+	    const struct Table *const restrict parent);
 
 /* ColumnInterval Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -131,13 +144,6 @@ table_exit_on_failure(void *arg,
 }
 extern inline void
 table_init(struct Table *const restrict table,
-	   struct Database *const restrict parent,
-	   struct Column *const restrict columns_from,
-	   const struct Column *const restrict columns_until,
-	   struct RowBlock *const restrict rowblocks_from,
-	   const struct RowBlock *const restrict rowblocks_until,
-	   char *const restrict column_name_bytes,
-	   const size_t column_name_length);
 
 /* TableInterval Operations
  * ────────────────────────────────────────────────────────────────────────── */
