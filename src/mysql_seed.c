@@ -6,16 +6,16 @@ int main(int argc, char *argv[])
 		return print_no_mode_flag();
 
 	return mode_dispatch(&argv[1],
-			     &argv[argc]);
+			     argc - 2);
 }
 
 /* parse stdin args
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-mode_dispatch(char *restrict *const restrict from,
-	      char *const restrict *const restrict until)
+mode_dispatch(char *restrict *const restrict arg,
+	      const int rem_argc)
 {
-	char *const restrict flag = *from;
+	char *const restrict flag = *arg;
 
 	if (*flag != '-')
 		return print_invalid_mode_flag(flag);
@@ -28,15 +28,15 @@ mode_dispatch(char *restrict *const restrict from,
 	case '-': break;	/* parse long mode flag */
 
 	case 'g': return (*rem == '\0')
-		       ? generate_dispatch(from + 1l, until)
+		       ? generate_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	case 'h': return (*rem == '\0')
-		       ? help_dispatch(from + 1l, until)
+		       ? help_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	case 'l': return (*rem == '\0')
-		       ? load_dispatch(from + 1l, until)
+		       ? load_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	default:  return print_invalid_mode_flag(flag);
@@ -45,15 +45,15 @@ mode_dispatch(char *restrict *const restrict from,
 	/* parse long mode flag */
 	switch (*rem) {
 	case 'g': return strings_equal("enerate",    rem + 1l)
-		       ? generate_dispatch(from + 1l, until)
+		       ? generate_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	case 'h': return strings_equal("elp",	 rem + 1l)
-		       ? help_dispatch(from + 1l, until)
+		       ? help_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	case 'l': return strings_equal("oad",	 rem + 1l)
-		       ? load_dispatch(from + 1l, until)
+		       ? load_dispatch(arg + 1l, rem_argc)
 		       : print_invalid_mode_flag(flag);
 
 	default:  return print_invalid_mode_flag(flag);
@@ -73,15 +73,15 @@ print_no_mode_flag(void)
 }
 
 inline int
-print_invalid_mode_flag(char *const restrict flag)
+print_invalid_mode_flag(char *const restrict arg)
 {
-	static char buffer[ERROR_BUFFER_SIZE] = {
+	static char buffer[ARG_INSPECT_BUFFER_SIZE] = {
 		INVALID_MODE_FLAG_HEADER
 	};
 
 	char *restrict
 	ptr = put_string_inspect(&buffer[sizeof(INVALID_MODE_FLAG_HEADER)],
-				 flag,
+				 arg,
 				 FLAG_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,

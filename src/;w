@@ -19,12 +19,10 @@
 #define DB_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
 #define DB_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * DB_NAME_LENGTH_MAX)
 #define DB_NAME_SIZE_MAX    (DB_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
-#define DB_NAME_LENGTH_MAX_STRING "63"
 
 #define COL_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
 #define COL_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * COL_NAME_LENGTH_MAX)
 #define COL_NAME_SIZE_MAX    (COL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
-#define COL_NAME_LENGTH_MAX_STRING "63"
 
 
 /* file naming conventions
@@ -127,17 +125,9 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
 
-#define PARSE_ERROR_MESSAGE(REASON)					\
-ERROR_HEADER_WRAP("parse", "error", "- " REASON) "\n"
-
 #define PARSE_ERROR_HEADER(REASON)					\
-PARSE_ERROR_MESSAGE(REASON ":")
+ERROR_HEADER_WRAP("parse", "error", "-" REASON " (IGNORE):")
 
-#define PARSE_FAILURE_MESSAGE(REASON)					\
-FAILURE_HEADER_WRAP("parse", "- " REASON) "\n"
-
-#define PARSE_FAILURE_HEADER(REASON)					\
-PARSE_FAILURE_MESSAGE(REASON ":")
 
 
 

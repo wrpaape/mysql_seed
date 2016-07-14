@@ -14,7 +14,7 @@
 
 static inline int
 mode_dispatch(char *restrict *const restrict from,
-	      char *const restrict *const restrict until);
+	      const int rem_argc);
 
 
 /* print error messsage and return 'EXIT_FAILURE'
@@ -23,6 +23,6 @@ extern inline int
 print_no_mode_flag(void);
 
 static inline int
-print_invalid_mode_flag(char *const restrict flag);
+print_invalid_mode_flag(char *const restrict arg);
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_H_ */

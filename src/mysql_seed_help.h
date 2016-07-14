@@ -202,9 +202,9 @@ print_invalid_mode(char *const restrict mode)
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 help_dispatch(char *const restrict *const restrict arg,
-	      char *const restrict *const restrict until)
+	      const int rem_argc)
 {
-	if (arg == until)
+	if (rem_argc == 0)
 		return print_help_usage();
 
 	char *const restrict mode = *arg;

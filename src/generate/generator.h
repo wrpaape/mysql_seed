@@ -10,13 +10,16 @@
 /* minimum valid spec lengths
  *─────────────────────────────────────────────────────────────────────────── */
 /* -c COL_NAME COL_TYPE */
-#define COL_SPEC_LENGTH_MIN 3lu
+#define COL_SPEC_LENGTH_MIN	   3lu
+#define COL_SPEC_LENGTH_MIN_STRING "3"
 
 /* -t TBL_NAME ROW_COUNT COL_SPEC */
-#define TBL_SPEC_LENGTH_MIN (3lu + COL_SPEC_LENGTH_MIN)
+#define TBL_SPEC_LENGTH_MIN	   6lu
+#define TBL_SPEC_LENGTH_MIN_STRING "6"
 
 /* -d DB_NAME TBL_SPEC */
-#define DB_SPEC_LENGTH_MIN  (2lu + TBL_SPEC_LENGTH_MIN)
+#define DB_SPEC_LENGTH_MIN	   8lu
+#define DB_SPEC_LENGTH_MIN_STRING "8"
 
 
 /* struct declarations, typedefs
@@ -113,7 +116,7 @@ union TypeQualifier {
 struct ColSpec {
 	struct String name;
 	union TypeQualifier type;
-	Procedure *build;
+	Procedure *create;
 };
 
 struct ColSpecInterval {
@@ -135,7 +138,6 @@ struct TblSpecInterval {
 struct DbSpec {
 	struct String name;
 	struct TblSpecInterval tbl_specs;
-	struct DbSpec *next;		/* next valid db_spec */
 };
 
 struct DbSpecInterval {
@@ -248,7 +250,7 @@ struct Generator {
 	struct Counter counter;			/* shared by all */
 	struct LengthLock total;		/* total file length */
 	struct DatabaseInterval databases;
-	struct DbSpecInterval *db_specs;	/* from raw input */
+	struct DbSpecInterval db_specs;		/* from raw input */
 	char *contents;				/* buffer for all files */
 };
 

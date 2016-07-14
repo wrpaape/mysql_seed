@@ -21,47 +21,13 @@
 #define GD_FAILURE_PARSE	 PARSE_FAILURE_MESSAGE("no valid DB_SPEC")
 
 /* parsing DB_SPEC */
-#define FAILURE_NO_DB_SPEC						\
-PARSE_FAILURE_MESSAGE("no DB_SPEC provided") MORE_INFO_MESSAGE
+#define FAILURE_NO_DB_SPEC
 
-#define FAILURE_DB_SPEC_SHORT						\
-PARSE_FAILURE_MESSAGE("DB_SPEC too short, need at least "		\
-		      DB_SPEC_LENGTH_MIN_STRING " arguments to "	\
-		      "describe a database in generate mode") MORE_INFO_MESSAGE
 
 /* parsing DB_NAME */
-#define ERROR_INVALID_DB_NAME_HEADER					\
-PARSE_ERROR_HEADER("invalid DB_NAME")
+#define ERROR_INVALID_DB_NAME
+#define ERROR_DB_NAME_SHORT
 
-#define ERROR_INVALID_DB_NAME_EMPTY					\
-PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC")
-
-#define ERROR_INVALID_DB_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "
-		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"
-		" ignoring DB_SPEC:") "\n"
-
-#define ERROR_INVALID_DB_NAME_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC:") "\n"
-
-/* parsing COL_NAME */
-#define ERROR_INVALID_COL_NAME_HEADER					\
-PARSE_ERROR_HEADER("invalid COL_NAME")
-
-#define ERROR_INVALID_COL_NAME_EMPTY					\
-PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC")
-
-#define ERROR_INVALID_COL_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
-		COL_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints"	\
-		", ignoring DB_SPEC:") "\n"
-
-#define ERROR_INVALID_COL_NAME_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC:") "\n"
-
-/* parsing COL_NAME */
 
 
 

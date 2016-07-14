@@ -29,5 +29,5 @@ print_invalid_mode(char *const restrict mode);
 /* dispatch help mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-help_dispatch(char *const restrict *const restrict arg_ptr,
-	      char *const restrict *const restrict until_ptr);
+help_dispatch(char *const restrict *const restrict arg,
+	      const int rem_argc)

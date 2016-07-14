@@ -5,4 +5,4 @@
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
 load_dispatch(char *const restrict *const restrict arg_ptr,
-	      char *const restrict *const restrict until_ptr);
+	      const int rem_argc);

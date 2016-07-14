@@ -16,13 +16,13 @@ static inline int
 print_no_database_name(void);
 
 static inline int
-print_invalid_database_name(char *const restrict database_name);
+print_invalid_database_name(char *const restrict db_name);
 
 /* dispatch load mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 load_dispatch(char *const restrict *const restrict arg_ptr,
-	      char *const restrict *const restrict until_ptr)
+	      const int rem_argc)
 {
 	return EXIT_FAILURE;
 }
