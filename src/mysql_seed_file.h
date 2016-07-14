@@ -23,6 +23,11 @@
 #define DB_NAME_SIZE_MAX    (DB_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
 #define DB_NAME_LENGTH_MAX_STRING "63"
 
+#define TBL_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
+#define TBL_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * TBL_NAME_LENGTH_MAX)
+#define TBL_NAME_SIZE_MAX    (TBL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
+#define TBL_NAME_LENGTH_MAX_STRING "63"
+
 #define COL_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
 #define COL_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * COL_NAME_LENGTH_MAX)
 #define COL_NAME_SIZE_MAX    (COL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
@@ -130,13 +135,13 @@
 #define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
 
 #define PARSE_ERROR_MESSAGE(REASON)					\
-ERROR_HEADER_WRAP("parse", "error", " - " REASON) "\n"
+ERROR_HEADER_WRAP("parse", "error", " - " REASON)
 
 #define PARSE_ERROR_HEADER(REASON)					\
 PARSE_ERROR_MESSAGE(REASON ":")
 
 #define PARSE_FAILURE_MESSAGE(REASON)					\
-FAILURE_HEADER_WRAP("parse", " - " REASON) "\n"
+FAILURE_HEADER_WRAP("parse", " - " REASON)
 
 #define PARSE_FAILURE_HEADER(REASON)					\
 PARSE_FAILURE_MESSAGE(REASON ":")
@@ -598,17 +603,17 @@ flag_match_next(char *const restrict *restrict from,
 inline char *
 put_inspect_args(char *restrict buffer,
 		 char *const restrict *restrict from,
-		 char *const restrict *const restrict until)
+		 char *const restrict *const restrict upto)
 {
 	while (1) {
 		buffer = put_string_inspect(buffer,
 					    *from,
 					    LENGTH_INSPECT_MAX);
 
-		++from;
-
-		if (from == until)
+		if (from == upto)
 			return buffer;
+
+		++from;
 
 		*buffer = ' ';
 		++buffer;

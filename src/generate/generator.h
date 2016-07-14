@@ -22,9 +22,26 @@
 #define DB_SPEC_LENGTH_MIN_STRING "8"
 
 
+/* macro constants
+ *─────────────────────────────────────────────────────────────────────────── */
+/* Counter limits */
+#if (SIZE_MAX < UINT32_MAX)
+#	define UPTO_MAX 9999lu
+#	define UPTO_MAX_STRING "9999"
+#	define MAG_UPTO_MAX 3u
+#	define SIZE_UPTO_MAX_STR 5u
+#	undef  LARGE_UPTO_MAX
+#else
+#	define UPTO_MAX 99999999lu
+#	define UPTO_MAX_STRING "99999999"
+#	define MAG_UPTO_MAX 7u
+#	define SIZE_UPTO_MAX_STR 9u
+#	define LARGE_UPTO_MAX
+#endif /* if (SIZE_MAX < UINT32_MAX) */
+
+
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
-
 /* GENERATOR COMPONENT SPECS
  * ──────────────────────────────────────────────────────────────────────────
  * ────────────────────────────────────────────────────────────────────────── */
@@ -120,29 +137,21 @@ struct ColSpec {
 };
 
 struct ColSpecInterval {
-	const struct ColSpec *restrict from;
+	struct ColSpec *restrict from;
 	const struct ColSpec *restrict until;
 };
 
 struct TblSpec {
 	struct String name;
 	size_t row_count;
-	struct ColSpecInterval col_specs;
-};
-
-struct TblSpecInterval {
-	const struct TblSpec *restrict from;
-	const struct TblSpec *restrict until;
+	struct ColSpecInterval col_specs;	/* contiguous interval */
+	struct TblSpec *next;
 };
 
 struct DbSpec {
 	struct String name;
-	struct TblSpecInterval tbl_specs;
-};
-
-struct DbSpecInterval {
-	const struct DbSpec *restrict from;
-	const struct DbSpec *restrict until;
+	struct TblSpec *tbl_specs;		/* linked list */
+	struct DbSpec *next;
 };
 
 
@@ -250,7 +259,7 @@ struct Generator {
 	struct Counter counter;			/* shared by all */
 	struct LengthLock total;		/* total file length */
 	struct DatabaseInterval databases;
-	struct DbSpecInterval db_specs;		/* from raw input */
+	struct DbSpec *db_specs;		/* from raw input */
 	char *contents;				/* buffer for all files */
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 };

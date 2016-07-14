@@ -147,7 +147,7 @@ flag_match_count(char *const restrict *restrict from,
 		 char *const restrict *const restrict until,
 		 const char short_flag,
 		 const char *const restrict long_flag);
-inline char *const restrict *restrict
+extern inline char *const restrict *restrict
 flag_match_next(char *const restrict *restrict from,
 		char *const restrict *const restrict until,
 		const char short_flag,

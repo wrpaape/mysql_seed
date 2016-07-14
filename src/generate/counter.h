@@ -3,22 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generator.h"	/* Counter, string, parallelization utils */
-
-
-/* macro constants
- *─────────────────────────────────────────────────────────────────────────── */
-#if (SIZE_MAX < UINT32_MAX)
-#	define UPTO_MAX 9999lu
-#	define MAG_UPTO_MAX 3u
-#	define SIZE_UPTO_MAX_STR 5u
-#	undef  LARGE_UPTO_MAX
-#else
-#	define UPTO_MAX 99999999lu
-#	define MAG_UPTO_MAX 7u
-#	define SIZE_UPTO_MAX_STR 9u
-#	define LARGE_UPTO_MAX
-#endif /* if (SIZE_MAX < UINT32_MAX) */
+#include "generate/generator.h"	/* UPTO_MAX, Counter, string/thread utils */
 
 
 /* failure messages
@@ -28,7 +13,7 @@ FAILURE_REASON("counter_create", REASON)
 
 #define CC_UPTO_MAX_EXCEEDED_FAILURE_MESSAGE				\
 COUNTER_CREATE_FAILURE_MESSAGE("'UPTO_MAX' of "				\
-			       EXPAND_STRINGIFY(UPTO_MAX) " exceeded\n")
+			       UPTO_MAX_STRING " exceeded\n")
 
 #define CC_ALLOC_FAILURE_MESSAGE					\
 COUNTER_CREATE_FAILURE_MESSAGE(MALLOC_FAILURE_REASON)
