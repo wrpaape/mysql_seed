@@ -23,7 +23,7 @@ help_load(void);
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-print_invalid_mode(char *const restrict mode);
+invalid_mode(char *const restrict mode);
 
 
 /* dispatch help mode according to 'arg_ptr'

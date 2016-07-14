@@ -15,59 +15,62 @@ generator_counter_increment(struct GeneratorCounter *const restrict gen_counter,
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 extern inline void
-print_no_db_spec(void);
+no_db_spec(void);
 extern inline void
-print_db_spec_short(void);
+short_db_spec(void);
 extern inline void
-print_generate_failure_malloc(void);
+generate_failure_malloc(void);
 extern inline void
-print_generate_failure_no_valid_db_spec(void);
+generate_failure_no_valid_db_spec(void);
 
 /* parsing errors (recoverable) */
 extern inline void
-print_expected_db_flag(char *const restrict invalid);
+expected_db_flag(char *const restrict invalid);
 extern inline void
-print_invalid_db_name_empty(char *const restrict *restrict db_spec_start,
-			    char *const restrict *restrict invalid);
+invalid_db_name_empty(char *const restrict *restrict db_spec_start,
+		      char *const restrict *restrict invalid);
 extern inline void
-print_invalid_db_name_invalid(char *const restrict *restrict db_spec_start,
-			      char *const restrict *restrict invalid);
-extern inline void
-print_invalid_db_name_long(char *const restrict *restrict db_spec_start,
-			   char *const restrict *restrict invalid);
-extern inline void
-print_expected_tbl_flag(char *const restrict *restrict db_spec_start,
+invalid_db_name_invalid(char *const restrict *restrict db_spec_start,
 			char *const restrict *restrict invalid);
 extern inline void
-print_invalid_tbl_name_empty(char *const restrict *restrict db_spec_start,
-			     char *const restrict *restrict invalid);
+invalid_db_name_long(char *const restrict *restrict db_spec_start,
+		     char *const restrict *restrict invalid);
 extern inline void
-print_invalid_tbl_name_invalid(char *const restrict *restrict db_spec_start,
-			       char *const restrict *restrict invalid);
+expected_tbl_flag(char *const restrict *restrict db_spec_start,
+		  char *const restrict *restrict invalid);
 extern inline void
-print_invalid_tbl_name_long(char *const restrict *restrict db_spec_start,
-			    char *const restrict *restrict invalid);
+invalid_tbl_name_empty(char *const restrict *restrict db_spec_start,
+		       char *const restrict *restrict invalid);
 extern inline void
-print_expected_col_flag(char *const restrict *restrict db_spec_start,
+invalid_tbl_name_invalid(char *const restrict *restrict db_spec_start,
+			 char *const restrict *restrict invalid);
+extern inline void
+invalid_tbl_name_long(char *const restrict *restrict db_spec_start,
+		      char *const restrict *restrict invalid);
+extern inline void
+expected_col_flag(char *const restrict *restrict db_spec_start,
+		  char *const restrict *restrict invalid);
+extern inline void
+invalid_col_type_invalid(char *const restrict *restrict db_spec_start,
+			 char *const restrict *restrict invalid);
+extern inline void
+invalid_col_name_empty(char *const restrict *restrict db_spec_start,
+		       char *const restrict *restrict invalid);
+extern inline void
+invalid_col_name_invalid(char *const restrict *restrict db_spec_start,
+			 char *const restrict *restrict invalid);
+extern inline void
+invalid_col_name_long(char *const restrict *restrict db_spec_start,
+		      char *const restrict *restrict invalid);
+extern inline void
+invalid_row_count_invalid(char *const restrict *restrict db_spec_start,
+			  char *const restrict *restrict invalid);
+extern inline void
+invalid_row_count_zero(char *const restrict *restrict db_spec_start,
+		       char *const restrict *restrict invalid);
+extern inline void
+invalid_row_count_large(char *const restrict *restrict db_spec_start,
 			char *const restrict *restrict invalid);
-extern inline void
-print_invalid_col_name_empty(char *const restrict *restrict db_spec_start,
-			     char *const restrict *restrict invalid);
-extern inline void
-print_invalid_col_name_invalid(char *const restrict *restrict db_spec_start,
-			       char *const restrict *restrict invalid);
-extern inline void
-print_invalid_col_name_long(char *const restrict *restrict db_spec_start,
-			    char *const restrict *restrict invalid);
-extern inline void
-print_invalid_row_count_invalid(char *const restrict *restrict db_spec_start,
-				char *const restrict *restrict invalid);
-extern inline void
-print_invalid_row_count_zero(char *const restrict *restrict db_spec_start,
-			     char *const restrict *restrict invalid);
-extern inline void
-print_invalid_row_count_large(char *const restrict *restrict db_spec_start,
-			      char *const restrict *restrict invalid);
 
 /* parse UTF-8 identifiers from input
  *─────────────────────────────────────────────────────────────────────────── */

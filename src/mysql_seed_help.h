@@ -177,7 +177,7 @@ help_load(void)
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-print_invalid_mode(char *const restrict mode)
+invalid_mode(char *const restrict mode)
 {
 	char buffer[ARG_INSPECT_BUFFER_SIZE] = {
 		FAILURE_INVALID_MODE_HEADER
@@ -218,8 +218,16 @@ help_dispatch(char *const restrict *const restrict arg,
 
 		break;
 
+
+	case 'h':
+		if ((*rem == '\0') || strings_equal("elp", rem))
+			return help_usage();
+
+		break;
+
+
 	case 'l':
-		if ((*rem == '\0') || strings_equal("enerate", rem))
+		if ((*rem == '\0') || strings_equal("oad", rem))
 			return help_load();
 
 		break;
@@ -229,7 +237,7 @@ help_dispatch(char *const restrict *const restrict arg,
 		break;
 	}
 
-       print_invalid_mode(mode);
+       invalid_mode(mode);
 
        return EXIT_FAILURE;
 }

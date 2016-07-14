@@ -19,10 +19,8 @@ mode_dispatch(char *restrict *const restrict from,
 {
 	char *const restrict flag = *from;
 
-	if (*flag != '-') {
-		print_invalid_mode_flag(flag);
-		return EXIT_FAILURE;
-	}
+	if (*flag != '-')
+		goto INVALID_MODE_FLAG;
 
 	char *const restrict arg = flag + 1l;
 	char *const restrict rem = arg + 1l;
