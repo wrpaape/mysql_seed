@@ -993,18 +993,18 @@ do_parse_digits(uintmax_t *const restrict n,
 
 	*n = (uintmax_t) ASCII_TO_DIGIT(*string);
 
-	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
+	const uintmax_t *restrict power       = &ten_pow_map[1];
 
 	const uintptr_t *const restrict until = &ten_pow_map[count_digits];
 
 
-	while (pow_ptr < until) {
+	while (power < until) {
 
 		--string;
 
-		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*pow_ptr));
+		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*power));
 
-		++pow_ptr;
+		++power;
 	}
 
 	return true;
@@ -1065,18 +1065,18 @@ do_parse_digits_stop(uintmax_t *const restrict n,
 
 	*n = (uintmax_t) ASCII_TO_DIGIT(*string);
 
-	const uintmax_t *restrict pow_ptr	  = &ten_pow_map[1];
+	const uintmax_t *restrict power	      = &ten_pow_map[1];
 
 	const uintptr_t *const restrict until = &ten_pow_map[count_digits];
 
 
-	while (pow_ptr < until) {
+	while (power < until) {
 
 		--string;
 
-		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*pow_ptr));
+		(*n) += (((uintmax_t) ASCII_TO_DIGIT(*string)) * (*power));
 
-		++pow_ptr;
+		++power;
 	}
 
 	return stop_ptr;

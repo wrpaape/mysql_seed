@@ -61,9 +61,30 @@ PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC")
 "\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
 		", ignoring DB_SPEC:") "\n"
 
-/* parsing COL_NAME */
+
+/* parsing ROW_COUNT */
+#define ERROR_INVALID_ROW_COUNT_HEADER					\
+PARSE_ERROR_HEADER("invalid ROW_COUNT")
+
+#define ERROR_INVALID_ROW_COUNT_REASON_INVALID				\
+"\n" ERROR_WRAP("reason: not a number ≥ 1 or overflows implementation-"	\
+		"defined uintmax_t, ignoring DB_SPEC:") "\n"
 
 
+/* parsing COL_TYPE */
+#define ERROR_INVALID_COL_TYPE_HEADER					\
+PARSE_ERROR_HEADER("invalid COL_TYPE")
+
+#define ERROR_INVALID_COL_TYPE_REASON_INVALID				\
+"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC:") "\n"
+
+
+/* parsing COL_TYPE_Q */
+#define ERROR_INVALID_COL_TYPE_Q_HEADER					\
+PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
+
+#define ERROR_INVALID_COL_TYPE_Q_REASON_INVALID				\
+"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC:") "\n"
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
