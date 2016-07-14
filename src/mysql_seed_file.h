@@ -11,8 +11,10 @@
 #define ARGC_INSPECT_MAX 10lu
 #define LENGTH_INSPECT_MAX (sizeof("--generate") * 2lu)
 #define ARG_INSPECT_BUFFER_SIZE (LENGTH_INSPECT_MAX + 128lu)
-#define ARGV_INSPECT_BUFFER_SIZE (((LENGTH_INSPECT_MAX + 4lu)		\
+#define ARGV_INSPECT_BUFFER_SIZE ((((LENGTH_INSPECT_MAX + 4lu)		\
 				   * ARGC_INSPECT_MAX) + 128lu))
+#define ARG_ARGV_INSPECT_BUFFER_SIZE (  ARG_INSPECT_BUFFER_SIZE		\
+				      + ARGV_INSPECT_BUFFER_SIZE)
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */
@@ -42,7 +44,7 @@
 #define DB_DIRNAME_NN_SIZE_MAX	DB_NAME_NN_SIZE_MAX
 #define DB_DIRNAME_LENGTH_MAX	DB_NAME_LENGTH_MAX
 
-#define DB_DIRPATH_PFX		DB_ROOT_DIRNAME PATH_DELIM
+#define DB_DIRPATH_PFX		DB_ROOT_DIRNAME PATH_DELIM_STRING
 #define DB_DIRPATH_PFX_WIDTH	10
 #define DB_DIRPATH_PFX_SIZE	10lu
 #define DB_DIRPATH_PFX_NN_WIDTH 9
@@ -128,13 +130,13 @@
 #define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
 
 #define PARSE_ERROR_MESSAGE(REASON)					\
-ERROR_HEADER_WRAP("parse", "error", "- " REASON) "\n"
+ERROR_HEADER_WRAP("parse", "error", " - " REASON) "\n"
 
 #define PARSE_ERROR_HEADER(REASON)					\
 PARSE_ERROR_MESSAGE(REASON ":")
 
 #define PARSE_FAILURE_MESSAGE(REASON)					\
-FAILURE_HEADER_WRAP("parse", "- " REASON) "\n"
+FAILURE_HEADER_WRAP("parse", " - " REASON) "\n"
 
 #define PARSE_FAILURE_HEADER(REASON)					\
 PARSE_FAILURE_MESSAGE(REASON ":")

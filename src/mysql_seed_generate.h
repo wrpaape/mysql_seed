@@ -10,17 +10,16 @@
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define GD_FAILURE_NO_DB_SPEC    PARSE_FAILURE_MESSAGE("no DB_SPEC")
+#define GD_FAILURE_MALLOC						\
+MALLOC_FAILURE_MESSAGE("generate_dispatch")
 
-#define GD_FAILURE_DB_SPEC_SHORT PARSE_FAILURE_MESSAGE("DB_SPEC too short")
-
-#define GD_ERROR_DB_SPEC_SHORT   PARSE_ERROR_MESSAGE("DB_SPEC too short")
-
-#define GD_FAILURE_MALLOC	 MALLOC_FAILURE_MESSAGE("generate_dispatch")
-
-#define GD_FAILURE_PARSE	 PARSE_FAILURE_MESSAGE("no valid DB_SPEC")
+#define FAILURE_INVALID_DB_SPEC						\
+FAILURE_REASON("generate_dispatch", "no valid DB_SPEC")
 
 /* parsing DB_SPEC */
+#define ERROR_INVALID_DB_SPEC						\
+PARSE_ERROR_HEADER("invalid DB_NAME")
+
 #define FAILURE_NO_DB_SPEC						\
 PARSE_FAILURE_MESSAGE("no DB_SPEC provided") MORE_INFO_MESSAGE
 
@@ -37,8 +36,8 @@ PARSE_ERROR_HEADER("invalid DB_NAME")
 PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC")
 
 #define ERROR_INVALID_DB_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "
-		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"
+"\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
+		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"	\
 		" ignoring DB_SPEC:") "\n"
 
 #define ERROR_INVALID_DB_NAME_REASON_INVALID				\
@@ -106,8 +105,8 @@ inline void
 generator_counter_reset(struct GeneratorCounter *const restrict gen_counter)
 {
 	gen_counter->databases = 0u;
-	gen_counter->tables	 = 0u;
-	gen_counter->columns	 = 0u;
+	gen_counter->tables    = 0u;
+	gen_counter->columns   = 0u;
 }
 
 inline void
@@ -129,39 +128,54 @@ generator_counter_increment(struct GeneratorCounter *const restrict gen_counter,
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
+/* irrecoverable failures */
 inline void
 print_no_db_spec(void)
 {
 	write_muffle(STDERR_FILENO,
-		     GD_FAILURE_NO_DB_SPEC,
-		     sizeof(GD_FAILURE_NO_DB_SPEC) - 1lu);
+		     FAILURE_NO_DB_SPEC,
+		     sizeof(FAILURE_NO_DB_SPEC) - 1lu);
 }
 
 inline void
-print_invalid_db_spec(char *const restrict *const restrict from,
-		      char *restrict *const restrict until,
-		      const char *const restrict reason,
-		      const size_t length_reason)
+print_db_spec_short(void)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+	write_muffle(STDERR_FILENO,
+		     FAILURE_DB_SPEC_SHORT,
+		     sizeof(FAILURE_DB_SPEC_SHORT) - 1lu);
+}
 
-	const char *const restrict *const restrict until_max = from
-							     + ARGC_INSPECT_MAX;
-	if (until > until_max)
-		until = until_max;
+inline void
+print_generate_dispatch_malloc_failure(void)
+{
+	write_muffle(STDERR_FILENO,
+		     GD_FAILURE_MALLOC,
+		     sizeof(GD_FAILURE_MALLOC) - 1lu);
+}
 
-	char *restrict
-	ptr = put_string_size(&buffer[0],
-			      PARSE_ERROR_INSPECT_1,
-			      sizeof(PARSE_ERROR_INSPECT_1) - 1lu);
+inline void
+print_generate_dispatch_parse_failure(void)
+{
+	write_muffle(STDERR_FILENO,
+		     FAILURE_INVALID_DB_SPEC,
+		     sizeof(FAILURE_INVALID_DB_SPEC) - 1lu);
 
-	ptr = put_inspect_args(ptr,
-			       from,
-			       until);
+}
 
-	ptr = put_string_size(ptr,
-			      reason,
-			      length_reason);
+/* parsing DB_NAME */
+inline void
+print_invalid_db_name_empty(char *const restrict *restrict db_spec_start,
+			    char *const restrict *restrict invalid)
+
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
+		     ERROR_INVALID_DB_NAME_EMPTY
+	};
+
+	char *const restrict ptr
+	= put_inspect_args(&buffer[sizeof(ERROR_INVALID_DB_NAME_EMPTY) - 1lu],
+			   db_spec_start,
+			   invalid);
 
 
 	write_muffle(STDERR_FILENO,
@@ -170,71 +184,159 @@ print_invalid_db_spec(char *const restrict *const restrict from,
 }
 
 inline void
-print_generate_dispatch_malloc_failure(void)
+print_invalid_db_name_invalid(char *const restrict *restrict db_spec_start,
+			      char *const restrict *restrict invalid)
 {
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
+		ERROR_INVALID_DB_NAME_HEADER
+	};
+
+	char *restrict ptr
+	= put_string_inspect(&buffer[0]
+			     + sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu,
+			     *invalid,
+			     LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_DB_NAME_REASON_INVALID,
+			      sizeof(ERROR_INVALID_DB_NAME_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       db_spec_start,
+			       invalid);
+
 	write_muffle(STDERR_FILENO,
-		     GD_FAILURE_MALLOC
-		     sizeof(GD_FAILURE_MALLOC) - 1lu);
+		     &buffer[0],
+		     ptr - &buffer[0]);
 }
 
 inline void
-print_generate_dispatch_parse_failure(void)
+print_invalid_db_name_long(char *const restrict *restrict db_spec_start,
+			   char *const restrict *restrict invalid)
 {
-	write_muffle(STDERR_FILENO,
-		     GD_FAILURE_PARSE
-		     sizeof(GD_FAILURE_PARSE) - 1lu);
+	char buffer[ARG_INSPECT_BUFFER_SIZE] = {
+		ERROR_INVALID_DB_NAME_HEADER
+	};
 
+	char *restrict ptr
+	= put_string_inspect(&buffer[0]
+			     + sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu,
+			     *invalid,
+			     LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_DB_NAME_REASON_LONG,
+			      sizeof(ERROR_INVALID_DB_NAME_REASON_LONG)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       db_spec_start,
+			       invalid);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
 }
 
 /* dispatch generate mode according to 'from'
  *─────────────────────────────────────────────────────────────────────────── */
-inline void
-generate_scan_specs(struct GeneratorCounter *const restrict gen_counter,
-		    struct DbSpec *restrict spec_buffer,
-		    int *const restrict exit_status,
-		    char *const restrict *restrict from,
-		    const char *const restrict *const restrict until)
+
+inline bool
+parse_db_name(struct String *const restrict db_name,
+	      char *const restrict *const restrict db_spec_start,
+	      char *const restrict *const restrict input)
 {
+	if (**input == '\0') {
+		print_invalid_db_name_empty(db_spec_start,
+					    input);
+		return false;
+	}
 
-	struct DatabaseCounter db_counter = {
-		.tables	   = 0lu,
-		.columns   = 0lu
-	};
+	const octet_t *restrict octets = (const octet_t *restrict) *input;
 
-	char *const restrict *const restrict last_valid_db_spec
-	= until - DB_SPEC_LENGTH_MIN;
+	unsigned int width;
 
-	struct DbSpec *restrict db_spec;
-	struct TblSpec *restrict tbl_spec;
-	struct ColSpec *restrict col_spec;
+	size_t rem_length = DB_DIRNAME_LENGTH_MAX;
 
 	while (1) {
-		from = flag_match_next(from,
-				       until,
-				       'd',
-				       "database");
+		width = utf8_width(octets);
 
-		if (from > last_valid_db_spec)
-			return;
+		if (width == 0u) {
+			print_invalid_db_name_invalid(db_spec_start,
+						      input);
+			return false;
+		}
 
+		octets += width;
 
-		++from;
+		if (*octets == '\0') {
+			db_name->bytes  = *input;
+			db_name->length = octets
+					- ((const octet_t *const restrict)
+					   *input);
 
-		/* parse DB_NAME */
+			return true;
+		}
 
-		utf8_string_size_length_status
+		--rem_length;
 
+		if (rem_length == 0lu) {
+			print_invalid_db_name_long(db_spec_start,
+						   input);
+			return false;
+		}
 
-
-
-		generator_counter_increment(gen_counter,
-					    &db_counter);
-
-		spec_buffer = next_spec_buffer;
-
-		database_counter_reset(&db_counter);
 	}
+
 }
+
+
+/* inline void */
+/* generate_scan_specs(struct GeneratorCounter *const restrict gen_counter, */
+/* 		    struct DbSpec *restrict spec_buffer, */
+/* 		    int *const restrict exit_status, */
+/* 		    char *const restrict *restrict from, */
+/* 		    char *const restrict *const restrict until) */
+/* { */
+
+	/* struct DatabaseCounter db_counter = { */
+	/* 	.tables	   = 0lu, */
+	/* 	.columns   = 0lu */
+	/* }; */
+
+	/* char *const restrict *const restrict last_valid_db_spec */
+	/* = until - DB_SPEC_LENGTH_MIN; */
+
+	/* struct DbSpec *restrict db_spec; */
+	/* struct TblSpec *restrict tbl_spec; */
+	/* struct ColSpec *restrict col_spec; */
+
+	/* while (1) { */
+	/* 	from = flag_match_next(from, */
+	/* 			       until, */
+	/* 			       'd', */
+	/* 			       "database"); */
+
+	/* 	if (from > last_valid_db_spec) */
+	/* 		return; */
+
+
+	/* 	++from; */
+
+	/* 	/1* parse DB_NAME *1/ */
+
+
+
+
+	/* 	generator_counter_increment(gen_counter, */
+	/* 				    &db_counter); */
+
+	/* 	spec_buffer = next_spec_buffer; */
+
+	/* 	database_counter_reset(&db_counter); */
+	/* } */
+/* } */
 
 
 inline int
@@ -244,13 +346,9 @@ generate_dispatch(char *restrict *const restrict arg,
 	if (rem_argc < DB_SPEC_LENGTH_MIN) {
 
 		if (rem_argc == 0lu)
-			print_no_db_spec()
+			print_no_db_spec();
 		else
-			print_invalid_db_spec(arg,
-					      arg + rem_argc,
-					      GD_FAILURE_DB_SPEC_SHORT,
-					      sizeof(GD_FAILURE_DB_SPEC_SHORT)
-					      - 1lu);
+			print_db_spec_short();
 
 		return EXIT_FAILURE;
 	}
@@ -348,18 +446,18 @@ generate_dispatch(char *restrict *const restrict arg,
 	}
 
 	struct GeneratorCounter gen_counter = {
-		.databases = 0lu;
-		.tables	   = 0lu;
-		.columns   = 0lu;
+		.databases = 0lu,
+		.tables	   = 0lu,
+		.columns   = 0lu
 	};
 
 	int exit_status = EXIT_SUCCESS;
 
-	generate_scan_specs(&gen_counter,
-			    spec_alloc,
-			    &exit_status,
-			    arg,
-			    &arg[rem_argc]);
+	/* generate_scan_specs(&gen_counter, */
+	/* 		    spec_alloc, */
+	/* 		    &exit_status, */
+	/* 		    arg, */
+	/* 		    &arg[0] + rem_argc); */
 
 	if (gen_counter.databases == 0u) {
 	    print_generate_dispatch_parse_failure();

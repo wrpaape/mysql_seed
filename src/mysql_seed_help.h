@@ -86,7 +86,8 @@ _P1_("TODO")
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define INVALID_MODE_HEADER INVALID_SPEC_HEADER("MODE")
+#define FAILURE_INVALID_MODE_HEADER					\
+PARSE_FAILURE_HEADER("invalid MODE")
 
 
 /* print help then exit on success
@@ -118,7 +119,7 @@ exit_help_load(void)
 /* print help message, return success status
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-print_help_usage(void)
+help_usage(void)
 {
 	const char *restrict failure;
 
@@ -130,43 +131,43 @@ print_help_usage(void)
 
 	write_muffle(STDERR_FILENO,
 		     failure,
-		     string_size(failure));
+		     string_length(failure));
 
 	return EXIT_FAILURE;
 }
 
 inline int
-print_help_generate(void)
+help_generate(void)
 {
 	const char *restrict failure;
 
 	if (write_report(STDOUT_FILENO,
 			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
+			 sizeof(HELP_GENERATE_MESSAGE) - 1lu,
 			 &failure))
 		return EXIT_SUCCESS;
 
 	write_muffle(STDERR_FILENO,
 		     failure,
-		     string_size(failure));
+		     string_length(failure));
 
 	return EXIT_FAILURE;
 }
 
 inline int
-print_help_load(void)
+help_load(void)
 {
 	const char *restrict failure;
 
 	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE),
+			 HELP_LOAD_MESSAGE,
+			 sizeof(HELP_LOAD_MESSAGE) - 1lu,
 			 &failure))
 		return EXIT_SUCCESS;
 
 	write_muffle(STDERR_FILENO,
 		     failure,
-		     string_size(failure));
+		     string_length(failure));
 
 	return EXIT_FAILURE;
 }
@@ -174,17 +175,18 @@ print_help_load(void)
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-inline int
+inline void
 print_invalid_mode(char *const restrict mode)
 {
-	char buffer[ERROR_BUFFER_SIZE] = {
-		INVALID_MODE_HEADER
+	char buffer[ARG_INSPECT_BUFFER_SIZE] = {
+		FAILURE_INVALID_MODE_HEADER
 	};
 
 	char *restrict
-	ptr = put_string_inspect(&buffer[sizeof(INVALID_MODE_HEADER)],
+	ptr = put_string_inspect(&buffer[0]
+				 + sizeof(FAILURE_INVALID_MODE_HEADER) - 1ul,
 				 mode,
-				 SPEC_LENGTH_MAX);
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      MORE_INFO_MESSAGE,
@@ -193,8 +195,6 @@ print_invalid_mode(char *const restrict mode)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
-
-	return EXIT_FAILURE;
 }
 
 
@@ -205,22 +205,32 @@ help_dispatch(char *const restrict *const restrict arg,
 	      const int rem_argc)
 {
 	if (rem_argc == 0)
-		return print_help_usage();
+		return help_usage();
 
 	char *const restrict mode = *arg;
 	char *const restrict rem  = mode + 1l;
 
 	switch (*mode) {
-	case 'g': return ((*rem == '\0') || strings_equal("enerate", rem))
-		       ? print_help_generate()
-		       : print_invalid_mode(mode);
+	case 'g':
+		if ((*rem == '\0') || strings_equal("enerate", rem))
+			return help_generate();
 
-	case 'l': return ((*rem == '\0') || strings_equal("oad", rem))
-		       ? print_help_load()
-		       : print_invalid_mode(mode);
+		break;
 
-	default:  return print_invalid_mode(mode);
+	case 'l':
+		if ((*rem == '\0') || strings_equal("enerate", rem))
+			return help_load();
+
+		break;
+
+
+	default:
+		break;
 	}
+
+       print_invalid_mode(mode);
+
+       return EXIT_FAILURE;
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_HELP_H_ */

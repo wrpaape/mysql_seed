@@ -49,16 +49,18 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
+#define CHAR_BUFFER_WIDTH(WIDTH) CharBuffer ## WIDTH
+
 #define SET_STRING_WIDTH(PTR, STRING, WIDTH)				\
-*((CharBuffer ## WIDTH *restrict) PTR)					\
-= *((const CharBuffer ## WIDTH *const restrict) STRING)
+*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR)				\
+= *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) STRING)
 
 #define PUT_STRING_WIDTH(PTR, STRING, WIDTH)				\
 do {									\
-	*((CharBuffer ## WIDTH *restrict) PTR)				\
-	= *((const CharBuffer ## WIDTH *const restrict) STRING);	\
+	*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR)			\
+	= *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) STRING);	\
 	PTR = (char *restrict)						\
-	      (((CharBuffer ## WIDTH *restrict) PTR) + 1l);		\
+	      (((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR) + 1l);	\
 } while (0)
 
 /* helper functions
@@ -568,8 +570,8 @@ put_string_size_until(char *restrict buffer,
 
 inline char *
 put_string_width(char *const restrict buffer,
-		 const *const restrict string,
-		 const unsigned int width);
+		 const char *const restrict string,
+		 const unsigned int width)
 {
 	switch (width) {
 	case  1u: *buffer = *string;
@@ -637,13 +639,13 @@ put_string_width(char *const restrict buffer,
 	}
 }
 
-extern inline char *
+inline char *
 put_label(char *const restrict buffer,
 	  const struct Label *const restrict label)
 {
 	return put_string_width(buffer,
 				label->bytes,
-				label-width);
+				label->width);
 }
 
 inline char *

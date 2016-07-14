@@ -2,8 +2,10 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-		return print_no_mode_flag();
+	if (argc < 2) {
+		print_no_mode_flag();
+		return EXIT_FAILURE;
+	}
 
 	return mode_dispatch(&argv[1],
 			     argc - 2);
@@ -12,77 +14,102 @@ int main(int argc, char *argv[])
 /* parse stdin args
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-mode_dispatch(char *restrict *const restrict arg,
+mode_dispatch(char *restrict *const restrict from,
 	      const int rem_argc)
 {
-	char *const restrict flag = *arg;
+	char *const restrict flag = *from;
 
-	if (*flag != '-')
-		return print_invalid_mode_flag(flag);
+	if (*flag != '-') {
+		print_invalid_mode_flag(flag);
+		return EXIT_FAILURE;
+	}
 
 	char *const restrict arg = flag + 1l;
 	char *const restrict rem = arg + 1l;
 
 	/* parse short mode flag */
 	switch (*arg) {
-	case '-': break;	/* parse long mode flag */
+	case '-':
+		break;	/* parse long mode flag */
 
-	case 'g': return (*rem == '\0')
-		       ? generate_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
+	case 'g':
+		if (*rem == '\0')
+			return generate_dispatch(from + 1l, rem_argc);
 
-	case 'h': return (*rem == '\0')
-		       ? help_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
+		goto INVALID_MODE_FLAG;
 
-	case 'l': return (*rem == '\0')
-		       ? load_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
 
-	default:  return print_invalid_mode_flag(flag);
+	case 'h':
+		if (*rem == '\0')
+			return help_dispatch(from + 1l, rem_argc);
+
+		goto INVALID_MODE_FLAG;
+
+
+	case 'l':
+		if (*rem == '\0')
+			return load_dispatch(from + 1l, rem_argc);
+
+		goto INVALID_MODE_FLAG;
+
+
+	default:
+		goto INVALID_MODE_FLAG;
 	}
 
 	/* parse long mode flag */
 	switch (*rem) {
-	case 'g': return strings_equal("enerate",    rem + 1l)
-		       ? generate_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
+	case 'g':
+		if (strings_equal("enerate", rem + 1l))
+			return generate_dispatch(from + 1l, rem_argc);
 
-	case 'h': return strings_equal("elp",	 rem + 1l)
-		       ? help_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
+		break;
 
-	case 'l': return strings_equal("oad",	 rem + 1l)
-		       ? load_dispatch(arg + 1l, rem_argc)
-		       : print_invalid_mode_flag(flag);
+	case 'h':
+		if (strings_equal("elp", rem + 1l))
+			return help_dispatch(from + 1l, rem_argc);
 
-	default:  return print_invalid_mode_flag(flag);
+		break;
+
+	case 'l':
+		if (strings_equal("oad", rem + 1l))
+			return load_dispatch(from + 1l, rem_argc);
+
+		break;
+
+	default:
+		break;
 	}
-}
 
-/* print error messsage and return 'EXIT_FAILURE'
- *─────────────────────────────────────────────────────────────────────────── */
-inline int
-print_no_mode_flag(void)
-{
-	write_muffle(STDERR_FILENO,
-		     NO_MODE_FLAG_MESSAGE,
-		     sizeof(NO_MODE_FLAG_MESSAGE) - 1lu);
+INVALID_MODE_FLAG:
+	print_invalid_mode_flag(flag);
 
 	return EXIT_FAILURE;
 }
 
-inline int
+/* print error messsage and return 'EXIT_FAILURE'
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+print_no_mode_flag(void)
+{
+	write_muffle(STDERR_FILENO,
+		     FAILURE_NO_MODE_FLAG,
+		     sizeof(FAILURE_NO_MODE_FLAG) - 1lu);
+}
+
+inline void
 print_invalid_mode_flag(char *const restrict arg)
 {
 	static char buffer[ARG_INSPECT_BUFFER_SIZE] = {
-		INVALID_MODE_FLAG_HEADER
+		FAILURE_INVALID_MODE_FLAG_HEADER
 	};
 
 	char *restrict
-	ptr = put_string_inspect(&buffer[sizeof(INVALID_MODE_FLAG_HEADER)],
+	ptr = put_string_inspect(&buffer[0]
+				 + sizeof(FAILURE_INVALID_MODE_FLAG_HEADER)
+				 - 1lu,
 				 arg,
-				 FLAG_LENGTH_MAX);
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      MORE_INFO_MESSAGE,
@@ -91,6 +118,4 @@ print_invalid_mode_flag(char *const restrict arg)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
-
-	return EXIT_FAILURE;
 }

@@ -144,8 +144,8 @@ put_string_size_until(char *restrict buffer,
 
 extern inline char *
 put_string_width(char *const restrict buffer,
-		 const *const restrict string,
-		 const size_t width);
+		 const char *const restrict string,
+		 const unsigned int width);
 
 extern inline char *
 put_label(char *const restrict buffer,

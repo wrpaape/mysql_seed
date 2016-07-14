@@ -273,7 +273,7 @@ counter_set_internals(struct Counter *const restrict counter)
 	counter->digits = digits;
 
 	/* point 'active' at one's digit */
-	active = &buffer.counter[counter->mag_upto];
+	active = &buffer.digits[counter->mag_upto];
 
 
 	switch (counter->mag_upto) {
@@ -362,7 +362,7 @@ counter_await(struct Counter *const restrict counter,
 	mutex_unlock_handle_cl(&counter->processing,
 			       fail_cl);
 
-	mutex_lock_try_catch_open();
+	mutex_lock_try_catch_close();
 }
 
 #endif	/* ifndef MYSQL_SEED_GENERATE_COUNTER_H_ */

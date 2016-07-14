@@ -252,6 +252,7 @@ struct Generator {
 	struct DatabaseInterval databases;
 	struct DbSpecInterval db_specs;		/* from raw input */
 	char *contents;				/* buffer for all files */
+	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 };
 
 /* error messages
@@ -288,7 +289,7 @@ database_dirpath_init(struct Dirpath *const restrict dirpath,
 			 DB_DIRPATH_PFX,
 			 DB_DIRPATH_PFX_NN_WIDTH);
 
-	memory_copy(&dirpath->buffer[DB_DIRPATH_PFX_SIZE],
+	memory_copy(&dirpath->buffer[DB_DIRPATH_PFX_LENGTH],
 		    db_name->bytes,
 		    db_name->length + 1lu);
 
@@ -316,12 +317,12 @@ table_file_init(struct FileHandle *const restrict file,
 
 	const size_t filename_size = file->name.length + 1lu;
 
-	file->path.length = db_dir_path->length + filename_size;
+	file->path.length = db_dirpath->length + filename_size;
 
 
 	ptr = put_string_size(&file->path.buffer[0],
-			      &db_path->buffer[0],
-			      db_path->length);
+			      &db_dirpath->buffer[0],
+			      db_dirpath->length);
 
 	PUT_PATH_DELIM(ptr);
 
@@ -355,11 +356,11 @@ loader_file_init(struct FileHandle *const restrict file,
 
 	const size_t filename_size = file->name.length + 1lu;
 
-	file->path.length = db_dir_path->length + filename_size;
+	file->path.length = db_dirpath->length + filename_size;
 
 	ptr = put_string_size(&file->path.buffer[0],
-			      &db_path->buffer[0],
-			      db_path->length);
+			      &db_dirpath->buffer[0],
+			      db_dirpath->length);
 
 	PUT_PATH_DELIM(ptr);
 
@@ -474,49 +475,49 @@ table_exit_on_failure(void *arg,
 		      const char *restrict faliure)
 __attribute__((noreturn));
 
-inline void
-table_init(struct Table *const restrict table,
-	   const struct TblSpec *const restrict spec,
-	   struct Column *restrict column,
-	   struct Rowspan *restrict rowspan
-	   struct Database *const restrict parent);
-{
+/* inline void */
+/* table_init(struct Table *const restrict table, */
+/* 	   const struct TblSpec *const restrict spec, */
+/* 	   struct Column *restrict column, */
+/* 	   struct Rowspan *restrict rowspan, */
+/* 	   struct Database *const restrict parent) */
+/* { */
 
-	table_file_init(&table->file,
-			&spec->name,
-			&parent->dirpath)
+/* 	table_file_init(&table->file, */
+/* 			&spec->name, */
+/* 			&parent->dirpath); */
 
-	length_lock_init(&table->total,
-			 0lu);
+/* 	length_lock_init(&table->total, */
+/* 			 0lu); */
 
-	table->spec = spec;
+/* 	table->spec = spec; */
 
-	table->contents = NULL; /* no-op in free on early exit */
+/* 	table->contents = NULL; /1* no-op in free on early exit *1/ */
 
-	column_interval_init(&table->columns,
-			     column,
-			     columns_until);
+/* 	column_interval_init(&table->columns, */
+/* 			     column, */
+/* 			     columns_until); */
 
-	struct ColSpec *restrict col_spec = spec->col_specs->from;
+/* 	struct ColSpec *restrict col_spec = spec->col_specs->from; */
 
-	do {
-		column_init(column,
-			    col_spec,
-			    )
+/* 	do { */
+/* 		column_init(column, */
+/* 			    col_spec, */
+/* 			    ) */
 
-		++column;
-	} while (column < columns_until);
+/* 		++column; */
+/* 	} while (column < columns_until); */
 
-	row_block_interval_init(&table->row_blocks,
-				row_block,
-				row_blocks_until);
+/* 	row_block_interval_init(&table->row_blocks, */
+/* 				row_block, */
+/* 				row_blocks_until); */
 
-	handler_closure_init(&table->fail_cl,
-			     &table_exit_on_failure,
-			     table);
+/* 	handler_closure_init(&table->fail_cl, */
+/* 			     &table_exit_on_failure, */
+/* 			     table); */
 
-	table->parent = parent;
-}
+/* 	table->parent = parent; */
+/* } */
 
 
 /* TableInterval Operations
@@ -538,50 +539,50 @@ database_exit_on_failure(void *arg,
 			 const char *restrict faliure)
 __attribute__((noreturn));
 
-inline void
-database_init(struct Database *const restrict database,
-	      struct Generator *const restrict parent,
-	      struct Table *const restrict tables_from,
-	      const struct Table *const restrict tables_until,
-	      char *const restrict database_name_bytes,
-	      const size_t database_name_length)
-{
-	database->parent = parent;
+/* inline void */
+/* database_init(struct Database *const restrict database, */
+/* 	      struct Generator *const restrict parent, */
+/* 	      struct Table *const restrict tables_from, */
+/* 	      const struct Table *const restrict tables_until, */
+/* 	      char *const restrict database_name_bytes, */
+/* 	      const size_t database_name_length) */
+/* { */
+/* 	database->parent = parent; */
 
-	length_lock_init(&database->total,
-			 0lu);
+/* 	length_lock_init(&database->total, */
+/* 			 0lu); */
 
-	table_interval_init(&database->tables,
-			    tables_from,
-			    tables_until);
+/* 	table_interval_init(&database->tables, */
+/* 			    tables_from, */
+/* 			    tables_until); */
 
-	string_init(&database->name,
-		    database_name_bytes,
-		    database_name_length);
+/* 	string_init(&database->name, */
+/* 		    database_name_bytes, */
+/* 		    database_name_length); */
 
-	handler_closure_init(&database->fail_cl,
-			     &database_exit_on_failure,
-			     database);
-}
+/* 	handler_closure_init(&database->fail_cl, */
+/* 			     &database_exit_on_failure, */
+/* 			     database); */
+/* } */
 
 
 /* Counter Operations
  *─────────────────────────────────────────────────────────────────────────── */
-inline void
-counter_init(struct Counter *const restrict counter,
-	     struct Generator *const restrict parent,
-	     const size_t upto)
-{
-	mutex_init(&counter->processing);
-	thread_cond_init(&counter->done);
+/* inline void */
+/* counter_init(struct Counter *const restrict counter, */
+/* 	     struct Generator *const restrict parent, */
+/* 	     const size_t upto) */
+/* { */
+/* 	mutex_init(&counter->processing); */
+/* 	thread_cond_init(&counter->done); */
 
-	counter->ready = false;
-	counter->upto  = upto;
+/* 	counter->ready = false; */
+/* 	counter->upto  = upto; */
 
-	handler_closure_init(&counter->fail_cl,
-			     &counter_exit_on_failure,
-			     counter);
-}
+/* 	handler_closure_init(&counter->fail_cl, */
+/* 			     &counter_exit_on_failure, */
+/* 			     counter); */
+/* } */
 
 void
 counter_exit_on_failure(void *arg,

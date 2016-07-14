@@ -9,8 +9,11 @@
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define INVALID_MODE_FLAG_HEADER INVALID_FLAG_HEADER("MODE")
-#define NO_MODE_FLAG_MESSAGE NO_FLAG_MESSAGE("MODE")
+#define FAILURE_NO_MODE_FLAG						\
+PARSE_FAILURE_MESSAGE("MODE not specified") MORE_INFO_MESSAGE
+
+#define FAILURE_INVALID_MODE_FLAG_HEADER				\
+PARSE_FAILURE_HEADER("invalid MODE flag")
 
 static inline int
 mode_dispatch(char *restrict *const restrict from,
@@ -19,10 +22,10 @@ mode_dispatch(char *restrict *const restrict from,
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline int
+extern inline void
 print_no_mode_flag(void);
 
-static inline int
+static inline void
 print_invalid_mode_flag(char *const restrict arg);
 
 #endif	/* MYSQL_SEED_MYSQL_SEED_H_ */

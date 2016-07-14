@@ -12,17 +12,17 @@ exit_help_load(void);
 /* print help message, return success status
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-print_help_usage(void);
+help_usage(void);
 
 extern inline int
-print_help_generate(void);
+help_generate(void);
 
 extern inline int
-print_help_load(void);
+help_load(void);
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline int
+extern inline void
 print_invalid_mode(char *const restrict mode);
 
 
@@ -30,4 +30,4 @@ print_invalid_mode(char *const restrict mode);
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
 help_dispatch(char *const restrict *const restrict arg,
-	      const int rem_argc)
+	      const int rem_argc);

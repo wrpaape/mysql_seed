@@ -80,7 +80,7 @@ file_handle_process(struct FileHandle *const restrict file,
 		    const struct HandlerClosure *const restrict fail_cl);
 
 
-/* DirHandle Operations
+/* Dirpath Operations
  * ────────────────────────────────────────────────────────────────────────── */
 /* make */
 extern inline bool
@@ -118,7 +118,7 @@ dirpath_remove_handle_cl(const struct Dirpath *const restrict path,
 void
 dirpath_cleanup(void *arg)
 {
-	dirpath_remove_muffle((const struct DirHandle *const restrict) arg);
+	dirpath_remove_muffle((const struct Dirpath *const restrict) arg);
 }
 
 

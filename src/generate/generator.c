@@ -68,8 +68,8 @@ column_exit_on_failure(void *arg,
 				      sizeof(COLUMN_FAILURE_MESSAGE_1) - 1lu);
 
 	thread_log_append_string_size(generator_log,
-				      column->spec.name.bytes,
-				      column->spec.name.length);
+				      column->spec->name.bytes,
+				      column->spec->name.length);
 
 	thread_log_append_string_size(generator_log,
 				      COLUMN_FAILURE_MESSAGE_2,
@@ -91,7 +91,7 @@ column_init(struct Column *const restrict column,
 	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
 	    const struct Rowspan *const restrict rowspans_until,
-	    const struct Table *const restrict parent);
+	    struct Table *const restrict parent);
 
 /* ColumnInterval Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -124,8 +124,8 @@ table_exit_on_failure(void *arg,
 				      sizeof(TABLE_FAILURE_MESSAGE_1) - 1lu);
 
 	thread_log_append_string_size(generator_log,
-				      table->name.bytes,
-				      table->name.length);
+				      table->spec->name.bytes,
+				      table->spec->name.length);
 
 	thread_log_append_string_size(generator_log,
 				      TABLE_FAILURE_MESSAGE_2,
@@ -142,8 +142,8 @@ table_exit_on_failure(void *arg,
 			     failure);
 	__builtin_unreachable();
 }
-extern inline void
-table_init(struct Table *const restrict table,
+/* extern inline void */
+/* table_init(struct Table *const restrict table, */
 
 /* TableInterval Operations
  * ────────────────────────────────────────────────────────────────────────── */
@@ -175,8 +175,8 @@ database_exit_on_failure(void *arg,
 				      sizeof(DATABASE_FAILURE_MESSAGE_1) - 1lu);
 
 	thread_log_append_string_size(generator_log,
-				      database->name.bytes,
-				      database->name.length);
+				      database->spec->name.bytes,
+				      database->spec->name.length);
 
 	thread_log_append_string_size(generator_log,
 				      DATABASE_FAILURE_MESSAGE_2,
@@ -197,9 +197,9 @@ database_exit_on_failure(void *arg,
 
 /* Counter Operations
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-counter_init(struct Counter *const restrict counter,
-	     const size_t upto);
+/* extern inline void */
+/* counter_init(struct Counter *const restrict counter, */
+/* 	     const size_t upto); */
 
 void
 counter_exit_on_failure(void *arg,
