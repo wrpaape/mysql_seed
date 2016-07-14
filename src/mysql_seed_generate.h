@@ -578,7 +578,7 @@ print_expected_tbl_flag(char *const restrict *restrict db_spec_start,
 
 inline void
 print_expected_col_flag(char *const restrict *restrict db_spec_start,
-			char *const restrict *restrict invalid);
+			char *const restrict *restrict invalid)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
 		ERROR_EXPECTED_COL_FLAG_HEADER
@@ -761,13 +761,13 @@ parse_row_count(size_t *const restrict row_count,
 		return false;
 	}
 
-	if (*parsed == 0llu) {
+	if (parsed == 0llu) {
 		print_invalid_row_count_zero(db_spec_start,
 					     input);
 		return false;
 	}
 
-	if (*parsed > UPTO_MAX) {
+	if (parsed > UPTO_MAX) {
 		print_invalid_row_count_large(db_spec_start,
 					      input);
 		return false;
@@ -864,9 +864,6 @@ generate_scan_specs(struct GeneratorCounter *const restrict gen_counter,
 				*exit_status = EXIT_FAILURE;
 				goto PARSE_NEXT_DB_SPEC;
 			}
-			/* increment running table and row counts */
-			db_counter.rows	  += tbl_spec->row_count;
-			db_counter.tables += 1u;
 
 			/* advance to next available slot in spec_alloc */
 			col_spec = (struct ColSpec *restrict) (tbl_spec + 1l);
@@ -878,6 +875,12 @@ generate_scan_specs(struct GeneratorCounter *const restrict gen_counter,
 			while (1) {
 			}
 
+			/* close ColSpecInterval */
+			tbl_spec->col_specs.until = col_spec + 1l;
+
+			/* increment running table and row counts */
+			db_counter.rows	  += tbl_spec->row_count;
+			db_counter.tables += 1u;
 		}
 
 

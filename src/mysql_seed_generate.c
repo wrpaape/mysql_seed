@@ -65,7 +65,7 @@ print_invalid_row_count_invalid(char *const restrict *restrict db_spec_start,
 extern inline void
 print_invalid_row_count_zero(char *const restrict *restrict db_spec_start,
 			     char *const restrict *restrict invalid);
-inline void
+extern inline void
 print_invalid_row_count_large(char *const restrict *restrict db_spec_start,
 			      char *const restrict *restrict invalid);
 

@@ -33,10 +33,11 @@ _P2_("generates seed files for N databases according to their "		\
      "specification, 'DB_SPEC'")					\
 _P2_("examples:")							\
 _P3_("mysql_seed --generate --database foo_forum --table users 500 "	\
-     "--column name STRING NAME FULL --column age UNSIGNED RANGE 18 "	\
-     "99 --column email STRING EMAIL")					\
-_P3_("mysql_seed -g -d baz_shop -t products 100000 -c name STRING"	\
-     "-c price FLOAT MIN 0.10")						\
+     "--column name --string --names-full --column age "		\
+     "--unsigned-integer --range 18 99 --column email --string "	\
+     "--emails")							\
+_P3_("mysql_seed -g -d baz_shop -t products 100000 -c name -s "		\
+     "-c price -f -m 0.10")						\
 _H2_("load\t<-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
 _P2_("loads seed files found in directory 'db" PATH_DELIM_STRING	\
      "DB_NAME' into the mysql database 'DB_NAME'")			\
