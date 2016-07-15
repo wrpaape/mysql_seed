@@ -146,6 +146,26 @@ struct DatabaseCounter {
 	unsigned int tables;
 };
 
+struct GeneratorSpecState {
+	struct DbSpec  *db;
+	struct TblSpec *tbl;
+	struct ColSpec *col;
+};
+
+
+struct GeneratorArgvState {
+	struct ArgvInterval argv;
+	struct ArgvInterval db_spec;
+};
+
+
+struct GeneratorScanState {
+	struct GeneratorSpecState specs;
+	struct GeneratorCounter gen_counter;
+	struct DatabaseCounter db_counter;
+	int exit_status;
+};
+
 
 /* Generator/DatbaseCounter operations
  *─────────────────────────────────────────────────────────────────────────── */
