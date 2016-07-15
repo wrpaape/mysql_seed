@@ -931,15 +931,35 @@ generate_scan_specs(struct GeneratorCounter *const restrict gen_counter,
 				}
 
 				++arg;
-
 				rem = arg + 1;
 
 				switch (*arg) {
 				case '-':
 					break; /* parse long COL_TYPE flag */
 
-				case 'f':
-					if (*rem == '\0')
+				case 'f': /* parse FLOAT type qualifiers */
+					if (*rem != '\0') {
+						invalid_col_type_invalid(db_spec_start,
+									 from);
+						++from;
+						*exit_status = EXIT_FAILURE;
+						goto PARSE_NEXT_DB_SPEC;
+					}
+
+					arg = *from;
+
+					switch (*arg) {
+
+					case '-':
+						break;
+
+					case 'p':
+						break;
+
+					}
+
+
+
 
 				case 'i':
 					if (*rem == '\0')

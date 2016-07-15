@@ -39,6 +39,9 @@
 #	define LARGE_UPTO_MAX
 #endif /* if (SIZE_MAX < UINT32_MAX) */
 
+#define FLOAT_PRECISION_DEFAULT	6u
+#define FLOAT_PRECISION_MAX	15u
+
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
@@ -58,7 +61,7 @@ union StringLengthScale {
 	struct StringLengthRange range;
 	size_t from;
 	size_t upto;
-	size_t fixed;
+	size_t constant;
 };
 
 union StringQualifier {
@@ -79,7 +82,7 @@ union IntegerUnsignedScale {
 	struct IntegerUnsignedRange range;
 	uintmax_t from;
 	uintmax_t upto;
-	uintmax_t fixed;
+	uintmax_t constant;
 };
 
 /* -c temperature SIGNED RANGE -100 100		      → 45
@@ -95,7 +98,7 @@ union IntegerSignedScale {
 	struct IntegerSignedRange range;
 	intmax_t from;
 	intmax_t upto;
-	intmax_t fixed;
+	intmax_t constant;
 };
 
 union IntegerQualifier {
@@ -116,7 +119,7 @@ union FloatScale {
 	struct FloatRange range;
 	long double from;
 	long double upto;
-	long double fixed;
+	long double constant;
 };
 
 struct FloatQualifier {
