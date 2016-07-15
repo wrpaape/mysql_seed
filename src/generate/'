@@ -1,0 +1,22 @@
+#include "generate/loader.h"
+
+extern inline size_t
+loader_estimate_size(const unsigned int tbl_count);
+
+/* worker task entry point
+ * ────────────────────────────────────────────────────────────────────────── */
+void
+loader_build(void *arg)
+{
+	struct Database *const restrict database
+	= (struct Database *const restrict) arg;
+
+	struct FileHandle *const restrict loader
+	= database->loader;
+
+	loader_file_init(loader,
+			 &database->spec->name,
+			 &database->dirpath);
+
+
+}

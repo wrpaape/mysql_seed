@@ -643,6 +643,48 @@ invalid_col_type_invalid(const struct GenerateArgvState *const restrict argv)
 }
 
 
+/* confirm flag match
+ *─────────────────────────────────────────────────────────────────────────── */
+inline bool
+db_flag_match(struct GenerateArgvState *const restrict argv)
+{
+	const bool matched_db_flag = flag_match(*(argv->arg.from),
+						'd',
+						"database");
+
+	if (!matched_db_flag)
+		expected_db_flag(*(argv->arg.from));
+
+	return matched_db_flag;
+}
+
+inline bool
+tbl_flag_match(struct GenerateArgvState *const restrict argv)
+{
+	const bool matched_tbl_flag = flag_match(*(argv->arg.from),
+					       't',
+					       "table");
+
+	if (!matched_tbl_flag)
+		expected_tbl_flag(argv);
+
+	return matched_tbl_flag;
+}
+
+extern inline bool
+col_flag_match(struct GenerateArgvState *const restrict argv)
+{
+	const bool matched_col_flag = flag_match(*(argv->arg.from),
+					       'c',
+					       "column");
+
+	if (!matched_col_flag)
+		expected_col_flag(argv);
+
+	return matched_col_flag;
+}
+
+
 /* parse UTF-8 identifiers from input
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
@@ -805,31 +847,178 @@ parse_row_count(size_t *const restrict row_count,
 	return true;
 }
 
+/* make compiler happy
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+parse_next_db_spec(struct GenerateParseState *const restrict state);
+inline void
+generate_parse_error(struct GenerateParseState *const restrict state);
+
+
+/* finished parsing
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+parse_db_spec_complete(struct GenerateParseState *const restrict state)
+{
+}
+
+inline void
+parse_generate_complete(struct GenerateParseState *const restrict state)
+{
+	state->specs.db->next  = NULL;
+
+	state->specs.tbl->col_specs.until = state->specs.col + 1l;
+
+	state->specs.tbl->next = NULL;
+
+	generator_counter_increment(&state->generator,
+				    &state->database);
+}
+
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
+/* COL_SPEC */
 inline void
-parse_tbl_specs(struct GenerateParseState *const restrict state);
+parse_string_qualifiers(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from < state->argv.arg.until) {
+
+		const char *restrict arg;
+		const char *restrict rem;
+
+		arg = *(state->argv.arg.from);
+		rem = arg + 1l;
+
+		switch (*arg) {
+		case '-':
+			break;	/* parse long string qualifier */
+
+		case 'r':
+			if (*rem == '\0')
+		}
+
+
+		switch (*arg) {
+
+INVALID_FLOAT_QUALIFIER:
+		}
+	} else {
+		col_spec->create = NULL;	/* TODO: default string */
+
+		parse_generate_complete(state); /* done parsing */
+	}
+}
+
 inline void
-parse_db_specs(struct GenerateParseState *const restrict state);
+parse_col_type(struct GenerateParseState *const restrict state)
+{
+	const char *restrict arg;
+	const char *restrict rem;
+
+	arg = *(state->argv.arg.from);
+
+	if (*arg == '-') {
+		++arg;
+		rem = arg + 1l;
+
+
+		switch (*arg) {
+		case '-':
+			break;	/* parse long COL_TYPE */
+
+		case 's':
+			if (*rem == '\0')
+				parse_string_qualifiers(state)
+			else
+				goto INVALID_COL_TYPE;
+
+		default:
+			goto INVALID_COL_TYPE;
+		}
+
+		/* long COL_TYPE */
+		switch (*rem) {
+		case 's':
+			if (strings_equal("tring", rem + 1))
+				parse_string_qualifiers(state)
+			else
+				goto INVALID_COL_TYPE;
+
+		default:
+			goto INVALID_COL_TYPE;
+		}
+
+	} else {
+INVALID_COL_TYPE:
+		invalid_col_type_invalid(&state->argv);
+
+		++(state->argv.arg.from);
+
+		generate_parse_error(state);
+	}
+}
+
+inline void
+parse_first_col_spec(struct GenerateParseState *const restrict state)
+{
+	const bool matched_col_flag = col_flag_match(&state->argv);
+
+	++(state->argv.arg.from);
+
+	if (matched_col_flag) {
+		struct ColSpec *const restrict col_spec
+		= (struct ColSpec *const restrict) (state->specs.tbl + 1l);
+
+		const bool valid_col_name = parse_col_name(&col_spec->name,
+							   &state->argv);
+
+		++(state->argv.arg.from);
+
+		if (valid_col_name) {
+			state->specs.tbl->col_specs.from = col_spec;
+
+			state->specs.col = col_spec;
+
+			/* set column counter */
+			state->database.columns = 1u;
+
+			parse_col_type(state);
+
+		} else {
+			generate_parse_error(state);
+		}
+	} else {
+		generate_parse_error(state);
+	}
+}
+
 
 /* TBL_SPEC */
 inline void
-parse_tbl_specs(struct GenerateParseState *const restrict state)
+parse_rem_tbl_specs(struct GenerateParseState *const restrict state)
 {
-	const bool tbl_flag_match = flag_match(*(state->argv.arg.from),
-					       't',
-					       "table");
+}
+
+
+inline void
+parse_first_tbl_spec(struct GenerateParseState *const restrict state)
+{
+	const bool matched_tbl_flag = tbl_flag_match(&state->argv);
+
 	++(state->argv.arg.from);
 
-	if (tbl_flag_match) {
+	if (matched_tbl_flag) {
 
 		struct TblSpec *const restrict tbl_spec
 		= (struct TblSpec *const restrict) (state->specs.db + 1l);
 
-		const bool valid_tbl_name
-		= parse_tbl_name(&tbl_spec->name,
-				 &state->argv);
+		const bool valid_tbl_name = parse_tbl_name(&tbl_spec->name,
+							   &state->argv);
 
 		++(state->argv.arg.from);
 
@@ -842,72 +1031,78 @@ parse_tbl_specs(struct GenerateParseState *const restrict state)
 			++(state->argv.arg.from);
 
 			if (valid_row_count) {
-
 				state->specs.db->tbl_specs = tbl_spec;
 
+				/* set initial counter values */
+				state->database.rows   = tbl_spec->row_count;
+				state->database.tables = 1u;
 
-
-
+				parse_first_col_spec(state);
 
 			} else {
-				goto SKIP_INVALID_DB_SPEC;
+				generate_parse_error(state);
 			}
 		} else {
-			goto SKIP_INVALID_DB_SPEC;
+			generate_parse_error(state);
 		}
-
 	} else {
-		expected_tbl_flag(&state->argv);
-
-SKIP_INVALID_DB_SPEC:
-		state->exit_status = EXIT_FAILURE;
-
-		parse_db_specs(state);
+		generate_parse_error(state);
 	}
 }
 
-/* DB_SPEC */
-inline bool
-find_next_db_spec(struct GenerateArgvState *const restrict argv)
-{
-	argv->db_spec.from = flag_match_next(argv->arg.from,
-					     argv->arg.until,
-					     'd',
-					     "database");
 
-	return argv->db_spec.from < argv->db_spec.until;
+/* DB_SPEC */
+inline void
+parse_next_db_spec(struct GenerateParseState *const restrict state)
+{
+	const bool valid_db_name = parse_db_name(&state->specs.db->name,
+						 &state->argv);
+
+	++(state->argv.arg.from);
+
+	if (valid_db_name)
+		parse_first_tbl_spec(state);
+	else
+		generate_parse_error(state);
 }
+
+inline void
+generate_parse_error(struct GenerateParseState *const restrict state)
+{
+	state->exit_status = EXIT_FAILURE;
+
+	/* find next DB_SPEC */
+	state->argv.db_spec.from = flag_match_next(state->argv.arg.from,
+						   state->argv.arg.until,
+						   'd',
+						   "database");
+
+	if (state->argv.db_spec.from < state->argv.db_spec.until) {
+		state->argv.arg.from = state->argv.db_spec.from + 1l;
+
+		parse_next_db_spec(state);
+
+	} else {
+		state->specs.db->next = NULL; /* done parsing */
+
+		if (state->argv.db_spec.from < state->argv.arg.until)
+			short_db_spec(&state->argv); /* error spec too short */
+	}
+}
+
 
 inline void
 parse_db_specs(struct GenerateParseState *const restrict state)
 {
 
-	/* find next DB_SPEC */
-	if (find_next_db_spec(&state->argv)) {
-		state->argv.arg.from = state->argv.db_spec.from + 1l;
+	const bool matched_db_flag = db_flag_match(&state->argv);
 
-		database_counter_reset(&state->database);
+	++(state->argv.arg.from);
 
-		const bool valid_db_name = parse_db_name(&state->specs.db->name,
-							 &state->argv);
-
-		++(state->argv.arg.from);
-
-		if (valid_db_name) {
-			parse_tbl_specs(state);
-
-		} else {
-			state->exit_status = EXIT_FAILURE;
-
-			parse_db_specs(state);
-		}
-	} else {
-		short_db_spec(&state->argv);		/* print error */
-
-		state->specs.db->next = NULL;		/* terminate db_spec */
-
-		state->exit_status = EXIT_FAILURE;
-	}
+	if (matched_db_flag)
+		parse_next_db_spec(state);
+	else
+		generate_parse_error(state);
 }
 
 

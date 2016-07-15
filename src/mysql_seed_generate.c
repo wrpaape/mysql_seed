@@ -61,6 +61,17 @@ invalid_row_count_large(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_col_type_invalid(const struct GenerateArgvState *const restrict argv);
 
+/* confirm flag match
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+db_flag_match(struct GenerateArgvState *const restrict argv);
+
+extern inline bool
+tbl_flag_match(struct GenerateArgvState *const restrict argv);
+
+extern inline bool
+col_flag_match(struct GenerateArgvState *const restrict argv);
+
 
 /* parse UTF-8 identifiers from input
  *─────────────────────────────────────────────────────────────────────────── */
@@ -81,14 +92,35 @@ extern inline bool
 parse_row_count(size_t *const restrict row_count,
 		struct GenerateArgvState *const restrict argv);
 
+/* recover from parse error
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+generate_parse_error(struct GenerateParseState *const restrict state);
+
+/* finished parsing
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_generate_complete(struct GenerateParseState *const restrict state);
+
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
+/* COL_SPEC */
+extern inline void
+parse_string_qualifiers(struct GenerateParseState *const restrict state);
+extern inline void
+parse_col_type(struct GenerateParseState *const restrict state);
+extern inline void
+parse_first_col_spec(struct GenerateParseState *const restrict state);
+extern inline void
+parse_rem_col_specs(struct GenerateParseState *const restrict state);
 /* TBL_SPEC */
 extern inline void
-parse_tbl_specs(struct GenerateParseState *const restrict state);
+parse_rem_tbl_specs(struct GenerateParseState *const restrict state);
+extern inline void
+parse_first_tbl_spec(struct GenerateParseState *const restrict state);
 /* DB_SPEC */
-extern inline bool
-find_next_db_spec(struct GenerateArgvState *const restrict argv);
+extern inline void
+parse_next_db_spec(struct GenerateParseState *const restrict state);
 extern inline void
 parse_db_specs(struct GenerateParseState *const restrict state);
 

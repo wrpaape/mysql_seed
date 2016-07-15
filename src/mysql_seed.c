@@ -22,8 +22,8 @@ mode_dispatch(char *restrict *const restrict from,
 	if (*flag != '-')
 		goto INVALID_MODE_FLAG;
 
-	char *const restrict arg = flag + 1l;
-	char *const restrict rem = arg + 1l;
+	const char *const restrict arg = flag + 1l;
+	const char *const restrict rem = arg + 1l;
 
 	/* parse short mode flag */
 	switch (*arg) {
