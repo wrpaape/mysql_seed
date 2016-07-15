@@ -185,7 +185,7 @@ struct LengthLock {
 /* continous interval of argv */
 struct ArgvInterval {
 	char *const restrict *restrict from;
-	const char *const restrict *restrict until;
+	char *const restrict *restrict until;
 };
 
 
