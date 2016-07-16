@@ -216,7 +216,7 @@ count_buffer_increment(char *restrict digit)
 
 #define SET_RANGE_DIGITS_MAG_UPTO(MAG)					\
 do {									\
-	pointer.digits      = digits + SIZE_MAG_0_ ## MAG ## _STR;	\
+	pointer.digits     = digits + SIZE_MAG_0_ ## MAG ## _STR;	\
 	buffer.mag_ ## MAG = mag_ ## MAG ##_min_string;			\
 	while (1) {							\
 		*(pointer.mag_ ## MAG) = buffer.mag_ ## MAG;		\
@@ -254,6 +254,9 @@ counter_set_internals(struct Counter *const restrict counter)
 	until = pointers + counter->upto;
 
 	char *const restrict digits = (char *) until;
+
+	/* point last pointer past end of digits buffer */
+	*until = digits + counter->size_digits;
 
 	counter->digits = digits;
 
@@ -296,12 +299,14 @@ counter_init_internals(struct Counter *const restrict counter)
 
 	counter_size_internals(counter);
 
+	/* 'upto' pointers + 'size_digits' ascii chars */
+	const size_t size_counter = (sizeof(char *) * counter->upto)
+				  + counter->size_digits;
+
 	thread_try_catch_open(free,
 			      counter->pointers);
 
-	/* 'upto' pointers + 'size_digits' ascii chars */
-	counter->pointers = malloc((sizeof(char *) * counter->upto)
-				   + counter->size_digits);
+	counter->pointers = malloc(size_counter);
 
 	if (counter->pointers == NULL) {
 		handler_closure_call(&counter->fail_cl,

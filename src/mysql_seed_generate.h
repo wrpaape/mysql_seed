@@ -4,6 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/generator.h" /* file/exit/string/parallelization utils */
+#include "generate/loader.h"	/* loader_build */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -898,14 +899,26 @@ parse_string_qualifiers(struct GenerateParseState *const restrict state)
 		case '-':
 			break;	/* parse long string qualifier */
 
-		case 'r':
-			if (*rem == '\0')
+		case 'b':
+			if (*rem == '\0') {
+				/* TODO: dispatch default string builder */
+
+			}
+
+			goto INVALID_STRING_QUALIFIER;
+
+		default:
+			goto INVALID_STRING_QUALIFIER;
 		}
 
 
 		switch (*arg) {
 
-INVALID_FLOAT_QUALIFIER:
+
+		}
+
+INVALID_STRING_QUALIFIER:
+
 		}
 	} else {
 		col_spec->create = NULL;	/* TODO: default string */
@@ -932,10 +945,11 @@ parse_col_type(struct GenerateParseState *const restrict state)
 			break;	/* parse long COL_TYPE */
 
 		case 's':
-			if (*rem == '\0')
-				parse_string_qualifiers(state)
-			else
-				goto INVALID_COL_TYPE;
+			if (*rem == '\0') {
+				parse_string_qualifiers(state);
+				return;
+			}
+			goto INVALID_COL_TYPE;
 
 		default:
 			goto INVALID_COL_TYPE;
@@ -944,10 +958,11 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		/* long COL_TYPE */
 		switch (*rem) {
 		case 's':
-			if (strings_equal("tring", rem + 1))
-				parse_string_qualifiers(state)
-			else
-				goto INVALID_COL_TYPE;
+			if (strings_equal("tring", rem + 1)) {
+				parse_string_qualifiers(state);
+				return;
+			}
+			goto INVALID_COL_TYPE;
 
 		default:
 			goto INVALID_COL_TYPE;
@@ -1240,10 +1255,6 @@ generate_dispatch(char *restrict *const restrict arg,
 
 	/* populate specs according to argv */
 	parse_db_specs(&state);
-
-
-
-
 
 
 

@@ -7,15 +7,11 @@ build_column_ids(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-
-
 	const struct Rowspan *const restrict until = column->rowspans->until;
 	struct Rowspan *const restrict from	   = column->rowspans->from;
 
-	struct Table *const restrict table = counter->parent;
-
 	struct Counter *const restrict counter
-	= &table->parent->parent->counter;
+	= &column->parent->parent->parent->counter;
 
 	/* wait for counter to be built */
 	counter_await(counter,
@@ -23,13 +19,22 @@ build_column_ids(void *arg)
 
 	/* hook up rowspans */
 
-	size_t i_row = 0lu;
+	const char *restrict *restrict count_ptr = counter->pointers;
 
 	do {
-		from->cell = counter->pointers[i_row];
+		from->cells = *count_ptr;
 
-		i_row += from->parent->row_count;
+		count_ptr += from->parent->row_count;
 
+		/* add length of id rowspan to row_block total */
+		length_lock_increment(&from->parent->total,
+				      *count_ptr - from->cells,
+				      &column->fail_cl);
 		++from;
 	} while (from < until);
+
+	/* add total length to table */
+	length_lock_increment(&column->parent->total,
+			      *count_ptr - *(counter->pointers),
+			      &colum->fail_cl);
 }

@@ -515,6 +515,21 @@ put_string(char *restrict buffer,
 	return buffer;
 }
 
+inline char *
+put_string_stop(char *restrict buffer,
+		const char *restrict string)
+{
+	while (1) {
+		*buffer = *string;
+		++buffer;
+
+		if (*string = '\0')
+			return buffer;
+
+		++string;
+	}
+}
+
 
 inline char *
 put_string_length(char *restrict buffer,

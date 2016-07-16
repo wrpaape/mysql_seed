@@ -122,6 +122,10 @@ put_string(char *restrict buffer,
 	   const char *restrict string);
 
 extern inline char *
+put_string_stop(char *restrict buffer,
+		const char *restrict string);
+
+extern inline char *
 put_string_length(char *restrict buffer,
 		  const char *restrict string,
 		  size_t length);

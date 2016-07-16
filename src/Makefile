@@ -1169,6 +1169,41 @@ TARGETS			+= $(GENERATE_COUNTER_OBJ)			\
 			   $(GENERATE_COUNTER_TEST_OBJ)			\
 			   $(GENERATE_COUNTER_TEST_BIN)
 
+# generate/loader
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_LOADER_SRC 		:= $(call HELPER_SOURCE_PATH,generate loader)
+GENERATE_LOADER_HDR		:= $(call HELPER_HEADER_PATH,generate loader)
+GENERATE_LOADER_OBJ 		:= $(call HELPER_OBJECT_PATH,generate loader)
+GENERATE_LOADER_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate loader)
+GENERATE_LOADER_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate loader)
+GENERATE_LOADER_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate loader)
+GENERATE_LOADER_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate loader)
+GENERATE_LOADER_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate loader)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_LOADER_OBJ_PREQS	:= $(GENERATE_LOADER_SRC) 		\
+				   $(GENERATE_LOADER_HDR) 		\
+				   $(GENERATE_GENERATOR_HDR)
+GENERATE_LOADER_OBJ_GROUP	:= $(GENERATE_OBJ) 			\
+				   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_LOADER_TRNR_SRC_PREQS	:= $(GENERATE_LOADER_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_LOADER_TEST_OBJ_PREQS	:= $(GENERATE_LOADER_TEST_SRC)		\
+			   	   $(GENERATE_LOADER_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+GENERATE_LOADER_TRNR_OBJ_PREQS	:= $(GENERATE_LOADER_TRNR_SRC)		\
+			   	   $(GENERATE_LOADER_TEST_OBJ_PREQS)
+GENERATE_LOADER_TEST_BIN_PREQS	:= $(GENERATE_LOADER_TRNR_OBJ)		\
+			   	   $(GENERATE_LOADER_TEST_OBJ)		\
+			   	   $(GENERATE_LOADER_OBJ_GROUP)		\
+			           $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_LOADER_TEST_BIN)
+TARGETS			+= $(GENERATE_LOADER_OBJ)			\
+			   $(GENERATE_LOADER_TRNR_SRC)			\
+			   $(GENERATE_LOADER_TRNR_OBJ)			\
+			   $(GENERATE_LOADER_TEST_OBJ)			\
+			   $(GENERATE_LOADER_TEST_BIN)
+
 
 
 ## PROJECT MODULES
@@ -1402,6 +1437,11 @@ $(GENERATE_GENERATOR_OBJ): $(GENERATE_GENERATOR_OBJ_PREQS)
 # make generate/counter object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_COUNTER_OBJ): $(GENERATE_COUNTER_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/loader object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_LOADER_OBJ): $(GENERATE_LOADER_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/names object
@@ -1779,6 +1819,26 @@ $(STRING_UTF8_UTILS_TEST_OBJ): $(STRING_UTF8_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(STRING_UTF8_UTILS_TRNR_SRC): $(STRING_UTF8_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/loader
+# make:
+# 	generate_loader_test		binary,
+# 	generate_loader_test_runner 	object,
+# 	generate_loader_test		object, and
+# 	generate_loader_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_LOADER_TEST_BIN): $(GENERATE_LOADER_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_LOADER_TRNR_OBJ): $(GENERATE_LOADER_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_LOADER_TEST_OBJ): $(GENERATE_LOADER_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_LOADER_TRNR_SRC): $(GENERATE_LOADER_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
