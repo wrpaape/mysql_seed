@@ -92,7 +92,7 @@ loader_put_body(char *restrict ptr,
 /* worker task entry point
  * ────────────────────────────────────────────────────────────────────────── */
 void
-loader_build(void *arg);
+build_loader(void *arg);
 
 
 

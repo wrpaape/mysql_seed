@@ -14,7 +14,7 @@ loader_put_body(char *restrict ptr,
 /* worker task entry point
  * ────────────────────────────────────────────────────────────────────────── */
 void
-loader_build(void *arg)
+build_loader(void *arg)
 {
 	struct Database *const restrict database
 	= (struct Database *const restrict) arg;
@@ -30,7 +30,7 @@ loader_build(void *arg)
 
 	if (contents == NULL) {
 		handler_closure_call(&database->fail_cl,
-				     MALLOC_FAILURE_MESSAGE("loader_build"));
+				     MALLOC_FAILURE_MESSAGE("build_loader"));
 		__builtin_unreachable();
 	}
 

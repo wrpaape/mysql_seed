@@ -50,22 +50,33 @@
 
 /* table file */
 #define TAB_TOKEN "<TAB>"
-#define PUT_TAB_TOKEN(PTR) PUT_STRING_WIDTH(PTR, TAB_TOKEN, 5)
+#define PUT_TAB_TOKEN(PTR)						\
+PUT_STRING_WIDTH(PTR, TAB_TOKEN, 5)
 
 #define TABLE_HEADER_1							\
   " 1) "	/* database/<db_name>/<tbl_name>.tsv */
+#define PUT_TABLE_HEADER_1(PTR)						\
+PUT_STRING_WIDTH(PTR, TABLE_HEADER_1, 4)
 
 #define TABLE_HEADER_2							\
 "\n 2)"									\
 "\n 3) contains tab-separated seed data for table:"			\
 "\n 4)"									\
 "\n 5) \t"	/* <tbl_name> */
+#define PUT_TABLE_HEADER_2(PTR)						\
+PTR = put_string_size(ptr,						\
+		      TABLE_HEADER_2,					\
+		      sizeof(TABLE_HEADER_2) - 1lu)
 
 #define TABLE_HEADER_3							\
 "\n 6)"									\
 "\n 7) in MySQL database:"						\
 "\n 8)"									\
 "\n 9) \t"	/* <db_name> */
+#define PUT_TABLE_HEADER_3(PTR)						\
+PTR = put_string_size(ptr,						\
+		      TABLE_HEADER_3,					\
+		      sizeof(TABLE_HEADER_3) - 1lu)
 
 #define TABLE_HEADER_4							\
 "\n10)"									\
@@ -73,6 +84,10 @@
 "\n12) Row definition adheres to the syntax:"				\
 "\n13)"									\
 "\n14) "	/* <col_name_1><TAB><col_name_2><TAB> ... <col_name_N> */
+#define PUT_TABLE_HEADER_4(PTR)						\
+PTR = put_string_size(ptr,						\
+		      TABLE_HEADER_4,					\
+		      sizeof(TABLE_HEADER_4) - 1lu)
 
 #define TABLE_HEADER_5							\
 	"<NEWLINE>"							\
@@ -80,6 +95,18 @@
 "\n16) ╔═══════════════════════════════════════════════╗"		\
 "\n17) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
 "\n18) ╚═══════════════════════════════════════════════╝\n"
+#define PUT_TABLE_HEADER_5(PTR)						\
+PTR = put_string_size(ptr,						\
+		      TABLE_HEADER_5,					\
+		      sizeof(TABLE_HEADER_5) - 1lu)
+
+#define TABLE_HEADER_BASE_SIZE						\
+(sizeof(TABLE_HEADER_1 TABLE_HEADER_2 TABLE_HEADER_3 TABLE_HEADER_4	\
+	TABLE_HEADER_5) - 1lu)
+
+
+
+
 
 
 /* loader file */
@@ -312,7 +339,6 @@ struct Table;
 
 struct Column {
 	const struct ColSpec *spec;		/* from raw input */
-	char *contents;
 	struct RowspanInterval rowspans;	/* X BLK_COUNT */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
@@ -335,7 +361,6 @@ struct Table {
 	struct FileHandle file;
 	struct LengthLock total;		/* total table length */
 	const struct TblSpec *spec;		/* from raw input */
-	char *contents;				/* table file start */
 	struct ColumnInterval columns;		/* slice assigned by db */
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
@@ -353,7 +378,6 @@ struct Database {
 	struct FileHandle loader;
 	struct Dirpath dirpath;
 	const struct DbSpec *spec;		/* raw input */
-	char *contents;				/* table files and loader */
 	struct TableInterval tables;
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 	struct Generator *parent;
@@ -409,6 +433,47 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
 #define GENERATOR_FAILURE_MESSAGE					\
 "\n" ANSI_UNDERLINE "GENERATOR EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
+
+/* cleanup
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+column_destroy(struct Column *const restrict column)
+{
+		free(from->rowspans.from->cells);
+}
+
+inline void
+table_destroy(struct Table *const restrict table)
+{
+	free(table->file.contents.bytes);
+
+	const struct Column *const restrict until = table->columns.until;
+	struct Column *restrict from = table->columns.from + 1l; /* skip IDs */
+
+	do {
+		column_destroy(from);
+
+		++from;
+
+	} while (from < until);
+}
+
+
+inline void
+database_destroy(struct Database *const restrict database)
+{
+	free(database->file.loader.bytes);
+
+	const struct Table *const restrict until = database->tables.until;
+	struct Table *restrict from		 = database->tables.from;
+
+	do {
+		table_destroy(from);
+
+		++from
+
+	} while (from < until);
+}
 
 
 /* init Generator FileHandle, Dirpath

@@ -27,17 +27,17 @@ build_column_string_base(void *arg)
 				     - counter->pointers[0]
 				     + (row_count * base->length);
 
+	char *restrict ptr = NULL;
+
 	/* increment table length */
 	length_lock_increment(&counter->parent->total,
 			      length_contents,
 			      &column->fail_cl);
 
 	thread_try_catch_open(free,
-			      column->contents);
+			      ptr);
 
-	column->contents = malloc(length_contents);
-
-	char *restrict ptr = column->contents;
+	ptr = malloc(length_contents);
 
 	char *restrict *restrict count_ptr = counter->pointers;
 
