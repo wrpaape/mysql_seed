@@ -50,6 +50,7 @@
 
 /* table file */
 #define TAB_TOKEN "<TAB>"
+#define TAB_TOKEN_LENGTH 5lu
 #define PUT_TAB_TOKEN(PTR)						\
 PUT_STRING_WIDTH(PTR, TAB_TOKEN, 5)
 
@@ -439,7 +440,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
-		free(from->rowspans.from->cells);
+	free(from->rowspans.from->cells);
 }
 
 inline void
@@ -462,15 +463,29 @@ table_destroy(struct Table *const restrict table)
 inline void
 database_destroy(struct Database *const restrict database)
 {
-	free(database->file.loader.bytes);
-
 	const struct Table *const restrict until = database->tables.until;
 	struct Table *restrict from		 = database->tables.from;
 
 	do {
 		table_destroy(from);
 
-		++from
+		++from;
+
+	} while (from < until);
+}
+
+inline void
+generator_destroy(struct Generator *const restrict generator)
+{
+	const struct Database *const restrict until
+	= generator->databases.until;
+
+	struct Database *restrict from = generator->databases.from;
+
+	do {
+		database_destroy(from);
+
+		++from;
 
 	} while (from < until);
 }

@@ -1,5 +1,7 @@
 #include "generate/column_string.h"
 
+#define BCSB_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_column_string_base")
+
 /* worker thread entry point */
 void
 build_column_string_base(void *arg)
@@ -27,25 +29,27 @@ build_column_string_base(void *arg)
 				     - counter->pointers[0]
 				     + (row_count * base->length);
 
-	char *restrict ptr = NULL;
 
 	/* increment table length */
 	length_lock_increment(&counter->parent->total,
 			      length_contents,
 			      &column->fail_cl);
 
-	thread_try_catch_open(free,
-			      ptr);
+	from->cells = malloc(length_contents);
 
-	ptr = malloc(length_contents);
+	if (from->cells == NULL) {
+		handler_closure_call(&column->fail_cl,
+				     BCSB_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	char *restrict ptr = from->cell;
 
 	char *restrict *restrict count_ptr = counter->pointers;
 
 	char *restrict *restrict count_until;
 
-	do {
-		from->cells = ptr;
-
+	while (1) {
 		count_until = count_ptr + from->parent->row_count;
 
 		do {
@@ -64,8 +68,10 @@ build_column_string_base(void *arg)
 				      &column->fail_cl);
 
 		++from;
-	} while (from < until);
 
+		if (from == until)
+			return;
 
-	thread_try_catch_close();
+		from->cells = ptr;
+	};
 }

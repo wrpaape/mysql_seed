@@ -195,7 +195,7 @@ struct ArgvInterval {
 /* all can read, only owner can write */
 #define FILE_HANDLE_MODE (S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH)
 
-#define DIR_HANDLE_MODE FILE_HANDLE_MODE
+#define DIRPATH_MODE FILE_HANDLE_MODE
 
 /* FileHandle Operations
  * ────────────────────────────────────────────────────────────────────────── */
@@ -416,14 +416,14 @@ inline bool
 dirpath_make_status(const struct Dirpath *const restrict path)
 {
 	return mkdir_status(&path->buffer[0],
-			    DIR_HANDLE_MODE);
+			    DIRPATH_MODE);
 }
 
 inline void
 dirpath_make_muffle(const struct Dirpath *const restrict path)
 {
 	mkdir_muffle(&path->buffer[0],
-		     DIR_HANDLE_MODE);
+		     DIRPATH_MODE);
 }
 
 inline bool
@@ -431,7 +431,7 @@ dirpath_make_report(const struct Dirpath *const restrict path,
 		    const char *restrict *const restrict failure)
 {
 	return mkdir_report(&path->buffer[0],
-			    DIR_HANDLE_MODE,
+			    DIRPATH_MODE,
 			    failure);
 }
 
@@ -441,7 +441,7 @@ dirpath_make_handle(const struct Dirpath *const restrict path,
 		    void *arg)
 {
 	mkdir_handle(&path->buffer[0],
-		     DIR_HANDLE_MODE,
+		     DIRPATH_MODE,
 		     handle,
 		     arg);
 }
@@ -451,7 +451,7 @@ dirpath_make_handle_cl(const struct Dirpath *const restrict path,
 		       const struct HandlerClosure *const restrict fail_cl)
 {
 	mkdir_handle_cl(&path->buffer[0],
-			DIR_HANDLE_MODE,
+			DIRPATH_MODE,
 			fail_cl);
 }
 

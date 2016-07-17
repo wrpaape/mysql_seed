@@ -19,6 +19,17 @@ build_loader(void *arg)
 	struct Database *const restrict database
 	= (struct Database *const restrict) arg;
 
+	database_dirpath_init(&database->dirpath,
+			      &datbase->spec->name);
+
+	/* make datbase/<db_name> directory */
+	dirpath_make_handle_cl(&database->dirpath,
+			       &database->fail_cl);
+
+	loader_file_init(&database->loader,
+			 &database->spec->name,
+			 &database->dirpath);
+
 	const size_t size_est = loader_estimate_size(database->tables.until
 						     - database->tables.from);
 	char *restrict contents = NULL;
@@ -42,6 +53,7 @@ build_loader(void *arg)
 
 	database->loader.contents.length = ptr - contents;
 	database->loader.contents.bytes  = contents;
+
 
 	/* write contents to file */
 	file_handle_process(&database->loader,
