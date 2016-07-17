@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "gen/gen_names.h"
+#include "generate/generator.h"
 
 void setUp(void)
 {
@@ -9,7 +9,7 @@ void tearDown(void)
 {
 }
 
-void test_gen_first_names(void)
+void TODO_test_generate_generator(void)
 {
 	TEST_IGNORE();
 }

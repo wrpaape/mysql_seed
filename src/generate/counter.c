@@ -16,6 +16,9 @@ const Mag7String mag_7_min_string = { "10000000" };
 extern inline void
 counter_size_internals(struct Counter *const restrict counter);
 
+extern inline size_t
+counter_size_upto(const size_t upto);
+
 extern inline void
 count_buffer_increment(char *restrict digit);
 

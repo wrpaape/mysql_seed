@@ -3,8 +3,10 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generator.h" /* file/exit/string/parallelization utils */
-#include "generate/loader.h"	/* loader_build */
+#include "generate/loader.h"		/* build_loader */
+#include "generate/column_id.h"		/* build_column_id */
+#include "generate/column_string.h"	/* build_column_string_base */
+#include "generate/table.h"		/* build_table_header */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -137,6 +139,7 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
  *─────────────────────────────────────────────────────────────────────────── */
 struct GeneratorCounter {
 	uintmax_t rows;
+	size_t row_count_max;
 	unsigned int columns;
 	unsigned int tables;
 	unsigned int databases;
@@ -144,6 +147,7 @@ struct GeneratorCounter {
 
 struct DatabaseCounter {
 	uintmax_t rows;
+	size_t row_count_max;
 	unsigned int columns;
 	unsigned int tables;
 };
@@ -175,16 +179,21 @@ struct GenerateParseState {
 inline void
 database_counter_reset(struct DatabaseCounter *const restrict database)
 {
-	database->rows    = 0llu;
-	database->columns = 0u;
-	database->tables  = 0u;
+	database->rows		= 0llu;
+	database->row_count_max = 0lu;
+	database->columns	= 0u;
+	database->tables	= 0u;
 }
 
 inline void
-generator_counter_increment(struct GeneratorCounter *const restrict generator,
-			    struct DatabaseCounter *const restrict database)
+generator_counter_update(struct GeneratorCounter *const restrict generator,
+			 struct DatabaseCounter *const restrict database)
 {
 	generator->rows      += database->rows;
+
+	if (database->row_count_max > generator->row_count_max)
+		generator->row_count_max = database->row_count_max;
+
 	generator->columns   += database->columns;
 	generator->tables    += database->tables;
 	generator->databases += 1u;
@@ -672,7 +681,7 @@ tbl_flag_match(struct GenerateArgvState *const restrict argv)
 	return matched_tbl_flag;
 }
 
-extern inline bool
+inline bool
 col_flag_match(struct GenerateArgvState *const restrict argv)
 {
 	const bool matched_col_flag = flag_match(*(argv->arg.from),
@@ -872,8 +881,8 @@ parse_generate_complete(struct GenerateParseState *const restrict state)
 
 	state->specs.tbl->next = NULL;
 
-	generator_counter_increment(&state->generator,
-				    &state->database);
+	generator_counter_update(&state->generator,
+				 &state->database);
 }
 
 
@@ -902,6 +911,7 @@ parse_string_qualifiers(struct GenerateParseState *const restrict state)
 		case 'b':
 			if (*rem == '\0') {
 				/* TODO: dispatch default string builder */
+				puts("HONK");
 
 			}
 
@@ -914,14 +924,23 @@ parse_string_qualifiers(struct GenerateParseState *const restrict state)
 
 		switch (*arg) {
 
+		case 'b':
+			if (strings_equal("ase", rem)) {
+				puts("HONK");
+			}
+
+		default:
+			break;
 
 		}
 
 INVALID_STRING_QUALIFIER:
+		puts("AWOOGA");
 
-		}
 	} else {
-		col_spec->create = NULL;	/* TODO: default string */
+DEFAULT_STRING_QUALIFIER:
+		col_spec->create = &build_column_string_base;
+		col_spec->type.string.base = col_spec->name;
 
 		parse_generate_complete(state); /* done parsing */
 	}
@@ -1049,7 +1068,9 @@ parse_first_tbl_spec(struct GenerateParseState *const restrict state)
 				state->specs.db->tbl_specs = tbl_spec;
 
 				/* set initial counter values */
-				state->database.rows   = tbl_spec->row_count;
+				state->database.rows = tbl_spec->row_count;
+				state->database.row_count_max
+				= tbl_spec->row_count;
 				state->database.tables = 1u;
 
 				parse_first_col_spec(state);

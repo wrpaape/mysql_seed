@@ -128,7 +128,7 @@ extern const Mag7String mag_7_min_string;
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
 /* count of chars required for "1", "2", ... "upto" null-terminated ascii
- * strings plus a final '\0' character to indicate end */
+ * strings */
 inline void
 counter_size_internals(struct Counter *const restrict counter)
 {
@@ -192,6 +192,46 @@ counter_size_internals(struct Counter *const restrict counter)
 							* (counter->upto
 							   - MAG_6_MAX));
 			}
+		}
+	}
+#endif	/*  ifdef LARGE_UPTO_MAX */
+}
+
+
+/* count of chars required for "1", "2", ... "upto" null-terminated ascii
+ * strings */
+inline size_t
+counter_size_upto(const size_t upto)
+{
+#ifdef LARGE_UPTO_MAX
+	if (upto < MAG_4_MIN) {
+#endif	/*  ifdef LARGE_UPTO_MAX */
+		if (upto < MAG_2_MIN) {
+			return (upto < MAG_1_MIN)
+			     ? (SIZE_MAG_0_STR * upto)
+			     : (SIZE_MAG_0_1_STR + (SIZE_MAG_1_STR
+						    * (upto - MAG_0_MAX)));
+		} else {
+			return (upto < MAG_3_MIN)
+			     ? (SIZE_MAG_0_2_STR + (SIZE_MAG_2_STR
+						    * (upto - MAG_1_MAX)))
+			     : (SIZE_MAG_0_3_STR + (SIZE_MAG_3_STR
+						    * (upto - MAG_2_MAX)));
+		}
+#ifdef LARGE_UPTO_MAX
+	} else {
+		if (upto < MAG_6_MIN) {
+			return (upto < MAG_5_MIN)
+			     ? (SIZE_MAG_0_4_STR + (SIZE_MAG_4_STR
+						    * (upto - MAG_3_MAX)))
+			     : (SIZE_MAG_0_5_STR + (SIZE_MAG_5_STR
+						    * (upto - MAG_4_MAX)));
+		} else {
+			return (upto < MAG_7_MIN)
+			     ? (SIZE_MAG_0_6_STR + (SIZE_MAG_6_STR
+						    * (upto - MAG_5_MAX)))
+			     : (SIZE_MAG_0_7_STR + (SIZE_MAG_7_STR
+						    * (upto - MAG_6_MAX)));
 		}
 	}
 #endif	/*  ifdef LARGE_UPTO_MAX */

@@ -26,10 +26,10 @@ build_table_header(void *arg)
 	thread_try_catch_open(free,
 			      ptr);
 
-	ptr = malloc(table->file.conents.length);
+	ptr = malloc(table->file.contents.length);
 
 	if (ptr == NULL) {
-		handler_closure_call(&column->fail_cl,
+		handler_closure_call(&table->fail_cl,
 				     BTH_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}

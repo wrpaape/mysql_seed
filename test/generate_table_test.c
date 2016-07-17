@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "gen/gen_strings.h"
+#include "generate/table.h"
 
 void setUp(void)
 {
@@ -9,7 +9,7 @@ void tearDown(void)
 {
 }
 
-void testy(void)
+void TODO_test_generate_table(void)
 {
 	TEST_IGNORE();
 }

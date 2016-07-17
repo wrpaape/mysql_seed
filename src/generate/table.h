@@ -9,15 +9,15 @@ inline size_t
 table_size_contents(const struct Table *const restrict table)
 {
 	size_t size_contents = TABLE_HEADER_BASE_SIZE
-			     + table->file->path.length
+			     + table->file.path.length
 			     + table->spec->name.length
 			     + table->parent->spec->name.length
 			     + table->total.length;
 
-	const struct Colspec *const restrict until
+	const struct ColSpec *const restrict until
 	= table->spec->col_specs.until;
 
-	const struct Colspec *restrict from = table->spec->col_specs.from;
+	const struct ColSpec *restrict from = table->spec->col_specs.from;
 
 	while (1) {
 		size_contents += from->name.length;
@@ -56,10 +56,10 @@ table_put_header(char *restrict ptr,
 	PUT_TABLE_HEADER_4(ptr);
 
 
-	const struct Colspec *const restrict until
+	const struct ColSpec *const restrict until
 	= table->spec->col_specs.until;
 
-	const struct Colspec *restrict from = table->spec->col_specs.from;
+	const struct ColSpec *restrict from = table->spec->col_specs.from;
 
 	while (1) {
 		ptr = put_string_size(ptr,
@@ -78,9 +78,6 @@ table_put_header(char *restrict ptr,
 
 	return ptr;
 }
-
-void
-build_table_header_exit_cleanup(void *arg);
 
 /* thread worker entry
  *─────────────────────────────────────────────────────────────────────────── */

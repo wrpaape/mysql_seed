@@ -5,8 +5,8 @@
 extern inline void
 database_counter_reset(struct DatabaseCounter *const restrict database);
 extern inline void
-generator_counter_increment(struct GeneratorCounter *const restrict generator,
-			    struct DatabaseCounter *const restrict database);
+generator_counter_update(struct GeneratorCounter *const restrict generator,
+			 struct DatabaseCounter *const restrict database);
 
 
 /* print error messsage

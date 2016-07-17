@@ -1,14 +1,14 @@
-#include "generate/column_ids.h"
+#include "generate/column_id.h"
 
 /* worker thread entry point */
 void
-build_column_ids(void *arg)
+build_column_id(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct Rowspan *const restrict until = column->rowspans->until;
-	struct Rowspan *const restrict from	   = column->rowspans->from;
+	const struct Rowspan *const restrict until = column->rowspans.until;
+	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	struct Counter *const restrict counter
 	= &column->parent->parent->parent->counter;
@@ -19,7 +19,7 @@ build_column_ids(void *arg)
 
 	/* hook up rowspans */
 
-	const char *restrict *restrict count_ptr = counter->pointers;
+	char *restrict *restrict count_ptr = counter->pointers;
 
 	do {
 		from->cells = *count_ptr;
@@ -36,5 +36,5 @@ build_column_ids(void *arg)
 	/* add total length to table */
 	length_lock_increment(&column->parent->total,
 			      *count_ptr - *(counter->pointers),
-			      &colum->fail_cl);
+			      &column->fail_cl);
 }

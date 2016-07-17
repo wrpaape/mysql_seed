@@ -23,7 +23,7 @@
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct String {
-	const char *bytes;
+	char *bytes;
 	size_t length;
 };
 
@@ -523,7 +523,7 @@ put_string_stop(char *restrict buffer,
 		*buffer = *string;
 		++buffer;
 
-		if (*string = '\0')
+		if (*string == '\0')
 			return buffer;
 
 		++string;

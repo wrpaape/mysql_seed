@@ -440,7 +440,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
-	free(from->rowspans.from->cells);
+	free(column->rowspans.from->cells);
 }
 
 inline void
@@ -654,8 +654,6 @@ column_init(struct Column *const restrict column,
 	    struct Table *const restrict parent)
 {
 	column->spec = spec;
-
-	column->contents = NULL; /* no-op in free on early exit */
 
 	rowspan_interval_init(&column->rowspans,
 			      rowspans_from,

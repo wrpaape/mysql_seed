@@ -9,14 +9,34 @@ build_column_string_base(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-
 	const struct String *const restrict base
 	= &column->spec->type.string.base;
 
 	const size_t row_count = column->parent->spec->row_count;
 
-	const struct Rowspan *const restrict until = column->rowspans->until;
-	struct Rowspan *const restrict from	   = column->rowspans->from;
+	const size_t length_contents = counter_size_upto(row_count)
+				     + (row_count * base->length);
+
+	/* increment table length */
+	length_lock_increment(&column->parent->total,
+			      length_contents,
+			      &column->fail_cl);
+
+	char *restrict ptr = NULL;
+
+	thread_try_catch_open(free,
+			      ptr);
+
+	ptr = malloc(length_contents);
+
+	if (ptr == NULL) {
+		handler_closure_call(&column->fail_cl,
+				     BCSB_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	const struct Rowspan *const restrict until = column->rowspans.until;
+	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	struct Counter *const restrict counter
 	= &column->parent->parent->parent->counter;
@@ -25,31 +45,13 @@ build_column_string_base(void *arg)
 	counter_await(counter,
 		      &column->fail_cl);
 
-	const size_t length_contents = counter->pointers[row_count]
-				     - counter->pointers[0]
-				     + (row_count * base->length);
-
-
-	/* increment table length */
-	length_lock_increment(&counter->parent->total,
-			      length_contents,
-			      &column->fail_cl);
-
-	from->cells = malloc(length_contents);
-
-	if (from->cells == NULL) {
-		handler_closure_call(&column->fail_cl,
-				     BCSB_MALLOC_FAILURE);
-		__builtin_unreachable();
-	}
-
-	char *restrict ptr = from->cell;
-
 	char *restrict *restrict count_ptr = counter->pointers;
 
 	char *restrict *restrict count_until;
 
-	while (1) {
+	do {
+		from->cells = ptr;
+
 		count_until = count_ptr + from->parent->row_count;
 
 		do {
@@ -68,10 +70,7 @@ build_column_string_base(void *arg)
 				      &column->fail_cl);
 
 		++from;
+	} while (from < until);
 
-		if (from == until)
-			return;
-
-		from->cells = ptr;
-	};
+	thread_try_catch_close();
 }

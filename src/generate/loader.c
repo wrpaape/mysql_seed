@@ -20,9 +20,9 @@ build_loader(void *arg)
 	= (struct Database *const restrict) arg;
 
 	database_dirpath_init(&database->dirpath,
-			      &datbase->spec->name);
+			      &database->spec->name);
 
-	/* make datbase/<db_name> directory */
+	/* make database/<db_name> directory */
 	dirpath_make_handle_cl(&database->dirpath,
 			       &database->fail_cl);
 

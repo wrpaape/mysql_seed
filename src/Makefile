@@ -1089,49 +1089,12 @@ GENERATE_GENERATOR_TEST_BIN_PREQS	:= $(GENERATE_GENERATOR_TRNR_OBJ)	\
 			   	   	   $(GENERATE_GENERATOR_OBJ_GROUP)	\
 			   	   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(GEN_GEN_GENERATOR_TEST_BIN)
-TARGETS			+= $(GEN_GEN_GENERATOR_OBJ)			\
-			   $(GEN_GEN_GENERATOR_TRNR_SRC)		\
-			   $(GEN_GEN_GENERATOR_TRNR_OBJ)		\
-			   $(GEN_GEN_GENERATOR_TEST_OBJ)		\
-			   $(GEN_GEN_GENERATOR_TEST_BIN)
-
-
-# generate/names
-# ──────────────────────────────────────────────────────────────────────────────
-GENERATE_NAMES_SRC 	:= $(call HELPER_SOURCE_PATH,generate names)
-GENERATE_NAMES_HDR	:= $(call HELPER_HEADER_PATH,generate names)
-GENERATE_NAMES_OBJ 	:= $(call HELPER_OBJECT_PATH,generate names)
-GENERATE_NAMES_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate names)
-GENERATE_NAMES_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate names)
-GENERATE_NAMES_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate names)
-GENERATE_NAMES_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate names)
-GENERATE_NAMES_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate names)
-# ─────────────── target prequisites ───────────────────────────────────────────
-GENERATE_NAMES_OBJ_PREQS	:= $(GENERATE_NAMES_SRC) 		\
-			     	   $(GENERATE_NAMES_HDR)		\
-			      	   $(RANDOM_RANDOM_HDR)
-GENERATE_NAMES_OBJ_GROUP	:= $(GENERATE_NAMES_OBJ) 		\
-				   $(RANDOM_RANDOM_OBJ_GROUP)		\
-				   $(GENERATE_GENERATOR_OBJ_GROUP)
-GENERATE_NAMES_TRNR_SRC_PREQS	:= $(GENERATE_NAMES_TEST_SRC)		\
-				   $(TEST_RUNNER_SOURCE_DIR)
-GENERATE_NAMES_TEST_OBJ_PREQS	:= $(GENERATE_NAMES_TEST_SRC)		\
-			   	   $(GENERATE_NAMES_OBJ_PREQS)		\
-			   	   $(UNITY_OBJ_PREQS)
-GENERATE_NAMES_TRNR_OBJ_PREQS	:= $(GENERATE_NAMES_TRNR_SRC)		\
-			   	   $(GENERATE_NAMES_TEST_OBJ_PREQS)
-GENERATE_NAMES_TEST_BIN_PREQS	:= $(GENERATE_NAMES_TRNR_OBJ)		\
-				   $(GENERATE_NAMES_TEST_OBJ)		\
-			   	   $(GENERATE_NAMES_OBJ_GROUP)		\
-			   	   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(GEN_GEN_NAMES_TEST_BIN)
-TARGETS			+= $(GEN_GEN_NAMES_OBJ)			\
-			   $(GEN_GEN_NAMES_TRNR_SRC)		\
-			   $(GEN_GEN_NAMES_TRNR_OBJ)		\
-			   $(GEN_GEN_NAMES_TEST_OBJ)		\
-			   $(GEN_GEN_NAMES_TEST_BIN)
+TEST_BINARIES		+= $(GENERATE_GENERATOR_TEST_BIN)
+TARGETS			+= $(GENERATE_GENERATOR_OBJ)			\
+			   $(GENERATE_GENERATOR_TRNR_SRC)		\
+			   $(GENERATE_GENERATOR_TRNR_OBJ)		\
+			   $(GENERATE_GENERATOR_TEST_OBJ)		\
+			   $(GENERATE_GENERATOR_TEST_BIN)
 
 
 # generate/counter
@@ -1148,7 +1111,7 @@ GENERATE_COUNTER_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate counter)
 GENERATE_COUNTER_OBJ_PREQS	:= $(GENERATE_COUNTER_SRC) 		\
 				   $(GENERATE_COUNTER_HDR) 		\
 				   $(GENERATE_GENERATOR_HDR)
-GENERATE_COUNTER_OBJ_GROUP	:= $(GENERATE_OBJ) 			\
+GENERATE_COUNTER_OBJ_GROUP	:= $(GENERATE_COUNTER_OBJ) 		\
 				   $(GENERATE_GENERATOR_OBJ_GROUP)
 GENERATE_COUNTER_TRNR_SRC_PREQS	:= $(GENERATE_COUNTER_TEST_SRC)		\
 			   	   $(TEST_RUNNER_SOURCE_DIR)
@@ -1168,6 +1131,118 @@ TARGETS			+= $(GENERATE_COUNTER_OBJ)			\
 			   $(GENERATE_COUNTER_TRNR_OBJ)			\
 			   $(GENERATE_COUNTER_TEST_OBJ)			\
 			   $(GENERATE_COUNTER_TEST_BIN)
+
+
+# generate/column_string_names
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_STRING_NAMES_SRC 	:= $(call HELPER_SOURCE_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_HDR	:= $(call HELPER_HEADER_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_OBJ 	:= $(call HELPER_OBJECT_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_string_names)
+GENERATE_COLUMN_STRING_NAMES_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_string_names)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_STRING_NAMES_OBJ_PREQS		:= $(GENERATE_COLUMN_STRING_NAMES_SRC) 			\
+			     	   		   $(GENERATE_COLUMN_STRING_NAMES_HDR)			\
+			      	   	   	   $(RANDOM_RANDOM_HDR)
+GENERATE_COLUMN_STRING_NAMES_OBJ_GROUP		:= $(GENERATE_COLUMN_STRING_NAMES_OBJ) 			\
+				   	   	   $(RANDOM_RANDOM_OBJ_GROUP)				\
+				   	   	   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_COLUMN_STRING_NAMES_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_STRING_NAMES_TEST_SRC)		\
+				   	   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_STRING_NAMES_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_NAMES_TEST_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_NAMES_OBJ_PREQS)		\
+			   	   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_NAMES_TRNR_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_NAMES_TEST_OBJ_PREQS)
+GENERATE_COLUMN_STRING_NAMES_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ)		\
+				   	   	   $(GENERATE_COLUMN_STRING_NAMES_TEST_OBJ)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_NAMES_OBJ_GROUP)		\
+			   	   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_STRING_NAMES_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_STRING_NAMES_OBJ)			\
+			   $(GENERATE_COLUMN_STRING_NAMES_TRNR_SRC)		\
+			   $(GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_NAMES_TEST_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_NAMES_TEST_BIN)
+
+
+# generate/column_string
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_STRING_SRC 	:= $(call HELPER_SOURCE_PATH,generate column_string)
+GENERATE_COLUMN_STRING_HDR	:= $(call HELPER_HEADER_PATH,generate column_string)
+GENERATE_COLUMN_STRING_OBJ 	:= $(call HELPER_OBJECT_PATH,generate column_string)
+GENERATE_COLUMN_STRING_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_string)
+GENERATE_COLUMN_STRING_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_string)
+GENERATE_COLUMN_STRING_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_string)
+GENERATE_COLUMN_STRING_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_string)
+GENERATE_COLUMN_STRING_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_string)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_STRING_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_SRC) 		\
+			     	   	   $(GENERATE_COLUMN_STRING_HDR)		\
+			      	   	   $(GENERATE_COUNTER_HDR)			\
+			      	   	   $(GENERATE_COLUMN_STRING_NAMES_HDR)
+GENERATE_COLUMN_STRING_OBJ_GROUP	:= $(GENERATE_COLUMN_STRING_OBJ) 		\
+				   	   $(GENERATE_COUNTER_OBJ_GROUP)		\
+				   	   $(GENERATE_COLUMN_STRING_NAMES_OBJ_GROUP)
+GENERATE_COLUMN_STRING_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_STRING_TEST_SRC)		\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_STRING_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_TEST_SRC)		\
+			   	   	   $(GENERATE_COLUMN_STRING_OBJ_PREQS)		\
+			   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_STRING_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_TRNR_SRC)		\
+			   	   	   $(GENERATE_COLUMN_STRING_TEST_OBJ_PREQS)
+GENERATE_COLUMN_STRING_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_STRING_TRNR_OBJ)		\
+				   	   $(GENERATE_COLUMN_STRING_TEST_OBJ)		\
+			   	   	   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
+			   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_STRING_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_STRING_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_TRNR_SRC)		\
+			   $(GENERATE_COLUMN_STRING_TRNR_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_TEST_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_TEST_BIN)
+
+
+# generate/column_id
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_ID_SRC 		:= $(call HELPER_SOURCE_PATH,generate column_id)
+GENERATE_COLUMN_ID_HDR		:= $(call HELPER_HEADER_PATH,generate column_id)
+GENERATE_COLUMN_ID_OBJ 		:= $(call HELPER_OBJECT_PATH,generate column_id)
+GENERATE_COLUMN_ID_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_id)
+GENERATE_COLUMN_ID_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_id)
+GENERATE_COLUMN_ID_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_id)
+GENERATE_COLUMN_ID_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_id)
+GENERATE_COLUMN_ID_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_id)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_ID_OBJ_PREQS		:= $(GENERATE_COLUMN_ID_SRC) 			\
+			     	   	   $(GENERATE_COLUMN_ID_HDR)			\
+			      	   	   $(GENERATE_COUNTER_HDR)
+GENERATE_COLUMN_ID_OBJ_GROUP		:= $(GENERATE_COLUMN_ID_OBJ) 			\
+				   	   $(GENERATE_COUNTER_OBJ_GROUP)
+GENERATE_COLUMN_ID_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_ID_TEST_SRC)		\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_ID_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_ID_TEST_SRC)		\
+			   	   	   $(GENERATE_COLUMN_ID_OBJ_PREQS)		\
+			   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_ID_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_ID_TRNR_SRC)		\
+			   	   	   $(GENERATE_COLUMN_ID_TEST_OBJ_PREQS)
+GENERATE_COLUMN_ID_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_ID_TRNR_OBJ)		\
+				   	   $(GENERATE_COLUMN_ID_TEST_OBJ)		\
+			   	   	   $(GENERATE_COLUMN_ID_OBJ_GROUP)		\
+			   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_ID_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_ID_OBJ)		\
+			   $(GENERATE_COLUMN_ID_TRNR_SRC)	\
+			   $(GENERATE_COLUMN_ID_TRNR_OBJ)	\
+			   $(GENERATE_COLUMN_ID_TEST_OBJ)	\
+			   $(GENERATE_COLUMN_ID_TEST_BIN)
+
 
 # generate/loader
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1241,6 +1316,11 @@ TARGETS			+= $(GENERATE_TABLE_OBJ)			\
 			   $(GENERATE_TABLE_TEST_BIN)
 
 
+#include "generate/loader.h"		/* build_loader */
+#include "generate/column_ids.h"	/* build_column_ids */
+#include "generate/column_string.h"	/* build_column_string_base */
+#include "generate/table.h"		/* build_table_header */
+
 
 ## PROJECT MODULES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1257,9 +1337,15 @@ GENERATE_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,generate)
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_OBJ_PREQS	:= $(GENERATE_SRC) 				\
 			   $(GENERATE_HDR) 				\
-			   $(GENERATE_GENERATOR_HDR)
+			   $(GENERATE_LOADER_HDR)			\
+			   $(GENERATE_COLUMN_ID_HDR)			\
+			   $(GENERATE_COLUMN_STRING_HDR)		\
+			   $(GENERATE_TABLE_HDR)
 GENERATE_OBJ_GROUP	:= $(GENERATE_OBJ)				\
-			   $(GENERATE_GENERATOR_OBJ_GROUP)
+			   $(GENERATE_LOADER_OBJ_GROUP)			\
+			   $(GENERATE_COLUMN_ID_OBJ_GROUP)		\
+			   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
+			   $(GENERATE_TABLE_OBJ_GROUP)
 GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_TEST_SRC)				\
@@ -1366,7 +1452,7 @@ PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 			   $(LOAD_OBJ_GROUP)				\
 			   # $(HELP_OBJ_GROUP)
 			   # $(GEN_GEN_COUNT_STRING_OBJ) 			\
-			   # $(GEN_GEN_NAMES_OBJ) 			\
+			   # $(GEN_GENCOLUMN_STRING_NAMES_OBJ) 			\
 			   # $(GEN_GEN_STRINGS_OBJ) 			\
 			   # $(THREAD_THREAD_LOG_OBJ) 					\
 			   # $(THREAD_THREAD_UTILS_OBJ)				\
@@ -1485,9 +1571,19 @@ $(GENERATE_LOADER_OBJ): $(GENERATE_LOADER_OBJ_PREQS)
 $(GENERATE_TABLE_OBJ): $(GENERATE_TABLE_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make generate/names object
+# make generate/column_id object
 # ──────────────────────────────────────────────────────────────────────────────
-$(GENERATE_NAMES_OBJ): $(GENERATE_NAMES_OBJ_PREQS)
+$(GENERATE_COLUMN_ID_OBJ): $(GENERATE_COLUMN_ID_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/column_string object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_OBJ): $(GENERATE_COLUMN_STRING_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/column_string_names object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_NAMES_OBJ): $(GENERATE_COLUMN_STRING_NAMES_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make system/system_utils object
@@ -1923,23 +2019,63 @@ $(GENERATE_COUNTER_TRNR_SRC): $(GENERATE_COUNTER_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for generate/names
+# for generate/column_id
 # make:
-# 	generate_names_test		binary,
-# 	generate_names_test_runner 	object,
-# 	generate_names_test		object, and
-# 	generate_names_test_runner	source
+# 	generate_column_id_test		binary,
+# 	generate_column_id_test_runner 	object,
+# 	generate_column_id_test		object, and
+# 	generate_column_id_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(GENERATE_NAMES_TEST_BIN): $(GENERATE_NAMES_TEST_BIN_PREQS)
+$(GENERATE_COLUMN_ID_TEST_BIN): $(GENERATE_COLUMN_ID_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(GENERATE_NAMES_TRNR_OBJ): $(GENERATE_NAMES_TRNR_OBJ_PREQS)
+$(GENERATE_COLUMN_ID_TRNR_OBJ): $(GENERATE_COLUMN_ID_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GENERATE_NAMES_TEST_OBJ): $(GENERATE_NAMES_TEST_OBJ_PREQS)
+$(GENERATE_COLUMN_ID_TEST_OBJ): $(GENERATE_COLUMN_ID_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(GENERATE_NAMES_TRNR_SRC): $(GENERATE_NAMES_TRNR_SRC_PREQS)
+$(GENERATE_COLUMN_ID_TRNR_SRC): $(GENERATE_COLUMN_ID_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/column_string
+# make:
+# 	generate_column_string_test		binary,
+# 	generate_column_string_test_runner 	object,
+# 	generate_column_string_test		object, and
+# 	generate_column_string_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_TEST_BIN): $(GENERATE_COLUMN_STRING_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_STRING_TRNR_OBJ): $(GENERATE_COLUMN_STRING_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_TEST_OBJ): $(GENERATE_COLUMN_STRING_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_TRNR_SRC): $(GENERATE_COLUMN_STRING_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/column_string_names
+# make:
+# 	generate_column_string_names_test		binary,
+# 	generate_column_string_names_test_runner 	object,
+# 	generate_column_string_names_test		object, and
+# 	generate_column_string_names_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_NAMES_TEST_BIN): $(GENERATE_COLUMN_STRING_NAMES_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ): $(GENERATE_COLUMN_STRING_NAMES_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_NAMES_TEST_OBJ): $(GENERATE_COLUMN_STRING_NAMES_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_NAMES_TRNR_SRC): $(GENERATE_COLUMN_STRING_NAMES_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

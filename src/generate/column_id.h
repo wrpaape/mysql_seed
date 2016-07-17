@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_GENERATE_COLUMN_IDS_H_
-#define MYSQL_SEED_GENERATE_COLUMN_IDS_H_
+#ifndef MYSQL_SEED_GENERATE_COLUMN_ID_H_
+#define MYSQL_SEED_GENERATE_COLUMN_ID_H_
 
 
 /* external dependencies
@@ -8,7 +8,7 @@
 
 /* worker thread entry point */
 void
-build_column_ids(void *arg);
+build_column_id(void *arg);
 
 
-#endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_IDS_H_ */
+#endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_ID_H_ */
