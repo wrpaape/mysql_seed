@@ -616,8 +616,10 @@ put_inspect_args(char *restrict buffer,
 					    *from,
 					    LENGTH_INSPECT_MAX);
 
-		if (from == upto)
-			return buffer;
+		if (from == upto) {
+			*buffer = '\n';
+			return buffer + 1l;
+		}
 
 		++from;
 

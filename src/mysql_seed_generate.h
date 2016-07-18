@@ -13,6 +13,15 @@
 #define GENERATE_FAILURE(REASON)					\
 FAILURE_HEADER_WRAP("generate", " - " REASON)
 
+#define FAILURE_NO_DB_SPEC						\
+GENERATE_FAILURE("no DB_SPEC provided") MORE_INFO_MESSAGE
+
+#define FAILURE_DB_SPEC_SHORT						\
+GENERATE_FAILURE("DB_SPEC too short - need at least "			\
+		 DB_SPEC_LENGTH_MIN_STRING " arguments to describe "	\
+		 "a database in generate mode, ignoring DB_SPEC "	\
+		 "starting with:")
+
 #define GENERATE_FAILURE_MALLOC						\
 GENERATE_FAILURE(MALLOC_FAILURE_REASON)
 
@@ -26,9 +35,6 @@ GENERATE_FAILURE("no valid DB_SPEC")
 "\n" ERROR_WRAP("ignoring DB_SPEC starting with:") "\n"
 
 /* parsing DB_SPEC */
-#define FAILURE_NO_DB_SPEC						\
-PARSE_FAILURE_MESSAGE("no DB_SPEC provided") MORE_INFO_MESSAGE
-
 #define ERROR_DB_SPEC_SHORT						\
 PARSE_ERROR_MESSAGE("DB_SPEC too short - need at least "		\
 		    DB_SPEC_LENGTH_MIN_STRING " arguments to describe "	\
@@ -36,10 +42,10 @@ PARSE_ERROR_MESSAGE("DB_SPEC too short - need at least "		\
 		    "DB_SPEC starting with:") "\n"
 
 #define ERROR_EXPECTED_DB_FLAG_HEADER					\
-PARSE_ERROR_HEADER("expected DATABASE flag instead of:")
+PARSE_ERROR_HEADER("expected DATABASE flag instead of")
 
 #define ERROR_INCOMPLETE_DB_SPEC_HEADER					\
-PARSE_ERROR_HEADER("incomplete DB_SPEC:")
+PARSE_ERROR_HEADER("incomplete DB_SPEC")
 
 #define ERROR_INCOMPLETE_DB_SPEC_COL_NAME				\
 "\n" ERROR_WRAP("reason: expected COL_NAME to follow COLUMN flag, "	\
@@ -63,7 +69,7 @@ PARSE_ERROR_HEADER("invalid DB_NAME")
 
 #define ERROR_INVALID_DB_NAME_EMPTY					\
 PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC starting"	\
-		   " with:")
+		   " with")
 
 #define ERROR_INVALID_DB_NAME_REASON_LONG				\
 "\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
@@ -76,7 +82,7 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC starting"	\
 
 /* parsing TBL_SPEC */
 #define ERROR_EXPECTED_TBL_FLAG_HEADER					\
-PARSE_ERROR_HEADER("expected TABLE flag instead of:")
+PARSE_ERROR_HEADER("expected TABLE flag instead of")
 
 /* parsing TBL_NAME */
 #define ERROR_INVALID_TBL_NAME_HEADER					\
@@ -84,7 +90,7 @@ PARSE_ERROR_HEADER("invalid TBL_NAME")
 
 #define ERROR_INVALID_TBL_NAME_EMPTY					\
 PARSE_ERROR_HEADER("invalid TBL_NAME (empty), ignoring DB_SPEC "	\
-		   "starting with:")
+		   "starting with")
 
 #define ERROR_INVALID_TBL_NAME_REASON_LONG				\
 "\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
@@ -97,7 +103,7 @@ PARSE_ERROR_HEADER("invalid TBL_NAME (empty), ignoring DB_SPEC "	\
 
 /* parsing COL_SPEC */
 #define ERROR_EXPECTED_COL_FLAG_HEADER					\
-PARSE_ERROR_HEADER("expected COLUMN flag instead of:")
+PARSE_ERROR_HEADER("expected COLUMN flag instead of")
 
 /* parsing COL_NAME */
 #define ERROR_INVALID_COL_NAME_HEADER					\
@@ -105,7 +111,7 @@ PARSE_ERROR_HEADER("invalid COL_NAME")
 
 #define ERROR_INVALID_COL_NAME_EMPTY					\
 PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC "	\
-		   "starting with:")
+		   "starting with")
 
 #define ERROR_INVALID_COL_NAME_REASON_LONG				\
 "\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
@@ -136,7 +142,7 @@ PARSE_ERROR_HEADER("invalid ROW_COUNT")
 /* parsing COL_TYPE */
 #define ERROR_NO_COL_TYPE						\
 PARSE_ERROR_HEADER("no COL_TYPE provided, ignoring DB_SPEC starting "	\
-		   "with:")
+		   "with")
 
 #define ERROR_INVALID_COL_TYPE_HEADER					\
 PARSE_ERROR_HEADER("invalid COL_TYPE")
@@ -155,11 +161,11 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 
 #define ERROR_NO_STRING_BASE						\
 PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
-		   "starting with:")
+		   "starting with")
 
 #define ERROR_INVALID_STRING_BASE_EMPTY					\
 PARSE_ERROR_HEADER("invalid column base string (empty), ignoring "	\
-		   "DB_SPEC starting with:")
+		   "DB_SPEC starting with")
 
 #define ERROR_INVALID_STRING_BASE_HEADER				\
 PARSE_ERROR_HEADER("invalid column base string")
@@ -176,7 +182,7 @@ PARSE_ERROR_HEADER("invalid column base string")
 /* parsing next SPEC */
 #define ERROR_EXPECTED_COL_TBL_DB_FLAG_HEADER				\
 PARSE_ERROR_HEADER("expected COLUMN flag, TABLE flag, DATABASE flag, "	\
-		   "or end of arguments instead of:")
+		   "or end of arguments instead of")
 
 
 /* typedefs, struct declarations
@@ -254,11 +260,29 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 inline void
-no_db_spec(void)
+generate_failure_no_db_spec(void)
 {
 	write_muffle(STDERR_FILENO,
 		     FAILURE_NO_DB_SPEC,
 		     sizeof(FAILURE_NO_DB_SPEC) - 1lu);
+}
+
+inline void
+generate_failure_short_db_spec(char *const restrict *const restrict from,
+			       char *const restrict *const restrict until)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
+		     FAILURE_DB_SPEC_SHORT
+	};
+
+	char *const restrict ptr
+	= put_inspect_args(&buffer[sizeof(FAILURE_DB_SPEC_SHORT) - 1lu],
+			   from,
+			   until - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
 }
 
 inline void
@@ -687,7 +711,7 @@ no_col_type(const struct GenerateArgvState *const restrict argv)
 	char *const restrict ptr
 	= put_inspect_args(&buffer[sizeof(ERROR_NO_COL_TYPE) - 1lu],
 			   argv->db_spec.from,
-			   argv->arg.from);
+			   argv->arg.from - 1l);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -750,10 +774,16 @@ no_string_base(const struct GenerateArgvState *const restrict argv)
 		ERROR_NO_STRING_BASE
 	};
 
+	/* puts("AWOOGA"); */
+	/* fflush(stdout); */
+	/* printf("dbspec.from: %p, arg.from: %p\n", argv->db_spec.from, argv->arg.from); */
+	/* fflush(stdout); */
+	/* exit(1); */
+
 	char *const restrict ptr
 	= put_inspect_args(&buffer[sizeof(ERROR_NO_STRING_BASE) - 1lu],
 			   argv->db_spec.from,
-			   argv->arg.from);
+			   argv->arg.from - 1l);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -955,7 +985,9 @@ db_flag_match(struct GenerateArgvState *const restrict argv)
 						'd',
 						"database");
 
-	if (!matched_db_flag)
+	if (matched_db_flag)
+		argv->db_spec.from = argv->arg.from;
+	else
 		expected_db_flag(*(argv->arg.from));
 
 	return matched_db_flag;
@@ -1352,6 +1384,17 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 
 	case 'b':
 		if (*rem == '\0') {
+			++(state->argv.arg.from);
+
+			if (state->argv.arg.from == state->argv.arg.until) {
+INCOMPLETE_NO_STRING_BASE:
+				no_string_base(&state->argv);
+				*(state->valid.last) = NULL;
+				state->exit_status = EXIT_FAILURE;
+				return;
+			}
+
+
 			const bool valid_string_base
 			= parse_string_base(&state->specs.col->type.string.base,
 					    &state->argv);
@@ -1402,6 +1445,11 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 	switch (*rem) {
 	case 'b':
 		if (strings_equal("ase", rem + 1l)) {
+			++(state->argv.arg.from);
+
+			if (state->argv.arg.from == state->argv.arg.until)
+				goto INCOMPLETE_NO_STRING_BASE;
+
 			const bool valid_string_base
 			= parse_string_base(&state->specs.col->type.string.base,
 					    &state->argv);
@@ -1513,6 +1561,7 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		state->specs.tbl->col_specs.from = col_spec;
 
 		++col_spec;
+
 
 		const bool valid_col_name = parse_col_name(&col_spec->name,
 							   &state->argv);
@@ -1655,6 +1704,7 @@ parse_first_tbl_spec(struct GenerateParseState *const restrict state)
 
 			if (valid_row_count) {
 				state->specs.db->tbl_specs = tbl_spec;
+				state->specs.tbl = tbl_spec;
 
 				/* set initial counter values */
 				state->database.rows = tbl_spec->row_count;
@@ -1845,7 +1895,7 @@ generate_dispatch(char *restrict *const restrict arg,
 		  const int rem_argc)
 {
 	if (rem_argc == 0lu) {
-		no_db_spec();
+		generate_failure_no_db_spec();
 
 		return EXIT_FAILURE;
 	}
@@ -1937,6 +1987,16 @@ generate_dispatch(char *restrict *const restrict arg,
 	 *
 	 * worst case for allocing specs appears to be (c) */
 
+	char *const restrict *const restrict arg_until = arg + rem_argc;
+	char *const restrict *const restrict db_spec_until = arg_until
+							   - DB_SPEC_LENGTH_MIN;
+
+	if (arg >= db_spec_until) {
+		generate_failure_short_db_spec(arg,
+					       arg_until);
+		return EXIT_FAILURE;
+	}
+
 	struct DbSpec *const restrict
 	spec_alloc = malloc(sizeof(struct DbSpec)
 			    + sizeof(struct TblSpec)
@@ -1949,7 +2009,6 @@ generate_dispatch(char *restrict *const restrict arg,
 		return EXIT_FAILURE;
 	}
 
-	char *const restrict *const restrict arg_until = arg + rem_argc;
 
 	/* initialize parsing state */
 	struct GenerateParseState state = {
@@ -1959,7 +2018,7 @@ generate_dispatch(char *restrict *const restrict arg,
 				.until = arg_until
 			},
 			.db_spec = {
-				.until = arg_until - DB_SPEC_LENGTH_MIN
+				.until = db_spec_until
 			}
 		},
 		.specs = {

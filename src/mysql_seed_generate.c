@@ -13,7 +13,10 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 extern inline void
-no_db_spec(void);
+generate_failure_no_db_spec(void);
+extern inline void
+generate_failure_short_db_spec(char *const restrict *const restrict from,
+			       char *const restrict *const restrict until);
 extern inline void
 generate_failure_malloc(void);
 extern inline void
