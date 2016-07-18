@@ -774,12 +774,6 @@ no_string_base(const struct GenerateArgvState *const restrict argv)
 		ERROR_NO_STRING_BASE
 	};
 
-	/* puts("AWOOGA"); */
-	/* fflush(stdout); */
-	/* printf("dbspec.from: %p, arg.from: %p\n", argv->db_spec.from, argv->arg.from); */
-	/* fflush(stdout); */
-	/* exit(1); */
-
 	char *const restrict ptr
 	= put_inspect_args(&buffer[sizeof(ERROR_NO_STRING_BASE) - 1lu],
 			   argv->db_spec.from,
@@ -1252,6 +1246,8 @@ parse_database_complete(struct GenerateParseState *const restrict state)
 {
 	parse_table_complete(state);
 	state->specs.tbl->next = NULL;
+	*(state->valid.last) = state->specs.db;
+	state->valid.last = &state->specs.db->next;
 	generator_counter_update(&state->generator,
 				 &state->database);
 }
@@ -2037,14 +2033,32 @@ generate_dispatch(char *restrict *const restrict arg,
 	/* populate specs according to argv */
 	parse_db_specs(&state);
 
-
-
 	if (state.generator.databases == 0u) {
 		generate_failure_no_valid_db_spec();
 
 		free(spec_alloc);
 
 		return EXIT_FAILURE;
+	}
+
+	for (struct DbSpec *db_spec = state.valid.head;
+	     db_spec != NULL;
+	     db_spec = db_spec->next) {
+
+		printf("db_name: %s\n", db_spec->name.bytes);
+
+		for (struct TblSpec *tbl_spec = db_spec->tbl_specs;
+		     tbl_spec != NULL;
+		     tbl_spec = tbl_spec->next) {
+			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes);
+			printf("\trow_count: %zu\n", tbl_spec->row_count);
+
+			for (struct ColSpec *col_spec = tbl_spec->col_specs.from;
+			     col_spec < tbl_spec->col_specs.until;
+			     ++col_spec) {
+				printf("\t\tcol_name:  %s\n", col_spec->name.bytes);
+			}
+		}
 	}
 
 
