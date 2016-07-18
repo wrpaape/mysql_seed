@@ -137,6 +137,8 @@ generate_parse_error(struct GenerateParseState *const restrict state);
 extern inline void
 parse_table_complete(struct GenerateParseState *const restrict state);
 extern inline void
+parse_valid_complete(struct GenerateParseState *const restrict state);
+extern inline void
 parse_database_complete(struct GenerateParseState *const restrict state);
 extern inline void
 generate_parse_complete(struct GenerateParseState *const restrict state);

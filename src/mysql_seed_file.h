@@ -135,7 +135,7 @@
 #define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
 
 #define PARSE_ERROR_MESSAGE(REASON)					\
-ERROR_HEADER_WRAP("parse", "error", " - " REASON)
+"\n" ERROR_HEADER_WRAP("parse", "error", " - " REASON)
 
 #define PARSE_ERROR_HEADER(REASON)					\
 PARSE_ERROR_MESSAGE(REASON ":")
@@ -616,10 +616,8 @@ put_inspect_args(char *restrict buffer,
 					    *from,
 					    LENGTH_INSPECT_MAX);
 
-		if (from == upto) {
-			*buffer = '\n';
-			return buffer + 1l;
-		}
+		if (from == upto)
+			return buffer;
 
 		++from;
 
