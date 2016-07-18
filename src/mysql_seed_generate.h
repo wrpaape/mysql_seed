@@ -1785,7 +1785,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 		goto TERMINATE_VALID_EXIT_FAILURE;
 	}
 
-	state->specs.db->tbl_specs = state->specs.tbl;
+	/* state->specs.db->tbl_specs = state->specs.tbl; */
 
 	/* set counter values */
 	state->database.rows += state->specs.tbl->row_count;
@@ -2054,6 +2054,19 @@ generate_dispatch(char *restrict *const restrict arg,
 			}
 		}
 	}
+
+	printf("rows:          %lu\n"
+	       "row_count_max: %zu\n"
+	       "columns:       %u\n"
+	       "tables:        %u\n"
+	       "databases:     %u\n"
+	       "exit_status:   EXIT_%s\n",
+	       state.generator.rows,
+	       state.generator.row_count_max,
+	       state.generator.columns,
+	       state.generator.tables,
+	       state.generator.databases,
+	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
 
 
 	free(spec_alloc);
