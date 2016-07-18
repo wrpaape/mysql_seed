@@ -42,6 +42,8 @@
 #define FLOAT_PRECISION_DEFAULT	6u
 #define FLOAT_PRECISION_MAX	15u
 
+#define STRING_BASE_LENGTH_MAX		240lu
+#define STRING_BASE_LENGTH_MAX_STRING	"240"
 
 /* file templates
  *─────────────────────────────────────────────────────────────────────────── */

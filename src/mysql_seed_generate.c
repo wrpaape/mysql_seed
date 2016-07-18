@@ -59,7 +59,33 @@ invalid_row_count_zero(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_row_count_large(const struct GenerateArgvState *const restrict argv);
 extern inline void
-invalid_col_type_invalid(const struct GenerateArgvState *const restrict argv);
+no_col_type(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv);
+extern inline void
+no_string_base(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_string_base_empty(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_string_base_long(const struct GenerateArgvState *const restrict argv);
+
+/* parsing next SPEC */
+extern inline void
+expected_col_tbl_db_flag(const struct GenerateArgvState *const restrict argv);
+
+/* incomplete DB_SPEC */
+extern inline void
+incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv);
+extern inline void
+incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv);
+extern inline void
+incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv);
+extern inline void
+incomplete_db_spec_col_flag(const struct GenerateArgvState *const restrict argv);
 
 /* confirm flag match
  *─────────────────────────────────────────────────────────────────────────── */
@@ -87,7 +113,13 @@ extern inline bool
 parse_col_name(struct String *const restrict col_name,
 	       struct GenerateArgvState *const restrict argv);
 
+extern inline bool
+parse_string_base(struct String *const restrict base,
+		  struct GenerateArgvState *const restrict argv);
 
+
+/* parse ASCII numbers from input
+ *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
 parse_row_count(size_t *const restrict row_count,
 		struct GenerateArgvState *const restrict argv);
@@ -100,25 +132,37 @@ generate_parse_error(struct GenerateParseState *const restrict state);
 /* finished parsing
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-parse_generate_complete(struct GenerateParseState *const restrict state);
+parse_table_complete(struct GenerateParseState *const restrict state);
+extern inline void
+parse_database_complete(struct GenerateParseState *const restrict state);
+extern inline void
+generate_parse_complete(struct GenerateParseState *const restrict state);
+extern inline void
+parse_column_complete(struct GenerateParseState *const restrict state);
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
 extern inline void
-parse_string_qualifiers(struct GenerateParseState *const restrict state);
+col_spec_set_string_default(struct ColSpec *const restrict col_spec);
+extern inline void
+parse_string_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_col_type(struct GenerateParseState *const restrict state);
 extern inline void
+parse_first_col_spec_safe(struct GenerateParseState *const restrict state);
+extern inline void
 parse_first_col_spec(struct GenerateParseState *const restrict state);
 extern inline void
-parse_rem_col_specs(struct GenerateParseState *const restrict state);
+parse_next_col_spec(struct GenerateParseState *const restrict state);
 /* TBL_SPEC */
 extern inline void
-parse_rem_tbl_specs(struct GenerateParseState *const restrict state);
-extern inline void
 parse_first_tbl_spec(struct GenerateParseState *const restrict state);
+extern inline void
+parse_next_tbl_spec(struct GenerateParseState *const restrict state);
 /* DB_SPEC */
+extern inline void
+parse_first_db_spec(struct GenerateParseState *const restrict state);
 extern inline void
 parse_next_db_spec(struct GenerateParseState *const restrict state);
 extern inline void
