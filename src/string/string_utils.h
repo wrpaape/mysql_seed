@@ -499,6 +499,16 @@ put_pointer_id_until(char *restrict buffer,
 }
 
 
+inline void
+copy_string(char *restrict buffer,
+	    const char *restrict string)
+{
+	while (*string != '\0') {
+		*buffer = *string;
+		++buffer;
+		++string;
+	}
+}
 
 
 

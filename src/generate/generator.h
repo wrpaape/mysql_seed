@@ -97,7 +97,7 @@ PTR = put_string_size(ptr,						\
 "\n15)"									\
 "\n16) ╔═══════════════════════════════════════════════╗"		\
 "\n17) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
-"\n18) ╚═══════════════════════════════════════════════╝\n"
+"\n18) ╚═══════════════════════════════════════════════╝"
 #define PUT_TABLE_HEADER_5(PTR)						\
 PTR = put_string_size(ptr,						\
 		      TABLE_HEADER_5,					\

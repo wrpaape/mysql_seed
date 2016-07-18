@@ -163,10 +163,6 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
 		   "starting with")
 
-#define ERROR_INVALID_STRING_BASE_EMPTY					\
-PARSE_ERROR_HEADER("invalid column base string (empty), ignoring "	\
-		   "DB_SPEC starting with")
-
 #define ERROR_INVALID_STRING_BASE_HEADER				\
 PARSE_ERROR_HEADER("invalid column base string")
 
@@ -778,24 +774,6 @@ no_string_base(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-invalid_string_base_empty(const struct GenerateArgvState *const restrict argv)
-
-{
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     ERROR_INVALID_STRING_BASE_EMPTY
-	};
-
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_INVALID_STRING_BASE_EMPTY) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
 invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
@@ -1152,16 +1130,19 @@ parse_string_base(struct String *const restrict base,
 	const octet_t *restrict octets
 	= (const octet_t *restrict) *(argv->arg.from);
 
-	if (*octets == '\0') {
-		invalid_string_base_empty(argv);
-		return false;
-	}
-
 	unsigned int width;
 
 	size_t rem_length = STRING_BASE_LENGTH_MAX;
 
 	while (1) {
+		if (*octets == '\0') {
+			base->bytes  = *(argv->arg.from);
+			base->length = octets
+					- ((const octet_t *const restrict)
+					   base->bytes);
+			return true;
+		}
+
 		width = utf8_width(octets);
 
 		if (width == 0u) {
@@ -1170,14 +1151,6 @@ parse_string_base(struct String *const restrict base,
 		}
 
 		octets += width;
-
-		if (*octets == '\0') {
-			base->bytes  = *(argv->arg.from);
-			base->length = octets
-					- ((const octet_t *const restrict)
-					   base->bytes);
-			return true;
-		}
 
 		--rem_length;
 

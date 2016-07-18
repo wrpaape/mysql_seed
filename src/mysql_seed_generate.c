@@ -68,8 +68,6 @@ invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv);
 extern inline void
 no_string_base(const struct GenerateArgvState *const restrict argv);
 extern inline void
-invalid_string_base_empty(const struct GenerateArgvState *const restrict argv);
-extern inline void
 invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_string_base_long(const struct GenerateArgvState *const restrict argv);

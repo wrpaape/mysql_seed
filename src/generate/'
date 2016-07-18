@@ -28,43 +28,34 @@ put_row_block_row(char *restrict ptr,
 		  struct Rowspan *restrict from,
 		  const struct Rowspan *const restrict until)
 {
-	*ptr = '\n';
-	ptr  = put_rowspan_cell(ptr + 1l,
-				&from->cell);
+	ptr = put_rowspan_cell(ptr,
+			       &from->cell);
 	++from;
 
 	do {
 		*ptr = '\t';
-		ptr  = put_rowspan_cell(ptr + 1l,
-					&from->cell);
+		ptr = put_rowspan_cell(ptr + 1l,
+				       &from->cell);
 		++from;
 	} while (from < until);
 
-	return ptr;
+	*ptr = '\n';
+
+	return ptr + 1l;
 }
 
 inline void
-copy_row_block_row(char *restrict ptr,
-		   struct Rowspan *restrict from,
-		   const struct Rowspan *const restrict until)
+set_row_block_row(char *restrict ptr,
+		  struct Rowspan *restrict from,
+		  const struct Rowspan *const restrict until)
 {
-	*ptr = '\n';
-	ptr  = put_string(ptr + 1l,
-			  from->cell);
-	++from;
-
-	struct Rowspan *const restrict last = until - 1l;
-
 	do {
+		ptr = put_rowspan_cell(ptr,
+				       &from->cell);
 		*ptr = '\t';
-		ptr  = put_string(ptr + 1l,
-				  from->cell);
+		++ptr;
 		++from;
-	} while (from < last);
-
-	*ptr = '\t';
-	copy_string(ptr + 1l,
-		    last->cell);
+	} while (from < until);
 }
 
 void

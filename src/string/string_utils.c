@@ -117,6 +117,10 @@ put_pointer_id_until(char *restrict buffer,
 		     void *const restrict pointer,
 		     char *const restrict until);
 
+extern inline void
+copy_string(char *restrict buffer,
+	    const char *restrict string);
+
 extern inline char *
 put_string(char *restrict buffer,
 	   const char *restrict string);

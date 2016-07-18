@@ -1,14 +1,18 @@
 #include "generate/row_block.h"
 
 extern inline char *
+put_rowspan_cell(char *restrict ptr,
+		 char *const restrict *restrict cell_ptr);
+
+extern inline char *
 put_row_block_row(char *restrict ptr,
 		  struct Rowspan *restrict from,
 		  const struct Rowspan *const restrict until);
 
 extern inline void
-set_row_block_row(char *restrict ptr,
-		  struct Rowspan *restrict from,
-		  const struct Rowspan *const restrict until);
+copy_row_block_row(char *restrict ptr,
+		   struct Rowspan *restrict from,
+		   const struct Rowspan *const restrict until);
 
 void
 build_row_block(void *arg)
@@ -25,7 +29,7 @@ build_row_block(void *arg)
 					row_block->rowspans.from,
 					row_block->rowspans.until);
 
-	set_row_block_row(ptr,
-			  row_block->row_spans.from,
-			  row_block->row_spans.until);
+	copy_row_block_row(ptr,
+			   row_block->row_spans.from,
+			   row_block->row_spans.until);
 }
