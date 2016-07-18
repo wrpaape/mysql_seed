@@ -3,8 +3,6 @@
 /* Generator/DatbaseCounter operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-database_counter_reset(struct DatabaseCounter *const restrict database);
-extern inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database);
 
@@ -176,6 +174,10 @@ parse_db_specs(struct GenerateParseState *const restrict state);
 
 /* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+generate_process(const struct GeneratorCounter *const restrict count,
+		 const struct DbSpec *restrict db_spec,
+		 int *const restrict exit_status);
 extern inline int
 generate_dispatch(char *restrict *const restrict arg,
 		  const int rem_argc);

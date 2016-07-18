@@ -22,13 +22,13 @@ build_column_id(void *arg)
 	char *restrict *restrict count_ptr = counter->pointers;
 
 	do {
-		from->cells = *count_ptr;
+		from->cell = *count_ptr;
 
 		count_ptr += from->parent->row_count;
 
 		/* add length of id rowspan to row_block total */
 		length_lock_increment(&from->parent->total,
-				      *count_ptr - from->cells,
+				      *count_ptr - from->cell,
 				      &column->fail_cl);
 		++from;
 	} while (from < until);

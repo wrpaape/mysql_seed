@@ -233,15 +233,6 @@ struct GenerateParseState {
 /* Generator/DatbaseCounter operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-database_counter_reset(struct DatabaseCounter *const restrict database)
-{
-	database->rows		= 0llu;
-	database->row_count_max = 0lu;
-	database->columns	= 0u;
-	database->tables	= 0u;
-}
-
-inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database)
 {
@@ -1865,8 +1856,6 @@ generate_parse_error(struct GenerateParseState *const restrict state)
 inline void
 parse_db_specs(struct GenerateParseState *const restrict state)
 {
-	state->valid.last = &state->valid.head;
-
 	const bool matched_db_flag = db_flag_match(&state->argv);
 
 	++(state->argv.arg.from);
@@ -1877,6 +1866,12 @@ parse_db_specs(struct GenerateParseState *const restrict state)
 		generate_parse_error(state);
 }
 
+inline void
+generate_process(const struct GeneratorCounter *const restrict count,
+		 const struct DbSpec *restrict db_spec,
+		 int *const restrict exit_status)
+{
+}
 
 
 inline int
@@ -2001,28 +1996,24 @@ generate_dispatch(char *restrict *const restrict arg,
 
 
 	/* initialize parsing state */
-	struct GenerateParseState state = {
-		.argv = {
-			.arg = {
-				.from  = arg,
-				.until = arg_until
-			},
-			.db_spec = {
-				.until = db_spec_until
-			}
-		},
-		.specs = {
-			.db = spec_alloc
-		},
-		.generator = {
-			.rows	       = 0llu,
-			.row_count_max = 0lu,
-			.columns       = 0u,
-			.tables	       = 0u,
-			.databases     = 0u
-		},
-		.exit_status = EXIT_SUCCESS
-	};
+	struct GenerateParseState state;
+
+	state.argv.arg.from	 = arg;
+	state.argv.arg.until	 = arg_until;
+	state.argv.db_spec.until = db_spec_until;
+
+	state.specs.db = spec_alloc;
+
+	state.generator.rows	      = 0llu;
+	state.generator.row_count_max = 0lu;
+	state.generator.columns	      = 0u;
+	state.generator.tables	      = 0u;
+	state.generator.databases     = 0u;
+
+	state.valid.last  = &state.valid.head;
+
+	state.exit_status = EXIT_SUCCESS;
+
 
 	/* populate specs according to argv */
 	parse_db_specs(&state);
@@ -2035,39 +2026,42 @@ generate_dispatch(char *restrict *const restrict arg,
 		return EXIT_FAILURE;
 	}
 
-	for (struct DbSpec *db_spec = state.valid.head;
-	     db_spec != NULL;
-	     db_spec = db_spec->next) {
+	/* for (struct DbSpec *db_spec = state.valid.head; */
+	/*      db_spec != NULL; */
+	/*      db_spec = db_spec->next) { */
 
-		printf("db_name: %s\n", db_spec->name.bytes);
+	/* 	printf("db_name: %s\n", db_spec->name.bytes); */
 
-		for (struct TblSpec *tbl_spec = db_spec->tbl_specs;
-		     tbl_spec != NULL;
-		     tbl_spec = tbl_spec->next) {
-			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes);
-			printf("\trow_count: %zu\n", tbl_spec->row_count);
+	/* 	for (struct TblSpec *tbl_spec = db_spec->tbl_specs; */
+	/* 	     tbl_spec != NULL; */
+	/* 	     tbl_spec = tbl_spec->next) { */
+	/* 		printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes); */
+	/* 		printf("\trow_count: %zu\n", tbl_spec->row_count); */
 
-			for (struct ColSpec *col_spec = tbl_spec->col_specs.from;
-			     col_spec < tbl_spec->col_specs.until;
-			     ++col_spec) {
-				printf("\t\tcol_name:  %s\n", col_spec->name.bytes);
-			}
-		}
-	}
+	/* 		for (struct ColSpec *col_spec = tbl_spec->col_specs.from; */
+	/* 		     col_spec < tbl_spec->col_specs.until; */
+	/* 		     ++col_spec) { */
+	/* 			printf("\t\tcol_name:  %s\n", col_spec->name.bytes); */
+	/* 		} */
+	/* 	} */
+	/* } */
 
-	printf("rows:          %lu\n"
-	       "row_count_max: %zu\n"
-	       "columns:       %u\n"
-	       "tables:        %u\n"
-	       "databases:     %u\n"
-	       "exit_status:   EXIT_%s\n",
-	       state.generator.rows,
-	       state.generator.row_count_max,
-	       state.generator.columns,
-	       state.generator.tables,
-	       state.generator.databases,
-	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
+	/* printf("rows:          %lu\n" */
+	/*        "row_count_max: %zu\n" */
+	/*        "columns:       %u\n" */
+	/*        "tables:        %u\n" */
+	/*        "databases:     %u\n" */
+	/*        "exit_status:   EXIT_%s\n", */
+	/*        state.generator.rows, */
+	/*        state.generator.row_count_max, */
+	/*        state.generator.columns, */
+	/*        state.generator.tables, */
+	/*        state.generator.databases, */
+	/*        state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE"); */
 
+	generate_process(&state.generator,
+			 state.valid.head,
+			 &state.exit_status);
 
 	free(spec_alloc);
 

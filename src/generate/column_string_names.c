@@ -469,7 +469,7 @@ build_column_string_names_first(void *arg)
 	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	do {
-		from->cells = ptr;
+		from->cell = ptr;
 
 		ptr = put_single_names(ptr,
 				       &first_name_map,
@@ -477,7 +477,7 @@ build_column_string_names_first(void *arg)
 
 		/* add length of rowspan to row_block total */
 		length_lock_increment(&from->parent->total,
-				      ptr - from->cells,
+				      ptr - from->cell,
 				      &column->fail_cl);
 
 		++from;
@@ -486,7 +486,7 @@ build_column_string_names_first(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&column->parent->total,
-			      ptr - column->rowspans.from->cells,
+			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
 
 
@@ -527,7 +527,7 @@ build_column_string_names_last(void *arg)
 	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	do {
-		from->cells = ptr;
+		from->cell = ptr;
 
 		ptr = put_single_names(ptr,
 				       &last_name_map,
@@ -535,7 +535,7 @@ build_column_string_names_last(void *arg)
 
 		/* add length of rowspan to row_block total */
 		length_lock_increment(&from->parent->total,
-				      ptr - from->cells,
+				      ptr - from->cell,
 				      &column->fail_cl);
 
 		++from;
@@ -544,7 +544,7 @@ build_column_string_names_last(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&column->parent->total,
-			      ptr - column->rowspans.from->cells,
+			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
 
 
@@ -585,14 +585,14 @@ build_column_string_names_full(void *arg)
 	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	do {
-		from->cells = ptr;
+		from->cell = ptr;
 
 		ptr = put_full_names(ptr,
 				     from->parent->row_count);
 
 		/* add length of rowspan to row_block total */
 		length_lock_increment(&from->parent->total,
-				      ptr - from->cells,
+				      ptr - from->cell,
 				      &column->fail_cl);
 
 		++from;
@@ -601,7 +601,7 @@ build_column_string_names_full(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&column->parent->total,
-			      ptr - column->rowspans.from->cells,
+			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
 
 

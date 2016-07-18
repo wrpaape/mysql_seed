@@ -317,7 +317,7 @@ struct RowBlock;
 
 struct Rowspan {
 	struct RowBlock *parent;	/* get row_count, update total block length */
-	char *cells;			/* points to first cell */
+	char *cell;			/* points to first cell */
 };
 
 struct RowspanInterval {
@@ -394,7 +394,7 @@ struct DatabaseInterval {
 struct Counter {
 	Mutex processing;	/* condition lock */
 	ThreadCond done;	/* broadcasted once 'pointers' are set */
-	bool ready;	/* flipped true once 'pointers' are set */
+	bool ready;		/* flipped true once 'pointers' are set */
 	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
 	char **pointers;	/* digit pointers */
 	size_t upto;		/* final and max stringified number */
@@ -410,7 +410,6 @@ struct Generator {
 	struct Counter counter;			/* shared by all */
 	struct DatabaseInterval databases;
 	struct DbSpec *db_specs;		/* from raw input */
-	char *contents;				/* buffer for all files */
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 };
 
@@ -442,7 +441,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
-	free(column->rowspans.from->cells);
+	free(column->rowspans.from->cell);
 }
 
 inline void

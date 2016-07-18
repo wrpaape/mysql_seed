@@ -50,7 +50,7 @@ build_column_string_base(void *arg)
 	char *restrict *restrict count_until;
 
 	do {
-		from->cells = ptr;
+		from->cell = ptr;
 
 		count_until = count_ptr + from->parent->row_count;
 
@@ -66,7 +66,7 @@ build_column_string_base(void *arg)
 		} while (count_ptr < count_until);
 
 		length_lock_increment(&from->parent->total,
-				      ptr - from->cells,
+				      ptr - from->cell,
 				      &column->fail_cl);
 
 		++from;
