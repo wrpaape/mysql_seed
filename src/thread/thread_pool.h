@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* threads API */
-#include "thread/thread_queue.h"	/* ThreadQueue */
+#include "thread/task_queue.h"		/* TaskQueue */
 #include "thread/thread_log.h"		/* ThreadLog */
 
 #define WORKERS_MAX 16lu
@@ -43,11 +43,11 @@ struct Worker {
 	struct ThreadPool *pool;
 };
 
-struct TaskQueue {
-	struct ThreadQueue backlog;
-	struct ThreadQueue active;
-	struct ThreadQueue complete;
-	struct ThreadQueue vacant;
+struct TaskBuffer {
+	struct TaskQueue backlog;
+	struct TaskQueue active;
+	struct TaskQueue complete;
+	struct TaskQueue vacant;
 };
 
 struct WorkerCrew {
@@ -65,7 +65,7 @@ struct ThreadPoolStatus {
 struct ThreadPool {
 	struct ThreadPoolStatus status;
 	struct ThreadLog log;
-	struct TaskQueue task_queue;
+	struct TaskBuffer tasks;
 	struct Supervisor supervisor;
 	struct WorkerCrew worker_crew;
 };
@@ -99,17 +99,17 @@ worker_init(struct Worker *const restrict worker,
 inline void
 worker_process_tasks(struct Worker *const restrict worker)
 {
-	struct TaskQueue *const restrict
-	task_queue = &worker->pool->task_queue;
+	struct TaskBuffer *const restrict
+	tasks = &worker->pool->tasks;
 
-	struct ThreadQueueNode *restrict node;
+	struct TaskQueueNode *restrict node;
 	struct ProcedureClosure *restrict task_cl;
 
 	while (1) {
 		/* pop next assigned task, blocking if there are none,
 		 * then push into active queue */
-		thread_queue_pop_push_handle_cl(&task_queue->backlog,
-						&task_queue->active,
+		task_queue_pop_push_handle_cl(&tasks->backlog,
+						&tasks->active,
 						&node,
 						&worker->fail_cl);
 
@@ -118,12 +118,12 @@ worker_process_tasks(struct Worker *const restrict worker)
 
 		task_cl->fun(task_cl->arg);
 
-		thread_queue_remove_handle_cl(&task_queue->active,
+		task_queue_remove_handle_cl(&tasks->active,
 					      node,
 					      &worker->fail_cl);
 
 		/* push completed task */
-		thread_queue_push_handle_cl(&task_queue->complete,
+		task_queue_push_handle_cl(&tasks->complete,
 					    node,
 					    &worker->fail_cl);
 	}
@@ -198,24 +198,24 @@ worker_crew_cancel_success(struct WorkerCrew *const restrict worker_crew,
 }
 
 
-/* ThreadQueue operations
+/* TaskQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-task_queue_backlog_init(struct ThreadQueue *const restrict backlog,
-			struct ThreadQueueNode *restrict node,
+task_buffer_backlog_init(struct TaskQueue *const restrict backlog,
+			struct TaskQueueNode *restrict node,
 			const struct ProcedureClosure *restrict init_task,
 			const size_t count_init_tasks)
 {
 	if (count_init_tasks == 0lu) {
-		thread_queue_init_empty(backlog);
+		task_queue_init_empty(backlog);
 		return;
 	}
 
-	thread_queue_init(backlog);
+	task_queue_init(backlog);
 
-	struct ThreadQueueNode *const restrict last = node
+	struct TaskQueueNode *const restrict last = node
 						    + (count_init_tasks - 1l);
-	struct ThreadQueueNode *restrict next;
+	struct TaskQueueNode *restrict next;
 
 	last->next    = NULL;
 	backlog->last = last;
@@ -240,20 +240,20 @@ task_queue_backlog_init(struct ThreadQueue *const restrict backlog,
 }
 
 inline void
-task_queue_vacant_init(struct ThreadQueue *const restrict vacant,
-		       struct ThreadQueueNode *restrict node,
+task_buffer_vacant_init(struct TaskQueue *const restrict vacant,
+		       struct TaskQueueNode *restrict node,
 		       const size_t count_vacant_tasks)
 {
 	if (count_vacant_tasks == 0lu) {
-		thread_queue_init_empty(vacant);
+		task_queue_init_empty(vacant);
 		return;
 	}
 
-	thread_queue_init(vacant);
+	task_queue_init(vacant);
 
-	struct ThreadQueueNode *const restrict last = node
+	struct TaskQueueNode *const restrict last = node
 						    + (count_vacant_tasks - 1l);
-	struct ThreadQueueNode *restrict next;
+	struct TaskQueueNode *restrict next;
 
 	last->next   = NULL;
 	vacant->last = last;
@@ -277,27 +277,27 @@ task_queue_vacant_init(struct ThreadQueue *const restrict vacant,
 
 
 
-/* TaskQueue operations
+/* TaskBuffer operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-task_queue_init(struct TaskQueue *const restrict task_queue,
-		struct ThreadQueueNode *const restrict task_nodes,
+task_buffer_init(struct TaskBuffer *const restrict tasks,
+		struct TaskQueueNode *const restrict task_nodes,
 		const struct ProcedureClosure *const restrict init_tasks,
-		const size_t length_task_queue,
+		const size_t length_task_buffer,
 		const size_t count_init_tasks)
 {
-	task_queue_backlog_init(&task_queue->backlog,
+	task_buffer_backlog_init(&tasks->backlog,
 				task_nodes,
 				init_tasks,
 				count_init_tasks);
 
-	thread_queue_init_empty(&task_queue->active);
+	task_queue_init_empty(&tasks->active);
 
-	thread_queue_init_empty(&task_queue->complete);
+	task_queue_init_empty(&tasks->complete);
 
-	task_queue_vacant_init(&task_queue->vacant,
+	task_buffer_vacant_init(&tasks->vacant,
 			       task_nodes + count_init_tasks,
-			       length_task_queue - count_init_tasks);
+			       length_task_buffer - count_init_tasks);
 }
 
 
@@ -422,8 +422,8 @@ supervisor_do_exit_failure(struct Supervisor *const restrict supervisor)
 
 	/* if there's a thread waiting in thread_pool_await, ensure that it's
 	 * awoken */
-	thread_queue_clear_muffle(&pool->task_queue.backlog);
-	thread_queue_clear_muffle(&pool->task_queue.active);
+	task_queue_clear_muffle(&pool->tasks.backlog);
+	task_queue_clear_muffle(&pool->tasks.active);
 
 	/* signal pool is done */
 	thread_pool_status_set_failure(&pool->status);
@@ -585,10 +585,10 @@ supervisor_signal_handle_cl(struct Supervisor *const restrict supervisor,
 inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
 		 const struct ProcedureClosure *const restrict init_tasks,
-		 struct ThreadQueueNode *const restrict task_nodes,
+		 struct TaskQueueNode *const restrict task_nodes,
 		 struct Worker *const restrict workers,
 		 const size_t count_init_tasks,
-		 const size_t length_task_queue,
+		 const size_t length_task_buffer,
 		 const size_t count_workers)
 {
 	/* initialize thread pool status */
@@ -599,10 +599,10 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 			"thread pool");
 
 	/* initialize task queues */
-	task_queue_init(&pool->task_queue,
+	task_buffer_init(&pool->tasks,
 			task_nodes,
 			init_tasks,
-			length_task_queue,
+			length_task_buffer,
 			count_init_tasks);
 
 	/* initialize supervisor */
@@ -620,7 +620,7 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 inline struct ThreadPool *
 thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		   const size_t count_init_tasks,
-		   const size_t length_task_queue,
+		   const size_t length_task_buffer,
 		   const size_t count_workers,
 		   const struct HandlerClosure *const restrict fail_cl)
 {
@@ -633,33 +633,33 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		goto HANDLE_FAILURE;
 	}
 
-	if (count_init_tasks > length_task_queue) {
+	if (count_init_tasks > length_task_buffer) {
 		failure = FAILURE_REASON("thread_pool_create",
 					 "task queue too small to manage "
 					 "initial tasks (count_init_tasks > "
-					 "length_task_queue)");
+					 "length_task_buffer)");
 		goto HANDLE_FAILURE;
 	}
 
 	/* allocate space for:
 	 *	1			ThreadPool
 	 *	count_workers		Worker
-	 *	length_task_queue	ThreadQueueNode (for task queue) */
+	 *	length_task_buffer	TaskQueueNode (for task queue) */
 
 	struct ThreadPool *const restrict pool
 	= malloc(sizeof(struct ThreadPool)
 		 + (sizeof(struct Worker)	   * count_workers)
-		 + (sizeof(struct ThreadQueueNode) * length_task_queue));
+		 + (sizeof(struct TaskQueueNode) * length_task_buffer));
 
 	if (pool != NULL) {
 		/* divvy up memory for task queue nodes */
-		struct ThreadQueueNode *const restrict task_nodes
-		= (struct ThreadQueueNode *const restrict) (pool + 1l);
+		struct TaskQueueNode *const restrict task_nodes
+		= (struct TaskQueueNode *const restrict) (pool + 1l);
 
 		/* divvy up memory for workers */
 		struct Worker *const restrict workers
 		= (struct Worker *const restrict) (task_nodes
-						   + length_task_queue);
+						   + length_task_buffer);
 
 		/* initialize internal fields, but do not start */
 		thread_pool_init(pool,
@@ -667,7 +667,7 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 				 task_nodes,
 				 workers,
 				 count_init_tasks,
-				 length_task_queue,
+				 length_task_buffer,
 				 count_workers);
 		return pool;
 	}
@@ -697,11 +697,11 @@ thread_pool_await(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl)
 {
 	/* wait for backlog tasks to be completed */
-	thread_queue_await_empty_handle_cl(&pool->task_queue.backlog,
+	task_queue_await_empty_handle_cl(&pool->tasks.backlog,
 					   fail_cl);
 
 	/* wait for active tasks to be completed */
-	thread_queue_await_empty_handle_cl(&pool->task_queue.active,
+	task_queue_await_empty_handle_cl(&pool->tasks.active,
 					   fail_cl);
 }
 
@@ -710,16 +710,16 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 		      const struct ProcedureClosure *const restrict task_cl,
 		      const struct HandlerClosure *const restrict fail_cl)
 {
-	struct ThreadQueueNode *restrict node;
+	struct TaskQueueNode *restrict node;
 
-	thread_queue_pop_handle_cl(&pool->task_queue.vacant,
+	task_queue_pop_handle_cl(&pool->tasks.vacant,
 				   &node,
 				   fail_cl);
 
 
 	node->payload = (void *) task_cl;
 
-	thread_queue_push_handle_cl(&pool->task_queue.backlog,
+	task_queue_push_handle_cl(&pool->tasks.backlog,
 				    node,
 				    fail_cl);
 }
@@ -731,9 +731,9 @@ inline void
 thread_pool_clear_completed(struct ThreadPool *restrict pool,
 			    const struct HandlerClosure *const restrict fail_cl)
 {
-	thread_queue_transfer_all_handle_cl(&pool->task_queue.complete,
-					    &pool->task_queue.vacant,
-					    fail_cl);
+	task_queue_transfer_all_handle_cl(&pool->tasks.complete,
+					  &pool->tasks.vacant,
+					  fail_cl);
 }
 
 inline void

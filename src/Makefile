@@ -1258,7 +1258,7 @@ GENERATE_LOADER_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate loader)
 GENERATE_LOADER_OBJ_PREQS	:= $(GENERATE_LOADER_SRC) 		\
 				   $(GENERATE_LOADER_HDR) 		\
 				   $(GENERATE_GENERATOR_HDR)
-GENERATE_LOADER_OBJ_GROUP	:= $(GENERATE_OBJ) 			\
+GENERATE_LOADER_OBJ_GROUP	:= $(GENERATE_GENERATOR_OBJ) 		\
 				   $(GENERATE_GENERATOR_OBJ_GROUP)
 GENERATE_LOADER_TRNR_SRC_PREQS	:= $(GENERATE_LOADER_TEST_SRC)		\
 			   	   $(TEST_RUNNER_SOURCE_DIR)
@@ -1280,6 +1280,42 @@ TARGETS			+= $(GENERATE_LOADER_OBJ)			\
 			   $(GENERATE_LOADER_TEST_BIN)
 
 
+# generate/row_block
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_ROW_BLOCK_SRC 		:= $(call HELPER_SOURCE_PATH,generate row_block)
+GENERATE_ROW_BLOCK_HDR		:= $(call HELPER_HEADER_PATH,generate row_block)
+GENERATE_ROW_BLOCK_OBJ 		:= $(call HELPER_OBJECT_PATH,generate row_block)
+GENERATE_ROW_BLOCK_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate row_block)
+GENERATE_ROW_BLOCK_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate row_block)
+GENERATE_ROW_BLOCK_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate row_block)
+GENERATE_ROW_BLOCK_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate row_block)
+GENERATE_ROW_BLOCK_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate row_block)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_ROW_BLOCK_OBJ_PREQS		:= $(GENERATE_ROW_BLOCK_SRC) 		\
+				   	   $(GENERATE_ROW_BLOCK_HDR) 		\
+				   	   $(GENERATE_GENERATOR_HDR)
+GENERATE_ROW_BLOCK_OBJ_GROUP		:= $(GENERATE_ROW_BLOCK_OBJ)		\
+				   	   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_ROW_BLOCK_TRNR_SRC_PREQS	:= $(GENERATE_ROW_BLOCK_TEST_SRC)	\
+			   	   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_ROW_BLOCK_TEST_OBJ_PREQS	:= $(GENERATE_ROW_BLOCK_TEST_SRC)	\
+			   	   	   $(GENERATE_ROW_BLOCK_OBJ_PREQS) 	\
+			   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_ROW_BLOCK_TRNR_OBJ_PREQS	:= $(GENERATE_ROW_BLOCK_TRNR_SRC)	\
+			   	   	   $(GENERATE_ROW_BLOCK_TEST_OBJ_PREQS)
+GENERATE_ROW_BLOCK_TEST_BIN_PREQS	:= $(GENERATE_ROW_BLOCK_TRNR_OBJ)	\
+			   	   	   $(GENERATE_ROW_BLOCK_TEST_OBJ)	\
+			   	   	   $(GENERATE_ROW_BLOCK_OBJ_GROUP)	\
+			           	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_ROW_BLOCK_TEST_BIN)
+TARGETS			+= $(GENERATE_ROW_BLOCK_OBJ)			\
+			   $(GENERATE_ROW_BLOCK_TRNR_SRC)		\
+			   $(GENERATE_ROW_BLOCK_TRNR_OBJ)		\
+			   $(GENERATE_ROW_BLOCK_TEST_OBJ)		\
+			   $(GENERATE_ROW_BLOCK_TEST_BIN)
+
+
 # generate/table
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_TABLE_SRC 	:= $(call HELPER_SOURCE_PATH,generate table)
@@ -1293,9 +1329,9 @@ GENERATE_TABLE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate table)
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_TABLE_OBJ_PREQS	:= $(GENERATE_TABLE_SRC) 		\
 				   $(GENERATE_TABLE_HDR) 		\
-				   $(GENERATE_GENERATOR_HDR)
-GENERATE_TABLE_OBJ_GROUP	:= $(GENERATE_OBJ) 			\
-				   $(GENERATE_GENERATOR_OBJ_GROUP)
+				   $(GENERATE_ROW_BLOCK_HDR)
+GENERATE_TABLE_OBJ_GROUP	:= $(GENERATE_TABLE_OBJ) 		\
+				   $(GENERATE_ROW_BLOCK_OBJ_GROUP)
 GENERATE_TABLE_TRNR_SRC_PREQS	:= $(GENERATE_TABLE_TEST_SRC)		\
 			   	   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_TABLE_TEST_OBJ_PREQS	:= $(GENERATE_TABLE_TEST_SRC)		\
@@ -1315,11 +1351,6 @@ TARGETS			+= $(GENERATE_TABLE_OBJ)			\
 			   $(GENERATE_TABLE_TEST_OBJ)			\
 			   $(GENERATE_TABLE_TEST_BIN)
 
-
-#include "generate/loader.h"		/* build_loader */
-#include "generate/column_ids.h"	/* build_column_ids */
-#include "generate/column_string.h"	/* build_column_string_base */
-#include "generate/table.h"		/* build_table_header */
 
 
 ## PROJECT MODULES
@@ -1569,6 +1600,11 @@ $(GENERATE_LOADER_OBJ): $(GENERATE_LOADER_OBJ_PREQS)
 # make generate/table object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_TABLE_OBJ): $(GENERATE_TABLE_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/row_block object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_ROW_BLOCK_OBJ): $(GENERATE_ROW_BLOCK_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/column_id object
@@ -1996,6 +2032,26 @@ $(GENERATE_TABLE_TEST_OBJ): $(GENERATE_TABLE_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_TABLE_TRNR_SRC): $(GENERATE_TABLE_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/row_block
+# make:
+# 	generate_row_block_test		binary,
+# 	generate_row_block_test_runner 	object,
+# 	generate_row_block_test		object, and
+# 	generate_row_block_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_ROW_BLOCK_TEST_BIN): $(GENERATE_ROW_BLOCK_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_ROW_BLOCK_TRNR_OBJ): $(GENERATE_ROW_BLOCK_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_ROW_BLOCK_TEST_OBJ): $(GENERATE_ROW_BLOCK_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_ROW_BLOCK_TRNR_SRC): $(GENERATE_ROW_BLOCK_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
