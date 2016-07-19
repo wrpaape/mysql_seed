@@ -109,9 +109,9 @@ worker_process_tasks(struct Worker *const restrict worker)
 		/* pop next assigned task, blocking if there are none,
 		 * then push into active queue */
 		task_queue_pop_push_handle_cl(&tasks->backlog,
-						&tasks->active,
-						&node,
-						&worker->fail_cl);
+					      &tasks->active,
+					      &node,
+					      &worker->fail_cl);
 
 		/* do task */
 		task_cl = (struct ProcedureClosure *restrict) node->payload;
@@ -119,13 +119,13 @@ worker_process_tasks(struct Worker *const restrict worker)
 		task_cl->fun(task_cl->arg);
 
 		task_queue_remove_handle_cl(&tasks->active,
-					      node,
-					      &worker->fail_cl);
+					    node,
+					    &worker->fail_cl);
 
 		/* push completed task */
 		task_queue_push_handle_cl(&tasks->complete,
-					    node,
-					    &worker->fail_cl);
+					  node,
+					  &worker->fail_cl);
 	}
 	__builtin_unreachable();
 }
@@ -224,7 +224,7 @@ task_buffer_backlog_init(struct TaskQueue *const restrict backlog,
 	backlog->head = node;
 
 	while (1) {
-		node->payload = (void *) init_task;
+		node->task = init_task;
 
 		if (node == last)
 			return;
@@ -262,7 +262,7 @@ task_buffer_vacant_init(struct TaskQueue *const restrict vacant,
 	vacant->head = node;
 
 	while (1) {
-		/* no payloads, just hook up links */
+		/* no tasks, just hook up links */
 		if (node == last)
 			return;
 
@@ -698,11 +698,11 @@ thread_pool_await(struct ThreadPool *restrict pool,
 {
 	/* wait for backlog tasks to be completed */
 	task_queue_await_empty_handle_cl(&pool->tasks.backlog,
-					   fail_cl);
+					 fail_cl);
 
 	/* wait for active tasks to be completed */
 	task_queue_await_empty_handle_cl(&pool->tasks.active,
-					   fail_cl);
+					 fail_cl);
 }
 
 inline void
@@ -713,15 +713,15 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 	struct TaskQueueNode *restrict node;
 
 	task_queue_pop_handle_cl(&pool->tasks.vacant,
-				   &node,
-				   fail_cl);
+				 &node,
+				 fail_cl);
 
 
-	node->payload = (void *) task_cl;
+	node->task = task_cl;
 
 	task_queue_push_handle_cl(&pool->tasks.backlog,
-				    node,
-				    fail_cl);
+				  node,
+				  fail_cl);
 }
 
 /* transfer all 'complete' tasks to the 'vacant' task queue, should call after
