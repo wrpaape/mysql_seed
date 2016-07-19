@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generator.h"	/* Table, string/thread utils */
+#include "generate/row_block.h" /* generator.h, string/thread utils */
 
 inline size_t
 table_size_contents(const struct Table *const restrict table)

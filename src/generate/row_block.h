@@ -7,9 +7,11 @@
 
 inline char *
 put_rowspan_cell(char *restrict ptr,
-		 char *const restrict *restrict cell_ptr)
+		 char *restrict *const restrict cell_ptr)
 {
-	for (char *restrict cell = *cell_ptr; *cell != '\0'; ++cell) {
+	char *restrict cell;
+
+	for (cell = *cell_ptr; *cell != '\0'; ++cell) {
 		*ptr = *cell;
 		++ptr;
 	}
@@ -18,10 +20,6 @@ put_rowspan_cell(char *restrict ptr,
 
 	return ptr;
 }
-
-inline char *
-put_rowspan_cell(char *restrict ptr,
-		 char *const restrict *restrict cell_ptr)
 
 inline char *
 put_row_block_row(char *restrict ptr,
@@ -53,7 +51,7 @@ copy_row_block_row(char *restrict ptr,
 			  from->cell);
 	++from;
 
-	struct Rowspan *const restrict last = until - 1l;
+	const struct Rowspan *const restrict last = until - 1l;
 
 	do {
 		*ptr = '\t';
