@@ -47,12 +47,11 @@ struct TaskBuffer {
 	struct TaskQueue backlog;
 	struct TaskQueue active;
 	struct TaskQueue complete;
-	struct TaskQueue vacant;
 };
 
 struct WorkerCrew {
-	const struct Worker *until_ptr;
-	struct Worker *workers;
+	const struct Worker *until;
+	struct Worker *from;
 };
 
 struct ThreadPoolStatus {
@@ -67,11 +66,11 @@ struct ThreadPool {
 	struct ThreadLog log;
 	struct TaskBuffer tasks;
 	struct Supervisor supervisor;
-	struct WorkerCrew worker_crew;
+	struct WorkerCrew workers;
 };
 
 struct ThreadPoolGrid {
-	const struct ThreadPool *until_ptr;
+	const struct ThreadPool *until;
 	struct ThreadPool *pools;
 };
 
@@ -138,29 +137,29 @@ __attribute__((noreturn));
 /* WorkerCrew operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-worker_crew_init(struct WorkerCrew *const restrict worker_crew,
+worker_crew_init(struct WorkerCrew *const restrict workers,
 		 struct Worker *restrict worker,
 		 const size_t count_workers,
 		 struct ThreadPool *const restrict pool)
 {
-	const struct Worker *const restrict until_ptr = worker + count_workers;
+	const struct Worker *const restrict until = worker + count_workers;
 
-	worker_crew->until_ptr = until_ptr;
-	worker_crew->workers   = worker;
+	workers->until = until;
+	workers->from  = worker;
 
 	do {
 		worker_init(worker,
 			    pool);
 		++worker;
-	} while(worker < until_ptr);
+	} while(worker < until);
 }
 
 inline void
-worker_crew_start(struct WorkerCrew *const restrict worker_crew,
+worker_crew_start(struct WorkerCrew *const restrict workers,
 		  const struct HandlerClosure *const restrict fail_cl)
 {
-	const struct Worker *const restrict until_ptr = worker_crew->until_ptr;
-	struct Worker *restrict worker		      = worker_crew->workers;
+	const struct Worker *const restrict until = workers->until;
+	struct Worker *restrict worker		      = workers->from;
 
 	do {
 		thread_create_handle_cl(&worker->thread,
@@ -168,40 +167,40 @@ worker_crew_start(struct WorkerCrew *const restrict worker_crew,
 					worker,
 					fail_cl);
 		++worker;
-	} while (worker < until_ptr);
+	} while (worker < until);
 }
 
 inline void
-worker_crew_cancel_failure(struct WorkerCrew *const restrict worker_crew)
+worker_crew_cancel_failure(struct WorkerCrew *const restrict workers)
 {
-	const struct Worker *const restrict until_ptr = worker_crew->until_ptr;
-	struct Worker *restrict worker		      = worker_crew->workers;
+	const struct Worker *const restrict until = workers->until;
+	struct Worker *restrict worker		      = workers->from;
 
 	do {
 		thread_cancel_muffle(worker->thread);
 		++worker;
-	} while (worker < until_ptr);
+	} while (worker < until);
 }
 
 inline void
-worker_crew_cancel_success(struct WorkerCrew *const restrict worker_crew,
+worker_crew_cancel_success(struct WorkerCrew *const restrict workers,
 			   const struct HandlerClosure *const restrict fail_cl)
 {
-	const struct Worker *const restrict until_ptr = worker_crew->until_ptr;
-	struct Worker *restrict worker		      = worker_crew->workers;
+	const struct Worker *const restrict until = workers->until;
+	struct Worker *restrict worker		      = workers->from;
 
 	do {
 		thread_cancel_handle_cl(worker->thread,
 					fail_cl);
 		++worker;
-	} while (worker < until_ptr);
+	} while (worker < until);
 }
 
 
 /* TaskQueue operations
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-task_buffer_backlog_init(struct TaskQueue *const restrict backlog,
+task_queue_backlog_init(struct TaskQueue *const restrict backlog,
 			struct TaskQueueNode *restrict node,
 			const struct ProcedureClosure *restrict init_task,
 			const size_t count_init_tasks)
@@ -240,26 +239,26 @@ task_buffer_backlog_init(struct TaskQueue *const restrict backlog,
 }
 
 inline void
-task_buffer_vacant_init(struct TaskQueue *const restrict vacant,
+task_queue_complete_init(struct TaskQueue *const restrict complete,
 		       struct TaskQueueNode *restrict node,
-		       const size_t count_vacant_tasks)
+		       const size_t count_spare_nodes)
 {
-	if (count_vacant_tasks == 0lu) {
-		task_queue_init_empty(vacant);
+	if (count_spare_nodes == 0lu) {
+		task_queue_init_empty(complete);
 		return;
 	}
 
-	task_queue_init(vacant);
+	task_queue_init(complete);
 
 	struct TaskQueueNode *const restrict last = node
-						    + (count_vacant_tasks - 1l);
+						  + (count_spare_nodes - 1l);
 	struct TaskQueueNode *restrict next;
 
 	last->next   = NULL;
-	vacant->last = last;
+	complete->last = last;
 
 	node->prev   = NULL;
-	vacant->head = node;
+	complete->head = node;
 
 	while (1) {
 		/* no tasks, just hook up links */
@@ -281,23 +280,21 @@ task_buffer_vacant_init(struct TaskQueue *const restrict vacant,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_buffer_init(struct TaskBuffer *const restrict tasks,
-		struct TaskQueueNode *const restrict task_nodes,
-		const struct ProcedureClosure *const restrict init_tasks,
-		const size_t length_task_buffer,
-		const size_t count_init_tasks)
+		 struct TaskQueueNode *const restrict task_nodes,
+		 const struct ProcedureClosure *const restrict init_tasks,
+		 const size_t length_task_buffer,
+		 const size_t count_init_tasks)
 {
-	task_buffer_backlog_init(&tasks->backlog,
+	task_queue_backlog_init(&tasks->backlog,
 				task_nodes,
 				init_tasks,
 				count_init_tasks);
 
 	task_queue_init_empty(&tasks->active);
 
-	task_queue_init_empty(&tasks->complete);
-
-	task_buffer_vacant_init(&tasks->vacant,
-			       task_nodes + count_init_tasks,
-			       length_task_buffer - count_init_tasks);
+	task_queue_complete_init(&tasks->complete,
+				 task_nodes + count_init_tasks,
+				 length_task_buffer - count_init_tasks);
 }
 
 
@@ -399,8 +396,8 @@ supervisor_do_exit_failure(struct Supervisor *const restrict supervisor)
 
 	struct ThreadPool *const restrict pool = supervisor->pool;
 
-	/* cancel all living workers */
-	worker_crew_cancel_failure(&pool->worker_crew);
+	/* cancel all living from */
+	worker_crew_cancel_failure(&pool->workers);
 
 	/* close the log with a failure message and dump to stderr */
 	mutex_lock_try_catch_open(&pool->log.lock);
@@ -438,8 +435,8 @@ supervisor_do_exit_success(struct Supervisor *const restrict supervisor)
 
 	struct ThreadPool *const restrict pool = supervisor->pool;
 
-	/* cancel all living workers */
-	worker_crew_cancel_success(&pool->worker_crew,
+	/* cancel all living from */
+	worker_crew_cancel_success(&pool->workers,
 				   &supervisor->fail_cl);
 
 	/* close the log with a success message and dump to stdout */
@@ -600,10 +597,10 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 
 	/* initialize task queues */
 	task_buffer_init(&pool->tasks,
-			task_nodes,
-			init_tasks,
-			length_task_buffer,
-			count_init_tasks);
+			 task_nodes,
+			 init_tasks,
+			 length_task_buffer,
+			 count_init_tasks);
 
 	/* initialize supervisor */
 	supervisor_init(&pool->supervisor,
@@ -611,7 +608,7 @@ thread_pool_init(struct ThreadPool *const restrict pool,
 
 
 	/* initialize worker crew */
-	worker_crew_init(&pool->worker_crew,
+	worker_crew_init(&pool->workers,
 			 workers,
 			 count_workers,
 			 pool);
@@ -628,7 +625,7 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 
 	if (count_workers == 0lu) {
 		failure = FAILURE_REASON("thread_pool_create",
-					 "no space allocated for pool workers"
+					 "no space allocated for pool from"
 					 " (count_workers == 0)");
 		goto HANDLE_FAILURE;
 	}
@@ -656,8 +653,8 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		struct TaskQueueNode *const restrict task_nodes
 		= (struct TaskQueueNode *const restrict) (pool + 1l);
 
-		/* divvy up memory for workers */
-		struct Worker *const restrict workers
+		/* divvy up memory for from */
+		struct Worker *const restrict from
 		= (struct Worker *const restrict) (task_nodes
 						   + length_task_buffer);
 
@@ -665,7 +662,7 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		thread_pool_init(pool,
 				 init_tasks,
 				 task_nodes,
-				 workers,
+				 from,
 				 count_init_tasks,
 				 length_task_buffer,
 				 count_workers);
@@ -684,7 +681,7 @@ inline void
 thread_pool_start(struct ThreadPool *restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl)
 {
-	worker_crew_start(&pool->worker_crew,
+	worker_crew_start(&pool->workers,
 			  fail_cl);
 
 	supervisor_start(&pool->supervisor,
@@ -712,7 +709,7 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 {
 	struct TaskQueueNode *restrict node;
 
-	task_queue_pop_handle_cl(&pool->tasks.vacant,
+	task_queue_pop_handle_cl(&pool->tasks.complete,
 				 &node,
 				 fail_cl);
 
@@ -724,17 +721,17 @@ thread_pool_push_task(struct ThreadPool *restrict pool,
 				  fail_cl);
 }
 
-/* transfer all 'complete' tasks to the 'vacant' task queue, should call after
- * assured that results from all completed tasks have been gathered, processed
- * (perhaps following thread_pool_await) */
-inline void
-thread_pool_clear_completed(struct ThreadPool *restrict pool,
-			    const struct HandlerClosure *const restrict fail_cl)
-{
-	task_queue_transfer_all_handle_cl(&pool->tasks.complete,
-					  &pool->tasks.vacant,
-					  fail_cl);
-}
+/* /1* transfer all 'complete' tasks to the 'vacant' task queue, should call after */
+/*  * assured that results from all completed tasks have been gathered, processed */
+/*  * (perhaps following thread_pool_await) *1/ */
+/* inline void */
+/* thread_pool_clear_completed(struct ThreadPool *restrict pool, */
+/* 			    const struct HandlerClosure *const restrict fail_cl) */
+/* { */
+/* 	task_queue_transfer_all_handle_cl(&pool->tasks.complete, */
+/* 					  &pool->tasks.vacant, */
+/* 					  fail_cl); */
+/* } */
 
 inline void
 thread_pool_stop(struct ThreadPool *restrict pool,
