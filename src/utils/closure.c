@@ -8,7 +8,7 @@ routine_closure_init(struct RoutineClosure *const restrict routine_cl,
 		     void *arg);
 
 extern inline void *
-routine_closure_call(struct RoutineClosure *const restrict routine_cl);
+routine_closure_call(const struct RoutineClosure *const restrict routine_cl);
 
 /* ProcedureClosure operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -18,7 +18,7 @@ procedure_closure_init(struct ProcedureClosure *const restrict procedure_cl,
 		       void *arg);
 
 extern inline void
-procedure_closure_call(struct RoutineClosure *const restrict procedure_cl);
+procedure_closure_call(const struct ProcedureClosure *const restrict procedure_cl);
 
 /* HandlerClosure operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -27,5 +27,5 @@ handler_closure_init(struct HandlerClosure *const restrict handler_cl,
 		     Handler *const handle,
 		     void *arg);
 extern inline void
-handler_closure_call(struct HandlerClosure *const restrict handler_cl,
+handler_closure_call(const struct HandlerClosure *const restrict handler_cl,
 		     const char *const restrict failure);

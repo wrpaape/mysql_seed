@@ -39,7 +39,7 @@ routine_closure_init(struct RoutineClosure *const restrict routine_cl,
 }
 
 inline void *
-routine_closure_call(struct RoutineClosure *const restrict routine_cl)
+routine_closure_call(const struct RoutineClosure *const restrict routine_cl)
 {
 	return routine_cl->fun(routine_cl->arg);
 }
@@ -57,7 +57,7 @@ procedure_closure_init(struct ProcedureClosure *const restrict procedure_cl,
 }
 
 inline void
-procedure_closure_call(struct RoutineClosure *const restrict procedure_cl)
+procedure_closure_call(const struct ProcedureClosure *const restrict procedure_cl)
 {
 	procedure_cl->fun(procedure_cl->arg);
 }
@@ -74,7 +74,7 @@ handler_closure_init(struct HandlerClosure *const restrict handler_cl,
 }
 
 inline void
-handler_closure_call(struct HandlerClosure *const restrict handler_cl,
+handler_closure_call(const struct HandlerClosure *const restrict handler_cl,
 		     const char *const restrict failure)
 {
 	handler_cl->handle(handler_cl->arg,

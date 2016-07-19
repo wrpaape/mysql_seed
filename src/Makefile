@@ -902,40 +902,40 @@ TARGETS			+= $(THREAD_THREAD_UTILS_OBJ)			\
 			   $(THREAD_THREAD_UTILS_TEST_BIN)
 
 
-# thread/thread_queue
+# thread/task_queue
 # ──────────────────────────────────────────────────────────────────────────────
-THREAD_THREAD_QUEUE_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_HDR		:= $(call HELPER_HEADER_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_OBJ 	:= $(call HELPER_OBJECT_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread thread_queue)
-THREAD_THREAD_QUEUE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread thread_queue)
+THREAD_TASK_QUEUE_SRC 	:= $(call HELPER_SOURCE_PATH,thread task_queue)
+THREAD_TASK_QUEUE_HDR		:= $(call HELPER_HEADER_PATH,thread task_queue)
+THREAD_TASK_QUEUE_OBJ 	:= $(call HELPER_OBJECT_PATH,thread task_queue)
+THREAD_TASK_QUEUE_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,thread task_queue)
+THREAD_TASK_QUEUE_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,thread task_queue)
+THREAD_TASK_QUEUE_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,thread task_queue)
+THREAD_TASK_QUEUE_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,thread task_queue)
+THREAD_TASK_QUEUE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,thread task_queue)
 # ─────────────── target prequisites ───────────────────────────────────────────
-THREAD_THREAD_QUEUE_OBJ_PREQS		:= $(THREAD_THREAD_QUEUE_SRC) 		\
-			   		   $(THREAD_THREAD_QUEUE_HDR) 		\
+THREAD_TASK_QUEUE_OBJ_PREQS		:= $(THREAD_TASK_QUEUE_SRC) 		\
+			   		   $(THREAD_TASK_QUEUE_HDR) 		\
 			   		   $(THREAD_THREAD_UTILS_HDR)
-THREAD_THREAD_QUEUE_OBJ_GROUP		:= $(THREAD_THREAD_QUEUE_OBJ)		\
+THREAD_TASK_QUEUE_OBJ_GROUP		:= $(THREAD_TASK_QUEUE_OBJ)		\
 					   $(THREAD_THREAD_UTILS_OBJ_GROUP)
-THREAD_THREAD_QUEUE_TRNR_SRC_PREQS	:= $(THREAD_THREAD_QUEUE_TEST_SRC)	\
+THREAD_TASK_QUEUE_TRNR_SRC_PREQS	:= $(THREAD_TASK_QUEUE_TEST_SRC)	\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
-THREAD_THREAD_QUEUE_TEST_OBJ_PREQS	:= $(THREAD_THREAD_QUEUE_TEST_SRC)	\
-			   		   $(THREAD_THREAD_QUEUE_OBJ_PREQS) 	\
+THREAD_TASK_QUEUE_TEST_OBJ_PREQS	:= $(THREAD_TASK_QUEUE_TEST_SRC)	\
+			   		   $(THREAD_TASK_QUEUE_OBJ_PREQS) 	\
 			   		   $(UNITY_OBJ_PREQS)
-THREAD_THREAD_QUEUE_TRNR_OBJ_PREQS	:= $(THREAD_THREAD_QUEUE_TRNR_SRC)	\
-			   		   $(THREAD_THREAD_QUEUE_TEST_OBJ_PREQS)
-THREAD_THREAD_QUEUE_TEST_BIN_PREQS	:= $(THREAD_THREAD_QUEUE_TRNR_OBJ)	\
-			   		   $(THREAD_THREAD_QUEUE_TEST_OBJ)	\
-			   		   $(THREAD_THREAD_QUEUE_OBJ_GROUP)	\
+THREAD_TASK_QUEUE_TRNR_OBJ_PREQS	:= $(THREAD_TASK_QUEUE_TRNR_SRC)	\
+			   		   $(THREAD_TASK_QUEUE_TEST_OBJ_PREQS)
+THREAD_TASK_QUEUE_TEST_BIN_PREQS	:= $(THREAD_TASK_QUEUE_TRNR_OBJ)	\
+			   		   $(THREAD_TASK_QUEUE_TEST_OBJ)	\
+			   		   $(THREAD_TASK_QUEUE_OBJ_GROUP)	\
 			   		   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(THREAD_THREAD_QUEUE_TEST_BIN)
-TARGETS			+= $(THREAD_THREAD_QUEUE_OBJ)			\
-			   $(THREAD_THREAD_QUEUE_TRNR_SRC)		\
-			   $(THREAD_THREAD_QUEUE_TRNR_OBJ)		\
-			   $(THREAD_THREAD_QUEUE_TEST_OBJ)		\
-			   $(THREAD_THREAD_QUEUE_TEST_BIN)
+TEST_BINARIES		+= $(THREAD_TASK_QUEUE_TEST_BIN)
+TARGETS			+= $(THREAD_TASK_QUEUE_OBJ)			\
+			   $(THREAD_TASK_QUEUE_TRNR_SRC)		\
+			   $(THREAD_TASK_QUEUE_TRNR_OBJ)		\
+			   $(THREAD_TASK_QUEUE_TEST_OBJ)		\
+			   $(THREAD_TASK_QUEUE_TEST_BIN)
 
 
 # thread/thread_log
@@ -995,7 +995,7 @@ THREAD_THREAD_POOL_OBJ_PREQS		:= $(THREAD_THREAD_POOL_SRC) 		\
 			   		   $(THREAD_THREAD_LOG_HDR)
 THREAD_THREAD_POOL_OBJ_GROUP		:= $(THREAD_THREAD_POOL_OBJ)		\
 					   $(THREAD_THREAD_LOG_OBJ_GROUP)	\
-					   $(THREAD_THREAD_QUEUE_OBJ_GROUP)
+					   $(THREAD_TASK_QUEUE_OBJ_GROUP)
 THREAD_THREAD_POOL_TRNR_SRC_PREQS	:= $(THREAD_THREAD_POOL_TEST_SRC)	\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 THREAD_THREAD_POOL_TEST_OBJ_PREQS	:= $(THREAD_THREAD_POOL_TEST_SRC)	\
@@ -1572,9 +1572,9 @@ $(THREAD_THREAD_POOL_OBJ): $(THREAD_THREAD_POOL_OBJ_PREQS)
 $(THREAD_THREAD_LOG_OBJ): $(THREAD_THREAD_LOG_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make thread/thread_queue object
+# make thread/task_queue object
 # ──────────────────────────────────────────────────────────────────────────────
-$(THREAD_THREAD_QUEUE_OBJ): $(THREAD_THREAD_QUEUE_OBJ_PREQS)
+$(THREAD_TASK_QUEUE_OBJ): $(THREAD_TASK_QUEUE_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make thread/thread_utils object
@@ -1835,23 +1835,23 @@ $(THREAD_THREAD_LOG_TRNR_SRC): $(THREAD_THREAD_LOG_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for thread/thread_queue
+# for thread/task_queue
 # make:
-# 	thread_thread_queue_test		binary,
-# 	thread_thread_queue_test_runner 	object,
-# 	thread_thread_queue_test		object, and
-# 	thread_thread_queue_test_runner	source
+# 	thread_task_queue_test		binary,
+# 	thread_task_queue_test_runner 	object,
+# 	thread_task_queue_test		object, and
+# 	thread_task_queue_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(THREAD_THREAD_QUEUE_TEST_BIN): $(THREAD_THREAD_QUEUE_TEST_BIN_PREQS)
+$(THREAD_TASK_QUEUE_TEST_BIN): $(THREAD_TASK_QUEUE_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(THREAD_THREAD_QUEUE_TRNR_OBJ): $(THREAD_THREAD_QUEUE_TRNR_OBJ_PREQS)
+$(THREAD_TASK_QUEUE_TRNR_OBJ): $(THREAD_TASK_QUEUE_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(THREAD_THREAD_QUEUE_TEST_OBJ): $(THREAD_THREAD_QUEUE_TEST_OBJ_PREQS)
+$(THREAD_TASK_QUEUE_TEST_OBJ): $(THREAD_TASK_QUEUE_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(THREAD_THREAD_QUEUE_TRNR_SRC): $(THREAD_THREAD_QUEUE_TRNR_SRC_PREQS)
+$(THREAD_TASK_QUEUE_TRNR_SRC): $(THREAD_TASK_QUEUE_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

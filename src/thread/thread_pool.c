@@ -43,27 +43,25 @@ worker_spawn(void *arg)
 /* WorkerCrew operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-worker_crew_init(struct WorkerCrew *const restrict workers,
+worker_crew_init(struct WorkerCrew *const restrict worker_crew,
 		  struct Worker *restrict worker,
 		  const size_t count_workers,
 		  struct ThreadPool *const restrict pool);
 extern inline void
-worker_crew_start(struct WorkerCrew *const restrict workers,
+worker_crew_start(struct WorkerCrew *const restrict worker_crew,
 		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-worker_crew_cancel_failure(struct WorkerCrew *const restrict workers);
+worker_crew_cancel_failure(struct WorkerCrew *const restrict worker_crew);
 extern inline void
-worker_crew_cancel_success(struct WorkerCrew *const restrict workers,
+worker_crew_cancel_success(struct WorkerCrew *const restrict worker_crew,
 			   const struct HandlerClosure *const restrict fail_cl);
 
 
 /* TaskBuffer operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-task_buffer_init(struct TaskBuffer *const restrict tasks,
-		 struct TaskQueueNode *const restrict task_nodes,
-		 const struct ProcedureClosure *const restrict init_tasks,
-		 const size_t count_init_tasks);
+task_buffer_init(struct TaskBuffer *const restrict task_buffer,
+		 const struct TaskStore *const restrict task_store);
 
 /* ThreadPoolStatus operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -79,6 +77,9 @@ thread_pool_status_await_failure(struct ThreadPoolStatus *const restrict status)
 extern inline void
 thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
 				 const struct HandlerClosure *const restrict fail_cl);
+extern inline bool
+thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
+			      const struct HandlerClosure *const restrict fail_cl);
 
 /* Supervisor operations, SupervisorEvents
  *─────────────────────────────────────────────────────────────────────────── */
@@ -172,44 +173,51 @@ supervisor_signal_handle_cl(struct Supervisor *const restrict supervisor,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 thread_pool_init(struct ThreadPool *const restrict pool,
-		 const struct ProcedureClosure *const restrict init_tasks,
-		 struct TaskQueueNode *const restrict task_nodes,
+		 const struct TaskStore *const restrict task_store,
 		 struct Worker *const restrict workers,
-		 const size_t count_init_tasks,
-		 const size_t length_task_queue,
 		 const size_t count_workers);
 extern inline struct ThreadPool *
 thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		   const size_t count_init_tasks,
-		   const size_t length_task_queue,
 		   const size_t count_workers,
 		   const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_start(struct ThreadPool *restrict pool,
+thread_pool_start(struct ThreadPool *const restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_await(struct ThreadPool *restrict pool,
+thread_pool_await(struct ThreadPool *const restrict pool,
+		  const struct HandlerClosure *const restrict fail_cl);
+inline bool
+thread_pool_alive(struct ThreadPool *const restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_push_task(struct ThreadPool *restrict pool,
+thread_pool_push_task(struct ThreadPool *const restrict pool,
 		      const struct ProcedureClosure *const restrict task_cl,
 		      const struct HandlerClosure *const restrict fail_cl);
-/* extern inline void */
-/* thread_pool_clear_completed(struct ThreadPool *restrict pool, */
-/* 			    const struct HandlerClosure *const restrict fail_cl); */
 extern inline void
-thread_pool_stop(struct ThreadPool *restrict pool,
+thread_pool_stop(struct ThreadPool *const restrict pool,
 		 const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_await_exit_failure(struct ThreadPool *restrict pool);
+thread_pool_await_exit_failure(struct ThreadPool *const restrict pool);
 extern inline void
-thread_pool_await_exit_success(struct ThreadPool *restrict pool,
+thread_pool_await_exit_success(struct ThreadPool *const restrict pool,
 			       const struct HandlerClosure *const restrict fail_cl);
 extern inline int
-thread_pool_exit_status(struct ThreadPool *restrict pool,
+thread_pool_exit_status(struct ThreadPool *const restrict pool,
 			const struct HandlerClosure *const restrict fail_cl);
 extern inline void
-thread_pool_exit_on_failure(struct ThreadPool *restrict pool,
+thread_pool_exit_on_failure(struct ThreadPool *const restrict pool,
 			    const char *restrict failure);
 extern inline void
-thread_pool_destroy(struct ThreadPool *restrict pool);
+thread_pool_reload(struct ThreadPool *const restrict pool,
+		   struct TaskStore *const restrict store,
+		   const struct HandlerClosure *const restrict fail_cl);
+extern inline void
+thread_pool_retreive_cold(struct ThreadPool *const restrict pool,
+			  struct TaskStore *const restrict store);
+extern inline void
+thread_pool_retreive_hot(struct ThreadPool *const restrict pool,
+			 struct TaskStore *const restrict store,
+			 const struct HandlerClosure *const restrict fail_cl);
+extern inline void
+thread_pool_destroy(struct ThreadPool *const restrict pool);

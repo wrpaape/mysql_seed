@@ -7,28 +7,74 @@
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
-struct TaskQueueNode {
-	struct ProcedureClosure *task;
-	struct TaskQueueNode *prev;
-	struct TaskQueueNode *next;
+struct TaskNode {
+	const struct ProcedureClosure *task;
+	struct TaskNode *prev;
+	struct TaskNode *next;
+};
+
+struct TaskStore {
+	struct TaskNode *restrict head;
+	struct TaskNode *restrict last;
 };
 
 struct TaskQueue {
 	Mutex lock;
 	ThreadCond node_ready;
 	ThreadCond empty;
-	struct TaskQueueNode *restrict head;
-	struct TaskQueueNode *restrict last;
+	struct TaskNode *restrict head;
+	struct TaskNode *restrict last;
 };
 
 
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
+inline struct TaskNode *
+populate_task_nodes(struct TaskNode *restrict node,
+		    const struct ProcedureClosure *restrict task,
+		    const size_t count)
+{
+	struct TaskNode *restrict next;
+	struct TaskNode *const restrict last = node
+						  + (count - 1l);
+	last->next  = NULL;
+	node->prev  = NULL;
+
+	while (1) {
+		node->task = task;
+
+		if (node == last)
+			return last;
+
+		next = node + 1l;
+
+		node->next = next;
+		next->prev = node;
+
+		node = next;
+		++task;
+	}
+}
+
+inline void
+task_store_populate(struct TaskStore *const restrict store,
+		    struct TaskNode *const restrict nodes,
+		    const struct ProcedureClosure *const restrict tasks,
+		    const size_t count)
+{
+	store->head = nodes;
+	store->last = populate_task_nodes(nodes,
+					  tasks,
+					  count);
+}
+
 inline void
 task_queue_init(struct TaskQueue *const restrict queue)
 {
 	mutex_init(&queue->lock);
+
 	thread_cond_init(&queue->node_ready);
+
 	thread_cond_init(&queue->empty);
 }
 
@@ -42,162 +88,36 @@ task_queue_init_empty(struct TaskQueue *const restrict queue)
 }
 
 inline void
+task_queue_init_from_store(struct TaskQueue *const restrict queue,
+			   const struct TaskStore *const restrict store)
+{
+	task_queue_init(queue);
+
+	queue->head = store->head;
+	queue->last = store->last;
+}
+
+
+inline void
 task_queue_init_populated(struct TaskQueue *const restrict queue,
-			  struct TaskQueueNode *restrict node,
+			  struct TaskNode *restrict node,
 			  struct ProcedureClosure *restrict task,
 			  const size_t count)
 {
-	struct TaskQueueNode *restrict next;
-
 	task_queue_init(queue);
 
-	struct TaskQueueNode *const restrict last = node
-						  + (count - 1l);
-	last->next  = NULL;
-	queue->last = last;
-
-	node->prev  = NULL;
 	queue->head = node;
-
-
-	while (1) {
-		node->task = task;
-
-		if (node == last)
-			return;
-
-		next = node + 1l;
-
-		node->next = next;
-		next->prev = node;
-
-		node = next;
-		++task;
-	}
+	queue->last = populate_task_nodes(node,
+					  task,
+					  count);
 }
 
-/* locking the queue... */
-inline bool
-task_queue_lock_status(struct TaskQueue *const restrict queue)
-{
-	return mutex_lock_status(&queue->lock);
-}
-
-inline void
-task_queue_lock_muffle(struct TaskQueue *const restrict queue)
-{
-	mutex_lock_muffle(&queue->lock);
-}
-
-inline bool
-task_queue_lock_report(struct TaskQueue *const restrict queue,
-		       const char *restrict *const restrict failure)
-{
-	return mutex_lock_report(&queue->lock,
-				 failure);
-}
-
-inline void
-task_queue_lock_handle(struct TaskQueue *const restrict queue,
-		       Handler *const handle,
-		       void *arg)
-{
-	mutex_lock_handle(&queue->lock,
-			  handle,
-			  arg);
-}
-
-inline void
-task_queue_lock_handle_cl(struct TaskQueue *const restrict queue,
-			    const struct HandlerClosure *const restrict cl)
-{
-	mutex_lock_handle_cl(&queue->lock,
-			     cl);
-}
-
-/* locking the queue (no block on failure) */
-inline bool
-task_queue_try_lock_status(struct TaskQueue *const restrict queue)
-{
-	return mutex_try_lock_status(&queue->lock);
-}
-
-inline void
-task_queue_try_lock_muffle(struct TaskQueue *const restrict queue)
-{
-	mutex_try_lock_muffle(&queue->lock);
-}
-
-inline enum ThreadFlag
-task_queue_try_lock_report(struct TaskQueue *const restrict queue,
-			   const char *restrict *const restrict failure)
-{
-	return mutex_try_lock_report(&queue->lock,
-				     failure);
-}
-
-inline void
-task_queue_try_lock_handle(struct TaskQueue *const restrict queue,
-			   Handler *const handle,
-			   void *arg)
-{
-	mutex_try_lock_handle(&queue->lock,
-			      handle,
-			      arg);
-}
-
-inline void
-task_queue_try_lock_handle_cl(struct TaskQueue *const restrict queue,
-			      const struct HandlerClosure *const restrict cl)
-{
-	mutex_try_lock_handle_cl(&queue->lock,
-				 cl);
-}
-
-/* unlocking the queue... */
-inline bool
-task_queue_unlock_status(struct TaskQueue *const restrict queue)
-{
-	return mutex_unlock_status(&queue->lock);
-}
-
-inline void
-task_queue_unlock_muffle(struct TaskQueue *const restrict queue)
-{
-	mutex_unlock_muffle(&queue->lock);
-}
-
-inline bool
-task_queue_unlock_report(struct TaskQueue *const restrict queue,
-			 const char *restrict *const restrict failure)
-{
-	return mutex_unlock_report(&queue->lock,
-				   failure);
-}
-
-inline void
-task_queue_unlock_handle(struct TaskQueue *const restrict queue,
-			 Handler *const handle,
-			 void *arg)
-{
-	mutex_unlock_handle(&queue->lock,
-			    handle,
-			    arg);
-}
-
-inline void
-task_queue_unlock_handle_cl(struct TaskQueue *const restrict queue,
-			    const struct HandlerClosure *const restrict cl)
-{
-	mutex_unlock_handle_cl(&queue->lock,
-			       cl);
-}
 
 /* LIFO peek
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_queue_peek(struct TaskQueue *const restrict queue,
-		struct TaskQueueNode *restrict *const restrict node_ptr)
+		struct TaskNode *restrict *const restrict node_ptr)
 {
 	*node_ptr = queue->head;
 }
@@ -207,7 +127,7 @@ task_queue_peek(struct TaskQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_queue_push_muffle(struct TaskQueue *const restrict queue,
-		       struct TaskQueueNode *const restrict node)
+		       struct TaskNode *const restrict node)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
@@ -234,13 +154,13 @@ task_queue_push_muffle(struct TaskQueue *const restrict queue,
 
 inline void
 task_queue_push_handle_cl(struct TaskQueue *const restrict queue,
-			  struct TaskQueueNode *const restrict node,
-			  const struct HandlerClosure *const restrict h_cl)
+			  struct TaskNode *const restrict node,
+			  const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
-			     h_cl);
+			     fail_cl);
 
 	node->next = NULL;
 	node->prev = queue->last;
@@ -250,14 +170,14 @@ task_queue_push_handle_cl(struct TaskQueue *const restrict queue,
 		queue->last = node;
 
 		thread_cond_signal_handle_cl(&queue->node_ready,
-					     h_cl);
+					     fail_cl);
 	} else {
 		queue->last->next = node;
 		queue->last	  = node;
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -267,7 +187,7 @@ task_queue_push_handle_cl(struct TaskQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_queue_pop_muffle(struct TaskQueue *const restrict queue,
-			struct TaskQueueNode *restrict *const restrict node_ptr)
+			struct TaskNode *restrict *const restrict node_ptr)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
@@ -298,18 +218,18 @@ task_queue_pop_muffle(struct TaskQueue *const restrict queue,
 
 inline void
 task_queue_pop_handle_cl(struct TaskQueue *const restrict queue,
-			 struct TaskQueueNode *restrict *const restrict node_ptr,
-			 const struct HandlerClosure *const restrict h_cl)
+			 struct TaskNode *restrict *const restrict node_ptr,
+			 const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
-			     h_cl);
+			     fail_cl);
 
 	while (queue->head == NULL)
 		thread_cond_await_handle_cl(&queue->node_ready,
 					    &queue->lock,
-					    h_cl);
+					    fail_cl);
 
 	/* more than one node may be dumped into queue atomically, must check
 	 * if queue will be empty even after popping a fresh head */
@@ -321,13 +241,13 @@ task_queue_pop_handle_cl(struct TaskQueue *const restrict queue,
 		queue->last = NULL;
 
 		thread_cond_signal_handle_cl(&queue->empty,
-					     h_cl);
+					     fail_cl);
 	} else {
 		queue->head->prev = NULL;
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -337,7 +257,7 @@ task_queue_pop_handle_cl(struct TaskQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_queue_remove_muffle(struct TaskQueue *const restrict queue,
-			 struct TaskQueueNode *const restrict node)
+			 struct TaskNode *const restrict node)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
@@ -369,13 +289,13 @@ task_queue_remove_muffle(struct TaskQueue *const restrict queue,
 
 inline void
 task_queue_remove_handle_cl(struct TaskQueue *const restrict queue,
-			    struct TaskQueueNode *const restrict node,
-			    const struct HandlerClosure *const restrict h_cl)
+			    struct TaskNode *const restrict node,
+			    const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
-			     h_cl);
+			     fail_cl);
 
 	if (node->prev == NULL) {
 		if (node->next == NULL) {
@@ -383,7 +303,7 @@ task_queue_remove_handle_cl(struct TaskQueue *const restrict queue,
 			queue->last = NULL;
 
 			thread_cond_signal_handle_cl(&queue->empty,
-						     h_cl);
+						     fail_cl);
 		} else {
 			node->next->prev = NULL;
 			queue->head	 = node->next;
@@ -398,7 +318,7 @@ task_queue_remove_handle_cl(struct TaskQueue *const restrict queue,
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -408,9 +328,9 @@ task_queue_remove_handle_cl(struct TaskQueue *const restrict queue,
 inline void
 task_queue_pop_push_muffle(struct TaskQueue *const restrict queue1,
 			   struct TaskQueue *const restrict queue2,
-			   struct TaskQueueNode *restrict *const restrict node_ptr)
+			   struct TaskNode *restrict *const restrict node_ptr)
 {
-	struct TaskQueueNode *restrict node;
+	struct TaskNode *restrict node;
 
 	mutex_lock_try_catch_open(&queue1->lock);
 
@@ -464,20 +384,20 @@ task_queue_pop_push_muffle(struct TaskQueue *const restrict queue1,
 inline void
 task_queue_pop_push_handle_cl(struct TaskQueue *const restrict queue1,
 			      struct TaskQueue *const restrict queue2,
-			      struct TaskQueueNode *restrict *const restrict node_ptr,
-			      const struct HandlerClosure *const restrict h_cl)
+			      struct TaskNode *restrict *const restrict node_ptr,
+			      const struct HandlerClosure *const restrict fail_cl)
 {
-	struct TaskQueueNode *restrict node;
+	struct TaskNode *restrict node;
 
 	mutex_lock_try_catch_open(&queue1->lock);
 
 	mutex_lock_handle_cl(&queue1->lock,
-			     h_cl);
+			     fail_cl);
 
 	while (queue1->head == NULL)
 		thread_cond_await_handle_cl(&queue1->node_ready,
 					    &queue1->lock,
-					    h_cl);
+					    fail_cl);
 
 	node = queue1->head;
 
@@ -487,7 +407,7 @@ task_queue_pop_push_handle_cl(struct TaskQueue *const restrict queue1,
 		queue1->last = NULL;
 
 		thread_cond_signal_handle_cl(&queue1->empty,
-					     h_cl);
+					     fail_cl);
 	} else {
 		queue1->head->prev = NULL;
 
@@ -497,7 +417,7 @@ task_queue_pop_push_handle_cl(struct TaskQueue *const restrict queue1,
 	mutex_lock_try_catch_open(&queue2->lock);
 
 	mutex_lock_handle_cl(&queue2->lock,
-			     h_cl);
+			     fail_cl);
 
 	node->prev = queue2->last;
 
@@ -506,7 +426,7 @@ task_queue_pop_push_handle_cl(struct TaskQueue *const restrict queue1,
 		queue2->last   = node;
 
 		thread_cond_signal_handle_cl(&queue2->node_ready,
-					     h_cl);
+					     fail_cl);
 	} else {
 		queue2->last->next = node;
 		queue2->last	   = node;
@@ -515,12 +435,12 @@ task_queue_pop_push_handle_cl(struct TaskQueue *const restrict queue1,
 	*node_ptr = node;
 
 	mutex_unlock_handle_cl(&queue2->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 
 	mutex_unlock_handle_cl(&queue1->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -546,20 +466,20 @@ task_queue_await_empty_muffle(struct TaskQueue *const restrict queue)
 
 inline void
 task_queue_await_empty_handle_cl(struct TaskQueue *const restrict queue,
-				 const struct HandlerClosure *const restrict h_cl)
+				 const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
-			     h_cl);
+			     fail_cl);
 
 	while (queue->head != NULL)
 		thread_cond_await_handle_cl(&queue->empty,
 					    &queue->lock,
-					    h_cl);
+					    fail_cl);
 
 	mutex_unlock_handle_cl(&queue->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -589,13 +509,13 @@ task_queue_clear_muffle(struct TaskQueue *const restrict queue)
 
 inline void
 task_queue_clear_handle_cl(struct TaskQueue *const restrict queue,
-			     const struct HandlerClosure *const restrict h_cl)
+			     const struct HandlerClosure *const restrict fail_cl)
 
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
 	mutex_lock_handle_cl(&queue->lock,
-			     h_cl);
+			     fail_cl);
 
 	/* do nothing if queue is empty */
 	if (queue->head != NULL) {
@@ -604,11 +524,11 @@ task_queue_clear_handle_cl(struct TaskQueue *const restrict queue,
 		queue->last = NULL;
 
 		thread_cond_signal_handle_cl(&queue->empty,
-					     h_cl);
+					     fail_cl);
 	}
 
 	mutex_unlock_handle_cl(&queue->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
 }
@@ -618,7 +538,7 @@ task_queue_clear_handle_cl(struct TaskQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 task_queue_transfer_all_muffle(struct TaskQueue *const restrict queue1,
-				 struct TaskQueue *const restrict queue2)
+			       struct TaskQueue *const restrict queue2)
 {
 	mutex_lock_try_catch_open(&queue1->lock);
 
@@ -662,12 +582,12 @@ task_queue_transfer_all_muffle(struct TaskQueue *const restrict queue1,
 inline void
 task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 				  struct TaskQueue *const restrict queue2,
-				  const struct HandlerClosure *const restrict h_cl)
+				  const struct HandlerClosure *const restrict fail_cl)
 {
 	mutex_lock_try_catch_open(&queue1->lock);
 
 	mutex_lock_handle_cl(&queue1->lock,
-			     h_cl);
+			     fail_cl);
 
 	/* do nothing if queue1 is empty */
 	if (queue1->head != NULL) {
@@ -675,7 +595,7 @@ task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 		mutex_lock_try_catch_open(&queue2->lock);
 
 		mutex_lock_handle_cl(&queue2->lock,
-				     h_cl);
+				     fail_cl);
 
 		if (queue2->last == NULL) {
 			/* transfer_all head and last pointers, signal node_ready */
@@ -683,7 +603,7 @@ task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 			queue2->last = queue1->last;
 
 			thread_cond_signal_handle_cl(&queue2->node_ready,
-						     h_cl);
+						     fail_cl);
 		} else {
 			/* concat queues */
 			queue1->head->prev = queue2->last;
@@ -691,7 +611,7 @@ task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 		}
 
 		mutex_unlock_handle_cl(&queue2->lock,
-				       h_cl);
+				       fail_cl);
 
 		mutex_lock_try_catch_close();
 
@@ -700,13 +620,175 @@ task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 		queue1->last = NULL;
 
 		thread_cond_signal_handle_cl(&queue1->empty,
-					     h_cl);
+					     fail_cl);
 	}
 
 	mutex_unlock_handle_cl(&queue1->lock,
-			       h_cl);
+			       fail_cl);
 
 	mutex_lock_try_catch_close();
+}
+
+
+/* load queue with 'nodes' from 'store' (queue is empty, store is not empty)
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+task_queue_reload_muffle(struct TaskQueue *const restrict queue,
+			 struct TaskStore *const restrict store)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
+
+	queue->head = store->head;
+	queue->last = store->last;
+
+	thread_cond_signal_muffle(&queue->node_ready);
+
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+task_queue_reload_handle_cl(struct TaskQueue *const restrict queue,
+			    struct TaskStore *const restrict store,
+			    const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     fail_cl);
+
+	queue->head = store->head;
+	queue->last = store->last;
+
+	thread_cond_signal_handle_cl(&queue->node_ready,
+				     fail_cl);
+
+	mutex_unlock_handle_cl(&queue->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+/* locked/unsignaled push
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+task_queue_push_quiet_muffle(struct TaskQueue *const restrict queue,
+			     struct TaskNode *const restrict node)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
+
+	node->next = NULL;
+	node->prev = queue->last;
+
+	if (queue->last == NULL) {
+		queue->head = node;
+		queue->last = node;
+	} else {
+		queue->last->next = node;
+		queue->last	  = node;
+	}
+
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+task_queue_push_quiet_handle_cl(struct TaskQueue *const restrict queue,
+				struct TaskNode *const restrict node,
+				const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     fail_cl);
+
+	node->next = NULL;
+	node->prev = queue->last;
+
+	if (queue->last == NULL) {
+		queue->head = node;
+		queue->last = node;
+	} else {
+		queue->last->next = node;
+		queue->last	  = node;
+	}
+
+	mutex_unlock_handle_cl(&queue->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+/* retrieve nodes
+ *─────────────────────────────────────────────────────────────────────────── */
+/* unlocked/unsignaled */
+inline void
+task_queue_retreive_cold_quiet(struct TaskQueue *const restrict queue,
+			       struct TaskStore *const restrict store)
+{
+	store->head = queue->head;
+	queue->head = NULL;
+	store->last = queue->last;
+	queue->last = NULL;
+}
+
+/* locked/unsignaled */
+inline void
+task_queue_retreive_hot_quiet_muffle(struct TaskQueue *const restrict queue,
+				     struct TaskStore *const restrict store)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_muffle(&queue->lock);
+
+	task_queue_retreive_cold_quiet(queue,
+				       store);
+
+	mutex_unlock_muffle(&queue->lock);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+task_queue_retreive_hot_quiet_handle_cl(struct TaskQueue *const restrict queue,
+					struct TaskStore *const restrict store,
+					const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&queue->lock);
+
+	mutex_lock_handle_cl(&queue->lock,
+			     fail_cl);
+
+	task_queue_retreive_cold_quiet(queue,
+				       store);
+
+	mutex_unlock_handle_cl(&queue->lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+/* swap node stores
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+task_store_swap(struct TaskStore *const restrict store1,
+		struct TaskStore *const restrict store2)
+{
+	struct TaskNode *restrict swap;
+
+	swap = store1->head;
+	store1->head = store2->head;
+	store2->head = swap;
+
+	swap = store1->last;
+	store1->last = store2->last;
+	store2->last = swap;
 }
 
 #endif /* ifndef MYSQL_SEED_THREAD_THREAD_QUEUE_H_ */
