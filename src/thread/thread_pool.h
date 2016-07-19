@@ -197,84 +197,6 @@ worker_crew_cancel_success(struct WorkerCrew *const restrict workers,
 }
 
 
-/* TaskQueue operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-task_queue_backlog_init(struct TaskQueue *const restrict backlog,
-			struct TaskQueueNode *restrict node,
-			const struct ProcedureClosure *restrict init_task,
-			const size_t count_init_tasks)
-{
-	if (count_init_tasks == 0lu) {
-		task_queue_init_empty(backlog);
-		return;
-	}
-
-	task_queue_init(backlog);
-
-	struct TaskQueueNode *const restrict last = node
-						    + (count_init_tasks - 1l);
-	struct TaskQueueNode *restrict next;
-
-	last->next    = NULL;
-	backlog->last = last;
-
-	node->prev    = NULL;
-	backlog->head = node;
-
-	while (1) {
-		node->task = init_task;
-
-		if (node == last)
-			return;
-
-		next = node + 1l;
-
-		node->next = next;
-		next->prev = node;
-
-		node = next;
-		++init_task;
-	}
-}
-
-inline void
-task_queue_complete_init(struct TaskQueue *const restrict complete,
-		       struct TaskQueueNode *restrict node,
-		       const size_t count_spare_nodes)
-{
-	if (count_spare_nodes == 0lu) {
-		task_queue_init_empty(complete);
-		return;
-	}
-
-	task_queue_init(complete);
-
-	struct TaskQueueNode *const restrict last = node
-						  + (count_spare_nodes - 1l);
-	struct TaskQueueNode *restrict next;
-
-	last->next   = NULL;
-	complete->last = last;
-
-	node->prev   = NULL;
-	complete->head = node;
-
-	while (1) {
-		/* no tasks, just hook up links */
-		if (node == last)
-			return;
-
-		next = node + 1l;
-
-		node->next = next;
-		next->prev = node;
-
-		node = next;
-	}
-}
-
-
 
 /* TaskBuffer operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -282,19 +204,16 @@ inline void
 task_buffer_init(struct TaskBuffer *const restrict tasks,
 		 struct TaskQueueNode *const restrict task_nodes,
 		 const struct ProcedureClosure *const restrict init_tasks,
-		 const size_t length_task_buffer,
 		 const size_t count_init_tasks)
 {
-	task_queue_backlog_init(&tasks->backlog,
-				task_nodes,
-				init_tasks,
-				count_init_tasks);
+	task_queue_init_populated(&tasks->backlog,
+				  task_nodes,
+				  init_tasks,
+				  count_init_tasks);
 
 	task_queue_init_empty(&tasks->active);
 
-	task_queue_complete_init(&tasks->complete,
-				 task_nodes + count_init_tasks,
-				 length_task_buffer - count_init_tasks);
+	task_queue_init_empty(&tasks->complete);
 }
 
 
@@ -304,7 +223,9 @@ inline void
 thread_pool_status_init(struct ThreadPoolStatus *const restrict status)
 {
 	mutex_init(&status->processing);
+
 	thread_cond_init(&status->done);
+
 	status->busy = true;
 }
 
@@ -420,6 +341,7 @@ supervisor_do_exit_failure(struct Supervisor *const restrict supervisor)
 	/* if there's a thread waiting in thread_pool_await, ensure that it's
 	 * awoken */
 	task_queue_clear_muffle(&pool->tasks.backlog);
+
 	task_queue_clear_muffle(&pool->tasks.active);
 
 	/* signal pool is done */

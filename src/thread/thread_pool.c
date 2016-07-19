@@ -57,25 +57,12 @@ worker_crew_cancel_success(struct WorkerCrew *const restrict workers,
 			   const struct HandlerClosure *const restrict fail_cl);
 
 
-/* TaskQueue operations
+/* TaskBuffer operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-task_queue_backlog_init(struct TaskQueue *const restrict backlog,
-			struct TaskQueueNode *restrict node,
-			const struct ProcedureClosure *restrict init_task,
-			const size_t count_init_tasks);
-extern inline void
-task_queue_complete_init(struct TaskQueue *const restrict vacant,
-			 struct TaskQueueNode *restrict node,
-			 const size_t count_vacant_tasks);
-
-/* TaskQueue operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-task_buffer_init(struct TaskQueue *const restrict task_queue,
+task_buffer_init(struct TaskBuffer *const restrict tasks,
 		 struct TaskQueueNode *const restrict task_nodes,
 		 const struct ProcedureClosure *const restrict init_tasks,
-		 const size_t length_task_queue,
 		 const size_t count_init_tasks);
 
 /* ThreadPoolStatus operations

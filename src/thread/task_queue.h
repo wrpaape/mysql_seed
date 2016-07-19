@@ -69,7 +69,7 @@ task_queue_init_populated(struct TaskQueue *const restrict queue,
 		next = node + 1l;
 
 		node->next = next;
-		next->prev  = node;
+		next->prev = node;
 
 		node = next;
 		++task;
