@@ -94,6 +94,9 @@ build_counter(void *arg)
 			       &counter->fail_cl);
 
 	mutex_lock_try_catch_close();
+
+	for (size_t i = 0lu; i < counter->upto; ++i)
+		puts(counter->pointers[i]);
 }
 
 extern inline void

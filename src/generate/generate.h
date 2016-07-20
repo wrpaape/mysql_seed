@@ -306,13 +306,26 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	generator.build.counter_columns_loaders.last = prev_node;
 
-	/* initialize thread pool */
-	thread_pool_init(&generator.pool,
-			 &generator.build.counter_columns_loaders,
-			 &generator.workers[0],
-			 COUNT_WORKERS);
+	procedure_closure_call(&generator.build.counter_columns_loaders.head->task);
 
-	puts("AWOOOOOOOOOOOOOOGA");
+	/* /1* initialize thread pool *1/ */
+	/* thread_pool_init(&generator.pool, */
+	/* 		 &generator.build.counter_columns_loaders, */
+	/* 		 &generator.workers[0], */
+	/* 		 COUNT_WORKERS); */
+
+
+	/* thread_pool_start(&generator.pool, */
+	/* 		  &generator.fail_cl); */
+
+	/* thread_pool_await(&generator.pool, */
+	/* 		  &generator.fail_cl); */
+
+	/* thread_pool_stop(&generator.pool, */
+	/* 		 &generator.fail_cl); */
+
+	/* thread_pool_await_exit_success(&generator.pool, */
+	/* 			       &generator.fail_cl); */
 
 	free(generator_alloc);
 }

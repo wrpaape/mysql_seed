@@ -22,7 +22,7 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "thread/thread_pool.h"
+#include "generate/row_block.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
@@ -41,7 +41,7 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/thread_thread_pool_test.c");
+  UnityBegin("../test/generate_row_block_test.c");
 
   return (UnityEnd());
 }

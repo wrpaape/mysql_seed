@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "thread/thread_queue.h"
+#include "thread/task_queue.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_thread_queue(void);
+extern void test_task_queue(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/thread_thread_queue_test.c");
-  RUN_TEST(test_thread_queue, 12);
+  UnityBegin("../test/thread_task_queue_test.c");
+  RUN_TEST(test_task_queue, 12);
 
   return (UnityEnd());
 }
