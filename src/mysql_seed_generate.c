@@ -1,10 +1,5 @@
 #include "mysql_seed_generate.h"
 
-/* Generator/DatbaseCounter operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-generator_counter_update(struct GeneratorCounter *const restrict generator,
-			 struct DatabaseCounter *const restrict database);
 /* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
@@ -13,8 +8,6 @@ generate_failure_no_db_spec(void);
 extern inline void
 generate_failure_short_db_spec(char *const restrict *const restrict from,
 			       char *const restrict *const restrict until);
-extern inline void
-generate_failure_malloc(void);
 extern inline void
 generate_failure_no_valid_db_spec(void);
 
@@ -170,10 +163,6 @@ parse_db_specs(struct GenerateParseState *const restrict state);
 
 /* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-generate_process(const struct GeneratorCounter *const restrict count,
-		 const struct DbSpec *restrict db_spec,
-		 int *const restrict exit_status);
 extern inline int
 generate_dispatch(char *restrict *const restrict arg,
 		  const int rem_argc);

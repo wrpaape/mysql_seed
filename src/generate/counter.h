@@ -3,8 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/generator.h"	/* UPTO_MAX, Counter, string/thread utils */
-
+#include "generate/generator.h" /* UPTO_MAX, Counter, string/thread utils */
 
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -364,6 +363,7 @@ counter_exit_on_failure(void *arg,
 			const char *restrict failure)
 __attribute__((noreturn));
 
+
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -380,6 +380,8 @@ counter_init(struct Counter *const restrict counter,
 	handler_closure_init(&counter->fail_cl,
 			     &counter_exit_on_failure,
 			     counter);
+
+	counter->parent = parent;
 }
 
 inline void

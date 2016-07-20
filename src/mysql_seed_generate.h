@@ -3,16 +3,10 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "generate/loader.h"		/* build_loader */
-#include "generate/column_id.h"		/* build_column_id */
-#include "generate/column_string.h"	/* build_column_string_base */
-#include "generate/table.h"		/* build_table_header */
+#include "generate/generate.h"		/* mysql_seed_generate */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define GENERATE_FAILURE(REASON)					\
-"\n" FAILURE_HEADER_WRAP("generate", " - " REASON)
-
 #define FAILURE_NO_DB_SPEC						\
 GENERATE_FAILURE("no DB_SPEC provided") MORE_INFO_MESSAGE
 
@@ -21,9 +15,6 @@ GENERATE_FAILURE("DB_SPEC too short - need at least "			\
 		 DB_SPEC_LENGTH_MIN_STRING " arguments to describe "	\
 		 "a database in generate mode, ignoring DB_SPEC "	\
 		 "starting with:")
-
-#define GENERATE_FAILURE_MALLOC						\
-GENERATE_FAILURE(MALLOC_FAILURE_REASON)
 
 #define GENERATE_FAILURE_NO_VALID_DB_SPEC				\
 GENERATE_FAILURE("no valid DB_SPEC")
@@ -183,21 +174,6 @@ PARSE_ERROR_HEADER("expected COLUMN flag, TABLE flag, DATABASE flag, "	\
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
-struct GeneratorCounter {
-	uintmax_t rows;
-	size_t row_count_max;
-	unsigned int columns;
-	unsigned int tables;
-	unsigned int databases;
-};
-
-struct DatabaseCounter {
-	uintmax_t rows;
-	size_t row_count_max;
-	unsigned int columns;
-	unsigned int tables;
-};
-
 struct ValidDbSpecQueue {
 	struct DbSpec **last;
 	struct DbSpec *head;
@@ -225,22 +201,6 @@ struct GenerateParseState {
 	int exit_status;
 };
 
-
-/* Generator/DatbaseCounter operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-generator_counter_update(struct GeneratorCounter *const restrict generator,
-			 struct DatabaseCounter *const restrict database)
-{
-	generator->rows      += database->rows;
-
-	if (database->row_count_max > generator->row_count_max)
-		generator->row_count_max = database->row_count_max;
-
-	generator->columns   += database->columns;
-	generator->tables    += database->tables;
-	generator->databases += 1u;
-}
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
@@ -271,14 +231,6 @@ generate_failure_short_db_spec(char *const restrict *const restrict from,
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr + 1l - &buffer[0]);
-}
-
-inline void
-generate_failure_malloc(void)
-{
-	write_muffle(STDERR_FILENO,
-		     GENERATE_FAILURE_MALLOC,
-		     sizeof(GENERATE_FAILURE_MALLOC) - 1lu);
 }
 
 inline void
@@ -1838,31 +1790,6 @@ parse_db_specs(struct GenerateParseState *const restrict state)
 		generate_parse_error(state);
 }
 
-inline void
-generate_process(const struct GeneratorCounter *const restrict count,
-		 const struct DbSpec *restrict db_spec,
-		 int *const restrict exit_status)
-{
-	const size_t row_block_row_count_max
-	= (count->row_count_max < COUNT_WORKERS)
-	? count->row_count_max
-	: (count->row_count_max / COUNT_WORKERS);
-
-	const size_t count_row_blocks_max = (count->rows
-					     / row_block_row_count_max)
-					  + count->columns;
-
-	const size_t count_tasks_max
-	= 2lu			/* build_counter + build_downstream_tasks */
-	+ count->columns	/* build_column_X */
-	+ count->databases	/* build_loader */
-	+ (count->tables * 2lu) /* build_table_header + write_file */
-	+ count_row_blocks_max; /* build_table_contents */
-
-	const size_t count_row_spans_max = count_row_blocks_max
-					 * count->columns;
-}
-
 
 inline int
 generate_dispatch(char *restrict *const restrict arg,
@@ -1870,7 +1797,6 @@ generate_dispatch(char *restrict *const restrict arg,
 {
 	if (rem_argc == 0lu) {
 		generate_failure_no_db_spec();
-
 		return EXIT_FAILURE;
 	}
 	/* calculate max required size for all components + their specs
@@ -1980,7 +1906,6 @@ generate_dispatch(char *restrict *const restrict arg,
 
 	if (spec_alloc == NULL) {
 		generate_failure_malloc();
-
 		return EXIT_FAILURE;
 	}
 
@@ -2010,9 +1935,7 @@ generate_dispatch(char *restrict *const restrict arg,
 
 	if (state.generator.databases == 0u) {
 		generate_failure_no_valid_db_spec();
-
 		free(spec_alloc);
-
 		return EXIT_FAILURE;
 	}
 
@@ -2049,9 +1972,9 @@ generate_dispatch(char *restrict *const restrict arg,
 	/*        state.generator.databases, */
 	/*        state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE"); */
 
-	generate_process(&state.generator,
-			 state.valid.head,
-			 &state.exit_status);
+	mysql_seed_generate(&state.generator,
+			    state.valid.head,
+			    &state.exit_status);
 
 	free(spec_alloc);
 

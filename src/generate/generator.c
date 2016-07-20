@@ -164,6 +164,8 @@ table_interval_init(struct TableInterval *const restrict interval,
 		    struct Table *const restrict from,
 		    const struct Table *const restrict until);
 
+/* Database Operations
+ *─────────────────────────────────────────────────────────────────────────── */
 void
 database_exit_on_failure(void *arg,
 			 const char *restrict failure)
@@ -205,6 +207,12 @@ database_exit_on_failure(void *arg,
 	__builtin_unreachable();
 }
 
+/* DatabaseInterval Operations
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+database_interval_init(struct DatabaseInterval *const restrict interval,
+		       struct Database *const restrict from,
+		       const struct Database *const restrict until);
 
 /* Generator Operations
  *─────────────────────────────────────────────────────────────────────────── */

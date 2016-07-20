@@ -1352,6 +1352,48 @@ TARGETS			+= $(GENERATE_TABLE_OBJ)			\
 			   $(GENERATE_TABLE_TEST_BIN)
 
 
+# generate/generate
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_GENERATE_SRC 		:= $(call HELPER_SOURCE_PATH,generate generate)
+GENERATE_GENERATE_HDR		:= $(call HELPER_HEADER_PATH,generate generate)
+GENERATE_GENERATE_OBJ 		:= $(call HELPER_OBJECT_PATH,generate generate)
+GENERATE_GENERATE_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate generate)
+GENERATE_GENERATE_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate generate)
+GENERATE_GENERATE_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate generate)
+GENERATE_GENERATE_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate generate)
+GENERATE_GENERATE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate generate)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_GENERATE_OBJ_PREQS		:= $(GENERATE_GENERATE_SRC) 			\
+			   		   $(GENERATE_GENERATE_HDR) 			\
+			   		   $(GENERATE_LOADER_HDR)			\
+			   		   $(GENERATE_COLUMN_ID_HDR)			\
+			   		   $(GENERATE_COLUMN_STRING_HDR)		\
+			   		   $(GENERATE_TABLE_HDR)
+GENERATE_GENERATE_OBJ_GROUP		:= $(GENERATE_GENERATE_OBJ)			\
+			   		   $(GENERATE_LOADER_OBJ_GROUP)			\
+			   		   $(GENERATE_COLUMN_ID_OBJ_GROUP)		\
+			   		   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
+			   		   $(GENERATE_TABLE_OBJ_GROUP)
+GENERATE_GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_GENERATE_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_GENERATE_TEST_SRC)		\
+			   		   $(GENERATE_GENERATE_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+GENERATE_GENERATE_TRNR_OBJ_PREQS	:= $(GENERATE_GENERATE_TRNR_SRC)		\
+			   		   $(GENERATE_GENERATE_TEST_OBJ_PREQS)
+GENERATE_GENERATE_TEST_BIN_PREQS	:= $(GENERATE_GENERATE_TRNR_OBJ)		\
+			   		   $(GENERATE_GENERATE_TEST_OBJ)		\
+			   		   $(GENERATE_GENERATE_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_GENERATE_TEST_BIN)
+TARGETS			+= $(GENERATE_GENERATE_OBJ)			\
+			   $(GENERATE_GENERATE_TRNR_SRC)		\
+			   $(GENERATE_GENERATE_TRNR_OBJ)		\
+			   $(GENERATE_GENERATE_TEST_OBJ)		\
+			   $(GENERATE_GENERATE_TEST_BIN)
+
+
 
 ## PROJECT MODULES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1368,15 +1410,9 @@ GENERATE_TEST_BIN	:= $(call PROJECT_TEST_BINARY_PATH,generate)
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_OBJ_PREQS	:= $(GENERATE_SRC) 				\
 			   $(GENERATE_HDR) 				\
-			   $(GENERATE_LOADER_HDR)			\
-			   $(GENERATE_COLUMN_ID_HDR)			\
-			   $(GENERATE_COLUMN_STRING_HDR)		\
-			   $(GENERATE_TABLE_HDR)
+			   $(GENERATE_GENERATE_HDR)
 GENERATE_OBJ_GROUP	:= $(GENERATE_OBJ)				\
-			   $(GENERATE_LOADER_OBJ_GROUP)			\
-			   $(GENERATE_COLUMN_ID_OBJ_GROUP)		\
-			   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
-			   $(GENERATE_TABLE_OBJ_GROUP)
+			   $(GENERATE_GENERATE_OBJ_GROUP)
 GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_TEST_SRC)				\
 			   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_TEST_OBJ_PREQS	:= $(GENERATE_TEST_SRC)				\
@@ -1580,6 +1616,11 @@ $(THREAD_TASK_QUEUE_OBJ): $(THREAD_TASK_QUEUE_OBJ_PREQS)
 # make thread/thread_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/generate object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_GENERATE_OBJ): $(GENERATE_GENERATE_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/generator object
@@ -2152,6 +2193,25 @@ $(GENERATE_GENERATOR_TEST_OBJ): $(GENERATE_GENERATOR_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_GENERATOR_TRNR_SRC): $(GENERATE_GENERATOR_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+# for generate/generate
+# make:
+# 	generate_generate_test		binary,
+# 	generate_generate_test_runner 	object,
+# 	generate_generate_test		object, and
+# 	generate_generate_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_GENERATE_TEST_BIN): $(GENERATE_GENERATE_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_GENERATE_TRNR_OBJ): $(GENERATE_GENERATE_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_GENERATE_TEST_OBJ): $(GENERATE_GENERATE_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_GENERATE_TRNR_SRC): $(GENERATE_GENERATE_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

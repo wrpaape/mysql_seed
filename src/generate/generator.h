@@ -6,7 +6,6 @@
 #include "mysql_seed_file.h"	/* file/exit/string/parallelization utils */
 #include "thread/thread_pool.h"	/* ThreadPool */
 
-
 /* minimum valid spec lengths
  *─────────────────────────────────────────────────────────────────────────── */
 /* -c COL_NAME COL_TYPE */
@@ -107,10 +106,6 @@ PTR = put_string_size(ptr,						\
 #define TABLE_HEADER_BASE_SIZE						\
 (sizeof(TABLE_HEADER_1 TABLE_HEADER_2 TABLE_HEADER_3 TABLE_HEADER_4	\
 	TABLE_HEADER_5) - 1lu)
-
-
-
-
 
 
 /* loader file */
@@ -376,6 +371,19 @@ struct TableInterval {
 	const struct Table *restrict until;	/* assigned by main */
 };
 
+struct Counter {
+	Mutex processing;	/* condition lock */
+	ThreadCond done;	/* broadcasted once 'pointers' are set */
+	bool ready;		/* flipped true once 'pointers' are set */
+	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
+	char **pointers;	/* digit pointers */
+	size_t upto;		/* final and max stringified number */
+	size_t size_digits;	/* sizeof("1", "2", ... "$(upto)") */
+	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
+	struct HandlerClosure fail_cl;	/* cleanup self, then main */
+	struct Generator *parent;
+};
+
 struct Generator;
 
 struct Database {
@@ -392,21 +400,18 @@ struct DatabaseInterval {
 	const struct Database *restrict until;	/* assigned by main */
 };
 
-struct Counter {
-	Mutex processing;	/* condition lock */
-	ThreadCond done;	/* broadcasted once 'pointers' are set */
-	bool ready;		/* flipped true once 'pointers' are set */
-	char *digits;		/* "1", "2", "3", ..., "$(upto)" */
-	char **pointers;	/* digit pointers */
-	size_t upto;		/* final and max stringified number */
-	size_t size_digits;	/* sizeof("1", "2", ... "$(upto)") */
-	unsigned int mag_upto;	/* ⌊ log₁₀(upto) ⌋ */
-	struct HandlerClosure fail_cl;	/* cleanup self, then main */
-	struct Generator *parent;
+
+struct GeneratorTaskList {
+	struct TaskStore counter_columns_loaders;
+	struct TaskStore table_headers;
+	struct TaskStore table_contents;
+	struct TaskStore table_files;
 };
 
 struct Generator {
 	struct ThreadPool pool;			/* all child threads */
+	struct Worker workers[COUNT_WORKERS];
+	struct GeneratorTaskList build;
 	struct ThreadLog log;
 	struct Counter counter;			/* shared by all */
 	struct DatabaseInterval databases;
@@ -782,6 +787,16 @@ __attribute__((noreturn));
 /* 			     database); */
 /* } */
 
+/* DatabaseInterval Operations
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+database_interval_init(struct DatabaseInterval *const restrict interval,
+		       struct Database *const restrict from,
+		       const struct Database *const restrict until)
+{
+	interval->from  = from;
+	interval->until = until;
+}
 
 
 /* Generator Operations
