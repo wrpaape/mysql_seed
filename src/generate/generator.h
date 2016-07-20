@@ -21,7 +21,6 @@
 #define DB_SPEC_LENGTH_MIN	   8lu
 #define DB_SPEC_LENGTH_MIN_STRING "8"
 
-
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
 /* Counter limits */
@@ -44,6 +43,8 @@
 
 #define STRING_BASE_LENGTH_MAX		240lu
 #define STRING_BASE_LENGTH_MAX_STRING	"240"
+
+#define COUNT_WORKERS 4lu
 
 /* file templates
  *─────────────────────────────────────────────────────────────────────────── */
@@ -436,6 +437,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 #define GENERATOR_FAILURE_MESSAGE					\
 "\n" ANSI_UNDERLINE "GENERATOR EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
+
 /* cleanup
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -478,6 +480,8 @@ database_destroy(struct Database *const restrict database)
 inline void
 generator_destroy(struct Generator *const restrict generator)
 {
+	/* counter_free_internals(&generator->counter); */
+
 	const struct Database *const restrict until
 	= generator->databases.until;
 
@@ -489,6 +493,8 @@ generator_destroy(struct Generator *const restrict generator)
 		++from;
 
 	} while (from < until);
+
+
 }
 
 
@@ -777,29 +783,6 @@ __attribute__((noreturn));
 /* } */
 
 
-/* Counter Operations
- *─────────────────────────────────────────────────────────────────────────── */
-/* inline void */
-/* counter_init(struct Counter *const restrict counter, */
-/* 	     struct Generator *const restrict parent, */
-/* 	     const size_t upto) */
-/* { */
-/* 	mutex_init(&counter->processing); */
-/* 	thread_cond_init(&counter->done); */
-
-/* 	counter->ready = false; */
-/* 	counter->upto  = upto; */
-
-/* 	handler_closure_init(&counter->fail_cl, */
-/* 			     &counter_exit_on_failure, */
-/* 			     counter); */
-/* } */
-
-void
-counter_exit_on_failure(void *arg,
-			const char *restrict failure)
-__attribute__((noreturn));
-
 
 /* Generator Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -807,6 +790,5 @@ void
 generator_exit_on_failure(void *arg,
 			  const char *restrict failure)
 __attribute__((noreturn));
-
 
 #endif /* ifndef MYSQL_SEED_GENERATE_GENERATOR_H_ */

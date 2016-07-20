@@ -359,8 +359,28 @@ counter_init_internals(struct Counter *const restrict counter)
 	thread_try_catch_close();
 }
 
+void
+counter_exit_on_failure(void *arg,
+			const char *restrict failure)
+__attribute__((noreturn));
+
 /* top-level functions
  *─────────────────────────────────────────────────────────────────────────── */
+inline void
+counter_init(struct Counter *const restrict counter,
+	     struct Generator *const restrict parent,
+	     const size_t upto)
+{
+	mutex_init(&counter->processing);
+	thread_cond_init(&counter->done);
+
+	counter->ready = false;
+	counter->upto  = upto;
+
+	handler_closure_init(&counter->fail_cl,
+			     &counter_exit_on_failure,
+			     counter);
+}
 
 inline void
 counter_free_internals(struct Counter *const restrict counter)
@@ -369,8 +389,7 @@ counter_free_internals(struct Counter *const restrict counter)
 }
 
 void
-counter_create(void *arg);
-
+build_counter(void *arg);
 
 inline void
 counter_await(struct Counter *const restrict counter,

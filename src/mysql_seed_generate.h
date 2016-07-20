@@ -242,7 +242,6 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 	generator->databases += 1u;
 }
 
-
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
@@ -1844,6 +1843,24 @@ generate_process(const struct GeneratorCounter *const restrict count,
 		 const struct DbSpec *restrict db_spec,
 		 int *const restrict exit_status)
 {
+	const size_t row_block_row_count_max
+	= (count->row_count_max < COUNT_WORKERS)
+	? count->row_count_max
+	: (count->row_count_max / COUNT_WORKERS);
+
+	const size_t count_row_blocks_max = (count->rows
+					     / row_block_row_count_max)
+					  + count->columns;
+
+	const size_t count_tasks_max
+	= 2lu			/* build_counter + build_downstream_tasks */
+	+ count->columns	/* build_column_X */
+	+ count->databases	/* build_loader */
+	+ (count->tables * 2lu) /* build_table_header + write_file */
+	+ count_row_blocks_max; /* build_table_contents */
+
+	const size_t count_row_spans_max = count_row_blocks_max
+					 * count->columns;
 }
 
 

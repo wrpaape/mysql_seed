@@ -1,4 +1,16 @@
 #include "generate/generator.h"
+
+/* cleanup
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+column_destroy(struct Column *const restrict column);
+extern inline void
+table_destroy(struct Table *const restrict table);
+extern inline void
+database_destroy(struct Database *const restrict database);
+extern inline void
+generator_destroy(struct Generator *const restrict generator);
+
 /* init Generator FileHandle, Dirpath
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
@@ -152,7 +164,6 @@ table_interval_init(struct TableInterval *const restrict interval,
 		    struct Table *const restrict from,
 		    const struct Table *const restrict until);
 
-
 void
 database_exit_on_failure(void *arg,
 			 const char *restrict failure)
@@ -181,46 +192,6 @@ database_exit_on_failure(void *arg,
 	thread_log_append_string_size(generator_log,
 				      DATABASE_FAILURE_MESSAGE_2,
 				      sizeof(DATABASE_FAILURE_MESSAGE_2) - 1lu);
-
-	thread_log_append_string(generator_log,
-				 failure);
-
-	mutex_unlock_muffle(&generator_log->lock);
-
-	mutex_lock_try_catch_close();
-
-	handler_closure_call(&generator->fail_cl,
-			     failure);
-	__builtin_unreachable();
-}
-
-
-/* Counter Operations
- *─────────────────────────────────────────────────────────────────────────── */
-/* extern inline void */
-/* counter_init(struct Counter *const restrict counter, */
-/* 	     const size_t upto); */
-
-void
-counter_exit_on_failure(void *arg,
-			const char *restrict failure)
-{
-	struct Counter *const restrict counter
-	= (struct Counter *const restrict) arg;
-
-	struct Generator *const restrict generator
-	= counter->parent;
-
-	struct ThreadLog *const restrict generator_log
-	= &generator->log;
-
-	mutex_lock_try_catch_open(&generator_log->lock);
-
-	mutex_lock_muffle(&generator_log->lock);
-
-	thread_log_append_string_size(generator_log,
-				      COUNTER_FAILURE_MESSAGE,
-				      sizeof(COUNTER_FAILURE_MESSAGE) - 1lu);
 
 	thread_log_append_string(generator_log,
 				 failure);

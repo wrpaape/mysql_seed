@@ -28,15 +28,52 @@ counter_set_internals(struct Counter *const restrict counter);
 extern inline void
 counter_init_internals(struct Counter *const restrict counter);
 
+void
+counter_exit_on_failure(void *arg,
+			const char *restrict failure)
+{
+	struct Counter *const restrict counter
+	= (struct Counter *const restrict) arg;
+
+	struct Generator *const restrict generator
+	= counter->parent;
+
+	struct ThreadLog *const restrict generator_log
+	= &generator->log;
+
+	mutex_lock_try_catch_open(&generator_log->lock);
+
+	mutex_lock_muffle(&generator_log->lock);
+
+	thread_log_append_string_size(generator_log,
+				      COUNTER_FAILURE_MESSAGE,
+				      sizeof(COUNTER_FAILURE_MESSAGE) - 1lu);
+
+	thread_log_append_string(generator_log,
+				 failure);
+
+	mutex_unlock_muffle(&generator_log->lock);
+
+	mutex_lock_try_catch_close();
+
+	handler_closure_call(&generator->fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+
+
+/* top-level functions
+ *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-counter_await(struct Counter *const restrict counter,
-	      const struct HandlerClosure *const restrict fail_cl);
+counter_init(struct Counter *const restrict counter,
+	     struct Generator *const restrict parent,
+	     const size_t upto);
 
 extern inline void
 counter_free_internals(struct Counter *const restrict counter);
 
 void
-counter_create(void *arg)
+build_counter(void *arg)
 {
 	struct Counter *const restrict
 	counter = (struct Counter *const restrict) arg;
@@ -58,3 +95,7 @@ counter_create(void *arg)
 
 	mutex_lock_try_catch_close();
 }
+
+extern inline void
+counter_await(struct Counter *const restrict counter,
+	      const struct HandlerClosure *const restrict fail_cl);

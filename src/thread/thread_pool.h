@@ -112,7 +112,7 @@ worker_process_tasks(struct Worker *const restrict worker)
 					      &worker->fail_cl);
 
 		/* do task */
-		procedure_closure_call(node->task);
+		procedure_closure_call(&node->task);
 
 		task_queue_remove_handle_cl(&task_buffer->active,
 					    node,
@@ -201,8 +201,8 @@ inline void
 task_buffer_init(struct TaskBuffer *const restrict task_buffer,
 		 const struct TaskStore *const restrict task_store)
 {
-	task_queue_init_from_store(&task_buffer->backlog,
-				   task_store);
+	task_queue_init_store(&task_buffer->backlog,
+			      task_store);
 
 	task_queue_init_empty(&task_buffer->active);
 
@@ -573,10 +573,10 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		struct TaskNode *const restrict task_nodes
 		= (struct TaskNode *const restrict) (pool + 1l);
 
-		task_store_populate(&task_store,
-				    task_nodes,
-				    init_tasks,
-				    count_init_tasks);
+		task_store_init_tasks(&task_store,
+				      task_nodes,
+				      init_tasks,
+				      count_init_tasks);
 
 		/* divvy up memory for workers */
 		struct Worker *const restrict workers
@@ -645,7 +645,7 @@ thread_pool_push_task(struct ThreadPool *const restrict pool,
 				 &node,
 				 fail_cl);
 
-	node->task = task_cl;
+	node->task = *task_cl;
 
 	task_queue_push_handle_cl(&pool->task_buffer.backlog,
 				  node,

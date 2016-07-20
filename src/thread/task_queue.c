@@ -3,14 +3,36 @@
 /* initialize
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline struct TaskNode *
-populate_task_nodes(struct TaskNode *restrict node,
-		    const struct ProcedureClosure *restrict task,
-		    const size_t count);
+task_nodes_init_mfma(struct TaskNode *restrict node,
+		     Procedure *const *task_fun,
+		     void **task_arg,
+		     const size_t count);
+extern inline struct TaskNode *
+task_nodes_init_sfma(struct TaskNode *restrict node,
+		     Procedure *const task_fun,
+		     void **task_arg,
+		     const size_t count);
+extern inline struct TaskNode *
+task_nodes_init_tasks(struct TaskNode *restrict node,
+		      const struct ProcedureClosure *restrict task,
+		      const size_t count);
 extern inline void
-task_store_populate(struct TaskStore *const restrict store,
-		    struct TaskNode *const restrict nodes,
-		    const struct ProcedureClosure *const restrict tasks,
-		    const size_t count);
+task_store_init_mfma(struct TaskStore *const restrict store,
+		     struct TaskNode *const restrict nodes,
+		     Procedure *const *const task_funs,
+		     void **task_args,
+		     const size_t count);
+extern inline void
+task_store_init_sfma(struct TaskStore *const restrict store,
+		     struct TaskNode *const restrict nodes,
+		     Procedure *const task_fun,
+		     void **task_args,
+		     const size_t count);
+extern inline void
+task_store_init_tasks(struct TaskStore *const restrict store,
+		      struct TaskNode *const restrict nodes,
+		      const struct ProcedureClosure *const restrict tasks,
+		      const size_t count);
 extern inline void
 task_queue_init(struct TaskQueue *const restrict queue);
 
@@ -18,13 +40,25 @@ extern inline void
 task_queue_init_empty(struct TaskQueue *const restrict queue);
 
 extern inline void
-task_queue_init_from_store(struct TaskQueue *const restrict queue,
-			   const struct TaskStore *const restrict store);
+task_queue_init_store(struct TaskQueue *const restrict queue,
+		      const struct TaskStore *const restrict store);
 extern inline void
-task_queue_init_populated(struct TaskQueue *const restrict queue,
-			  struct TaskNode *restrict node,
-			  struct ProcedureClosure *restrict task,
-			  const size_t count);
+task_queue_init_mfma(struct TaskQueue *const restrict queue,
+		     struct TaskNode *const restrict nodes,
+		     Procedure *const *const task_funs,
+		     void **task_args,
+		     const size_t count);
+extern inline void
+task_queue_init_sfma(struct TaskQueue *const restrict queue,
+		     struct TaskNode *const restrict nodes,
+		     Procedure *const task_fun,
+		     void **task_args,
+		     const size_t count);
+extern inline void
+task_queue_init_tasks(struct TaskQueue *const restrict queue,
+		      struct TaskNode *const restrict nodes,
+		      const struct ProcedureClosure *const restrict tasks,
+		      const size_t count);
 
 /* LIFO peek
  *─────────────────────────────────────────────────────────────────────────── */

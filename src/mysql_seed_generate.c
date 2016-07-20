@@ -5,8 +5,6 @@
 extern inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database);
-
-
 /* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
