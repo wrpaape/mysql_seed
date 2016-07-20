@@ -156,11 +156,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	prev_node->prev	= NULL;
 	next_node = prev_node + 1l;
 
-	generator.db_specs = db_spec;
-
-	handler_closure_init(&generator->fail_cl,
-			     &generator_exit_on_failure,
-			     &generator);
 
 	/* initialize thread log */
 	thread_log_init(&generator.log,
@@ -172,6 +167,13 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		     count->row_count_max);
 
 	generator.databases.from = database;		     /* <databases> */
+
+	generator.db_specs = db_spec;
+
+	handler_closure_init(&generator.fail_cl,
+			     &generator_exit_on_failure,
+			     &generator);
+
 	do {
 		database->spec = db_spec;
 
@@ -213,7 +215,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			table->row_blocks.from = row_block;  /* <row_blocks> */
 
 			/* open first row_block's rowspan interval */
-			rowblock->rowspans.from = rowspan;
+			row_block->rowspans.from = rowspan;
 
 			table->columns.from = column;	     /* <columns> */
 
@@ -252,7 +254,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				length_lock_init(&row_block->total,
 						 0lu);
 
-				if (rowblock == row_block_div_until)
+				if (row_block == row_block_div_until)
 					break;
 
 				row_block->row_count = row_block_row_count_max;
@@ -270,11 +272,11 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				} while (rowspan < rowspans_until);
 			}
 
-			roblock->row_count = (count_row_blocks_mod > 0u)
-					   ? count_row_blocks_mod
-					   : row_block_row_count_max;
+			row_block->row_count = (count_row_blocks_mod > 0u)
+					     ? count_row_blocks_mod
+					     : row_block_row_count_max;
 
-			++rowblock;
+			++row_block;
 
 			table->row_blocks.until = row_block; /* </row_blocks> */
 

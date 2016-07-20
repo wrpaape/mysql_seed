@@ -417,7 +417,7 @@ struct Generator {
 	struct ThreadLog log;
 	struct Counter counter;			/* shared by all */
 	struct DatabaseInterval databases;
-	struct DbSpec *db_specs;		/* from raw input */
+	const struct DbSpec *db_specs;		/* from raw input */
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */
 };
 
