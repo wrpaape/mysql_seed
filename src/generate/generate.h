@@ -306,7 +306,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	generator.build.counter_columns_loaders.last = prev_node;
 
-	procedure_closure_call(&generator.build.counter_columns_loaders.head->task);
+	procedure_closure_call(&generator.build.counter_columns_loaders.head->next->task);
 
 	/* /1* initialize thread pool *1/ */
 	/* thread_pool_init(&generator.pool, */
