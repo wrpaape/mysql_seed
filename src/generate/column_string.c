@@ -12,13 +12,18 @@ build_column_string_base(void *arg)
 	const struct String *const restrict base
 	= &column->spec->type.string.base;
 
-	const size_t row_count = column->parent->spec->row_count;
+	struct Table *const restrict table
+	= column->parent;
+
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
 
 	const size_t length_contents = counter_size_upto(row_count)
 				     + (row_count * base->length);
 
 	/* increment table length */
-	length_lock_increment(&column->parent->total,
+	length_lock_increment(&table->total,
 			      length_contents,
 			      &column->fail_cl);
 
@@ -39,7 +44,7 @@ build_column_string_base(void *arg)
 	struct Rowspan *restrict from		   = column->rowspans.from;
 
 	struct Counter *const restrict counter
-	= &column->parent->parent->parent->counter;
+	= &table->parent->parent->counter;
 
 	/* wait for counter to be built */
 	counter_await(counter,
@@ -69,7 +74,8 @@ build_column_string_base(void *arg)
 				      ptr - from->cell,
 				      &column->fail_cl);
 
-		++from;
+		/* skip to rowspan in next row */
+		from += col_count;
 	} while (from < until);
 
 	thread_try_catch_close();

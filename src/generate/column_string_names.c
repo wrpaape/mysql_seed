@@ -442,15 +442,21 @@ build_column_string_names_first(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const size_t count = column->parent->spec->row_count;
+	struct Table *const restrict table
+	= column->parent;
 
-	if (count > FIRST_NAMES_COUNT_MAX) {
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
+
+	if (row_count > FIRST_NAMES_COUNT_MAX) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FIRST_MAX_EXCEEDED);
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char) * (FIRST_NAME_SIZE_MAX * count);
+	const size_t size_est = sizeof(char)
+			      * (FIRST_NAME_SIZE_MAX * row_count);
 
 	char *restrict ptr = NULL;
 
@@ -480,15 +486,15 @@ build_column_string_names_first(void *arg)
 				      ptr - from->cell,
 				      &column->fail_cl);
 
-		++from;
+		/* skip to rowspan in next row */
+		from += col_count;
 	} while (from < until);
 
 
 	/* add length of column to table total */
-	length_lock_increment(&column->parent->total,
+	length_lock_increment(&table->total,
 			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
-
 
 	thread_try_catch_close();
 }
@@ -500,15 +506,20 @@ build_column_string_names_last(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const size_t count = column->parent->spec->row_count;
+	struct Table *const restrict table
+	= column->parent;
 
-	if (count > LAST_NAMES_COUNT_MAX) {
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
+
+	if (row_count > LAST_NAMES_COUNT_MAX) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_LAST_MAX_EXCEEDED);
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char) * (LAST_NAME_SIZE_MAX * count);
+	const size_t size_est = sizeof(char) * (LAST_NAME_SIZE_MAX * row_count);
 
 	char *restrict ptr = NULL;
 
@@ -538,15 +549,15 @@ build_column_string_names_last(void *arg)
 				      ptr - from->cell,
 				      &column->fail_cl);
 
-		++from;
+		/* skip to rowspan in next row */
+		from += col_count;
 	} while (from < until);
 
 
 	/* add length of column to table total */
-	length_lock_increment(&column->parent->total,
+	length_lock_increment(&table->total,
 			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
-
 
 	thread_try_catch_close();
 }
@@ -558,15 +569,20 @@ build_column_string_names_full(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const size_t count = column->parent->spec->row_count;
+	struct Table *const restrict table
+	= column->parent;
 
-	if (count > FULL_NAMES_COUNT_MAX) {
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
+
+	if (row_count > FULL_NAMES_COUNT_MAX) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FULL_MAX_EXCEEDED);
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char) * (FULL_NAME_SIZE_MAX * count);
+	const size_t size_est = sizeof(char) * (FULL_NAME_SIZE_MAX * row_count);
 
 	char *restrict ptr = NULL;
 
@@ -595,15 +611,15 @@ build_column_string_names_full(void *arg)
 				      ptr - from->cell,
 				      &column->fail_cl);
 
-		++from;
+		/* skip to rowspan in next row */
+		from += col_count;
 	} while (from < until);
 
 
 	/* add length of column to table total */
-	length_lock_increment(&column->parent->total,
+	length_lock_increment(&table->total,
 			      ptr - column->rowspans.from->cell,
 			      &column->fail_cl);
-
 
 	thread_try_catch_close();
 }

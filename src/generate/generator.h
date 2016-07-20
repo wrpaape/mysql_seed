@@ -338,7 +338,7 @@ struct Table;
 
 struct Column {
 	const struct ColSpec *spec;		/* from raw input */
-	struct RowspanInterval rowspans;	/* X BLK_COUNT */
+	struct RowspanInterval rowspans;	/* X BLK_COUNT, col_count gap */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
 };
@@ -364,6 +364,8 @@ struct Table {
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
 	struct Database *parent;
+	unsigned int col_count;
+	unsigned int col_count;
 };
 
 struct TableInterval {
