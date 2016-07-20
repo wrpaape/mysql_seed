@@ -40,11 +40,11 @@ build_column_string_base(void *arg)
 		__builtin_unreachable();
 	}
 
-	const struct Rowspan *const restrict until = column->rowspans.until;
-	struct Rowspan *restrict from		   = column->rowspans.from;
-
 	struct Counter *const restrict counter
 	= &table->parent->parent->counter;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
+	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	/* wait for counter to be built */
 	counter_await(counter,

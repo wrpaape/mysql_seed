@@ -283,7 +283,7 @@ union TypeQualifier {
 struct ColSpec {
 	struct String name;
 	union TypeQualifier type;
-	Procedure *create;
+	Procedure *build;
 };
 
 struct ColSpecInterval {
@@ -338,7 +338,7 @@ struct Table;
 
 struct Column {
 	const struct ColSpec *spec;		/* from raw input */
-	struct RowspanInterval rowspans;	/* X BLK_COUNT, col_count gap */
+	struct Rowspan *restrict rowspans_from;	/* X BLK_COUNT, col_count gap */
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
 };
@@ -364,7 +364,7 @@ struct Table {
 	struct RowBlockInterval row_blocks;	/* slice assigned by db */
 	struct HandlerClosure fail_cl;		/* cleanup self, then db */
 	struct Database *parent;
-	unsigned int col_count;
+	const struct Rowspan *restrict rowspans_until;
 	unsigned int col_count;
 };
 
@@ -450,7 +450,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
-	free(column->rowspans.from->cell);
+	free(column->rowspans_from->cell);
 }
 
 inline void
@@ -664,14 +664,11 @@ inline void
 column_init(struct Column *const restrict column,
 	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
-	    const struct Rowspan *const restrict rowspans_until,
 	    struct Table *const restrict parent)
 {
 	column->spec = spec;
 
-	rowspan_interval_init(&column->rowspans,
-			      rowspans_from,
-			      rowspans_until);
+	column->rowspans_from = rowspans_from;
 
 	handler_closure_init(&column->fail_cl,
 			     &column_exit_on_failure,

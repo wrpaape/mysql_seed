@@ -445,6 +445,8 @@ build_column_string_names_first(void *arg)
 	struct Table *const restrict table
 	= column->parent;
 
+	const struct Rowspan *const restrict until = table->rowspans_until;
+
 	const unsigned int col_count = table->col_count;
 
 	const size_t row_count = table->spec->row_count;
@@ -471,8 +473,7 @@ build_column_string_names_first(void *arg)
 		__builtin_unreachable();
 	}
 
-	const struct Rowspan *const restrict until = column->rowspans.until;
-	struct Rowspan *restrict from		   = column->rowspans.from;
+	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	do {
 		from->cell = ptr;
@@ -493,7 +494,7 @@ build_column_string_names_first(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&table->total,
-			      ptr - column->rowspans.from->cell,
+			      ptr - column->rowspans_from->cell,
 			      &column->fail_cl);
 
 	thread_try_catch_close();
@@ -508,6 +509,8 @@ build_column_string_names_last(void *arg)
 
 	struct Table *const restrict table
 	= column->parent;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
 
 	const unsigned int col_count = table->col_count;
 
@@ -534,8 +537,7 @@ build_column_string_names_last(void *arg)
 		__builtin_unreachable();
 	}
 
-	const struct Rowspan *const restrict until = column->rowspans.until;
-	struct Rowspan *restrict from		   = column->rowspans.from;
+	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	do {
 		from->cell = ptr;
@@ -556,7 +558,7 @@ build_column_string_names_last(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&table->total,
-			      ptr - column->rowspans.from->cell,
+			      ptr - column->rowspans_from->cell,
 			      &column->fail_cl);
 
 	thread_try_catch_close();
@@ -571,6 +573,8 @@ build_column_string_names_full(void *arg)
 
 	struct Table *const restrict table
 	= column->parent;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
 
 	const unsigned int col_count = table->col_count;
 
@@ -597,8 +601,7 @@ build_column_string_names_full(void *arg)
 		__builtin_unreachable();
 	}
 
-	const struct Rowspan *const restrict until = column->rowspans.until;
-	struct Rowspan *restrict from		   = column->rowspans.from;
+	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	do {
 		from->cell = ptr;
@@ -618,7 +621,7 @@ build_column_string_names_full(void *arg)
 
 	/* add length of column to table total */
 	length_lock_increment(&table->total,
-			      ptr - column->rowspans.from->cell,
+			      ptr - column->rowspans_from->cell,
 			      &column->fail_cl);
 
 	thread_try_catch_close();

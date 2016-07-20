@@ -7,11 +7,13 @@ build_column_id(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct Rowspan *const restrict until = column->rowspans.until;
-	struct Rowspan *restrict from		   = column->rowspans.from;
+
+	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	struct Table *const restrict table
 	= column->parent;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
 
 	const unsigned int col_count = table->col_count;
 

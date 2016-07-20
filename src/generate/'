@@ -162,10 +162,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			     &generator_exit_on_failure,
 			     &generator);
 
-	/* initialize thread log */
-	thread_log_init(&generator.log,
-			"generator");
-
 	/* initialize counter */
 	counter_init(&generator.counter,
 		     &generator,
@@ -226,29 +222,17 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 					    rowspan,
 					    table);
 
-
-				procedure_closure_init(&next_node->task,
-						       col_spec->build,
-						       column);
-
-				next_node->prev = prev_node;
-				prev_node->next = next_node;
-
-				prev_node = next_node;
-				++next_node;
-
-				++column;
 				++rowspan;
+				++column;
 				++col_spec;
 			} while (col_spec < tbl_spec->col_specs.until);
 
-			col_count = column - table->columns.from;
-
 			table->columns.until = column;	     /* </columns> */
+
+			col_count = column - table->columns.from;
 
 			while (1) {
 				row_block->rowspans.until = rowspan;
-
 				length_lock_init(&row_block->total,
 						 0lu);
 
@@ -274,7 +258,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 					   ? count_row_blocks_mod
 					   : row_block_row_count_max;
 
-			++rowblock;
 
 			table->row_blocks.until = row_block; /* </row_blocks> */
 
@@ -304,13 +287,11 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	generator.build.counter_columns_loaders.last = prev_node;
 
-	/* initialize thread pool */
-	thread_pool_init(&generator.pool,
-			 &generator.build.counter_columns_loaders,
-			 &generator.workers[0],
-			 COUNT_WORKERS);
 
-	puts("AWOOOOOOOOOOOOOOGA");
+	/* initialize thread pool */
+
+
+
 
 	free(generator_alloc);
 }

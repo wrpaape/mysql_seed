@@ -102,7 +102,6 @@ extern inline void
 column_init(struct Column *const restrict column,
 	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
-	    const struct Rowspan *const restrict rowspans_until,
 	    struct Table *const restrict parent);
 
 /* ColumnInterval Operations

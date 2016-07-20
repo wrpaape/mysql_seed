@@ -1275,7 +1275,7 @@ EXPECTED_COL_TBL_DB_FLAG:
 inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec)
 {
-	col_spec->create = &build_column_string_base;
+	col_spec->build = &build_column_string_base;
 	col_spec->type.string.base = col_spec->name;
 }
 
@@ -1326,7 +1326,7 @@ INCOMPLETE_NO_STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				state->specs.col->create
+				state->specs.col->build
 				= &build_column_string_base;
 				parse_column_complete(state);
 			} else {
@@ -1381,7 +1381,7 @@ INCOMPLETE_NO_STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				state->specs.col->create
+				state->specs.col->build
 				= &build_column_string_base;
 				parse_column_complete(state);
 			} else {
@@ -1480,7 +1480,7 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		/* reserve first column for 'id' */
 		col_spec->name.bytes  = "id";
 		col_spec->name.length = 2lu;
-		col_spec->create = &build_column_id;
+		col_spec->build = &build_column_id;
 
 		state->specs.tbl->col_specs.from = col_spec;
 
@@ -1534,7 +1534,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 	/* reserve first column for 'id' */
 	col_spec->name.bytes  = "id";
 	col_spec->name.length = 2lu;
-	col_spec->create = &build_column_id;
+	col_spec->build = &build_column_id;
 
 	state->specs.tbl->col_specs.from = col_spec;
 
@@ -1865,7 +1865,7 @@ generate_dispatch(char *restrict *const restrict arg,
 	 * struct ColSpec {
 	 *	struct String name;			1 pointer + 1 size_t
 	 *	union TypeQualifier			2 ldbls + 1 uint (max)
-	 *	Procedure *create;			1 pointer
+	 *	Procedure *build;			1 pointer
 	 * };						────────────────
 	 *						2 pointer + 1 size_t
 	 *						+ 2 ldbls + 1 uint
