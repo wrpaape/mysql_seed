@@ -70,6 +70,16 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		    const struct DbSpec *restrict db_spec,
 		    int *const restrict exit_status)
 {
+	struct Database *restrict database;
+	struct Table *restrict table;
+	struct Column *restrict column;
+	struct Rowspan *restrict rowspan;
+	struct RowBlock *restrict row_block;
+	struct TaskNode *restrict prev_node;
+	struct TaskNode *restrict next_node;
+	struct TblSpec *restrict tbl_spec;
+	struct ColSpec *restrict col_spec;
+
 	const size_t row_block_row_count_max
 	= (count->row_count_max < COUNT_WORKERS)
 	? count->row_count_max
@@ -103,26 +113,95 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		return;
 	}
 
-	struct Generator generator;
+	database = generator_alloc;
 
-	/* database_interval_init(&generator.databases, */
-	/* 		       databases, */
-	/* 		       databases + count->databases); */
-
+	/* divvy up memory */
 	struct Table *const restrict tables
-	= (struct Table *const restrict) (generator_alloc + count->databases);
+	= (struct Table *const restrict) (database + count->databases);
+	table = tables;
 
 	struct Column *const restrict columns
-	= (struct Column *const restrict) (tables + count->tables);
+	= (struct Column *const restrict) (table + count->tables);
+	column = columns;
 
 	struct Rowspan *const restrict rowspans
-	= (struct Rowspan *const restrict) (columns + count->columns);
+	= (struct Rowspan *const restrict) (column + count->columns);
+	rowspan = rowspans;
 
 	struct RowBlock *const restrict row_blocks
-	= (struct RowBlock *const restrict) (rowspans + count_rowspans_max);
+	= (struct RowBlock *const restrict) (rowspan + count_rowspans_max);
+	row_block = row_blocks;
 
 	struct TaskNode *const restrict task_nodes
-	= (struct TaskNode *const restrict) (row_blocks + count_row_blocks_max);
+	= (struct TaskNode *const restrict) (row_block + count_row_blocks_max);
+	prev_node = task_nodes;
+
+
+	/* hook up generator pointers */
+	struct Generator generator;
+
+	generator.build.counter_columns_loaders.head = prev_node;
+
+	/* ensure Counter gets assigned first task */
+	prev_node->task.fun = &build_counter;
+	prev_node->task.arg = &generator.counter;
+	prev_node->prev	    = NULL;
+
+	next_node = prev_node + 1l;
+
+
+	generator.databases.from = database;
+	do {
+		database->spec = spec;
+
+		database->tables.from = table;
+
+		handler_closure_init(&database->fail_cl,
+				     &database_exit_on_failure,
+				     database);
+
+		database->parent = &generator;
+
+		next_node->task.fun = &build_loader;
+		next_node->task.arg = database;
+		next_node->prev	    = prev_node;
+		prev_node->next	    = next_node;
+
+		prev_node = next_node;
+		++next_node;
+
+		tbl_spec = db_spec->tbl_specs;
+		do {
+
+			col_spec = tbl_spec->col_specs.from;
+			do {
+
+
+
+				++column;
+
+				++col_spec;
+			} while (col_spec < tbl_spec->col_specs.until);
+
+
+			++table;
+
+			tbl_spec = tbl_spec->next;
+		} while (tbl_spec != NULL);
+
+
+		database->tables.until = table;
+
+		++database;
+
+		db_spec = db_spec->next;
+	} while (db_spec != NULL);
+
+	prev_node->next = NULL;
+
+	generator.build.counter_columns_loaders.last = prev_node;
+
+	generator.databases.until = database;
 
 
 

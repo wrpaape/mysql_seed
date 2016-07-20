@@ -761,31 +761,6 @@ database_exit_on_failure(void *arg,
 			 const char *restrict faliure)
 __attribute__((noreturn));
 
-/* inline void */
-/* database_init(struct Database *const restrict database, */
-/* 	      struct Generator *const restrict parent, */
-/* 	      struct Table *const restrict tables_from, */
-/* 	      const struct Table *const restrict tables_until, */
-/* 	      char *const restrict database_name_bytes, */
-/* 	      const size_t database_name_length) */
-/* { */
-/* 	database->parent = parent; */
-
-/* 	length_lock_init(&database->total, */
-/* 			 0lu); */
-
-/* 	table_interval_init(&database->tables, */
-/* 			    tables_from, */
-/* 			    tables_until); */
-
-/* 	string_init(&database->name, */
-/* 		    database_name_bytes, */
-/* 		    database_name_length); */
-
-/* 	handler_closure_init(&database->fail_cl, */
-/* 			     &database_exit_on_failure, */
-/* 			     database); */
-/* } */
 
 /* DatabaseInterval Operations
  *─────────────────────────────────────────────────────────────────────────── */
