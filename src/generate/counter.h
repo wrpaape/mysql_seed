@@ -292,7 +292,7 @@ counter_set_internals(struct Counter *const restrict counter)
 	/* point counter buffer 'digits' after 'upto' x counter pointers */
 	until = pointers + counter->upto;
 
-	char *const restrict digits = (char *) until;
+	char *const restrict digits = (char *) (until + 1l);
 
 	/* point last pointer past end of digits buffer */
 	*until = digits + counter->size_digits;
@@ -338,8 +338,8 @@ counter_init_internals(struct Counter *const restrict counter)
 
 	counter_size_internals(counter);
 
-	/* 'upto' pointers + 'size_digits' ascii chars */
-	const size_t size_counter = (sizeof(char *) * counter->upto)
+	/* 'upto + 1' pointers + 'size_digits' ascii chars */
+	const size_t size_counter = (sizeof(char *) * (counter->upto + 1lu))
 				  + counter->size_digits;
 
 	thread_try_catch_open(free,
