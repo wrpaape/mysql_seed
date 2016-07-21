@@ -1,0 +1,26 @@
+# database/db1/load_db1.mysql
+#
+# seeds MySQL database db1 according to the tabular data files:
+#
+# 	- database/db1/tbl1.csv
+# 	- database/db1/tbl2.csv
+
+USE db1;
+
+LOAD DATA INFILE 'database/db1/tbl1.csv'
+	IGNORE INTO TABLE tbl1
+	FIELDS TERMINATED BY ','
+	       ENCLOSED BY   ''
+	       ESCAPED BY    '\\'
+	LINES  STARTING BY   ''
+	       TERMINATED BY '\n'
+	IGNORE 17 LINES;
+
+LOAD DATA INFILE 'database/db1/tbl2.csv'
+	IGNORE INTO TABLE tbl2
+	FIELDS TERMINATED BY ','
+	       ENCLOSED BY   ''
+	       ESCAPED BY    '\\'
+	LINES  STARTING BY   ''
+	       TERMINATED BY '\n'
+	IGNORE 17 LINES;
