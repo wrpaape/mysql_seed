@@ -15,10 +15,6 @@ build_table_header(void *arg)
 	struct Table *const restrict table
 	= (struct Table *const restrict) arg;
 
-	table_file_init(&table->file,
-			&table->spec->name,
-			&table->parent->dirpath);
-
 	table->file.contents.length = table_size_contents(table);
 
 	char *restrict ptr = NULL;

@@ -145,10 +145,9 @@ PTR = put_string_size(PTR,						\
 PUT_STRING_WIDTH(PTR, LOADER_HEADER_4, 6)
 
 #define LOADER_HEADER_5							\
-			 ";"						\
-"\n"
+			 ";"
 #define PUT_LOADER_HEADER_5(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_HEADER_5, 2)
+PUT_STRING_WIDTH(PTR, LOADER_HEADER_5, 1)
 
 #define LOADER_HEADER_BASE_SIZE_MAX					\
 (sizeof(LOADER_HEADER_1 LOADER_HEADER_2 LOADER_HEADER_3			\
@@ -167,7 +166,7 @@ PTR = put_string_size(PTR,						\
 		      sizeof(LOADER_LOAD_TABLE_1) - 1lu)
 
 #define LOADER_LOAD_TABLE_2						\
-"\n\tIGNORE INTO TABLE " /* <tbl_name> */
+"'\n\tIGNORE INTO TABLE " /* <tbl_name> */
 #define PUT_LOADER_LOAD_TABLE_2(PTR)					\
 PTR = put_string_size(PTR,						\
 		      LOADER_LOAD_TABLE_2,				\
@@ -176,9 +175,9 @@ PTR = put_string_size(PTR,						\
 #define LOADER_LOAD_TABLE_3						\
 "\n\tFIELDS TERMINATED BY '\\t'"					\
 "\n\t       ENCLOSED BY   ''"						\
-"\n\t       ESCAPED BY    '\\'"						\
+"\n\t       ESCAPED BY    '\\\\'"					\
 "\n\tLINES  STARTING BY   ''"						\
-"\n\t       TERMINATED BY '\'"						\
+"\n\t       TERMINATED BY '\\\\'"					\
 "\n\tIGNORE " TABLE_HEADER_LINE_COUNT " LINES;"
 #define PUT_LOADER_LOAD_TABLE_3(PTR)					\
 PTR = put_string_size(PTR,						\

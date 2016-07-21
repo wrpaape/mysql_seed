@@ -34,9 +34,13 @@ loader_put_header(char *restrict ptr,
 	PUT_LOADER_HEADER_3(ptr);
 
 	const struct Table *const restrict until = database->tables.until;
-	const struct Table *restrict from	 = database->tables.from;
+	struct Table *restrict from		 = database->tables.from;
 
 	while (1) {
+		table_file_init(&from->file,
+				&from->spec->name,
+				&database->dirpath);
+
 		ptr = put_string_size(ptr,
 				      &from->file.path.buffer[0],
 				      from->file.path.length);

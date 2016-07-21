@@ -193,7 +193,7 @@ struct ArgvInterval {
 #define FILE_HANDLE_OPEN_FLAG (O_EXCL | O_CREAT | O_WRONLY)
 
 /* all can read, only owner can write */
-#define FILE_HANDLE_MODE (S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH)
+#define FILE_HANDLE_MODE (S_IRWXU | S_IRGRP | S_IROTH)
 
 #define DIRPATH_MODE FILE_HANDLE_MODE
 
