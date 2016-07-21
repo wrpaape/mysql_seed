@@ -37,21 +37,21 @@ table_put_header(char *restrict ptr,
 {
 	PUT_TABLE_HEADER_1(ptr);
 
-	put_string_size(ptr,
-			&table->file.path.buffer[0],
-			table->file.path.length);
+	ptr = put_string_size(ptr,
+			      &table->file.path.buffer[0],
+			      table->file.path.length);
 
 	PUT_TABLE_HEADER_2(ptr);
 
-	put_string_size(ptr,
-			table->spec->name.bytes,
-			table->spec->name.length);
+	ptr = put_string_size(ptr,
+			      table->spec->name.bytes,
+			      table->spec->name.length);
 
 	PUT_TABLE_HEADER_3(ptr);
 
-	put_string_size(ptr,
-			table->parent->spec->name.bytes,
-			table->parent->spec->name.length);
+	ptr = put_string_size(ptr,
+			      table->parent->spec->name.bytes,
+			      table->parent->spec->name.length);
 
 	PUT_TABLE_HEADER_4(ptr);
 

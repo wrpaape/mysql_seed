@@ -31,18 +31,18 @@ build_table_header(void *arg)
 	char *restrict ptr = table_put_header(table->file.contents.bytes,
 					      table);
 
-	const struct RowBlock *const restrict until = table->row_blocks.until;
-	struct RowBlock *restrict from		    = table->row_blocks.from;
+	const struct RowBlock *const restrict upto = table->row_blocks.until - 1l;
+	struct RowBlock *restrict from		   = table->row_blocks.from;
 
 	while (1) {
 		from->contents = ptr;
 
-		++from;
-
-		if (from == until)
+		if (from == upto)
 			break;
 
 		ptr += from->total.length;
+
+		++from;
 	}
 
 	thread_try_catch_close();
