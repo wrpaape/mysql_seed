@@ -76,7 +76,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	struct Rowspan *restrict rowspan;
 	struct Rowspan *restrict rowspans_until;
 	struct RowBlock *restrict row_block;
-	struct RowBlock *restrict row_block_div_until;
+	struct RowBlock *restrict row_blocks_until;
 	struct TaskNode *restrict prev_node;
 	struct TaskNode *restrict next_node;
 	struct TblSpec *restrict tbl_spec;
@@ -208,14 +208,19 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			count_row_blocks_div = tbl_spec->row_count
 					     / row_block_row_count_max;
 
-			row_block_div_until = row_block + count_row_blocks_div;
+			row_blocks_until = row_block + count_row_blocks_div;
 
-
-
-			table->row_blocks.from = row_block;  /* <row_blocks> */
+			if (count_row_blocks_mod > 0u) {
+				++row_blocks_until;
+				row_block->row_count = count_row_blocks_mod;
+			} else {
+				row_block->row_count = row_block_row_count_max;
+			}
 
 			/* open first row_block's rowspan interval */
 			row_block->rowspans.from = rowspan;
+
+			table->row_blocks.from = row_block;  /* <row_blocks> */
 
 			table->columns.from = column;	     /* <columns> */
 
@@ -227,7 +232,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 					    col_spec,
 					    rowspan,
 					    table);
-
 
 				procedure_closure_init(&next_node->task,
 						       col_spec->build,
@@ -249,19 +253,19 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			table->columns.until = column;	     /* </columns> */
 
 			while (1) {
-				row_block->rowspans.until = rowspan;
-
 				length_lock_init(&row_block->total,
 						 0lu);
 
-				if (row_block == row_block_div_until)
-					break;
-
-				row_block->row_count = row_block_row_count_max;
+				row_block->rowspans.until = rowspan;
 
 				++row_block;
 
+				if (row_block == row_blocks_until)
+					break;
+
 				row_block->rowspans.from = rowspan;
+
+				row_block->row_count = row_block_row_count_max;
 
 				rowspans_until = rowspan + col_count;
 
@@ -272,13 +276,12 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				} while (rowspan < rowspans_until);
 			}
 
-			row_block->row_count = (count_row_blocks_mod > 0u)
-					     ? count_row_blocks_mod
-					     : row_block_row_count_max;
-
-			++row_block;
-
 			table->row_blocks.until = row_block; /* </row_blocks> */
+
+			/* for (struct RowBlock *row_block = table->row_blocks.from; row_block < table->row_blocks.until; ++row_block) */
+			/* 	printf("row_count: %zu\n", row_block->row_count); */
+
+			/* exit(0); */
 
 			table->parent = database;
 
