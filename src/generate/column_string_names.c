@@ -460,20 +460,20 @@ build_column_string_names_first(void *arg)
 	const size_t size_est = sizeof(char)
 			      * (FIRST_NAME_SIZE_MAX * row_count);
 
-	char *restrict ptr = NULL;
-
 	thread_try_catch_open(free,
-			      ptr);
+			      column->contents);
 
-	ptr = malloc(size_est);
+	column->contents = malloc(size_est);
 
-	if (ptr == NULL) {
+	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FIRST_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
 	struct Rowspan *restrict from		   = column->rowspans_from;
+
+	char *restrict ptr = column->contents;
 
 	do {
 		from->cell = ptr;
@@ -524,20 +524,20 @@ build_column_string_names_last(void *arg)
 
 	const size_t size_est = sizeof(char) * (LAST_NAME_SIZE_MAX * row_count);
 
-	char *restrict ptr = NULL;
-
 	thread_try_catch_open(free,
-			      ptr);
+			      column->contents);
 
-	ptr = malloc(size_est);
+	column->contents = malloc(size_est);
 
-	if (ptr == NULL) {
+	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_LAST_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
 	struct Rowspan *restrict from		   = column->rowspans_from;
+
+	char *restrict ptr = column->contents;
 
 	do {
 		from->cell = ptr;
@@ -588,20 +588,22 @@ build_column_string_names_full(void *arg)
 
 	const size_t size_est = sizeof(char) * (FULL_NAME_SIZE_MAX * row_count);
 
-	char *restrict ptr = NULL;
 
 	thread_try_catch_open(free,
-			      ptr);
+			      column->contents);
 
-	ptr = malloc(size_est);
+	column->contents = malloc(size_est);
 
-	if (ptr == NULL) {
+	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FULL_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
+
 	struct Rowspan *restrict from		   = column->rowspans_from;
+
+	char *restrict ptr = column->contents;
 
 	do {
 		from->cell = ptr;

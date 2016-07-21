@@ -17,23 +17,19 @@ build_table_header(void *arg)
 
 	table->file.contents.length = table_size_contents(table);
 
-	char *restrict ptr = NULL;
-
 	thread_try_catch_open(free,
-			      ptr);
+			      table->file.contents.bytes);
 
-	ptr = malloc(table->file.contents.length);
+	table->file.contents.bytes = malloc(table->file.contents.length);
 
-	if (ptr == NULL) {
+	if (table->file.contents.bytes == NULL) {
 		handler_closure_call(&table->fail_cl,
 				     BTH_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
-	table->file.contents.bytes = ptr;
-
-	ptr = table_put_header(ptr,
-			       table);
+	char *restrict ptr = table_put_header(table->file.contents.bytes,
+					      table);
 
 	const struct RowBlock *const restrict until = table->row_blocks.until;
 	struct RowBlock *restrict from		    = table->row_blocks.from;

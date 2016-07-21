@@ -27,14 +27,13 @@ build_column_string_base(void *arg)
 			      length_contents,
 			      &column->fail_cl);
 
-	char *restrict ptr = NULL;
 
 	thread_try_catch_open(free,
-			      ptr);
+			      column->contents);
 
-	ptr = malloc(length_contents);
+	column->contents = malloc(length_contents);
 
-	if (ptr == NULL) {
+	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
 				     BCSB_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -46,6 +45,8 @@ build_column_string_base(void *arg)
 	const struct Rowspan *const restrict until = table->rowspans_until;
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
+	char *restrict ptr = column->contents;
+
 	/* wait for counter to be built */
 	counter_await(counter,
 		      &column->fail_cl);
@@ -53,8 +54,6 @@ build_column_string_base(void *arg)
 	char *restrict *restrict count_ptr = counter->pointers;
 
 	char *restrict *restrict count_until;
-
-	printf("ptr: %p\n", ptr);
 
 	do {
 		from->cell = ptr;

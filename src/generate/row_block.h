@@ -53,12 +53,12 @@ copy_row_block_row(char *restrict ptr,
 
 	const struct Rowspan *const restrict last = until - 1l;
 
-	do {
+	while (from < last) {
 		*ptr = '\t';
 		ptr  = put_string(ptr + 1l,
 				  from->cell);
 		++from;
-	} while (from < last);
+	}
 
 	*ptr = '\t';
 	copy_string(ptr + 1l,

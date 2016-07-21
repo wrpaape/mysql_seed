@@ -34,6 +34,28 @@ struct DatabaseCounter {
 	unsigned int tables;
 };
 
+/* destructors
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+free_columns(struct Column *restrict from,
+	     const struct Column *const restrict until)
+{
+	do {
+		free(from->contents);
+		++from;
+	} while (from < until);
+}
+
+inline void
+free_table_files(struct Table *restrict from,
+		 const struct Table *const restrict until)
+{
+	do {
+		free(from->file.contents.bytes);
+		++from;
+	} while (from < until);
+}
+
 
 /* Generator/DatbaseCounter operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -73,7 +95,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	struct Database *restrict database;
 	struct Table *restrict table;
 	struct Column *restrict column;
-	const struct Column *restrict columns_until;
 	struct Rowspan *restrict rowspan;
 	const struct Rowspan *restrict rowspans_until;
 	struct RowBlock *restrict row_block;
@@ -198,7 +219,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 		tbl_spec = db_spec->tbl_specs;
 		do {
-			/* no-op if freed before allocated */
+			/* no-op if freed before allocation */
 			table->file.contents.bytes = NULL;
 
 			length_lock_init(&table->total,
@@ -350,21 +371,9 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	if (!thread_pool_alive(&generator.pool,
 			       &generator.fail_cl)) {
 
-		/* free columns (except ids) */
-		table = tables;
-		column = columns;
-		do {
-			++column;	/* skip id column */
-			columns_until = table->columns.until;
-
-			do {
-				column_destroy(column);
-				++column;
-			} while (column < columns_until);
-
-			++table;
-		} while (table < (const struct Table *const restrict) columns);
-
+		/* free columns */
+		free_columns(columns,
+			     (const struct Column *const restrict) rowspans);
 
 		counter_free_internals(&generator.counter);
 
@@ -417,23 +426,13 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	if (!thread_pool_alive(&generator.pool,
 			       &generator.fail_cl)) {
 FAILURE_FREE_EVERYTHING_AND_RETURN:
-		/* free table files, and columns */
-		table = tables;
-		column = columns;
-		do {
-			++column;	/* skip id column */
+		/* free table files */
+		free_table_files(tables,
+				 (const struct Table *const restrict) columns);
 
-			free(table->file.contents.bytes);
-
-			columns_until = table->columns.until;
-
-			do {
-				column_destroy(column);
-				++column;
-			} while (column < columns_until);
-
-			++table;
-		} while (table < (const struct Table *const restrict) columns);
+		/* free columns */
+		free_columns(columns,
+			     (const struct Column *const restrict) rowspans);
 
 		/* free counter */
 		counter_free_internals(&generator.counter);
@@ -480,7 +479,6 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 
 	next_node->next = NULL;
 
-
 	/* wait for third set of tasks to complete */
 	thread_pool_await(&generator.pool,
 			  &generator.fail_cl);
@@ -494,32 +492,14 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 			   &generator.build.table_files,
 			   &generator.fail_cl);
 
-	/* free all columns (except ids) */
-	table  = tables;
-	column = columns;
-
-	do {
-		columns_until = table->columns.until;
-		++column;	/* skip id column */
-		do {
-			puts("BOOGA");
-			puts(column->spec->name.bytes);
-			fflush(stdout);
-			column_destroy(column);
-			puts("AWOOGA");
-			fflush(stdout);
-			++column;
-		} while (column < columns_until);
-
-		++table;
-	} while (table < (const struct Table *const restrict) columns);
-
-	/* free counter */
-	counter_free_internals(&generator.counter);
+	/* free columns */
+	free_columns(columns,
+		     (const struct Column *const restrict) rowspans);
 
 	/* wait for fourth and final set of tasks to complete */
 	thread_pool_await(&generator.pool,
 			  &generator.fail_cl);
+
 
 	thread_pool_stop(&generator.pool,
 			 &generator.fail_cl);
@@ -527,17 +507,17 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 	if (thread_pool_exit_status(&generator.pool,
 				    &generator.fail_cl) != EXIT_SUCCESS) {
 
-		/* ensure all table files are freed */
-		table = tables;
-		do {
-			free(table->file.contents.bytes);
-			++table;
-		} while (table < (const struct Table *const restrict) columns);
+		/* free table files */
+		free_table_files(tables,
+				 (const struct Table *const restrict) columns);
 
 		*exit_status = EXIT_FAILURE;
 	}
 
-	/* free initial alloc */
+	/* free counter */
+	counter_free_internals(&generator.counter);
+
+	/* free generator */
 	free(generator_alloc);
 }
 

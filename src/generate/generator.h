@@ -95,9 +95,9 @@ PTR = put_string_size(ptr,						\
 #define TABLE_HEADER_5							\
 	"<NEWLINE>"							\
 "\n15)"									\
-"\n16) ╔═══════════════════════════════════════════════╗"		\
+"\n16) ╔═══════════════════════════════════════════╗"		\
 "\n17) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
-"\n18) ╚═══════════════════════════════════════════════╝"
+"\n18) ╚═══════════════════════════════════════════╝"
 #define PUT_TABLE_HEADER_5(PTR)						\
 PTR = put_string_size(ptr,						\
 		      TABLE_HEADER_5,					\
@@ -338,6 +338,7 @@ struct Table;
 struct Column {
 	const struct ColSpec *spec;		/* from raw input */
 	struct Rowspan *restrict rowspans_from;	/* X BLK_COUNT, col_count gap */
+	char *restrict contents;
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
 };
@@ -449,8 +450,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
-	printf("col: %p\n", column->rowspans_from->cell);
-	free(column->rowspans_from->cell);
+	free(column->contents);
 }
 
 inline void
@@ -670,7 +670,7 @@ column_init(struct Column *const restrict column,
 
 	column->rowspans_from = rowspans_from;
 
-	rowspans_from->cell = NULL; /* no-op if freed before allocation */
+	column->contents = NULL; /* no-op if freed before allocation */
 
 	handler_closure_init(&column->fail_cl,
 			     &column_exit_on_failure,

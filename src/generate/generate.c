@@ -11,6 +11,16 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 extern inline void
 generate_failure_malloc(void);
 
+/* destructors
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+free_columns(struct Column *restrict from,
+	     const struct Column *const restrict until);
+
+extern inline void
+free_table_files(struct Table *restrict from,
+		 const struct Table *const restrict until);
+
 /* generate mode
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
