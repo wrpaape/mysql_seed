@@ -103,9 +103,21 @@ void test_memory_put(void)
 {
 	char buffer[128];
 
-	char *ptr = memory_put(&buffer[0],
-			       "OOGA BOOGA",
-			       sizeof("OOGA BOOGA"));
+	char *ptr;
+
+	ptr = memory_put(&buffer[0],
+			 "test",
+			 sizeof("test"));
+
+	TEST_ASSERT_EQUAL_STRING("test", &buffer[0]);
+
+	--ptr;
+
+	TEST_ASSERT_EQUAL('\0', *ptr);
+
+	ptr = memory_put(&buffer[0],
+			 "OOGA BOOGA",
+			 sizeof("OOGA BOOGA"));
 
 	TEST_ASSERT_EQUAL_STRING("OOGA BOOGA", &buffer[0]);
 
