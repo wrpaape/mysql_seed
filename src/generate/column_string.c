@@ -54,6 +54,8 @@ build_column_string_base(void *arg)
 
 	char *restrict *restrict count_until;
 
+	printf("ptr: %p\n", ptr);
+
 	do {
 		from->cell = ptr;
 

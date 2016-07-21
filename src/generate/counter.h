@@ -374,8 +374,9 @@ counter_init(struct Counter *const restrict counter,
 	mutex_init(&counter->processing);
 	thread_cond_init(&counter->done);
 
-	counter->ready = false;
-	counter->upto  = upto;
+	counter->ready	  = false;
+	counter->pointers = NULL;
+	counter->upto	  = upto;
 
 	handler_closure_init(&counter->fail_cl,
 			     &counter_exit_on_failure,

@@ -73,10 +73,11 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	struct Database *restrict database;
 	struct Table *restrict table;
 	struct Column *restrict column;
+	const struct Column *restrict columns_until;
 	struct Rowspan *restrict rowspan;
-	struct Rowspan *restrict rowspans_until;
+	const struct Rowspan *restrict rowspans_until;
 	struct RowBlock *restrict row_block;
-	struct RowBlock *restrict row_blocks_until;
+	const struct RowBlock *restrict row_blocks_until;
 	struct TaskNode *restrict prev_node;
 	struct TaskNode *restrict next_node;
 	struct TblSpec *restrict tbl_spec;
@@ -118,9 +119,9 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		return;
 	}
 
+	/* divvy up memory */
 	database = generator_alloc;
 
-	/* divvy up memory */
 	struct Table *const restrict tables
 	= (struct Table *const restrict) (database + count->databases);
 	table = tables;
@@ -197,6 +198,9 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 		tbl_spec = db_spec->tbl_specs;
 		do {
+			/* no-op if freed before allocated */
+			table->file.contents.bytes = NULL;
+
 			length_lock_init(&table->total,
 					 0lu);
 
@@ -324,7 +328,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				       &build_table_header,
 				       table);
 		++table;
-		if (table == ((const struct Table *const restrict) columns))
+		if (table == (const struct Table *const restrict) columns)
 			break;
 
 		prev_node = next_node;
@@ -345,8 +349,30 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	if (!thread_pool_alive(&generator.pool,
 			       &generator.fail_cl)) {
+
+		/* free columns (except ids) */
+		table = tables;
+		column = columns;
+		do {
+			++column;	/* skip id column */
+			columns_until = table->columns.until;
+
+			do {
+				column_destroy(column);
+				++column;
+			} while (column < columns_until);
+
+			++table;
+		} while (table < (const struct Table *const restrict) columns);
+
+
+		counter_free_internals(&generator.counter);
+
+		free(generator_alloc);
+
 		*exit_status = EXIT_FAILURE;
-		goto CLEANUP_AND_RETURN;
+
+		return;
 	}
 
 	/* assign second set of tasks */
@@ -390,8 +416,34 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	if (!thread_pool_alive(&generator.pool,
 			       &generator.fail_cl)) {
+FAILURE_FREE_EVERYTHING_AND_RETURN:
+		/* free table files, and columns */
+		table = tables;
+		column = columns;
+		do {
+			++column;	/* skip id column */
+
+			free(table->file.contents.bytes);
+
+			columns_until = table->columns.until;
+
+			do {
+				column_destroy(column);
+				++column;
+			} while (column < columns_until);
+
+			++table;
+		} while (table < (const struct Table *const restrict) columns);
+
+		/* free counter */
+		counter_free_internals(&generator.counter);
+
+		/* free generator */
+		free(generator_alloc);
+
 		*exit_status = EXIT_FAILURE;
-		goto CLEANUP_AND_RETURN;
+
+		return;
 	}
 
 	/* assign third set of tasks */
@@ -413,7 +465,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				       &build_table_file,
 				       table);
 		++table;
-		if (table == ((const struct Table *const restrict) columns))
+		if (table == (const struct Table *const restrict) columns)
 			break;
 
 		prev_node = next_node;
@@ -434,15 +486,36 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			  &generator.fail_cl);
 
 	if (!thread_pool_alive(&generator.pool,
-			       &generator.fail_cl)) {
-		*exit_status = EXIT_FAILURE;
-		goto CLEANUP_AND_RETURN;
-	}
+			       &generator.fail_cl))
+		goto FAILURE_FREE_EVERYTHING_AND_RETURN;
 
 	/* assign fourth and final set of tasks */
 	thread_pool_reload(&generator.pool,
 			   &generator.build.table_files,
 			   &generator.fail_cl);
+
+	/* free all columns (except ids) */
+	table  = tables;
+	column = columns;
+
+	do {
+		columns_until = table->columns.until;
+		++column;	/* skip id column */
+		do {
+			puts("BOOGA");
+			puts(column->spec->name.bytes);
+			fflush(stdout);
+			column_destroy(column);
+			puts("AWOOGA");
+			fflush(stdout);
+			++column;
+		} while (column < columns_until);
+
+		++table;
+	} while (table < (const struct Table *const restrict) columns);
+
+	/* free counter */
+	counter_free_internals(&generator.counter);
 
 	/* wait for fourth and final set of tasks to complete */
 	thread_pool_await(&generator.pool,
@@ -452,10 +525,19 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			 &generator.fail_cl);
 
 	if (thread_pool_exit_status(&generator.pool,
-				    &generator.fail_cl) != EXIT_SUCCESS)
-		*exit_status = EXIT_FAILURE;
+				    &generator.fail_cl) != EXIT_SUCCESS) {
 
-CLEANUP_AND_RETURN:
+		/* ensure all table files are freed */
+		table = tables;
+		do {
+			free(table->file.contents.bytes);
+			++table;
+		} while (table < (const struct Table *const restrict) columns);
+
+		*exit_status = EXIT_FAILURE;
+	}
+
+	/* free initial alloc */
 	free(generator_alloc);
 }
 

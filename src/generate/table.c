@@ -66,4 +66,6 @@ build_table_file(void *arg)
 			    &table->fail_cl);
 
 	thread_try_ensure_close();
+
+	table->file.contents.bytes = NULL; /* no-op if freed again */
 }

@@ -449,6 +449,7 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 inline void
 column_destroy(struct Column *const restrict column)
 {
+	printf("col: %p\n", column->rowspans_from->cell);
 	free(column->rowspans_from->cell);
 }
 
@@ -668,6 +669,8 @@ column_init(struct Column *const restrict column,
 	column->spec = spec;
 
 	column->rowspans_from = rowspans_from;
+
+	rowspans_from->cell = NULL; /* no-op if freed before allocation */
 
 	handler_closure_init(&column->fail_cl,
 			     &column_exit_on_failure,
