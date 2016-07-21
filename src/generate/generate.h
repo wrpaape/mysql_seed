@@ -346,23 +346,116 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	if (!thread_pool_alive(&generator.pool,
 			       &generator.fail_cl)) {
 		*exit_status = EXIT_FAILURE;
-		return;
+		goto CLEANUP_AND_RETURN;
 	}
 
+	/* assign second set of tasks */
 	thread_pool_reload(&generator.pool,
 			   &generator.build.table_headers,
 			   &generator.fail_cl);
 
+	/* build next set of tasks */
+	++next_node;
+
+	generator.build.table_contents.head = next_node;
+
+	next_node->prev = NULL;
+
+	row_blocks_until = row_block;
+	row_block = row_blocks;
+
+	while (1) {
+		procedure_closure_init(&next_node->task,
+				       &build_row_block,
+				       row_block);
+		++row_block;
+		if (row_block == row_blocks_until)
+			break;
+
+		prev_node = next_node;
+
+		++next_node;
+
+		prev_node->next = next_node;
+		next_node->prev = prev_node;
+	}
+
+	generator.build.table_contents.last = next_node;
+
+	next_node->next = NULL;
+
 	/* wait for second set of tasks to complete */
+	thread_pool_await(&generator.pool,
+			  &generator.fail_cl);
+
+	if (!thread_pool_alive(&generator.pool,
+			       &generator.fail_cl)) {
+		*exit_status = EXIT_FAILURE;
+		goto CLEANUP_AND_RETURN;
+	}
+
+	/* assign third set of tasks */
+	thread_pool_reload(&generator.pool,
+			   &generator.build.table_contents,
+			   &generator.fail_cl);
+
+	/* build fourth and final set of tasks */
+	++next_node;
+
+	generator.build.table_files.head = next_node;
+
+	next_node->prev = NULL;
+
+	table = tables;
+
+	while (1) {
+		procedure_closure_init(&next_node->task,
+				       &build_table_file,
+				       table);
+		++table;
+		if (table == ((const struct Table *const restrict) columns))
+			break;
+
+		prev_node = next_node;
+
+		++next_node;
+
+		prev_node->next = next_node;
+		next_node->prev = prev_node;
+	}
+
+	generator.build.table_files.last = next_node;
+
+	next_node->next = NULL;
+
+
+	/* wait for third set of tasks to complete */
+	thread_pool_await(&generator.pool,
+			  &generator.fail_cl);
+
+	if (!thread_pool_alive(&generator.pool,
+			       &generator.fail_cl)) {
+		*exit_status = EXIT_FAILURE;
+		goto CLEANUP_AND_RETURN;
+	}
+
+	/* assign fourth and final set of tasks */
+	thread_pool_reload(&generator.pool,
+			   &generator.build.table_files,
+			   &generator.fail_cl);
+
+	/* wait for fourth and final set of tasks to complete */
 	thread_pool_await(&generator.pool,
 			  &generator.fail_cl);
 
 	thread_pool_stop(&generator.pool,
 			 &generator.fail_cl);
 
-	thread_pool_await_exit_success(&generator.pool,
-				       &generator.fail_cl);
+	if (thread_pool_exit_status(&generator.pool,
+				    &generator.fail_cl) != EXIT_SUCCESS)
+		*exit_status = EXIT_FAILURE;
 
+CLEANUP_AND_RETURN:
 	free(generator_alloc);
 }
 

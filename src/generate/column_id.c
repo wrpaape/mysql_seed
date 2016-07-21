@@ -33,7 +33,6 @@ build_column_id(void *arg)
 
 		count_ptr += from->parent->row_count;
 
-		printf("*count_ptr - from->cells: %zu\n", *count_ptr - from->cell);
 		/* add length of id rowspan to row_block total */
 		length_lock_increment(&from->parent->total,
 				      *count_ptr - from->cell,

@@ -84,4 +84,7 @@ table_put_header(char *restrict ptr,
 void
 build_table_header(void *arg);
 
+void
+build_table_file(void *arg);
+
 #endif /* ifndef MYSQL_SEED_GENERATE_TABLE_H_ */
