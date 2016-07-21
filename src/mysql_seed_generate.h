@@ -1355,6 +1355,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 't':
 		if (*rem == '\0') {
+			col_spec_set_string_default(state->specs.col);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;
@@ -1410,6 +1411,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 't':
 		if (strings_equal("able", rem + 1l)) {
+			col_spec_set_string_default(state->specs.col);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;

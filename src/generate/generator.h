@@ -49,11 +49,6 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define TABLE_HEADER_LINE_COUNT "17"
 
-#define FIELD_DELIM ','
-#define PUT_FIELD_DELIM(PTR)						\
-PUT_CHAR(PTR, FIELD_DELIM)
-#define FIELD_DELIM_STRING ","
-#define FIELD_DELIM_WORD "comma"
 
 /* /1* table file *1/ */
 /* #define TAB_TOKEN "<TAB>" */

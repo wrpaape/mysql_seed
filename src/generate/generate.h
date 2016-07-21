@@ -295,7 +295,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 				do {
 					rowspan->parent = row_block;
-
 					++rowspan;
 				} while (rowspan < rowspans_until);
 			}
@@ -312,7 +311,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 			tbl_spec = tbl_spec->next;
 		} while (tbl_spec != NULL);
-
 
 		database->tables.until = table;		     /* </tables> */
 
