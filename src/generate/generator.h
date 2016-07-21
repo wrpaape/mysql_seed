@@ -49,21 +49,26 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define TABLE_HEADER_LINE_COUNT "17"
 
+#define FIELD_DELIM ','
+#define PUT_FIELD_DELIM(PTR)						\
+PUT_CHAR(PTR, FIELD_DELIM)
+#define FIELD_DELIM_STRING ","
+#define FIELD_DELIM_WORD "comma"
 
-/* table file */
-#define TAB_TOKEN "<TAB>"
-#define TAB_TOKEN_LENGTH 5lu
-#define PUT_TAB_TOKEN(PTR)						\
-PUT_STRING_WIDTH(PTR, TAB_TOKEN, 5)
+/* /1* table file *1/ */
+/* #define TAB_TOKEN "<TAB>" */
+/* #define TAB_TOKEN_LENGTH 5lu */
+/* #define PUT_TAB_TOKEN(PTR)						\ */
+/* PUT_STRING_WIDTH(PTR, TAB_TOKEN, 5) */
 
 #define TABLE_HEADER_1							\
-  " 1) "	/* database/<db_name>/<tbl_name>.tsv */
+  " 1) "	/* database/<db_name>/<tbl_name>.csv */
 #define PUT_TABLE_HEADER_1(PTR)						\
 PUT_STRING_WIDTH(PTR, TABLE_HEADER_1, 4)
 
 #define TABLE_HEADER_2							\
 "\n 2)"									\
-"\n 3) contains tab-separated seed data for table:"			\
+"\n 3) contains " FIELD_DELIM_WORD "-separated seed data for table:"	\
 "\n 4)"									\
 "\n 5) \t"	/* <tbl_name> */
 #define PUT_TABLE_HEADER_2(PTR)						\
@@ -172,11 +177,11 @@ PTR = put_string_size(PTR,						\
 		      sizeof(LOADER_LOAD_TABLE_2) - 1lu)
 
 #define LOADER_LOAD_TABLE_3						\
-"\n\tFIELDS TERMINATED BY '\\t'"					\
+"\n\tFIELDS TERMINATED BY '" FIELD_DELIM_STRING "'"			\
 "\n\t       ENCLOSED BY   ''"						\
 "\n\t       ESCAPED BY    '\\\\'"					\
 "\n\tLINES  STARTING BY   ''"						\
-"\n\t       TERMINATED BY '\\\\'"					\
+"\n\t       TERMINATED BY '\\n'"					\
 "\n\tIGNORE " TABLE_HEADER_LINE_COUNT " LINES;"
 #define PUT_LOADER_LOAD_TABLE_3(PTR)					\
 PTR = put_string_size(PTR,						\

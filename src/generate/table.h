@@ -8,27 +8,24 @@
 inline size_t
 table_size_contents(const struct Table *const restrict table)
 {
-	size_t size_contents = TABLE_HEADER_BASE_SIZE
-			     + table->file.path.length
-			     + table->spec->name.length
-			     + table->parent->spec->name.length
-			     + table->total.length;
-
 	const struct ColSpec *const restrict until
 	= table->spec->col_specs.until;
 
 	const struct ColSpec *restrict from = table->spec->col_specs.from;
 
-	while (1) {
+	size_t size_contents = TABLE_HEADER_BASE_SIZE
+			     + table->file.path.length
+			     + table->spec->name.length
+			     + table->parent->spec->name.length
+			     + table->total.length
+			     + (until - from - 1l);
+
+	do {
 		size_contents += from->name.length;
-
 		++from;
+	} while (from < until);
 
-		if (from == until)
-			return size_contents;
-
-		size_contents += TAB_TOKEN_LENGTH;
-	}
+	return size_contents;
 }
 
 inline char *
@@ -71,7 +68,7 @@ table_put_header(char *restrict ptr,
 		if (from == until)
 			break;
 
-		PUT_TAB_TOKEN(ptr);
+		PUT_FIELD_DELIM(ptr);
 	}
 
 	PUT_TABLE_HEADER_5(ptr);

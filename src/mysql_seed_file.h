@@ -90,7 +90,13 @@
 				      + 1lu)	/* '\0' */
 
 /* table data file */
-#define TABLE_FILENAME_SFX	    ".tsv"
+#define FIELD_DELIM ','
+#define PUT_FIELD_DELIM(PTR)						\
+PUT_CHAR(PTR, FIELD_DELIM)
+#define FIELD_DELIM_STRING ","
+#define FIELD_DELIM_WORD "comma"
+
+#define TABLE_FILENAME_SFX	    ".csv"
 #define TABLE_FILENAME_SFX_WIDTH    5
 #define TABLE_FILENAME_SFX_SIZE	    5lu
 #define TABLE_FILENAME_SFX_LENGTH   4lu
@@ -158,7 +164,7 @@ struct Dirpath {
 
 
 /* database/<db_name>/load_<db_name>.mysql or
- * database/<db_name>/<tbl_name>.tsv */
+ * database/<db_name>/<tbl_name>.csv */
 struct Filename {
 	char buffer[FILE_HANDLE_NAME_SIZE_MAX];
 	size_t length;
