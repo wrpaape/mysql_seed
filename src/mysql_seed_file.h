@@ -519,6 +519,7 @@ length_lock_increment(struct LengthLock *const restrict shared,
 	mutex_lock_handle_cl(&shared->lock,
 			     fail_cl);
 
+	printf("shared for: %p\n\tfrom: %zu\n\tto:   %zu\n", thread_self(), shared->length, shared->length + increment);
 	shared->length += increment;
 
 	mutex_unlock_handle_cl(&shared->lock,

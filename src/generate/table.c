@@ -17,6 +17,8 @@ build_table_header(void *arg)
 
 	table->file.contents.length = table_size_contents(table);
 
+	printf("length: %zu\n", table->total.length);
+
 	char *restrict ptr = NULL;
 
 	thread_try_catch_open(free,

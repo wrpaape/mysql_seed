@@ -197,7 +197,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 		tbl_spec = db_spec->tbl_specs;
 		do {
-
 			length_lock_init(&table->total,
 					 0lu);
 
@@ -278,11 +277,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 			table->row_blocks.until = row_block; /* </row_blocks> */
 
-			/* for (struct RowBlock *row_block = table->row_blocks.from; row_block < table->row_blocks.until; ++row_block) */
-			/* 	printf("row_count: %zu\n", row_block->row_count); */
-
-			/* exit(0); */
-
 			table->parent = database;
 
 			table->rowspans_until = rowspan;
@@ -305,9 +299,9 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	generator.databases.until = database;		     /* </databases> */
 
 	/* terminate first task store */
-	prev_node->next = NULL;
-
 	generator.build.counter_columns_loaders.last = prev_node;
+
+	prev_node->next = NULL;
 
 	/* initialize thread pool */
 	thread_pool_init(&generator.pool,
@@ -315,10 +309,51 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			 &generator.workers[0],
 			 COUNT_WORKERS);
 
-
 	thread_pool_start(&generator.pool,
 			  &generator.fail_cl);
 
+	/* build next set of tasks */
+	generator.build.table_headers.head = next_node;
+
+	next_node->prev = NULL;
+
+	table = tables;
+
+	while (1) {
+		procedure_closure_init(&next_node->task,
+				       &build_table_header,
+				       table);
+		++table;
+		if (table == ((const struct Table *const restrict) columns))
+			break;
+
+		prev_node = next_node;
+
+		++next_node;
+
+		prev_node->next = next_node;
+		next_node->prev = prev_node;
+	}
+
+	generator.build.table_headers.last = next_node;
+
+	next_node->next = NULL;
+
+	/* wait for first set of tasks to complete */
+	thread_pool_await(&generator.pool,
+			  &generator.fail_cl);
+
+	if (!thread_pool_alive(&generator.pool,
+			       &generator.fail_cl)) {
+		*exit_status = EXIT_FAILURE;
+		return;
+	}
+
+	thread_pool_reload(&generator.pool,
+			   &generator.build.table_headers,
+			   &generator.fail_cl);
+
+	/* wait for second set of tasks to complete */
 	thread_pool_await(&generator.pool,
 			  &generator.fail_cl);
 

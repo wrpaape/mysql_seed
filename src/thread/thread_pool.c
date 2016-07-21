@@ -187,7 +187,7 @@ thread_pool_start(struct ThreadPool *const restrict pool,
 extern inline void
 thread_pool_await(struct ThreadPool *const restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
-inline bool
+extern inline bool
 thread_pool_alive(struct ThreadPool *const restrict pool,
 		  const struct HandlerClosure *const restrict fail_cl);
 extern inline void
