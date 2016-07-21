@@ -47,7 +47,7 @@
 
 /* file templates
  *─────────────────────────────────────────────────────────────────────────── */
-#define TABLE_HEADER_LINE_COUNT "18"
+#define TABLE_HEADER_LINE_COUNT "17"
 
 
 /* table file */
@@ -83,10 +83,9 @@ PTR = put_string_size(ptr,						\
 
 #define TABLE_HEADER_4							\
 "\n10)"									\
-"\n11)"									\
-"\n12) Row definition adheres to the syntax:"				\
-"\n13)"									\
-"\n14) "	/* <col_name_1><TAB><col_name_2><TAB> ... <col_name_N> */
+"\n11) Row definition adheres to the syntax:"				\
+"\n12)"									\
+"\n13) "	/* <col_name_1><TAB><col_name_2><TAB> ... <col_name_N> */
 #define PUT_TABLE_HEADER_4(PTR)						\
 PTR = put_string_size(ptr,						\
 		      TABLE_HEADER_4,					\
@@ -94,10 +93,10 @@ PTR = put_string_size(ptr,						\
 
 #define TABLE_HEADER_5							\
 	"<NEWLINE>"							\
-"\n15)"									\
-"\n16) ╔═══════════════════════════════════════════╗"		\
-"\n17) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
-"\n18) ╚═══════════════════════════════════════════╝"
+"\n14)"									\
+"\n15) ╔═══════════════════════════════════════════╗"		\
+"\n16) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
+"\n17) ╚═══════════════════════════════════════════╝"
 #define PUT_TABLE_HEADER_5(PTR)						\
 PTR = put_string_size(ptr,						\
 		      TABLE_HEADER_5,					\
