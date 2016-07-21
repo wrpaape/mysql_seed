@@ -29,6 +29,7 @@ extern void setUp(void);
 extern void tearDown(void);
 extern void test_assign_memory_copy_array(void);
 extern void test_assign_memory_copy_array_then_copy_array(void);
+extern void test_memory_copy(void);
 
 
 //=======Test Reset Option=====
@@ -46,6 +47,7 @@ int main(void)
   UnityBegin("../test/memory_memory_copy_array_test.c");
   RUN_TEST(test_assign_memory_copy_array, 12);
   RUN_TEST(test_assign_memory_copy_array_then_copy_array, 69);
+  RUN_TEST(test_memory_copy, 97);
 
   return (UnityEnd());
 }

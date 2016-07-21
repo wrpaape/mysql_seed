@@ -93,3 +93,19 @@ void test_assign_memory_copy_array_then_copy_array(void)
 
 	TEST_ASSERT_EQUAL_DOUBLE_ARRAY(&nums[0], &zros[0], 4lu);
 }
+
+void test_memory_copy(void)
+{
+	char buffer[128];
+	memory_copy(&buffer[0],
+		    "test",
+		    sizeof("test"));
+
+	TEST_ASSERT_EQUAL_STRING("test", &buffer[0]);
+
+	memory_copy(&buffer[0],
+		    "OOGA BOOGA",
+		    sizeof("OOGA BOOGA"));
+
+	TEST_ASSERT_EQUAL_STRING("OOGA BOOGA", &buffer[0]);
+}

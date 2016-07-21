@@ -22,6 +22,9 @@ build_loader(void *arg)
 	database_dirpath_init(&database->dirpath,
 			      &database->spec->name);
 
+	printf("database->dirpath.buffer: %s\n", database->dirpath.buffer);
+
+
 	/* make database/<db_name> directory */
 	dirpath_make_handle_cl(&database->dirpath,
 			       &database->fail_cl);

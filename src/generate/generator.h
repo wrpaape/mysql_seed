@@ -511,13 +511,22 @@ inline void
 database_dirpath_init(struct Dirpath *const restrict dirpath,
 		      const struct String *const restrict db_name)
 {
+	puts("OOGA");
 	SET_STRING_WIDTH(&dirpath->buffer[0],
 			 DB_DIRPATH_PFX,
 			 DB_DIRPATH_PFX_NN_WIDTH);
 
+	puts("BOOGA");
+
+	/* memcpy(&dirpath->buffer[DB_DIRPATH_PFX_LENGTH], */
+	/* 	    db_name->bytes, */
+	/* 	    db_name->length + 1lu); */
 	memory_copy(&dirpath->buffer[DB_DIRPATH_PFX_LENGTH],
 		    db_name->bytes,
 		    db_name->length + 1lu);
+
+	puts("BOOEY");
+	fflush(stdout);
 
 	dirpath->length = DB_DIRPATH_PFX_LENGTH
 			+ db_name->length;

@@ -52,12 +52,12 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #define CHAR_BUFFER_WIDTH(WIDTH) CharBuffer ## WIDTH
 
 #define SET_STRING_WIDTH(PTR, STRING, WIDTH)				\
-*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR)				\
+*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) (PTR))				\
 = *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) STRING)
 
 #define PUT_STRING_WIDTH(PTR, STRING, WIDTH)				\
 do {									\
-	*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR)			\
+	*((CHAR_BUFFER_WIDTH(WIDTH) *restrict) (PTR))			\
 	= *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) STRING);	\
 	PTR = (char *restrict)						\
 	      (((CHAR_BUFFER_WIDTH(WIDTH) *restrict) PTR) + 1l);	\
