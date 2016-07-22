@@ -1272,10 +1272,35 @@ EXPECTED_COL_TBL_DB_FLAG:
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
 inline void
-col_spec_set_string_default(struct ColSpec *const restrict col_spec)
+col_spec_set_string_base(struct ColSpec *const restrict col_spec,
+			 const size_t row_count)
 {
+	const unsigned int max_width
+	= col_spec->type_qualifier.string.base.length
+	+ uint_digit_count(row_count);
+
+	char *restrict ptr = &col_spec->type.buffer[0];
+
+	PUT_STRING_WIDTH(ptr, "CHAR(", 5);
+
+	ptr = put_uint(ptr,
+		       max_width);
+
+	SET_STRING_WIDTH(ptr, ")", 2);
+
+	col_spec->type.width = ptr + 1l - &col_spec->type.buffer[0];
+
 	col_spec->build = &build_column_string_base;
+}
+
+inline void
+col_spec_set_string_default(struct ColSpec *const restrict col_spec,
+			    const size_t row_count)
+{
 	col_spec->type_qualifier.string.base = col_spec->name;
+
+	col_spec_set_string_base(col_spec,
+				 row_count);
 }
 
 inline void
@@ -1284,7 +1309,8 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		col_spec_set_string_default(state->specs.col);
+		col_spec_set_string_default(state->specs.col,
+					    state->specs.tbl->row_count);
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
@@ -1326,8 +1352,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 			if (valid_string_base) {
 				/* TODO: set type to CHAR(X) */
-				state->specs.col->build
-				= &build_column_string_base;
+				col_spec_set_string_base(state->specs.col,
+							 state->specs.tbl->row_count);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);
@@ -1338,7 +1364,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'c':
 		if (*rem == '\0') {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_next_col_spec(state);
 			return;
 		}
@@ -1346,7 +1373,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'd':
 		if (*rem == '\0') {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
@@ -1355,7 +1383,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 't':
 		if (*rem == '\0') {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;
@@ -1382,8 +1411,8 @@ INCOMPLETE_NO_STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				state->specs.col->build
-				= &build_column_string_base;
+				col_spec_set_string_base(state->specs.col,
+							 state->specs.tbl->row_count);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);
@@ -1394,7 +1423,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_next_col_spec(state);
 			return;
 		}
@@ -1402,7 +1432,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'd':
 		if (strings_equal("atabase", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
@@ -1411,7 +1442,8 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 't':
 		if (strings_equal("able", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col);
+			col_spec_set_string_default(state->specs.col,
+						    state->specs.tbl->row_count);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;

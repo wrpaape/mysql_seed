@@ -136,7 +136,11 @@ parse_column_complete(struct GenerateParseState *const restrict state);
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
 extern inline void
-col_spec_set_string_default(struct ColSpec *const restrict col_spec);
+col_spec_set_string_base(struct ColSpec *const restrict col_spec,
+			 const size_t row_count);
+extern inline void
+col_spec_set_string_default(struct ColSpec *const restrict col_spec,
+			    const size_t row_count);
 extern inline void
 parse_string_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
