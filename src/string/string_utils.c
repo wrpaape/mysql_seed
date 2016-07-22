@@ -156,6 +156,10 @@ put_string_width(char *const restrict buffer,
 		 const unsigned int width);
 
 extern inline char *
+put_stub(char *const restrict buffer,
+	 const struct Stub *const restrict stub);
+
+extern inline char *
 put_label(char *const restrict buffer,
 	  const struct Label *const restrict label);
 

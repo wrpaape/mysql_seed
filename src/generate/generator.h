@@ -280,7 +280,8 @@ union TypeQualifier {
 
 struct ColSpec {
 	struct String name;
-	union TypeQualifier type;
+	struct Stub type;
+	union TypeQualifier type_qualifier;
 	Procedure *build;
 };
 

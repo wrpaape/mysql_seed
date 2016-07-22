@@ -3,7 +3,7 @@
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-const struct Label first_names[FIRST_NAMES_COUNT] = {
+const struct Stub first_names[FIRST_NAMES_COUNT] = {
 	{ .bytes = "Aaron",       .width = sizeof("Aaron")		- 1u },
 	{ .bytes = "Abigail",     .width = sizeof("Abigail")		- 1u },
 	{ .bytes = "Adam",        .width = sizeof("Adam")		- 1u },
@@ -206,7 +206,7 @@ const struct Label first_names[FIRST_NAMES_COUNT] = {
 	{ .bytes = "Zachary",     .width = sizeof("Zachary")		- 1u }
 };
 
-const struct Label last_names[LAST_NAMES_COUNT] = {
+const struct Stub last_names[LAST_NAMES_COUNT] = {
 	{ .bytes = "Adams",     .width = sizeof("Adams")		- 1u },
 	{ .bytes = "Alexander", .width = sizeof("Alexander")		- 1u },
 	{ .bytes = "Allen",     .width = sizeof("Allen")		- 1u },
@@ -423,7 +423,7 @@ const struct NameMap last_name_map = {
 extern inline char *
 put_random_initial(char *const restrict string);
 
-extern inline const struct Label *
+extern inline const struct Stub *
 name_map_sample(const struct NameMap *const restrict map);
 
 extern inline char *

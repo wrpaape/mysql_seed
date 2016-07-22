@@ -27,8 +27,13 @@ struct String {
 	size_t length;
 };
 
-struct Label {
+struct Stub {
 	const char *bytes;
+	unsigned int width; /* 1 - 16 bytes */
+};
+
+struct Label {
+	char buffer[WIDTH_MAX_WIDTH];
 	unsigned int width; /* 1 - 16 bytes */
 };
 
@@ -665,11 +670,20 @@ put_string_width(char *const restrict buffer,
 }
 
 inline char *
+put_stub(char *const restrict buffer,
+	 const struct Stub *const restrict stub)
+{
+	return put_string_width(buffer,
+				stub->bytes,
+				stub->width);
+}
+
+inline char *
 put_label(char *const restrict buffer,
 	  const struct Label *const restrict label)
 {
 	return put_string_width(buffer,
-				label->bytes,
+				&label->buffer[0],
 				label->width);
 }
 

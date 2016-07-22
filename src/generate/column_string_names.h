@@ -56,14 +56,14 @@ MALLOC_FAILURE_MESSAGE("build_column_string_names_full")
 /* enum, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct NameMap {
-	const struct Label *names;
+	const struct Stub *names;
 	const urint_t i_last;
 };
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
-extern const struct Label first_names[FIRST_NAMES_COUNT];
-extern const struct Label last_names[LAST_NAMES_COUNT];
+extern const struct Stub first_names[FIRST_NAMES_COUNT];
+extern const struct Stub last_names[LAST_NAMES_COUNT];
 
 extern const struct NameMap first_name_map;
 extern const struct NameMap last_name_map;
@@ -76,7 +76,7 @@ put_random_initial(char *const restrict string)
 	return string + 1l;
 }
 
-inline const struct Label *
+inline const struct Stub *
 name_map_sample(const struct NameMap *const restrict map)
 {
 	return &map->names[ random_uint_upto(map->i_last) ];
@@ -88,8 +88,8 @@ put_single_names(char *restrict ptr,
 		 size_t count)
 {
 	do {
-		ptr = put_label(ptr,
-				name_map_sample(map));
+		ptr = put_stub(ptr,
+			       name_map_sample(map));
 		*ptr = '\0';
 		++ptr;
 
@@ -104,8 +104,8 @@ put_full_names(char *restrict ptr,
 	       size_t count)
 {
 	do {
-		ptr = put_label(ptr,
-				name_map_sample(&first_name_map));
+		ptr = put_stub(ptr,
+			       name_map_sample(&first_name_map));
 
 		*ptr = ' ';
 		++ptr;
@@ -113,15 +113,15 @@ put_full_names(char *restrict ptr,
 		if (coin_flip()) {
 			ptr = coin_flip()
 			      ? put_random_initial(ptr)
-			      : put_label(ptr,
-					  name_map_sample(&first_name_map));
+			      : put_stub(ptr,
+					 name_map_sample(&first_name_map));
 
 			*ptr = ' ';
 			++ptr;
 		}
 
-		ptr = put_label(ptr,
-				name_map_sample(&last_name_map));
+		ptr = put_stub(ptr,
+			       name_map_sample(&last_name_map));
 
 		*ptr = '\0';
 		++ptr;

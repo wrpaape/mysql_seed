@@ -10,7 +10,7 @@ build_column_string_base(void *arg)
 	= (struct Column *const restrict) arg;
 
 	const struct String *const restrict base
-	= &column->spec->type.string.base;
+	= &column->spec->type_qualifier.string.base;
 
 	struct Table *const restrict table
 	= column->parent;

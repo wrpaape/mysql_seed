@@ -201,7 +201,6 @@ struct GenerateParseState {
 	int exit_status;
 };
 
-
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
@@ -1276,7 +1275,7 @@ inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec)
 {
 	col_spec->build = &build_column_string_base;
-	col_spec->type.string.base = col_spec->name;
+	col_spec->type_qualifier.string.base = col_spec->name;
 }
 
 inline void
@@ -1320,12 +1319,13 @@ INCOMPLETE_NO_STRING_BASE:
 			}
 
 			const bool valid_string_base
-			= parse_string_base(&state->specs.col->type.string.base,
+			= parse_string_base(&state->specs.col->type_qualifier.string.base,
 					    &state->argv);
 
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
+				/* TODO: set type to CHAR(X) */
 				state->specs.col->build
 				= &build_column_string_base;
 				parse_column_complete(state);
@@ -1376,7 +1376,7 @@ INCOMPLETE_NO_STRING_BASE:
 				goto INCOMPLETE_NO_STRING_BASE;
 
 			const bool valid_string_base
-			= parse_string_base(&state->specs.col->type.string.base,
+			= parse_string_base(&state->specs.col->type_qualifier.string.base,
 					    &state->argv);
 
 			++(state->argv.arg.from);
