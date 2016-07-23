@@ -191,7 +191,7 @@ PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_FIELD_DELIM, 3)
 #define LOADER_LOAD_TABLE_1						\
 ");"									\
 "\n"									\
-"\nLOAD DATA INFILE '" /* <table_filepath n> */
+"\nLOAD DATA INFILE '" ROOT_DIR PATH_DELIM_STRING /* <table_filepath n> */
 #define PUT_LOADER_LOAD_TABLE_1(PTR)					\
 PTR = put_string_size(PTR,						\
 		      LOADER_LOAD_TABLE_1,				\

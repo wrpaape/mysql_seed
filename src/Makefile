@@ -105,9 +105,9 @@ endif
 # DIRECTORY CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 PATH_JOIN		 = $(call JOIN,$1,$(PATH_DELIM))
-
 PROJECT 		:= mysql_seed
 PROJECT_ROOT		:= ..
+PROJECT_ROOT_ABSOLUTE	:= $(call TRIM,"\"$(realpath $(PROJECT_ROOT))\"")
 SOURCE_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) src)
 HEADER_DIR		:= $(SOURCE_DIR)
 OBJECT_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) obj)
@@ -215,7 +215,7 @@ UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity fra
 # C Compiler
 # ──────────────────────────────────────────────────────────────────────────────
 CC		:= gcc
-CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ $(SYS_ENV_FLAGS)
+CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ -DROOT_DIR=$(PROJECT_ROOT_ABSOLUTE) $(SYS_ENV_FLAGS)
 CC_BASE_FLAGS	:= -std=c99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
 
 ifeq (T,$(DEVELOPMENT_MODE))
