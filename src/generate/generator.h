@@ -139,24 +139,57 @@ PTR = put_string_size(PTR,						\
 
 #define LOADER_HEADER_4							\
 "\n"									\
-"\nUSE " /* <db_name> */
+"\nCREATE DATABASE " /* <db_name> */
 #define PUT_LOADER_HEADER_4(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_HEADER_4, 6)
+PTR = put_string_size(PTR,						\
+		      LOADER_HEADER_4,					\
+		      sizeof(LOADER_HEADER_4) - 1lu)
 
 #define LOADER_HEADER_5							\
-			 ";"
+				     ";"				\
+"\n"									\
+"\nUSE " /* <db_name> */
 #define PUT_LOADER_HEADER_5(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_HEADER_5, 1)
+PUT_STRING_WIDTH(PTR, LOADER_HEADER_5, 7)
+
+#define LOADER_HEADER_6							\
+			 ";"
+#define PUT_LOADER_HEADER_6(PTR)					\
+PUT_STRING_WIDTH(PTR, LOADER_HEADER_6, 1)
+
+
 
 #define LOADER_HEADER_BASE_SIZE_MAX					\
 (sizeof(LOADER_HEADER_1 LOADER_HEADER_2 LOADER_HEADER_3			\
-	LOADER_HEADER_4 LOADER_HEADER_5)				\
+	LOADER_HEADER_4 LOADER_HEADER_5 LOADER_HEADER_6)		\
  + LOADER_FILEPATH_SIZE_MAX + (DB_NAME_NN_SIZE_MAX * 2lu) - 1lu)
 
 
+/* create table template (col_count segments) */
+#define LOADER_CREATE_TABLE_1						\
+"\n"									\
+"\nCREATE TABLE " /* <tbl_name> */
+#define PUT_LOADER_CREATE_TABLE_1(PTR)					\
+PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_1, 15)
+
+#define LOADER_CREATE_TABLE_2						\
+"(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
+#define PUT_LOADER_CREATE_TABLE_2(PTR)					\
+PTR = put_string_size(PTR,						\
+		      LOADER_CREATE_TABLE_2,				\
+		      sizeof(LOADER_CREATE_TABLE_2) - 1lu)
+
+#define LOADER_CREATE_TABLE_FIELD_DELIM					\
+",\n\t"
+#define PUT_LOADER_CREATE_TABLE_FIELD_DELIM(PTR)			\
+PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_FIELD_DELIM, 3)
+
+#define LOADER_CREATE_TABLE_BASE_SIZE					\
+(sizeof(LOADER_CREATE_TABLE_1 LOADER_CREATE_TABLE_2) - 1lu)
 
 /* load table template (2 segments) */
 #define LOADER_LOAD_TABLE_1						\
+");"									\
 "\n"									\
 "\nLOAD DATA INFILE '" /* <table_filepath n> */
 #define PUT_LOADER_LOAD_TABLE_1(PTR)					\

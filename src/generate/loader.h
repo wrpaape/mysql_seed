@@ -7,12 +7,15 @@
 
 
 inline size_t
-loader_estimate_size(const unsigned int tbl_count)
+loader_estimate_size(const unsigned int tbl_count,
+		     const unsigned int col_count)
 {
 	return LOADER_HEADER_BASE_SIZE_MAX
 	     + (tbl_count * ((TABLE_FILEPATH_SIZE_MAX * 2lu)
+			     + LOADER_CREATE_TABLE_BASE_SIZE
 			     + LOADER_LOAD_TABLE_BASE_SIZE
-			     + TBL_NAME_NN_SIZE_MAX));
+			     + TBL_NAME_NN_SIZE_MAX))
+	     + ((col_count - tbl_count) * (WIDTH_MAX_SIZE + 3lu));
 }
 
 inline char *
@@ -61,6 +64,12 @@ loader_put_header(char *restrict ptr,
 
 	PUT_LOADER_HEADER_5(ptr);
 
+	ptr = put_string_size(ptr,
+			      database->spec->name.bytes,
+			      database->spec->name.length);
+
+	PUT_LOADER_HEADER_6(ptr);
+
 	return ptr;
 }
 
@@ -71,8 +80,41 @@ loader_put_body(char *restrict ptr,
 	const struct Table *const restrict until = database->tables.until;
 	const struct Table *restrict from	 = database->tables.from;
 
+	const struct ColSpec *restrict col_spec_from;
+	const struct ColSpec *restrict col_spec_until;
+
 
 	do {
+		PUT_LOADER_CREATE_TABLE_1(ptr);
+
+		ptr = put_string_size(ptr,
+				      from->spec->name.bytes,
+				      from->spec->name.length);
+
+		PUT_LOADER_CREATE_TABLE_2(ptr);
+
+		col_spec_from  = from->spec->col_specs.from + 1l;
+		col_spec_until = from->spec->col_specs.until;
+
+		while (1) {
+			ptr = put_string_size(ptr,
+					      col_spec_from->name.bytes,
+					      col_spec_from->name.length);
+			*ptr = ' ';
+			++ptr;
+
+			ptr = put_label(ptr,
+					&col_spec_from->type);
+
+			++col_spec_from;
+
+			if (col_spec_from == col_spec_until)
+				break;
+
+			PUT_LOADER_CREATE_TABLE_FIELD_DELIM(ptr);
+		}
+
+
 		PUT_LOADER_LOAD_TABLE_1(ptr);
 
 		ptr = put_string_size(ptr,

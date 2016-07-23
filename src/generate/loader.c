@@ -1,7 +1,8 @@
 #include "generate/loader.h"
 
 extern inline size_t
-loader_estimate_size(const unsigned int tbl_count);
+loader_estimate_size(const unsigned int tbl_count,
+		     const unsigned int col_count);
 
 extern inline char *
 loader_put_header(char *restrict ptr,
@@ -30,8 +31,14 @@ build_loader(void *arg)
 			 &database->spec->name,
 			 &database->dirpath);
 
-	const size_t size_est = loader_estimate_size(database->tables.until
-						     - database->tables.from);
+	const unsigned int tbl_count = database->tables.until
+				     - database->tables.from;
+
+	const unsigned int col_count = database->tables.until[-1].columns.until
+				     - database->tables.from->columns.from;
+
+	const size_t size_est = loader_estimate_size(tbl_count,
+						     col_count);
 	char *restrict contents = NULL;
 
 	thread_try_ensure_open(free,
