@@ -83,7 +83,8 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #ifdef WIN32
-#	include <windows.h>
+#	include <windows.h>	/* FindFirst/NextFile */
+#	include <direct.h>	/* directory API */
 /* open a file */
 #	define open_imp(PATH,						\
 			OPEN_FLAG)					\
@@ -119,6 +120,13 @@
 #	undef unlink_relative_imp
 #	warning "unlink_relative undefined"
 
+/* fetch info on a file */
+#	define stat_imp(PATH,						\
+			BUFFER)						\
+	_stat(PATH,							\
+	      BUFFER)
+#	define StatBuffer _stat
+
 /* make a directory */
 #	define mkdir_imp(PATH,						\
 			 MODE)						\
@@ -126,12 +134,17 @@
 #	undef mkdir_relative_imp
 #	warning "mkdir_relative undefined"
 
+/* change working directory */
+#	define chdir_imp(PATH)						\
+	_chdir(PATH)
+
 /* delete a directory */
 #	define rmdir_imp(PATH)						\
 	_rmdir(PATH)
 
 #else
 #	include <dirent.h>
+#	include <fts.h>
 /* open a file */
 #	define open_imp(PATH,						\
 			OPEN_FLAG)					\
@@ -180,6 +193,13 @@
 		 RELATIVE_PATH,						\
 		 UNLINK_FLAG)
 
+/* fetch info on a file */
+#	define stat_imp(PATH,						\
+			BUFFER)						\
+	stat(PATH,							\
+	     BUFFER)
+#	define StatBuffer stat
+
 /* make a directory */
 #	define mkdir_imp(PATH,						\
 			 MODE)						\
@@ -191,6 +211,10 @@
 	mkdirat(DIRECTORY_DESCRIPTOR,					\
 		RELATIVE_PATH,						\
 		MODE)
+
+/* change working directory */
+#	define chdir_imp(PATH)						\
+	chdir(PATH)
 
 /* delete a directory */
 #	define rmdir_imp(PATH)						\
@@ -839,7 +863,7 @@ open_relative_mode_report(int *const restrict file_descriptor,
 				 "'O_TRUNC' is specified and write permission "
 				 "is denied.")
 	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
-				 "path specifies the slave side of a locked "
+				 "'path' specifies the slave side of a locked "
 				 "pseudo-terminal device.")
 	FAIL_SWITCH_ERRNO_CASE_2(EDQUOT,
 				 "'O_CREAT' is specified, the file does not "
@@ -1424,6 +1448,96 @@ unlink_relative_handle_cl(const int directory_descriptor,
 }
 #endif /* ifndef WIN32 */
 
+/* fetch info on a file */
+inline bool
+stat_status(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer)
+{
+	return stat_imp(path,
+			buffer) == 0;
+}
+
+inline void
+stat_muffle(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer)
+{
+	(void) stat_imp(path,
+			buffer);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE stat_imp
+inline bool
+stat_report(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer)
+{
+
+	FAIL_SWITCH_ERRNO_OPEN(path,
+			       buffer)
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'path' points to an invalid address.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurs while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeds "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The file size in bytes or the number of "
+				 "blocks allocated to the file or the file "
+				 "serial number cannot be represented correctly"
+				 " in the structure pointed to by 'buffer'.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+stat_handle(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer,
+	    Handler *const handle,
+	    void *arg)
+{
+	const char *restrict failure;
+
+	if (stat_report(path,
+			buffer,
+			&failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+stat_handle_cl(const char *const restrict path,
+	       struct StatBuffer *const restrict buffer,
+	       const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (stat_report(path,
+			buffer,
+			&failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
 
 /* mkdir (absolute or relative path) */
 inline bool
@@ -1436,7 +1550,7 @@ mkdir_status(const char *const restrict path,
 
 inline void
 mkdir_muffle(const char *const restrict path,
-		      const mode_t mode)
+	     const mode_t mode)
 {
 	(void) mkdir_imp(path,
 			 mode);
@@ -1672,11 +1786,88 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 #endif /* ifndef WIN32 */
 
 
+/* chdir (absolute or relative path) */
+inline bool
+chdir_status(const char *const restrict path)
+{
+	return chdir_imp(path) == 0;
+}
+
+inline void
+chdir_muffle(const char *const restrict path)
+{
+	(void) chdir_imp(path);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE chdir_imp
+inline bool
+chdir_report(const char *const restrict path,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(path)
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "Search permission is denied for any component"
+				 " of the path name.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'path' points outside the process's allocated"
+				 " address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links were encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeded {NAME_MAX}"
+				 " characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named directory does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline bool
+chdir_handle(const char *const restrict path,
+	     Handler *const handle,
+	     void *arg)
+{
+	const char *restrict failure;
+
+	if (chdir_report(path,
+			 &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+chdir_handle_cl(const char *const restrict path,
+		const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (chdir_report(path,
+			 &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
 /* rmdir (absolute or relative path) */
 inline bool
 rmdir_status(const char *const restrict path)
 {
-	return rmdir_imp(path);
+	return rmdir_imp(path) == 0;
 }
 
 inline void
@@ -1800,7 +1991,7 @@ opendir_report(DIR *restrict *const restrict dir,
 				 "Search permission is denied for a component "
 				 "of the path prefix.")
 	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
-				 "path specifies the slave side of a locked "
+				 "'path' specifies the slave side of a locked "
 				 "pseudo-terminal device.")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
 				 "'path' points outside the process's allocated"
@@ -1822,7 +2013,7 @@ opendir_report(DIR *restrict *const restrict dir,
 				 "characters, or an entire path name exceeded "
 				 "{PATH_MAX} characters.")
 	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
-				 "the named directory does not exist",
+				 "The named directory does not exist.",
 				 "A component of the path name that must exist "
 				 "does not exist.")
 	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
@@ -2034,7 +2225,274 @@ closedir_handle_cl(DIR *const restrict dir,
 	__builtin_unreachable();
 
 }
+
+/* UNIX file tree traversal - open */
+inline bool
+fts_open_status(FTS *restrict *const restrict tree,
+		char *const restrict *restrict path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **))
+{
+	*tree = fts_open(path_argv,
+			 options,
+			 compare);
+
+	return *tree != NULL;
+}
+
+inline void
+fts_open_muffle(FTS *restrict *const restrict tree,
+		char *const restrict *restrict path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **))
+{
+	*tree = fts_open(path_argv,
+			 options,
+			 compare);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE fts_open
+inline bool
+fts_open_report(FTS *restrict *const restrict tree,
+		char *const restrict *restrict path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **),
+		const char *restrict *const restrict failure)
+{
+	*tree = fts_open(path_argv,
+			 options,
+			 compare);
+
+	if (*tree != NULL)
+		return true;
+
+	switch (errno) {
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "open failure - Search permission is denied "
+				 "for a component of the path prefix.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "open failure - 'path' specifies the slave "
+				 "side of a locked pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "open failure - 'path' points outside the "
+				 "process's allocated address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "open failure - The open() operation is "
+				 "interrupted by a signal.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "open failure - Too many symbolic links are "
+				 "encountered in translating the pathname. This"
+				 " is taken to be indicative of a looping "
+				 "symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "open failure - The process has already "
+				 "reached its limit for open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "open failure - A component of a pathname "
+				 "exceeds {NAME_MAX} characters, or an entire "
+				 "path name exceeded {PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "open failure - The named directory does not "
+				 "exist.",
+				 "open failure - A component of the path name "
+				 "that must exist does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "open failure - A component of the path prefix"
+				 " is not a directory.",
+				 "The path argument is not an absolute path")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "open failure - 'O_SHLOCK' or 'O_EXLOCK' is "
+				 "specified, but the underlying filesystem does"
+				 " not support locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "open failure - The named file is a regular "
+				 "file and its size does not fit in an object "
+				 "of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "open failure - The named file resides on a "
+				 "read-only file system, and the file is to be "
+				 "modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "open failure - The file is a pure procedure ("
+				 "shared text) file that is being executed and "
+				 "the open() call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "open failure - The path argument does not "
+				 "specify an absolute path.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "'options' are invalid.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+				 MALLOC_FAILURE_REASON)
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+fts_open_handle(FTS *restrict *const restrict tree,
+		char *const restrict *restrict path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **),
+		Handler *const handle,
+		void *arg)
+{
+	const char *restrict failure;
+
+	if (fts_open_report(tree,
+			    path_argv,
+			    options,
+			    compare,
+			    &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+fts_open_handle_cl(FTS *restrict *const restrict tree,
+		   char *const restrict *restrict path_argv,
+		   int options,
+		   int (*compare)(const FTSENT **,
+				  const FTSENT **),
+		   const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (fts_open_report(tree,
+			    path_argv,
+			    options,
+			    compare,
+			    &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+/* read next entry in FTS */
+inline bool
+fts_read_status(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree)
+{
+	*entry = fts_read(tree);
+
+	return errno == 0;
+}
+
+inline bool
+fts_read_muffle(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree)
+{
+	*entry = fts_read(tree);
+}
+
+inline bool
+fts_read_report(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree,
+		const char *restrict *const restrict failure)
+{
+	*entry = fts_read(tree);
+
+	switch (errno) {
+	case 0: break;
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "ch|opendir failure - Search permission is "
+				 "denied for any component of the path name.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "opendir failure - 'path' specifies the slave "
+				 "side of a locked pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "ch|opendir failure - 'path' points outside "
+				 "the process's allocated address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "opendir failure - The open() operation is "
+				 "interrupted by a signal.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "ch|opendir failure - Too many symbolic links "
+				 "are encountered in translating the pathname. "
+				 "This is taken to be indicative of a looping "
+				 "symbolic link.",
+				 "opendir failuree - 'O_NOFOLLOW' was specified"
+				 " and the target is a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "opendir failure - The process has already "
+				 "reached its limit for open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "The named directory does not exist.",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "The path argument is not an absolute path")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the open() "
+				 "call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "The path argument does not specify an "
+				 "absolute path.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "chdir failure - An I/O error occurred while "
+				 "reading from or writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "chdir failure - A component of a pathname "
+				 "exceeded {NAME_MAX} characters, or an entire "
+				 "path name exceeded {PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "chdir failure - The named directory does not "
+				 "exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "chdir failure - A component of the path "
+				 "prefix is not a directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "'options' are invalid.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+				 MALLOC_FAILURE_REASON)
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+
+}
+
+
 #endif /* ifdef WIN32 */
+
+
+/* remove all contents */
+inline void
+remove_all(const char *const restrict path,
+	   const struct HandlerClosure *const restrict fail_cl);
+{
+}
+
+
 
 
 

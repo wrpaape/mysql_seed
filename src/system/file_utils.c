@@ -212,6 +212,26 @@ unlink_relative_handle_cl(const int directory_descriptor,
 			  const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifndef WIN32 */
 
+/* fetch info on a file */
+extern inline bool
+stat_status(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer);
+extern inline void
+stat_muffle(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer);
+extern inline bool
+stat_report(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer);
+extern inline void
+stat_handle(const char *const restrict path,
+	    struct StatBuffer *const restrict buffer,
+	    Handler *const handle,
+	    void *arg);
+extern inline void
+stat_handle_cl(const char *const restrict path,
+	       struct StatBuffer *const restrict buffer,
+	       const struct HandlerClosure *const restrict fail_cl);
+
 /* mkdir (absolute or relative path) */
 extern inline bool
 mkdir_status(const char *const restrict path,
@@ -260,6 +280,22 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 			 const mode_t mode,
 			 const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifndef WIN32 */
+
+/* chdir (absolute or relative path) */
+extern inline bool
+chdir_status(const char *const restrict path);
+extern inline void
+chdir_muffle(const char *const restrict path);
+extern inline bool
+chdir_report(const char *const restrict path,
+	     const char *restrict *const restrict failure);
+extern inline void
+chdir_handle(const char *const restrict path,
+	     Handler *const handle,
+	     void *arg);
+extern inline void
+chdir_handle_cl(const char *const restrict path,
+		const struct HandlerClosure *const restrict fail_cl);
 
 /* rmdir (absolute or relative path) */
 extern inline bool
