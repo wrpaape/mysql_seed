@@ -83,6 +83,7 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #ifdef WIN32
+#	include <windows.h>
 /* open a file */
 #	define open_imp(PATH,						\
 			OPEN_FLAG)					\
@@ -130,6 +131,7 @@
 	_rmdir(PATH)
 
 #else
+#	include <dirent.h>
 /* open a file */
 #	define open_imp(PATH,						\
 			OPEN_FLAG)					\
@@ -1760,6 +1762,279 @@ rmdir_handle_cl(const char *const restrict path,
 			failure);
 	__builtin_unreachable();
 }
+
+#ifdef WIN32
+
+#else
+/* open a directory */
+inline bool
+opendir_status(DIR *restrict *const restrict dir,
+	       const char *const restrict path)
+{
+	*dir = opendir(path);
+
+	return *dir != NULL;
+}
+
+inline void
+opendir_muffle(DIR *restrict *const restrict dir,
+	       const char *const restrict path)
+{
+	*dir = opendir(path);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE opendir
+inline bool
+opendir_report(DIR *restrict *const restrict dir,
+	       const char *const restrict path,
+	       const char *restrict *const restrict failure)
+{
+	*dir = opendir(path);
+
+	if (*dir != NULL)
+		return true;
+
+	switch (errno) {
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "Search permission is denied for a component "
+				 "of the path prefix.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "path specifies the slave side of a locked "
+				 "pseudo-terminal device.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'path' points outside the process's allocated"
+				 " address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "The open() operation is interrupted by a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+				 "Too many symbolic links are encountered in "
+				 "translating the pathname. This is taken to be"
+				 " indicative of a looping symbolic link.",
+				 "'O_NOFOLLOW' was specified and the target is "
+				 "a symbolic link.")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "The process has already reached its limit for"
+				 " open file descriptors.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeds {NAME_MAX} "
+				 "characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+				 "the named directory does not exist",
+				 "A component of the path name that must exist "
+				 "does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.",
+				 "The path argument is not an absolute path")
+	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
+				 "the underlying filesystem does not support "
+				 "locking.",
+				 "An attempt is made to open a socket (not "
+				 "currently implemented).")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The named file is a regular file and its size"
+				 " does not fit in an object of type 'off_t'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "The named file resides on a read-only file "
+				 "system, and the file is to be modified.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "The file is a pure procedure (shared text) "
+				 "file that is being executed and the open() "
+				 "call requests write access.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "The path argument does not specify an "
+				 "absolute path.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+				 MALLOC_FAILURE_REASON)
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+opendir_handle(DIR *restrict *const restrict dir,
+	       const char *const restrict path,
+	       Handler *const handle,
+	       void *arg)
+{
+	const char *restrict failure;
+
+	if (opendir_report(dir,
+			   path,
+			   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+opendir_handle_cl(DIR *restrict *const restrict dir,
+		  const char *const restrict path,
+		  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (opendir_report(dir,
+			   path,
+			   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+/* read next entry of a directory */
+inline bool
+readdir_status(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry)
+{
+	*entry = readdir(dir);
+
+	return errno == 0;
+}
+
+inline void
+readdir_muffle(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry)
+{
+	*entry = readdir(dir);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE readdir
+inline bool
+readdir_report(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry,
+	       const char *restrict *const restrict failure)
+{
+
+	*entry = readdir(dir);
+
+	if (errno == 0)
+		return true;
+
+	switch (errno) {
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "getdirentries failure - 'fd' is not a valid "
+				 "file descriptor open for reading.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "getdirentries failure - Either 'buf' or '"
+				 "basep' point outside the allocated address "
+				 "space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "getdirentries failure - An I/O error occurred"
+				 " while reading from or writing to the file "
+				 "system.")
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+readdir_handle(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry,
+	       Handler *const handle,
+	       void *arg)
+{
+	const char *restrict failure;
+
+	if (readdir_report(dir,
+			   entry,
+			   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+readdir_handle_cl(DIR *const restrict dir,
+		  struct dirent *restrict *const restrict entry,
+		  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (readdir_report(dir,
+			   entry,
+			   &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+/* close a directory */
+inline bool
+closedir_status(DIR *const restrict dir)
+{
+	return closedir(dir) == 0;
+}
+
+inline void
+closedir_muffle(DIR *const restrict dir)
+{
+	(void) closedir(dir);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE closedir
+inline bool
+closedir_report(DIR *const restrict dir,
+		const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(dir)
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'directory_descriptor' is not a valid, active"
+				 " directory descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "Execution was interrupted by a signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "A previously-uncommitted write(2) encountered"
+				 " an input/output error.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+closedir_handle(DIR *const restrict dir,
+	       Handler *const handle,
+	       void *arg)
+{
+	const char *restrict failure;
+
+	if (closedir_report(dir,
+			    &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+
+}
+
+inline void
+closedir_handle_cl(DIR *const restrict dir,
+		   const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (closedir_report(dir,
+			    &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+
+}
+#endif /* ifdef WIN32 */
 
 
 

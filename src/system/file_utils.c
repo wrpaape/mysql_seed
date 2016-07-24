@@ -277,6 +277,66 @@ extern inline void
 rmdir_handle_cl(const char *const restrict path,
 		const struct HandlerClosure *const restrict fail_cl);
 
+#ifdef WIN32
+#else
+/* open a directory */
+extern inline bool
+opendir_status(DIR *restrict *const restrict dir,
+	       const char *const restrict path);
+extern inline void
+opendir_muffle(DIR *restrict *const restrict dir,
+	       const char *const restrict path);
+extern inline bool
+opendir_report(DIR *restrict *const restrict dir,
+	       const char *const restrict path,
+	       const char *restrict *const restrict failure);
+extern inline void
+opendir_handle(DIR *restrict *const restrict dir,
+	       const char *const restrict path,
+	       Handler *const handle,
+	       void *arg);
+extern inline void
+opendir_handle_cl(DIR *restrict *const restrict dir,
+		  const char *const restrict path,
+		  const struct HandlerClosure *const restrict fail_cl);
+
+/* read next entry of a directory */
+extern inline bool
+readdir_status(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry);
+extern inline void
+readdir_muffle(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry);
+extern inline bool
+readdir_report(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry,
+	       const char *restrict *const restrict failure);
+extern inline void
+readdir_handle(DIR *const restrict dir,
+	       struct dirent *restrict *const restrict entry,
+	       Handler *const handle,
+	       void *arg);
+extern inline void
+readdir_handle_cl(DIR *const restrict dir,
+		  struct dirent *restrict *const restrict entry,
+		  const struct HandlerClosure *const restrict fail_cl);
+
+/* close a directory */
+extern inline bool
+closedir_status(DIR *const restrict dir);
+extern inline void
+closedir_muffle(DIR *const restrict dir);
+extern inline bool
+closedir_report(DIR *const restrict dir,
+		const char *restrict *const restrict failure);
+extern inline void
+closedir_handle(DIR *const restrict dir,
+	       Handler *const handle,
+	       void *arg);
+extern inline void
+closedir_handle_cl(DIR *const restrict dir,
+		   const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifdef WIN32 */
 
 /* inspect file permissions */
 extern inline char *
