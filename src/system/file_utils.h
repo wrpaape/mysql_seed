@@ -2113,12 +2113,13 @@ readdir_report(DIR *const restrict dir,
 
 	switch (errno) {
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "getdirentries failure - 'fd' is not a valid "
-				 "file descriptor open for reading.")
+				 "getdirentries failure - 'file_descriptor' is "
+				 "not a valid file descriptor open for reading"
+				 ".")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "getdirentries failure - Either 'buf' or '"
-				 "basep' point outside the allocated address "
-				 "space.")
+				 "getdirentries failure - Either 'buffer' or '"
+				 "base_ptr' point outside the allocated address"
+				 " space.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
 				 "getdirentries failure - An I/O error occurred"
 				 " while reading from or writing to the file "
@@ -2387,7 +2388,17 @@ fts_read_status(FTSENT *restrict *const restrict entry,
 {
 	*entry = fts_read(tree);
 
-	return errno == 0;
+	if (*entry == NULL)
+		return errno == 0;
+
+	switch ((*entry)->fts_info) {
+	case FTS_DNR:
+	case FTS_ERR:
+	case FTS_NS:
+		return false;
+	default:
+		return true;
+	}
 }
 
 inline bool
@@ -2397,6 +2408,8 @@ fts_read_muffle(FTSENT *restrict *const restrict entry,
 	*entry = fts_read(tree);
 }
 
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE fts_read
 inline bool
 fts_read_report(FTSENT *restrict *const restrict entry,
 		FTS *const restrict tree,
@@ -2404,83 +2417,219 @@ fts_read_report(FTSENT *restrict *const restrict entry,
 {
 	*entry = fts_read(tree);
 
-	switch (errno) {
-	case 0: break;
-	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
-				 "ch|opendir failure - Search permission is "
-				 "denied for any component of the path name.")
-	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
-				 "opendir failure - 'path' specifies the slave "
-				 "side of a locked pseudo-terminal device.")
-	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "ch|opendir failure - 'path' points outside "
-				 "the process's allocated address space.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "opendir failure - The open() operation is "
-				 "interrupted by a signal.")
-	FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
-				 "ch|opendir failure - Too many symbolic links "
-				 "are encountered in translating the pathname. "
-				 "This is taken to be indicative of a looping "
-				 "symbolic link.",
-				 "opendir failuree - 'O_NOFOLLOW' was specified"
-				 " and the target is a symbolic link.")
-	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
-				 "opendir failure - The process has already "
-				 "reached its limit for open file descriptors.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
-				 "A component of a pathname exceeds {NAME_MAX} "
-				 "characters, or an entire path name exceeded "
-				 "{PATH_MAX} characters.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
-				 "The named directory does not exist.",
-				 "A component of the path name that must exist "
-				 "does not exist.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
-				 "A component of the path prefix is not a "
-				 "directory.",
-				 "The path argument is not an absolute path")
-	FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
-				 "'O_SHLOCK' or 'O_EXLOCK' is specified, but "
-				 "the underlying filesystem does not support "
-				 "locking.",
-				 "An attempt is made to open a socket (not "
-				 "currently implemented).")
-	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
-				 "The named file is a regular file and its size"
-				 " does not fit in an object of type 'off_t'.")
-	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
-				 "The named file resides on a read-only file "
-				 "system, and the file is to be modified.")
-	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
-				 "The file is a pure procedure (shared text) "
-				 "file that is being executed and the open() "
-				 "call requests write access.")
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "The path argument does not specify an "
-				 "absolute path.")
-	FAIL_SWITCH_ERRNO_CASE_1(EIO,
-				 "chdir failure - An I/O error occurred while "
-				 "reading from or writing to the file system.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
-				 "chdir failure - A component of a pathname "
-				 "exceeded {NAME_MAX} characters, or an entire "
-				 "path name exceeded {PATH_MAX} characters.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
-				 "chdir failure - The named directory does not "
-				 "exist.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
-				 "chdir failure - A component of the path "
-				 "prefix is not a directory.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'options' are invalid.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
-				 MALLOC_FAILURE_REASON)
-	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	if (*entry == NULL) {
+		if (errno == 0)
+			return true;
+
+		*failure = strerror(errno);
+		return false;
 	}
 
+	switch ((*entry)->fts_info) {
+	case FTS_DNR:
+		switch ((*entry)->fts_errno) {
+		FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+					 "readdir failure - 'file_descriptor' "
+					 "is not a valid file descriptor open "
+					 "for reading.")
+		FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+					 "readdir failure - Either 'buffer' or "
+					 "'base_ptr' point outside the "
+					 "allocated address space.")
+		FAIL_SWITCH_ERRNO_CASE_1(EIO,
+					 "readdir failure - An I/O error "
+					 "occurred while reading from or "
+					 "writing to the file system.")
+		FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+		}
+	case FTS_ERR:
+		switch ((*entry)->fts_errno) {
+		FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+					 "ch|opendir failure - Search "
+					 "permission is denied for any "
+					 "component of the path name.")
+		FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+					 "opendir failure - 'path' specifies "
+					 "the slave side of a locked "
+					 "pseudo-terminal device.")
+		FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+					 "ch|opendir failure - 'path' points "
+					 "outside the process's allocated "
+					 "address space.")
+		FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+					 "opendir failure - The open() "
+					 "operation is interrupted by a signal"
+					 ".")
+		FAIL_SWITCH_ERRNO_CASE_2(ELOOP,
+					 "ch|opendir failure - Too many "
+					 "symbolic links are encountered in "
+					 "translating the pathname. This is "
+					 "taken to be indicative of a looping "
+					 "symbolic link.",
+					 "opendir failure - 'O_NOFOLLOW' was "
+					 "specified and the target is a "
+					 "symbolic link.")
+		FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+					 "opendir failure - The process has "
+					 "already reached its limit for open "
+					 "file descriptors.")
+		FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+					 "ch|opendir failure - A component of a"
+					 " pathname exceeds {NAME_MAX} "
+					 "characters, or an entire path name "
+					 "exceeded {PATH_MAX} characters.")
+		FAIL_SWITCH_ERRNO_CASE_2(ENOENT,
+					 "ch|opendir failure - The named "
+					 "directory does not exist.",
+					 "opendir failure - A component of the "
+					 "path name that must exist does not "
+					 "exist.")
+		FAIL_SWITCH_ERRNO_CASE_2(ENOTDIR,
+					 "ch|opendir failure - A component of "
+					 "the path prefix is not a directory.",
+					 "opendir failure - The path argument "
+					 "is not an absolute path")
+		FAIL_SWITCH_ERRNO_CASE_2(EOPNOTSUPP,
+					 "opendir failure - 'O_SHLOCK' or "
+					 "'O_EXLOCK' is specified, but the "
+					 "underlying filesystem does not "
+					 "support locking.",
+					 "opendir failure - An attempt is made "
+					 "to open a socket (not currently "
+					 "implemented).")
+		FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+					 "opendir failure - The named file is a"
+					 " regular file and its size does not "
+					 "fit in an object of type 'off_t'.")
+		FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+					 "opendir failure - The named file "
+					 "resides on a read-only file system, "
+					 "and the file is to be modified.")
+		FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+					 "opendir failure - The file is a pure "
+					 "procedure (shared text) file that is "
+					 "being executed and the open() call "
+					 "requests write access.")
+		FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+					 "opendir failure - The path argument "
+					 "does not specify an absolute path.")
+		FAIL_SWITCH_ERRNO_CASE_1(EIO,
+					 "chdir failure - An I/O error occurred"
+					 " while reading from or writing to the"
+					 " file system.")
+		FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+					 MALLOC_FAILURE_REASON)
+		FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+		}
+	case FTS_NS:
+		switch ((*entry)->fts_errno) {
+		FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+					 "stat failure - Search permission is "
+					 "denied for a component of the path "
+					 "prefix.")
+		FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+					 "stat failure - 'path' points to an "
+					 "invalid address.")
+		FAIL_SWITCH_ERRNO_CASE_1(EIO,
+					 "stat failure - An I/O error occurs "
+					 "while reading from or writing to the "
+					 "file system.")
+		FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+					 "stat failure - Too many symbolic "
+					 "links are encountered in translating "
+					 "the pathname. This is taken to be "
+					 "indicative of a looping symbolic link"
+					 ".")
+		FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+					 "stat failure - A component of a "
+					 "pathname exceeds {NAME_MAX} "
+					 "characters, or an entire path name "
+					 "exceeds {PATH_MAX} characters.")
+		FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+					 "stat failure - The named file does "
+					 "not exist.")
+		FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+					 "stat failure - A component of the "
+					 "path prefix is not a directory.")
+		FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+					 "stat failure - The file size in bytes"
+					 " or the number of blocks allocated to"
+					 " the file or the file serial number "
+					 "cannot be represented correctly in "
+					 "the structure pointed to by 'buffer'"
+					 ".")
+		FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+		}
+	default:
+		return true;
+	}
 }
 
+inline void
+fts_read_handle(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree,
+		Handler *const handle,
+		void *arg)
+{
+	const char *restrict failure;
+
+	if (fts_read_report(entry,
+			    tree,
+			    &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+
+inline void
+fts_read_handle_cl(FTSENT *restrict *const restrict entry,
+		   FTS *const restrict tree,
+		   const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (fts_read_report(entry,
+			    tree,
+			    &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
+inline bool
+fts_close_status(FTS *const restrict tree)
+{
+	return fts_close(tree) == 0;
+}
+
+inline void
+fts_close_muffle(FTS *const restrict tree)
+{
+	(void) fts_close(tree);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE fts_close
+inline bool
+fts_close_report(FTS *const restrict tree)
+{
+	FAIL_SWITCH_ERRNO_OPEN(tree)
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "close failure - 'file_descriptor' is not a valid, active file"
+				 " descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "close failure - Execution was interrupted by a signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "close failure - A previously-uncommitted write(2) encountered"
+				 " an input/output error.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
 
 #endif /* ifdef WIN32 */
 
