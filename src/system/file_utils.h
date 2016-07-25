@@ -7,6 +7,7 @@
 #include <unistd.h>		    /* close, getcwd, STDOUT/IN/ERR_FILENO */
 #include "utils/utils.h"	    /* FILE/stream API */
 #include "system/system_utils.h"    /* sys headers, FAIL_SWITCH, misc macros */
+#include "string/string_utils.h"    /* string_compare */
 
 /* EXTERNAL DEPENDENCIES ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
@@ -1469,7 +1470,8 @@ stat_muffle(const char *const restrict path,
 #define FAIL_SWITCH_ROUTINE stat_imp
 inline bool
 stat_report(const char *const restrict path,
-	    struct StatBuffer *const restrict buffer)
+	    struct StatBuffer *const restrict buffer,
+	    const char *restrict *const restrict failure)
 {
 
 	FAIL_SWITCH_ERRNO_OPEN(path,
@@ -1831,7 +1833,7 @@ chdir_report(const char *const restrict path,
 	FAIL_SWITCH_ERRNO_CLOSE()
 }
 
-inline bool
+inline void
 chdir_handle(const char *const restrict path,
 	     Handler *const handle,
 	     void *arg)
@@ -2230,7 +2232,7 @@ closedir_handle_cl(DIR *const restrict dir,
 /* UNIX file tree traversal - open */
 inline bool
 fts_open_status(FTS *restrict *const restrict tree,
-		char *const restrict *restrict path_argv,
+		char *const *path_argv,
 		int options,
 		int (*compare)(const FTSENT **,
 			       const FTSENT **))
@@ -2244,7 +2246,7 @@ fts_open_status(FTS *restrict *const restrict tree,
 
 inline void
 fts_open_muffle(FTS *restrict *const restrict tree,
-		char *const restrict *restrict path_argv,
+		char *const *path_argv,
 		int options,
 		int (*compare)(const FTSENT **,
 			       const FTSENT **))
@@ -2258,7 +2260,7 @@ fts_open_muffle(FTS *restrict *const restrict tree,
 #define FAIL_SWITCH_ROUTINE fts_open
 inline bool
 fts_open_report(FTS *restrict *const restrict tree,
-		char *const restrict *restrict path_argv,
+		char *const *path_argv,
 		int options,
 		int (*compare)(const FTSENT **,
 			       const FTSENT **),
@@ -2338,7 +2340,7 @@ fts_open_report(FTS *restrict *const restrict tree,
 
 inline void
 fts_open_handle(FTS *restrict *const restrict tree,
-		char *const restrict *restrict path_argv,
+		char *const *path_argv,
 		int options,
 		int (*compare)(const FTSENT **,
 			       const FTSENT **),
@@ -2361,7 +2363,7 @@ fts_open_handle(FTS *restrict *const restrict tree,
 
 inline void
 fts_open_handle_cl(FTS *restrict *const restrict tree,
-		   char *const restrict *restrict path_argv,
+		   char *const *path_argv,
 		   int options,
 		   int (*compare)(const FTSENT **,
 				  const FTSENT **),
@@ -2401,7 +2403,7 @@ fts_read_status(FTSENT *restrict *const restrict entry,
 	}
 }
 
-inline bool
+inline void
 fts_read_muffle(FTSENT *restrict *const restrict entry,
 		FTS *const restrict tree)
 {
@@ -2602,6 +2604,7 @@ fts_read_handle_cl(FTSENT *restrict *const restrict entry,
 }
 
 
+/* close FTS */
 inline bool
 fts_close_status(FTS *const restrict tree)
 {
@@ -2617,27 +2620,69 @@ fts_close_muffle(FTS *const restrict tree)
 #undef  FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE fts_close
 inline bool
-fts_close_report(FTS *const restrict tree)
+fts_close_report(FTS *const restrict tree,
+		 const char *restrict *const restrict failure)
 {
 	FAIL_SWITCH_ERRNO_OPEN(tree)
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "close failure - 'file_descriptor' is not a valid, active file"
-				 " descriptor.")
+				 "close failure - 'directory_descriptor' is not"
+				 " a valid, active directory descriptor.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
-				 "close failure - Execution was interrupted by a signal.")
+				 "close failure - Execution was interrupted by "
+				 "a signal.")
 	FAIL_SWITCH_ERRNO_CASE_1(EIO,
-				 "close failure - A previously-uncommitted write(2) encountered"
-				 " an input/output error.")
+				 "close failure - A previously-uncommitted "
+				 "write(2) encountered an input/output error.")
 	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+fts_close_handle(FTS *const restrict tree,
+		 Handler *const handle,
+		 void *arg)
+{
+	const char *restrict failure;
+
+	if (fts_close_report(tree,
+			     &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+fts_close_handle_cl(FTS *const restrict tree,
+		    const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (fts_close_report(tree,
+			     &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+/* compare FTS entries by name */
+inline int
+ftsent_compare_names(FTSENT **x,
+		     FTSENT **y)
+{
+	return string_compare((*x)->fts_name,
+			      (*y)->fts_name);
 }
 
 #endif /* ifdef WIN32 */
 
 
-/* remove all contents */
+/* remove all contents in a directory, then the directory itself */
 inline void
 remove_all(const char *const restrict path,
-	   const struct HandlerClosure *const restrict fail_cl);
+	   const struct HandlerClosure *const restrict fail_cl)
 {
 }
 

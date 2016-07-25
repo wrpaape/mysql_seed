@@ -221,7 +221,8 @@ stat_muffle(const char *const restrict path,
 	    struct StatBuffer *const restrict buffer);
 extern inline bool
 stat_report(const char *const restrict path,
-	    struct StatBuffer *const restrict buffer);
+	    struct StatBuffer *const restrict buffer,
+	    const char *restrict *const restrict failure);
 extern inline void
 stat_handle(const char *const restrict path,
 	    struct StatBuffer *const restrict buffer,
@@ -372,7 +373,92 @@ closedir_handle(DIR *const restrict dir,
 extern inline void
 closedir_handle_cl(DIR *const restrict dir,
 		   const struct HandlerClosure *const restrict fail_cl);
+
+/* UNIX file tree traversal - open */
+extern inline bool
+fts_open_status(FTS *restrict *const restrict tree,
+		char *const *path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **));
+extern inline void
+fts_open_muffle(FTS *restrict *const restrict tree,
+		char *const *path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **));
+extern inline bool
+fts_open_report(FTS *restrict *const restrict tree,
+		char *const *path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **),
+		const char *restrict *const restrict failure);
+extern inline void
+fts_open_handle(FTS *restrict *const restrict tree,
+		char *const *path_argv,
+		int options,
+		int (*compare)(const FTSENT **,
+			       const FTSENT **),
+		Handler *const handle,
+		void *arg);
+extern inline void
+fts_open_handle_cl(FTS *restrict *const restrict tree,
+		   char *const *path_argv,
+		   int options,
+		   int (*compare)(const FTSENT **,
+				  const FTSENT **),
+		   const struct HandlerClosure *const restrict fail_cl);
+
+/* read next entry in FTS */
+extern inline bool
+fts_read_status(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree);
+extern inline void
+fts_read_muffle(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree);
+extern inline bool
+fts_read_report(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree,
+		const char *restrict *const restrict failure);
+extern inline void
+fts_read_handle(FTSENT *restrict *const restrict entry,
+		FTS *const restrict tree,
+		Handler *const handle,
+		void *arg);
+extern inline void
+fts_read_handle_cl(FTSENT *restrict *const restrict entry,
+		   FTS *const restrict tree,
+		   const struct HandlerClosure *const restrict fail_cl);
+
+/* close FTS */
+extern inline bool
+fts_close_status(FTS *const restrict tree);
+
+extern inline void
+fts_close_muffle(FTS *const restrict tree);
+extern inline bool
+fts_close_report(FTS *const restrict tree,
+		 const char *restrict *const restrict failure);
+extern inline void
+fts_close_handle(FTS *const restrict tree,
+		 Handler *const handle,
+		 void *arg);
+extern inline void
+fts_close_handle_cl(FTS *const restrict tree,
+		    const struct HandlerClosure *const restrict fail_cl);
+
+/* compare FTS entries by name */
+extern inline int
+ftsent_compare_names(FTSENT **x,
+		     FTSENT **y);
 #endif /* ifdef WIN32 */
+
+
+/* remove all contents in a directory, then the directory itself */
+extern inline void
+remove_all(const char *const restrict path,
+	   const struct HandlerClosure *const restrict fail_cl);
 
 /* inspect file permissions */
 extern inline char *
