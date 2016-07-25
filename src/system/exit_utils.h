@@ -6,8 +6,7 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #include <stdlib.h>			/* exit, exitat */
-#include "system/file_utils.h"		/* STDOUT/ERR_FILENO, handlers */
-#include "string/string_utils.h"	/* string_length */
+#include "system/file_utils.h"		/* STDOUT/ERR_FILENO, string utils */
 #include "utils/types/action.h"		/* Action function type */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲

@@ -50,6 +50,9 @@ mode_dispatch(char *restrict *const restrict from,
 
 		goto INVALID_MODE_FLAG;
 
+	case 'r':
+		if (*rem == '\0')
+			return remove_dispatch(from + 1l, rem_argc);
 
 	default:
 		goto INVALID_MODE_FLAG;
@@ -74,6 +77,10 @@ mode_dispatch(char *restrict *const restrict from,
 			return load_dispatch(from + 1l, rem_argc);
 
 		break;
+
+	case 'r':
+		if (strings_equal("emove", rem + 1l))
+			return remove_dispatch(from + 1l, rem_argc);
 
 	default:
 		break;

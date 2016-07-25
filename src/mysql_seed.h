@@ -5,6 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_generate.h"	/* generate mode */
 #include "mysql_seed_load.h"		/* load mode */
+#include "mysql_seed_remove.h"		/* remove mode */
 #include "mysql_seed_help.h"		/* help mode */
 
 /* error messages

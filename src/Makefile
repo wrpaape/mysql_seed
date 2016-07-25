@@ -840,11 +840,9 @@ SYSTEM_EXIT_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,system exit_utils)
 SYSTEM_EXIT_UTILS_OBJ_PREQS		:= $(SYSTEM_EXIT_UTILS_SRC) 			\
 			   		   $(SYSTEM_EXIT_UTILS_HDR)			\
 			   		   $(SYSTEM_FILE_UTILS_HDR)			\
-			   		   $(STRING_STRING_UTILS_HDR)			\
 					   $(UTILS_TYPES_ACTION_HDR)
 SYSTEM_EXIT_UTILS_OBJ_GROUP		:= $(SYSTEM_EXIT_UTILS_OBJ)			\
-					   $(SYSTEM_FILE_UTILS_OBJ_GROUP)		\
-					   $(STRING_STRING_UTILS_OBJ_GROUP)
+					   $(SYSTEM_FILE_UTILS_OBJ_GROUP)
 SYSTEM_EXIT_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_EXIT_UTILS_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
 SYSTEM_EXIT_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_EXIT_UTILS_TEST_SRC)		\
@@ -1474,6 +1472,42 @@ TARGETS			+= $(LOAD_OBJ)					\
 			   $(LOAD_TEST_BIN)
 
 
+# mysql_seed_remove
+# ──────────────────────────────────────────────────────────────────────────────
+REMOVE_SRC 		:= $(call PROJECT_SOURCE_PATH,remove)
+REMOVE_HDR		:= $(call PROJECT_HEADER_PATH,remove)
+REMOVE_OBJ 		:= $(call PROJECT_OBJECT_PATH,remove)
+REMOVE_TEST_SRC		:= $(call PROJECT_TEST_SOURCE_PATH,remove)
+REMOVE_TRNR_SRC		:= $(call PROJECT_TEST_RUNNER_SOURCE_PATH,remove)
+REMOVE_TRNR_OBJ		:= $(call PROJECT_TEST_RUNNER_OBJECT_PATH,remove)
+REMOVE_TEST_OBJ		:= $(call PROJECT_TEST_OBJECT_PATH,remove)
+REMOVE_TEST_BIN		:= $(call PROJECT_TEST_BINARY_PATH,remove)
+# ─────────────── target prequisites ───────────────────────────────────────────
+REMOVE_OBJ_PREQS	:= $(REMOVE_SRC) 				\
+			   $(REMOVE_HDR) 				\
+			   $(FILE_HDR)
+REMOVE_OBJ_GROUP	:= $(REMOVE_OBJ)				\
+			   $(FILE_OBJ_GROUP)
+REMOVE_TRNR_SRC_PREQS	:= $(REMOVE_TEST_SRC)				\
+			   $(TEST_RUNNER_SOURCE_DIR)
+REMOVE_TEST_OBJ_PREQS	:= $(REMOVE_TEST_SRC)				\
+			   $(REMOVE_OBJ_PREQS) 				\
+			   $(UNITY_OBJ_PREQS)
+REMOVE_TRNR_OBJ_PREQS	:= $(REMOVE_TRNR_SRC)				\
+			   $(REMOVE_TEST_OBJ_PREQS)
+REMOVE_TEST_BIN_PREQS	:= $(REMOVE_TRNR_OBJ)				\
+			   $(REMOVE_TEST_OBJ)				\
+			   $(REMOVE_OBJ_GROUP)				\
+			   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(REMOVE_TEST_BIN)
+TARGETS			+= $(REMOVE_OBJ)				\
+			   $(REMOVE_TRNR_SRC)				\
+			   $(REMOVE_TRNR_OBJ)				\
+			   $(REMOVE_TEST_OBJ)				\
+			   $(REMOVE_TEST_BIN)
+
+
 # mysql_seed_help
 # ──────────────────────────────────────────────────────────────────────────────
 HELP_SRC 		:= $(call PROJECT_SOURCE_PATH,help)
@@ -1520,26 +1554,16 @@ PROJECT_BIN 		:= $(call BINARY_PATH,$(PROJECT))
 # ─────────────── target prequisites ───────────────────────────────────────────
 PROJECT_BIN_PREQS	:= $(PROJECT_OBJ) 				\
 			   $(HELP_OBJ_GROUP) 				\
+			   $(REMOVE_OBJ_GROUP) 				\
 			   $(GENERATE_OBJ_GROUP) 			\
-			   $(LOAD_OBJ_GROUP)				\
-			   # $(HELP_OBJ_GROUP)
-			   # $(GEN_GEN_COUNT_STRING_OBJ) 			\
-			   # $(GEN_GENCOLUMN_STRING_NAMES_OBJ) 			\
-			   # $(GEN_GEN_STRINGS_OBJ) 			\
-			   # $(THREAD_THREAD_LOG_OBJ) 					\
-			   # $(THREAD_THREAD_UTILS_OBJ)				\
-			   # $(HELP_OBJ) 					\
-			   # $(STRING_STRING_UTILS_OBJ)					\
-			   # $(RANDOM_RANDOM_OBJ)				\
-			   # $(RANDOM_PCG_BASIC_OBJ)			\
-			   # $(MEMORY_MEMORY_SWAP_OBJ)			\
-			   # $(MEMORY_MEMORY_UTILS_OBJ)			\
-			   # $(TIME_TIME_UTILS_OBJ)			\
-			   # $(UTILS_UTILS_OBJ)
+			   $(LOAD_OBJ_GROUP)
 
 PROJECT_OBJ_PREQS	:= $(PROJECT_SRC) 				\
 			   $(PROJECT_HDR) 				\
-			   $(HELP_HDR)
+			   $(HELP_HDR)					\
+			   $(REMOVE_HDR)				\
+			   $(GENERATE_HDR)				\
+			   $(LOAD_HDR)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TARGETS			+= $(PROJECT_OBJ)				\
 			   $(PROJECT_BIN)
@@ -1591,6 +1615,11 @@ $(GENERATE_OBJ): $(GENERATE_OBJ_PREQS)
 # make mysql_seed_load object
 # ──────────────────────────────────────────────────────────────────────────────
 $(LOAD_OBJ): $(LOAD_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make mysql_seed_remove object
+# ──────────────────────────────────────────────────────────────────────────────
+$(REMOVE_OBJ): $(REMOVE_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make mysql_seed_help object
@@ -1798,6 +1827,26 @@ $(LOAD_TEST_OBJ): $(LOAD_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(LOAD_TRNR_SRC): $(LOAD_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for mysql_seed_remove
+# make:
+# 	mysql_seed_remove_test		binary,
+# 	mysql_seed_remove_test_runner 	object,
+# 	mysql_seed_remove_test		object, and
+# 	mysql_seed_remove_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(REMOVE_TEST_BIN): $(REMOVE_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(REMOVE_TRNR_OBJ): $(REMOVE_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(REMOVE_TEST_OBJ): $(REMOVE_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(REMOVE_TRNR_SRC): $(REMOVE_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
