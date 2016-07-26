@@ -1,5 +1,26 @@
 #include "system/file_utils.h"
 
+/* access (absolute or relative path) */
+extern inline bool
+access_status(const char *const restrict path,
+	      const int mode);
+extern inline void
+access_muffle(const char *const restrict path,
+	      const int mode);
+extern inline bool
+access_report(const char *const restrict path,
+	      const int mode,
+	      const char *restrict *const restrict failure);
+extern inline void
+access_handle(const char *const restrict path,
+	      const int mode,
+	      Handler *const handle,
+	      void *arg);
+extern inline void
+access_handle_cl(const char *const restrict path,
+		 const int mode,
+		 const struct HandlerClosure *const restrict fail_cl);
+
 /* open (absolute or relative path, no mode) */
 extern inline bool
 open_status(int *const restrict file_descriptor,
@@ -479,12 +500,6 @@ extern inline int
 ftsent_compare_names(const FTSENT **x,
 		     const FTSENT **y);
 #endif /* ifdef WIN32 */
-
-
-/* remove all contents in a directory, then the directory itself */
-extern inline void
-remove_all(char *const restrict path,
-	   const struct HandlerClosure *const restrict fail_cl);
 
 /* inspect file permissions */
 extern inline char *

@@ -247,6 +247,109 @@
 #define FAIL_SWITCH_ERRNO_FAILURE	-1
 #define FAIL_SWITCH_FAILURE_POINTER	failure
 
+/* access (absolute or relative path) */
+inline bool
+access_status(const char *const restrict path,
+	      const int mode)
+{
+	return access_imp(path,
+			  mode) == 0;
+}
+
+inline void
+access_muffle(const char *const restrict path,
+	      const int mode)
+{
+	(void) access_imp(path,
+			  mode);
+}
+
+#define FAIL_SWITCH_ROUTINE access_imp
+inline bool
+access_report(const char *const restrict path,
+	      const int mode,
+	      const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(path,
+			       mode)
+	FAIL_SWITCH_ERRNO_CASE_2(EACCES,
+				 "Permission bits of the file mode do not "
+				 "permit the requested access, or search "
+				 "permission is denied on a component of the "
+				 "path prefix.",
+				 "The owner of a file has permission checked "
+				 "with respect to the 'owner' read, write, and "
+				 "execute mode bits, members of the file's "
+				 "group other than the owner have permission "
+				 "checked with respect to the 'group' mode bits"
+				 ", and all others have permissions checked "
+				 "with respect to the 'other' mode bits.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'path' points outside the process's allocated"
+				 " address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "An invalid value was specified for 'mode'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ELOOP,
+				 "Too many symbolic links were encountered in "
+				 "translating the pathname.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENAMETOOLONG,
+				 "A component of a pathname exceeded {NAME_MAX}"
+				 " characters, or an entire path name exceeded "
+				 "{PATH_MAX} characters.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The named file does not exist.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "A component of the path prefix is not a "
+				 "directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(EROFS,
+				 "Write access is requested for a file on a "
+				 "read-only file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(ETXTBSY,
+				 "Write access is requested for a pure "
+				 "procedure (shared text) file that is "
+				 "presently being executed.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+access_handle(const char *const restrict path,
+	      const int mode,
+	      Handler *const handle,
+	      void *arg)
+{
+	const char *restrict failure;
+
+	if (access_report(path,
+			  mode,
+			  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+access_handle_cl(const char *const restrict path,
+		 const int mode,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (access_report(path,
+			  mode,
+			  &failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
 /* open (absolute or relative path, no mode) */
 inline bool
 open_status(int *const restrict file_descriptor,
@@ -268,6 +371,7 @@ open_muffle(int *const restrict file_descriptor,
 				    open_flag);
 }
 
+#undef	FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE open_imp
 inline bool
 open_report(int *const restrict file_descriptor,
@@ -2778,60 +2882,6 @@ ftsent_compare_names(const FTSENT **x,
 			      (*y)->fts_name);
 }
 #endif /* ifdef WIN32 */
-
-
-/* remove all contents in a directory, then the directory itself */
-inline void
-remove_all(char *const restrict path,
-	   const struct HandlerClosure *const restrict fail_cl)
-{
-#ifdef WIN32
-
-#else
-	char *path_argv[] = {
-		path, NULL
-	};
-
-	FTS *restrict tree;
-	FTSENT *restrict entry;
-
-	fts_open_handle_cl(&tree,
-			   &path_argv[0],
-			   FTS_LOGICAL | FTS_NOSTAT,
-			   NULL,
-			   fail_cl);
-
-	while (1) {
-		fts_read_handle_cl(&entry,
-				   tree,
-				   fail_cl);
-
-		if (entry == NULL)
-			break;
-
-
-		switch (entry->fts_info) {
-		case FTS_D:	/* possibly populated directory, skip */
-			continue;
-
-		case FTS_DP:	/* empty directory, remove */
-			rmdir_handle_cl(entry->fts_accpath,
-					fail_cl);
-			continue;
-
-		default:	/* terminal file/link */
-			unlink_handle_cl(entry->fts_accpath,
-					 fail_cl);
-		}
-	}
-
-	fts_close_handle_cl(tree,
-			    fail_cl);
-#endif /* ifdef WIN32 */
-}
-
-
-
 
 
 /* inspect file permissions (10 chars long) */
