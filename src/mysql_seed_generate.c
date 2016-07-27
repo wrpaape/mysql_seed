@@ -168,5 +168,5 @@ parse_db_specs(struct GenerateParseState *const restrict state);
 /* dispatch generate mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-generate_dispatch(char *restrict *const restrict arg,
+generate_dispatch(char *const restrict *const restrict arg,
 		  const int rem_argc);

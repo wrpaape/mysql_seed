@@ -17,7 +17,7 @@ PARSE_FAILURE_MESSAGE("MODE not specified") MORE_INFO_MESSAGE
 PARSE_FAILURE_HEADER("invalid MODE flag")
 
 static inline int
-mode_dispatch(char *restrict *const restrict from,
+mode_dispatch(char *const *const restrict from,
 	      const int rem_argc);
 
 

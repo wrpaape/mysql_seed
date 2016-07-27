@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 /* parse stdin args
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-mode_dispatch(char *restrict *const restrict from,
+mode_dispatch(char *const *const restrict from,
 	      const int rem_argc)
 {
 	char *const restrict flag = *from;
@@ -52,7 +52,7 @@ mode_dispatch(char *restrict *const restrict from,
 
 	case 'r':
 		if (*rem == '\0')
-			return remove_dispatch(from + 1l, rem_argc);
+			return remove_dispatch(from + 1l);
 
 	default:
 		goto INVALID_MODE_FLAG;
@@ -80,7 +80,7 @@ mode_dispatch(char *restrict *const restrict from,
 
 	case 'r':
 		if (strings_equal("emove", rem + 1l))
-			return remove_dispatch(from + 1l, rem_argc);
+			return remove_dispatch(from + 1l);
 
 	default:
 		break;
