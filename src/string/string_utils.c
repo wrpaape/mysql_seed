@@ -192,6 +192,10 @@ extern inline bool
 strings_equal(const char *restrict string1,
 	      const char *restrict string2);
 
+extern inline char *
+string_starts_with(const char *restrict string1,
+		   const char *restrict string2);
+
 extern inline size_t
 string_length(const char *const restrict string);
 

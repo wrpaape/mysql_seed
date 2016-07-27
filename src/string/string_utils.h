@@ -934,6 +934,24 @@ strings_equal(const char *restrict string1,
 	}
 }
 
+inline char *
+string_starts_with(const char *restrict string1,
+		   const char *restrict string2)
+{
+	while (1) {
+		if (*string1 != *string2)
+			return (*string2 == '\0')
+			     ? (char *) string1
+			     : NULL;
+
+		if (*string1 == '\0')
+			return (char *) string1;
+
+		++string1;
+		++string2;
+	}
+}
+
 inline size_t
 string_length(const char *const restrict string)
 {

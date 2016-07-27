@@ -216,14 +216,17 @@ inline void
 generate_failure_short_db_spec(char *const restrict *const restrict from,
 			       char *const restrict *const restrict until)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     FAILURE_DB_SPEC_SHORT
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(FAILURE_DB_SPEC_SHORT) - 1lu],
-			   from,
-			   until - 1l);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  FAILURE_DB_SPEC_SHORT,
+			  sizeof(FAILURE_DB_SPEC_SHORT) - 1);
+
+
+	ptr = put_inspect_args(ptr,
+			       from,
+			       until - 1l);
 
 	*ptr = '\n';
 
@@ -246,14 +249,16 @@ generate_failure_no_valid_db_spec(void)
 inline void
 short_db_spec(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     ERROR_DB_SPEC_SHORT
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_DB_SPEC_SHORT) - 1lu],
-			   argv->arg.from,
-			   argv->arg.until - 1lu);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_DB_SPEC_SHORT,
+			  sizeof(ERROR_DB_SPEC_SHORT) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->arg.from,
+			       argv->arg.until - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -263,15 +268,17 @@ short_db_spec(const struct GenerateArgvState *const restrict argv)
 inline void
 expected_db_flag(char *const restrict invalid)
 {
-	char buffer[ARG_INSPECT_BUFFER_SIZE] = {
-		ERROR_EXPECTED_DB_FLAG_HEADER
-	};
+	char buffer[ARG_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_EXPECTED_DB_FLAG_HEADER) - 1lu,
-			     invalid,
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_DB_FLAG_HEADER,
+			  sizeof(ERROR_EXPECTED_DB_FLAG_HEADER) - 1);
+
+
+	ptr = put_string_inspect(ptr,
+				 invalid,
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      IGNORING_DB_SPEC,
@@ -286,14 +293,16 @@ inline void
 invalid_db_name_empty(const struct GenerateArgvState *const restrict argv)
 
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     ERROR_INVALID_DB_NAME_EMPTY
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_INVALID_DB_NAME_EMPTY) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_DB_NAME_EMPTY,
+			  sizeof(ERROR_INVALID_DB_NAME_EMPTY) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
 
 
 	write_muffle(STDERR_FILENO,
@@ -304,15 +313,16 @@ invalid_db_name_empty(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_db_name_invalid(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_DB_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_DB_NAME_HEADER,
+			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_DB_NAME_REASON_INVALID,
@@ -331,15 +341,16 @@ invalid_db_name_invalid(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_db_name_long(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_DB_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_DB_NAME_HEADER,
+			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_DB_NAME_REASON_LONG,
@@ -360,15 +371,16 @@ invalid_db_name_long(const struct GenerateArgvState *const restrict argv)
 inline void
 expected_tbl_flag(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_EXPECTED_TBL_FLAG_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_EXPECTED_TBL_FLAG_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_TBL_FLAG_HEADER,
+			  sizeof(ERROR_EXPECTED_TBL_FLAG_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      IGNORING_DB_SPEC_STARTING_WITH,
@@ -387,15 +399,16 @@ inline void
 invalid_tbl_name_empty(const struct GenerateArgvState *const restrict argv)
 
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     ERROR_INVALID_TBL_NAME_EMPTY
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_INVALID_TBL_NAME_EMPTY) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_TBL_NAME_EMPTY,
+			  sizeof(ERROR_INVALID_TBL_NAME_EMPTY) - 1);
 
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -405,15 +418,16 @@ invalid_tbl_name_empty(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_tbl_name_invalid(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_TBL_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_TBL_NAME_HEADER,
+			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_TBL_NAME_REASON_INVALID,
@@ -432,15 +446,16 @@ invalid_tbl_name_invalid(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_tbl_name_long(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_TBL_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_TBL_NAME_HEADER,
+			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_TBL_NAME_REASON_LONG,
@@ -460,15 +475,16 @@ invalid_tbl_name_long(const struct GenerateArgvState *const restrict argv)
 inline void
 expected_col_flag(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_EXPECTED_COL_FLAG_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_EXPECTED_COL_FLAG_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_COL_FLAG_HEADER,
+			  sizeof(ERROR_EXPECTED_COL_FLAG_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      IGNORING_DB_SPEC_STARTING_WITH,
@@ -487,14 +503,16 @@ inline void
 invalid_col_name_empty(const struct GenerateArgvState *const restrict argv)
 
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		     ERROR_INVALID_COL_NAME_EMPTY
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_INVALID_COL_NAME_EMPTY) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_NAME_EMPTY,
+			  sizeof(ERROR_INVALID_COL_NAME_EMPTY) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -504,15 +522,16 @@ invalid_col_name_empty(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_col_name_invalid(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_COL_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_NAME_HEADER,
+			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_NAME_REASON_INVALID,
@@ -531,15 +550,16 @@ invalid_col_name_invalid(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_col_name_long(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_COL_NAME_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_NAME_HEADER,
+			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_NAME_REASON_LONG,
@@ -559,15 +579,16 @@ invalid_col_name_long(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_row_count_invalid(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_ROW_COUNT_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_ROW_COUNT_HEADER,
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_ROW_COUNT_REASON_INVALID,
@@ -587,15 +608,16 @@ invalid_row_count_invalid(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_row_count_zero(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_ROW_COUNT_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_ROW_COUNT_HEADER,
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_ROW_COUNT_REASON_ZERO,
@@ -615,15 +637,16 @@ invalid_row_count_zero(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_row_count_large(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_ROW_COUNT_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_ROW_COUNT_HEADER,
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_ROW_COUNT_REASON_LARGE,
@@ -643,14 +666,16 @@ invalid_row_count_large(const struct GenerateArgvState *const restrict argv)
 inline void
 no_col_type(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_NO_COL_TYPE
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_NO_COL_TYPE) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_COL_TYPE,
+			  sizeof(ERROR_NO_COL_TYPE) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -661,15 +686,16 @@ no_col_type(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_COL_TYPE_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_COL_TYPE_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_TYPE_REASON_NOTSUP,
@@ -685,15 +711,16 @@ invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_COL_TYPE_Q_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_Q_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_TYPE_Q_REASON_NOTSUP,
@@ -709,14 +736,16 @@ invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv)
 inline void
 no_string_base(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_NO_STRING_BASE
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
-	char *const restrict ptr
-	= put_inspect_args(&buffer[sizeof(ERROR_NO_STRING_BASE) - 1lu],
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_STRING_BASE,
+			  sizeof(ERROR_NO_STRING_BASE) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -726,15 +755,16 @@ no_string_base(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_STRING_BASE_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_STRING_BASE_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_STRING_BASE_HEADER,
+			  sizeof(ERROR_INVALID_STRING_BASE_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_STRING_BASE_REASON_INVALID,
@@ -753,15 +783,16 @@ invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv)
 inline void
 invalid_string_base_long(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INVALID_STRING_BASE_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_INVALID_STRING_BASE_HEADER) - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_STRING_BASE_HEADER,
+			  sizeof(ERROR_INVALID_STRING_BASE_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_STRING_BASE_REASON_LONG,
@@ -780,16 +811,16 @@ invalid_string_base_long(const struct GenerateArgvState *const restrict argv)
 inline void
 expected_col_tbl_db_flag(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_EXPECTED_COL_TBL_DB_FLAG_HEADER
-	};
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_string_inspect(&buffer[0]
-			     + sizeof(ERROR_EXPECTED_COL_TBL_DB_FLAG_HEADER)
-			     - 1lu,
-			     *(argv->arg.from),
-			     LENGTH_INSPECT_MAX);
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_COL_TBL_DB_FLAG_HEADER,
+			  sizeof(ERROR_EXPECTED_COL_TBL_DB_FLAG_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      IGNORING_DB_SPEC_STARTING_WITH,
@@ -808,15 +839,16 @@ expected_col_tbl_db_flag(const struct GenerateArgvState *const restrict argv)
 inline void
 incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INCOMPLETE_DB_SPEC_HEADER
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_inspect_args(&buffer[0]
-			   + sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1lu,
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	= put_string_size(&buffer[0],
+			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
+			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INCOMPLETE_DB_SPEC_COL_NAME,
@@ -830,15 +862,16 @@ incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
 inline void
 incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INCOMPLETE_DB_SPEC_HEADER
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_inspect_args(&buffer[0]
-			   + sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1lu,
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	= put_string_size(&buffer[0],
+			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
+			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INCOMPLETE_DB_SPEC_TBL_NAME,
@@ -852,15 +885,16 @@ incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 inline void
 incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INCOMPLETE_DB_SPEC_HEADER
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_inspect_args(&buffer[0]
-			   + sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1lu,
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	= put_string_size(&buffer[0],
+			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
+			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INCOMPLETE_DB_SPEC_ROW_COUNT,
@@ -875,15 +909,16 @@ incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv
 inline void
 incomplete_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 {
-	char buffer[ARGV_INSPECT_BUFFER_SIZE] = {
-		ERROR_INCOMPLETE_DB_SPEC_HEADER
-	};
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_inspect_args(&buffer[0]
-			   + sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1lu,
-			   argv->db_spec.from,
-			   argv->arg.from - 1l);
+	= put_string_size(&buffer[0],
+			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
+			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INCOMPLETE_DB_SPEC_COL_FLAG,
@@ -1294,6 +1329,36 @@ col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 }
 
 inline void
+col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
+{
+	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_first;
+}
+
+inline void
+col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
+{
+	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_last;
+}
+
+inline void
+col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
+{
+	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_full;
+}
+
+inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count)
 {
@@ -1351,7 +1416,6 @@ INCOMPLETE_NO_STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				/* TODO: set type to CHAR(X) */
 				col_spec_set_string_base(state->specs.col,
 							 state->specs.tbl->row_count);
 				parse_column_complete(state);
@@ -1361,6 +1425,39 @@ INCOMPLETE_NO_STRING_BASE:
 			return;
 		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+	case 'n':
+		switch (*rem) {
+		case 'f':
+			if (rem[1] == '\0') {
+				col_spec_set_string_names_first(state->specs.col);
+				++(state->argv.arg.from);
+				parse_column_complete(state);
+				return;
+			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		case 'l':
+			if (rem[1] == '\0') {
+				col_spec_set_string_names_last(state->specs.col);
+				++(state->argv.arg.from);
+				parse_column_complete(state);
+				return;
+			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		case 'F':
+			if (rem[1] == '\0') {
+				col_spec_set_string_names_full(state->specs.col);
+				++(state->argv.arg.from);
+				parse_column_complete(state);
+				return;
+			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		default:
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+		}
 
 	case 'c':
 		if (*rem == '\0') {
@@ -1420,6 +1517,51 @@ INCOMPLETE_NO_STRING_BASE:
 			return;
 		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+	case 'n':
+		arg = string_starts_with(rem + 1l,
+					 "ames-");
+
+		if (arg == NULL)
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		switch (*arg) {
+		case 'f':
+			switch (arg[1]) {
+			case 'i':
+				if (strings_equal("rst", arg + 2l)) {
+					col_spec_set_string_names_first(state->specs.col);
+					++(state->argv.arg.from);
+					parse_column_complete(state);
+					return;
+				}
+				goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+			case 'u':
+				if (strings_equal("ll", arg + 2l)) {
+					col_spec_set_string_names_full(state->specs.col);
+					++(state->argv.arg.from);
+					parse_column_complete(state);
+					return;
+				}
+				goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+			default:
+				goto INVALID_STRING_QUALIFIER_NOTSUP;
+			}
+
+		case 'l':
+			if (strings_equal("ast", arg + 1l)) {
+				col_spec_set_string_names_last(state->specs.col);
+				++(state->argv.arg.from);
+				parse_column_complete(state);
+				return;
+			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		default:
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+		}
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l)) {
