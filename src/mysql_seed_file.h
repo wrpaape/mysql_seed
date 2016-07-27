@@ -633,4 +633,15 @@ put_inspect_args(char *restrict buffer,
 }
 
 
+/* print failure to stderr
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+print_failure(const char *const restrict failure)
+{
+	write_muffle(STDERR_FILENO,
+		     failure,
+		     string_length(failure));
+}
+
+
 #endif	/* MYSQL_SEED_MYSQL_SEED_FILE_H_ */

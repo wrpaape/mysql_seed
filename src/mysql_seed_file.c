@@ -153,10 +153,14 @@ flag_match_next(char *const restrict *restrict from,
 		const char short_flag,
 		const char *const restrict long_flag);
 
-
 /* Argv operations
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline char *
 put_inspect_args(char *restrict buffer,
 		 char *const restrict *restrict from,
 		 char *const restrict *const restrict until);
+
+/* print failure to stderr
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+print_failure(const char *const restrict failure);

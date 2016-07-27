@@ -1,9 +1,17 @@
 #include "mysql_seed_remove.h"
 
 /* remove all contents in a directory, then the directory itself */
+
 extern inline void
-remove_all(char *const restrict path,
-	   const struct HandlerClosure *const restrict fail_cl);
+remove_failure_no_rm_spec(void);
+
+/* remove all database directories in 'database' */
+extern inline int
+mysql_seed_remove_all(void);
+
+/* remove all contents in a directory, then the directory itself */
+extern inline int
+mysql_seed_remove(char *const restrict *restrict db_names);
 
 extern inline int
 remove_dispatch(char *const restrict *const restrict arg,
