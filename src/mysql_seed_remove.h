@@ -68,8 +68,8 @@ mysql_seed_remove_all(void)
 			continue;
 
 		case FTS_DP:
-			if (entry->fts_level == -1)
-				break;	/* returning to root-level directory */
+			if (entry->fts_level == 0) /* returning to root */
+				goto FTS_CLOSE_AND_RETURN;
 
 			if (!rmdir_report(entry->fts_accpath,
 					  &failure)) {
@@ -87,6 +87,7 @@ mysql_seed_remove_all(void)
 		}
 	}
 
+FTS_CLOSE_AND_RETURN:
 	if (!fts_close_report(tree,
 			      &failure)) {
 		print_failure(failure);
