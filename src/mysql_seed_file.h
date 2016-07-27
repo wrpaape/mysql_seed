@@ -10,9 +10,10 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define ARGC_INSPECT_MAX 10lu
 #define LENGTH_INSPECT_MAX (sizeof("--generate") * 2lu)
-#define ARG_INSPECT_BUFFER_SIZE (LENGTH_INSPECT_MAX + 128lu)
+#define ERROR_BUFFER_SIZE 128lu
+#define ARG_INSPECT_BUFFER_SIZE (LENGTH_INSPECT_MAX + ERROR_BUFFER_SIZE)
 #define ARGV_INSPECT_BUFFER_SIZE ((((LENGTH_INSPECT_MAX + 4lu)		\
-				   * ARGC_INSPECT_MAX) + 128lu))
+				   * ARGC_INSPECT_MAX) + ERROR_BUFFER_SIZE))
 #define ARG_ARGV_INSPECT_BUFFER_SIZE (  ARG_INSPECT_BUFFER_SIZE		\
 				      + ARGV_INSPECT_BUFFER_SIZE)
 
@@ -36,6 +37,9 @@
 
 /* file naming conventions
  *─────────────────────────────────────────────────────────────────────────── */
+/* project root */
+#define ABSPATH_PFX ROOT_ABSPATH PATH_DELIM_STRING
+
 /* database root directory */
 #define DB_ROOT_DIRNAME		 "database"
 #define DB_ROOT_DIRNAME_WIDTH	 9
@@ -43,6 +47,9 @@
 #define DB_ROOT_DIRNAME_LENGTH	 8lu
 #define DB_ROOT_DIRNAME_NN_WIDTH 8
 #define DB_ROOT_DIRNAME_NN_SIZE  8lu
+
+/* absolute path */
+#define DB_ROOT_ABSPATH ABSPATH_PFX DB_ROOT_DIRNAME
 
 /* database directory */
 #define DB_DIRNAME_SIZE_MAX	DB_NAME_SIZE_MAX
@@ -151,6 +158,10 @@ FAILURE_HEADER_WRAP("parse", " - " REASON)
 
 #define PARSE_FAILURE_HEADER(REASON)					\
 PARSE_FAILURE_MESSAGE(REASON ":")
+
+#define CHDIR_ROOT_FAILURE_HEADER					\
+"\n" ERROR_OPEN								\
+UNDERLINE_WRAP("failed to locate mysql_seed root directory:") "\n"
 
 
 
@@ -641,6 +652,41 @@ print_failure(const char *const restrict failure)
 	write_muffle(STDERR_FILENO,
 		     failure,
 		     string_length(failure));
+}
+
+
+/* change current working directory to project root
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+mysql_seed_chdir_root_failure(const char *const restrict failure)
+{
+	char buffer[ERROR_BUFFER_SIZE];
+
+	char *restrict ptr = put_string_size(&buffer[0],
+					     CHDIR_ROOT_FAILURE_HEADER,
+					     sizeof(CHDIR_ROOT_FAILURE_HEADER)
+					     - 1lu);
+
+	ptr = put_string(ptr,
+			 failure);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline bool
+mysql_seed_chdir_root(void)
+{
+	const char *restrict failure;
+
+	if (chdir_report(ROOT_ABSPATH,
+			 &failure))
+		return true;
+
+	mysql_seed_chdir_root_failure(failure);
+
+	return false;
 }
 
 

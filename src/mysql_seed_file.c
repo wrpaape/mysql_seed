@@ -164,3 +164,10 @@ put_inspect_args(char *restrict buffer,
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
 print_failure(const char *const restrict failure);
+
+/* change current working directory to project root
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+mysql_seed_chdir_root_failure(const char *const restrict failure);
+extern inline bool
+mysql_seed_chdir_root(void);

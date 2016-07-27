@@ -107,6 +107,12 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	size_t count_row_blocks_div;
 	unsigned int col_count;
 
+	/* ensure cwd at project root */
+	if (!mysql_seed_chdir_root()) {
+		*exit_status = EXIT_FAILURE;
+		return;
+	}
+
 	const size_t row_block_row_count_max
 	= (count->row_count_max < COUNT_WORKERS)
 	? count->row_count_max

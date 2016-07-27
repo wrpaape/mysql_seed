@@ -29,7 +29,13 @@ inline int
 mysql_seed_remove_all(void)
 {
 	const char *restrict failure;
-	int exit_status = EXIT_SUCCESS;
+	int exit_status;
+
+	/* ensure cwd at project root */
+	if (!mysql_seed_chdir_root())
+		return EXIT_FAILURE;
+
+	exit_status = EXIT_SUCCESS;
 #ifdef WIN32
 
 #else
@@ -106,7 +112,7 @@ mysql_seed_remove(char *const *db_names)
 	const char *restrict failure;
 	int exit_status;
 
-	if (!chdir_report(DB_ROOT_DIRNAME,
+	if (!chdir_report(DB_ROOT_ABSPATH,
 			  &failure)) {
 		print_failure(failure);
 		return EXIT_FAILURE;
