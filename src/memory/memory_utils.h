@@ -66,11 +66,22 @@ default:   HANDLE_CASE ## 16 (__VA_ARGS__);		\
 
 /* return a pointer to memory displaced 'offset' bytes from that referenced
  * by 'pointer' */
-inline void *memory_offset(const void *const restrict pointer,
-			   const ptrdiff_t offset)
+inline void *
+memory_offset(const void *const restrict pointer,
+	      const ptrdiff_t offset)
 {
 	return (void *) (((const Width1 *const restrict) pointer) + offset);
 }
+
+inline void
+free_nullify(void *restrict *const restrict alloc)
+{
+	free(*alloc);
+	*alloc = NULL;
+}
+
+void
+free_nullify_cleanup(void *arg);
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS

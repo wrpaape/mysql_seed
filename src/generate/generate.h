@@ -47,11 +47,44 @@ free_columns(struct Column *restrict from,
 }
 
 inline void
+check_remove_loaders_dirs(struct Database *restrict from,
+			  const struct Database *const restrict until)
+{
+	do {
+		if (file_handle_unlink_status(&from->loader))
+			dirpath_remove_muffle(&from->dirpath);
+		++from;
+	} while (from < until);
+}
+
+inline void
+remove_loaders_dirs(struct Database *restrict from,
+		    const struct Database *const restrict until)
+{
+	do {
+		file_handle_unlink_muffle(&from->loader);
+		dirpath_remove_muffle(&from->dirpath);
+		++from;
+	} while (from < until);
+}
+
+inline void
 free_table_files(struct Table *restrict from,
 		 const struct Table *const restrict until)
 {
 	do {
 		free(from->file.contents.bytes);
+		++from;
+	} while (from < until);
+}
+
+inline void
+remove_free_table_files(struct Table *restrict from,
+			const struct Table *const restrict until)
+{
+	do {
+		if (!file_handle_unlink_status(&from->file))
+			free(from->file.contents.bytes);
 		++from;
 	} while (from < until);
 }
@@ -379,8 +412,14 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		free_columns(columns,
 			     (const struct Column *const restrict) rowspans);
 
+		/* free counter */
 		counter_free_internals(&generator.counter);
 
+		/* delete database directories and loaders loaders */
+		check_remove_loaders_dirs(generator_alloc,
+					  database);
+
+		/* free initial allocation */
 		free(generator_alloc);
 
 		*exit_status = EXIT_FAILURE;
@@ -441,7 +480,11 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 		/* free counter */
 		counter_free_internals(&generator.counter);
 
-		/* free generator */
+		/* delete database directories and loaders loaders */
+		remove_loaders_dirs(generator_alloc,
+				    database);
+
+		/* free initial allocation */
 		free(generator_alloc);
 
 		*exit_status = EXIT_FAILURE;
@@ -511,9 +554,14 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 	if (thread_pool_exit_status(&generator.pool,
 				    &generator.fail_cl) != EXIT_SUCCESS) {
 
-		/* free table files */
-		free_table_files(tables,
-				 (const struct Table *const restrict) columns);
+		/* remove those that were created, free contents of files not
+		 * yet created */
+		remove_free_table_files(tables,
+					(const struct Table *const restrict) columns);
+
+		/* delete database directories and loaders loaders */
+		remove_loaders_dirs(generator_alloc,
+				    database);
 
 		*exit_status = EXIT_FAILURE;
 	}
@@ -521,7 +569,7 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 	/* free counter */
 	counter_free_internals(&generator.counter);
 
-	/* free generator */
+	/* free initial allocation */
 	free(generator_alloc);
 }
 

@@ -16,10 +16,18 @@ generate_failure_malloc(void);
 extern inline void
 free_columns(struct Column *restrict from,
 	     const struct Column *const restrict until);
-
+extern inline void
+check_remove_loaders_dirs(struct Database *restrict from,
+		    const struct Database *const restrict until);
+extern inline void
+remove_loaders_dirs(struct Database *restrict from,
+		    const struct Database *const restrict until);
 extern inline void
 free_table_files(struct Table *restrict from,
 		 const struct Table *const restrict until);
+extern inline void
+remove_free_table_files(struct Table *restrict from,
+			const struct Table *const restrict until);
 
 /* generate mode
  *─────────────────────────────────────────────────────────────────────────── */

@@ -55,13 +55,11 @@ build_table_file(void *arg)
 	struct Table *const restrict table
 	= (struct Table *const restrict) arg;
 
-	thread_try_ensure_open(free,
-			       table->file.contents.bytes);
+	thread_try_ensure_open(free_nullify_cleanup, /* no-op if freed again */
+			       &table->file.contents.bytes);
 
 	file_handle_process(&table->file,
 			    &table->fail_cl);
 
 	thread_try_ensure_close();
-
-	table->file.contents.bytes = NULL; /* no-op if freed again */
 }
