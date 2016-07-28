@@ -139,6 +139,9 @@ extern inline void
 type_set_char(struct Label *const restrict type,
 	      const uintmax_t length);
 extern inline void
+type_set_varchar(struct Label *const restrict type,
+		 const uintmax_t length);
+extern inline void
 type_set_tinyint(struct Label *const restrict type);
 extern inline void
 type_set_smallint(struct Label *const restrict type);

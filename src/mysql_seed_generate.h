@@ -1219,6 +1219,23 @@ type_set_char(struct Label *const restrict type,
 }
 
 inline void
+type_set_varchar(struct Label *const restrict type,
+		 const uintmax_t length)
+{
+	char *restrict ptr = &type->buffer[0];
+
+	PUT_STRING_WIDTH(ptr, "VARCHAR(", 8);
+
+	ptr = put_uint(ptr,
+		       length);
+
+	SET_STRING_WIDTH(ptr, ")", 2);
+
+	type->width = ptr + 1l - &type->buffer[0];
+
+}
+
+inline void
 type_set_tinyint(struct Label *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
@@ -1456,9 +1473,10 @@ inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count)
 {
-	type_set_char(&col_spec->type,
-		      (uintmax_t) (col_spec->type_qualifier.string.base.length
-				   + uint_digit_count(row_count)));
+	type_set_varchar(&col_spec->type,
+			 (uintmax_t)
+			 (col_spec->type_qualifier.string.base.length
+			  + uint_digit_count(row_count)));
 
 	col_spec->build = &build_column_string_base;
 }
