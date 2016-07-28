@@ -1268,12 +1268,6 @@ type_assign_integer_unsigned(struct Label *const restrict type,
 			     const uintmax_t upto)
 {
 	if (upto > SMALLINT_UNSIGNED_MAX) {
-		if (upto > TINYINT_UNSIGNED_MAX) {
-			type_set_smallint(type);
-		} else {
-			type_set_tinyint(type);
-		}
-	} else {
 		if (upto > MEDIUMINT_UNSIGNED_MAX) {
 			if (upto > INT_UNSIGNED_MAX) {
 				type_set_bigint(type);
@@ -1283,7 +1277,34 @@ type_assign_integer_unsigned(struct Label *const restrict type,
 		} else {
 			type_set_mediumint(type);
 		}
+	} else {
+		if (upto > TINYINT_UNSIGNED_MAX) {
+			type_set_smallint(type);
+		} else {
+			type_set_tinyint(type);
+		}
 	}
+}
+
+inline void
+type_assign_upto(struct Label *const restrict type,
+		 const size_t upto)
+{
+#if LARGE_UPTO_MAX
+	if (upto > SMALLINT_UNSIGNED_MAX) {
+		type_set_mediumint(type);
+	} else {
+#endif /* if LARGE_UPTO_MAX */
+
+		if (upto > TINYINT_UNSIGNED_MAX) {
+			type_set_smallint(type);
+		} else {
+			type_set_tinyint(type);
+		}
+
+#if LARGE_UPTO_MAX
+	}
+#endif /* if LARGE_UPTO_MAX */
 }
 
 
@@ -1417,6 +1438,20 @@ EXPECTED_COL_TBL_DB_FLAG:
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
+inline void
+col_spec_set_id(struct ColSpec *const restrict col_spec,
+		const size_t row_count)
+{
+	col_spec->name.bytes  = "id";
+	col_spec->name.length = 2lu;
+
+	type_assign_upto(&col_spec->type,
+			 row_count);
+
+	col_spec->build = &build_column_id;
+
+}
+
 inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count)
@@ -1756,9 +1791,8 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		= (struct ColSpec *restrict) (state->specs.tbl + 1l);
 
 		/* reserve first column for 'id' */
-		col_spec->name.bytes  = "id";
-		col_spec->name.length = 2lu;
-		col_spec->build = &build_column_id;
+		col_spec_set_id(col_spec,
+				state->specs.tbl->row_count);
 
 		state->specs.tbl->col_specs.from = col_spec;
 
@@ -1810,9 +1844,8 @@ TERMINATE_VALID_EXIT_FAILURE:
 	= (struct ColSpec *restrict) (state->specs.tbl + 1l);
 
 	/* reserve first column for 'id' */
-	col_spec->name.bytes  = "id";
-	col_spec->name.length = 2lu;
-	col_spec->build = &build_column_id;
+	col_spec_set_id(col_spec,
+			state->specs.tbl->row_count);
 
 	state->specs.tbl->col_specs.from = col_spec;
 

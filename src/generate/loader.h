@@ -93,6 +93,11 @@ loader_put_body(char *restrict ptr,
 
 		PUT_LOADER_CREATE_TABLE_2(ptr);
 
+		ptr = put_label(ptr,
+				&from->spec->col_specs.from->type);
+
+		PUT_LOADER_CREATE_TABLE_3(ptr);
+
 		col_spec_from  = from->spec->col_specs.from + 1l;
 		col_spec_until = from->spec->col_specs.until;
 

@@ -6,12 +6,12 @@ const Mag0String mag_0_min_string = { "1" };
 const Mag1String mag_1_min_string = { "10" };
 const Mag2String mag_2_min_string = { "100" };
 const Mag3String mag_3_min_string = { "1000" };
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 const Mag4String mag_4_min_string = { "10000" };
 const Mag5String mag_5_min_string = { "100000" };
 const Mag6String mag_6_min_string = { "1000000" };
 const Mag7String mag_7_min_string = { "10000000" };
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 
 extern inline void
 counter_size_internals(struct Counter *const restrict counter);

@@ -19,12 +19,12 @@ COUNTER_CREATE_FAILURE_MESSAGE(MALLOC_FAILURE_REASON)
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 typedef CharBuffer9 Mag7String;
 typedef CharBuffer8 Mag6String;
 typedef CharBuffer7 Mag5String;
 typedef CharBuffer6 Mag4String;
-#endif /* ifdef LARGE_UPTO_MAX */
+#endif /* if LARGE_UPTO_MAX */
 typedef CharBuffer5 Mag3String;
 typedef CharBuffer4 Mag2String;
 typedef CharBuffer3 Mag1String;
@@ -32,12 +32,12 @@ typedef CharBuffer2 Mag0String;
 
 union DigitsBuffer {
 	char digits[SIZE_UPTO_MAX_STR];
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	Mag7String mag_7;
 	Mag6String mag_6;
 	Mag5String mag_5;
 	Mag4String mag_4;
-#endif /* ifdef LARGE_UPTO_MAX */
+#endif /* if LARGE_UPTO_MAX */
 	Mag3String mag_3;
 	Mag2String mag_2;
 	Mag1String mag_1;
@@ -46,12 +46,12 @@ union DigitsBuffer {
 
 union DigitsPointer {
 	char *restrict digits;
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	Mag7String *restrict mag_7;
 	Mag6String *restrict mag_6;
 	Mag5String *restrict mag_5;
 	Mag4String *restrict mag_4;
-#endif /* ifdef LARGE_UPTO_MAX */
+#endif /* if LARGE_UPTO_MAX */
 	Mag3String *restrict mag_3;
 	Mag2String *restrict mag_2;
 	Mag1String *restrict mag_1;
@@ -83,7 +83,7 @@ union DigitsPointer {
 #define SIZE_MAG_2_3_STR	3600lu	   /* (3 digits + '\0') * 900 */
 #define SIZE_MAG_0_2_STR	(SIZE_MAG_0_1_STR + SIZE_MAG_1_2_STR)
 #define SIZE_MAG_0_3_STR	(SIZE_MAG_0_2_STR + SIZE_MAG_2_3_STR)
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 #	define MAG_4_MIN	10000lu
 #	define MAG_5_MIN	100000lu
 #	define MAG_6_MIN	1000000lu
@@ -108,7 +108,7 @@ union DigitsPointer {
 #	define SIZE_MAG_0_5_STR	(SIZE_MAG_0_4_STR + SIZE_MAG_4_5_STR)
 #	define SIZE_MAG_0_6_STR	(SIZE_MAG_0_5_STR + SIZE_MAG_5_6_STR)
 #	define SIZE_MAG_0_7_STR	(SIZE_MAG_0_6_STR + SIZE_MAG_6_7_STR)
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 
 
 /* global variables
@@ -117,12 +117,12 @@ extern const Mag0String mag_0_min_string;
 extern const Mag1String mag_1_min_string;
 extern const Mag2String mag_2_min_string;
 extern const Mag3String mag_3_min_string;
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 extern const Mag4String mag_4_min_string;
 extern const Mag5String mag_5_min_string;
 extern const Mag6String mag_6_min_string;
 extern const Mag7String mag_7_min_string;
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 
 /* misc helper functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -131,9 +131,9 @@ extern const Mag7String mag_7_min_string;
 inline void
 counter_size_internals(struct Counter *const restrict counter)
 {
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	if (counter->upto < MAG_4_MIN) {
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 		if (counter->upto < MAG_2_MIN) {
 			if (counter->upto < MAG_1_MIN) {
 				counter->mag_upto    = 0u;
@@ -161,7 +161,7 @@ counter_size_internals(struct Counter *const restrict counter)
 							   - MAG_2_MAX));
 			}
 		}
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	} else {
 		if (counter->upto < MAG_6_MIN) {
 			if (counter->upto < MAG_5_MIN) {
@@ -193,7 +193,7 @@ counter_size_internals(struct Counter *const restrict counter)
 			}
 		}
 	}
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 }
 
 
@@ -202,9 +202,9 @@ counter_size_internals(struct Counter *const restrict counter)
 inline size_t
 counter_size_upto(const size_t upto)
 {
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	if (upto < MAG_4_MIN) {
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 		if (upto < MAG_2_MIN) {
 			return (upto < MAG_1_MIN)
 			     ? (SIZE_MAG_0_STR * upto)
@@ -217,7 +217,7 @@ counter_size_upto(const size_t upto)
 			     : (SIZE_MAG_0_3_STR + (SIZE_MAG_3_STR
 						    * (upto - MAG_2_MAX)));
 		}
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	} else {
 		if (upto < MAG_6_MIN) {
 			return (upto < MAG_5_MIN)
@@ -233,7 +233,7 @@ counter_size_upto(const size_t upto)
 						    * (upto - MAG_6_MAX)));
 		}
 	}
-#endif	/*  ifdef LARGE_UPTO_MAX */
+#endif	/*  if LARGE_UPTO_MAX */
 }
 
 
@@ -304,7 +304,7 @@ counter_set_internals(struct Counter *const restrict counter)
 
 
 	switch (counter->mag_upto) {
-#ifdef LARGE_UPTO_MAX
+#if LARGE_UPTO_MAX
 	case 7u:
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(7);
 	case 6u:
@@ -313,7 +313,7 @@ counter_set_internals(struct Counter *const restrict counter)
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(5);
 	case 4u:
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(4);
-#endif /* ifdef LARGE_UPTO_MAX */
+#endif /* if LARGE_UPTO_MAX */
 	case 3u:
 		SET_RANGE_DIGITS_MAG_UPTO_GT_0(3);
 	case 2u:

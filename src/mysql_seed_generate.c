@@ -151,10 +151,16 @@ type_set_bigint(struct Label *const restrict type);
 extern inline void
 type_assign_integer_unsigned(struct Label *const restrict type,
 			     const uintmax_t upto);
+extern inline void
+type_assign_upto(struct Label *const restrict type,
+		 const size_t upto);
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
+extern inline void
+col_spec_set_id(struct ColSpec *const restrict col_spec,
+		const size_t row_count);
 extern inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count);

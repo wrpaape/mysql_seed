@@ -24,17 +24,17 @@
  *─────────────────────────────────────────────────────────────────────────── */
 /* Counter limits */
 #if (SIZE_MAX < UINT32_MAX)
-#	define UPTO_MAX 9999lu
-#	define UPTO_MAX_STRING "9999"
-#	define MAG_UPTO_MAX 3u
-#	define SIZE_UPTO_MAX_STR 5u
-#	undef  LARGE_UPTO_MAX
+#	define UPTO_MAX			9999lu
+#	define UPTO_MAX_STRING		"9999"
+#	define MAG_UPTO_MAX		3u
+#	define SIZE_UPTO_MAX_STR	5u
+#	define  LARGE_UPTO_MAX		0
 #else
-#	define UPTO_MAX 99999999lu
-#	define UPTO_MAX_STRING "99999999"
-#	define MAG_UPTO_MAX 7u
-#	define SIZE_UPTO_MAX_STR 9u
-#	define LARGE_UPTO_MAX
+#	define UPTO_MAX			99999999lu
+#	define UPTO_MAX_STRING		"99999999"
+#	define MAG_UPTO_MAX		7u
+#	define SIZE_UPTO_MAX_STR	9u
+#	define LARGE_UPTO_MAX		1
 #endif /* if (SIZE_MAX < UINT32_MAX) */
 
 #define FLOAT_PRECISION_DEFAULT	6u
@@ -173,11 +173,16 @@ PUT_STRING_WIDTH(PTR, LOADER_HEADER_6, 1)
 PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_1, 15)
 
 #define LOADER_CREATE_TABLE_2						\
-"(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
+"(id "
 #define PUT_LOADER_CREATE_TABLE_2(PTR)					\
+PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_2, 4)
+
+#define LOADER_CREATE_TABLE_3						\
+" NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
+#define PUT_LOADER_CREATE_TABLE_3(PTR)					\
 PTR = put_string_size(PTR,						\
-		      LOADER_CREATE_TABLE_2,				\
-		      sizeof(LOADER_CREATE_TABLE_2) - 1lu)
+		      LOADER_CREATE_TABLE_3,				\
+		      sizeof(LOADER_CREATE_TABLE_3) - 1lu)
 
 #define LOADER_CREATE_TABLE_FIELD_DELIM					\
 ",\n\t"
