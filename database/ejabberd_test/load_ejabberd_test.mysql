@@ -1,0 +1,21 @@
+# database/ejabberd_test/load_ejabberd_test.mysql
+#
+# seeds MySQL database ejabberd_test according to the tabular data files:
+#
+# 	- database/ejabberd_test/ooga.csv
+
+CREATE DATABASE ejabberd_test;
+
+USE ejabberd_test;
+
+CREATE TABLE ooga(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	booga CHAR(9));
+
+LOAD DATA INFILE '/Users/Reid/lifesize/mysql_seed/database/ejabberd_test/ooga.csv'
+	IGNORE INTO TABLE ooga
+	FIELDS TERMINATED BY ','
+	       ENCLOSED BY   ''
+	       ESCAPED BY    '\\'
+	LINES  STARTING BY   ''
+	       TERMINATED BY '\n'
+	IGNORE 17 LINES;

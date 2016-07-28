@@ -226,10 +226,10 @@ PTR = put_string_size(PTR,						\
 /* GENERATOR COMPONENT SPECS
  * ──────────────────────────────────────────────────────────────────────────
  * ────────────────────────────────────────────────────────────────────────── */
-/* -c username STRING BASE tastyham		      → tastyham1
- *							tastyham2
- *			   				...
- *			   				tastyham<ROW_COUNT> */
+/* -c username --string --base tastyham			→ tastyham1
+ *							  tastyham2
+ *			   				  ...
+ *			   				  tastyham<ROW_COUNT> */
 struct StringLengthRange {
 	size_t min;
 	size_t max;
@@ -247,10 +247,10 @@ union StringQualifier {
 	struct String base;
 };
 
-/* -c temperature UNSIGNED RANGE 500 200000	      → 580
- *							100000
- *							(random in 500..200000)
- *			   				...  */
+/* -c temperature --integer-unsigned --range 500 200000	→ 580
+ *							  100000
+ *							  (random in 500..200000)
+ *			   				  ...  */
 struct IntegerUnsignedRange {
 	uintmax_t min;
 	uintmax_t max;
@@ -263,10 +263,10 @@ union IntegerUnsignedScale {
 	uintmax_t constant;
 };
 
-/* -c temperature SIGNED RANGE -100 100		      → 45
- *							100
- *							(random in -100..100)
- *			   				...  */
+/* -c temperature --integer --range -100 100		→ 45
+ *							  100
+ *							  (random in -100..100)
+ *			   				  ...  */
 struct IntegerSignedRange {
 	intmax_t min;
 	intmax_t max;
@@ -284,10 +284,10 @@ union IntegerQualifier {
 	union IntegerSignedScale signed_scale;
 };
 
-/* -c temperature FLOAT RANGE 1 500.25		      → 300.2334
- *							1.0000000
- *							(random in 1..500.25)
- *			   				...  */
+/* -c temperature --float --range 1 500.25		→ 300.2334
+ *							  1.0000000
+ *							  (random in 1..500.25)
+ *			   				  ...  */
 struct FloatRange {
 	long double min;
 	long double max;

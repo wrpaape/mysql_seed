@@ -132,6 +132,26 @@ generate_parse_complete(struct GenerateParseState *const restrict state);
 extern inline void
 parse_column_complete(struct GenerateParseState *const restrict state);
 
+
+/* assign type according to MySQL data types, limits
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+type_set_char(struct Label *const restrict type,
+	      const uintmax_t length);
+extern inline void
+type_set_tinyint(struct Label *const restrict type);
+extern inline void
+type_set_smallint(struct Label *const restrict type);
+extern inline void
+type_set_mediumint(struct Label *const restrict type);
+extern inline void
+type_set_int(struct Label *const restrict type);
+extern inline void
+type_set_bigint(struct Label *const restrict type);
+extern inline void
+type_assign_integer_unsigned(struct Label *const restrict type,
+			     const uintmax_t upto);
+
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */

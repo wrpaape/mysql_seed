@@ -5,6 +5,29 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/generate.h"		/* mysql_seed_generate */
 
+/* macro constants
+ *─────────────────────────────────────────────────────────────────────────── */
+#define TINYINT_SIGNED_MIN	-128ll
+#define TINYINT_SIGNED_MAX	127ll
+#define TINYINT_UNSIGNED_MAX	255llu
+
+#define SMALLINT_SIGNED_MIN	-32768ll
+#define SMALLINT_SIGNED_MAX	32767ll
+#define SMALLINT_UNSIGNED_MAX	65535llu
+
+#define MEDIUMINT_SIGNED_MIN	-8388608ll
+#define MEDIUMINT_SIGNED_MAX	8388607ll
+#define MEDIUMINT_UNSIGNED_MAX	16777215llu
+
+#define INT_SIGNED_MIN		-2147483648ll
+#define INT_SIGNED_MAX		2147483647ll
+#define INT_UNSIGNED_MAX	4294967295llu
+
+#define BIGINT_SIGNED_MIN	-9223372036854775808ll
+#define BIGINT_SIGNED_MAX	9223372036854775807ll
+#define BIGINT_UNSIGNED_MAX	18446744073709551615llu
+
+
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define FAILURE_NO_DB_SPEC						\
@@ -1176,6 +1199,94 @@ parse_row_count(size_t *const restrict row_count,
 }
 
 
+/* assign type according to MySQL data types, limits
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+type_set_char(struct Label *const restrict type,
+	      const uintmax_t length)
+{
+	char *restrict ptr = &type->buffer[0];
+
+	PUT_STRING_WIDTH(ptr, "CHAR(", 5);
+
+	ptr = put_uint(ptr,
+		       length);
+
+	SET_STRING_WIDTH(ptr, ")", 2);
+
+	type->width = ptr + 1l - &type->buffer[0];
+
+}
+
+inline void
+type_set_tinyint(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "TINYINT",
+			 8);
+	type->width = 7u;
+}
+
+inline void
+type_set_smallint(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "SMALLINT",
+			 9);
+	type->width = 8u;
+}
+
+inline void
+type_set_mediumint(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "MEDIUMINT",
+			 10);
+	type->width = 9u;
+}
+
+inline void
+type_set_int(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "INT",
+			 4);
+	type->width = 3u;
+}
+
+inline void
+type_set_bigint(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "BIGINT",
+			 7);
+	type->width = 6u;
+}
+
+inline void
+type_assign_integer_unsigned(struct Label *const restrict type,
+			     const uintmax_t upto)
+{
+	if (upto > SMALLINT_UNSIGNED_MAX) {
+		if (upto > TINYINT_UNSIGNED_MAX) {
+			type_set_smallint(type);
+		} else {
+			type_set_tinyint(type);
+		}
+	} else {
+		if (upto > MEDIUMINT_UNSIGNED_MAX) {
+			if (upto > INT_UNSIGNED_MAX) {
+				type_set_bigint(type);
+			} else {
+				type_set_int(type);
+			}
+		} else {
+			type_set_mediumint(type);
+		}
+	}
+}
+
+
 /* make compiler happy
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -1310,20 +1421,9 @@ inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count)
 {
-	const unsigned int max_width
-	= col_spec->type_qualifier.string.base.length
-	+ uint_digit_count(row_count);
-
-	char *restrict ptr = &col_spec->type.buffer[0];
-
-	PUT_STRING_WIDTH(ptr, "CHAR(", 5);
-
-	ptr = put_uint(ptr,
-		       max_width);
-
-	SET_STRING_WIDTH(ptr, ")", 2);
-
-	col_spec->type.width = ptr + 1l - &col_spec->type.buffer[0];
+	type_set_char(&col_spec->type,
+		      (uintmax_t) (col_spec->type_qualifier.string.base.length
+				   + uint_digit_count(row_count)));
 
 	col_spec->build = &build_column_string_base;
 }
@@ -1623,6 +1723,8 @@ INVALID_COL_TYPE_NOTSUP:
 			return;
 		}
 		goto INVALID_COL_TYPE_NOTSUP;
+
+	case 'g':
 
 	default:
 		goto INVALID_COL_TYPE_NOTSUP;

@@ -15,8 +15,8 @@
 
 #if !HAVE_INT_STRING_ATTRS
 #	include <stdio.h>	/* sprintf, snprintf */
-#	include <inttypes.h>	/* stroumax */
-#	include <errno.h>	/* errno (checking return of stroumax) */
+#	include <inttypes.h>	/* strtoumax */
+#	include <errno.h>	/* errno (checking return of strtoumax) */
 #endif	/* if !HAVE_INT_STRING_ATTRS */
 
 
@@ -1001,10 +1001,10 @@ string_size_limit(const char *const restrict string,
 
 #if HAVE_INT_STRING_ATTRS
 inline bool
-do_parse_digits(uintmax_t *const restrict n,
-		const char *restrict string,
-		const unsigned int digit_count_max,
-		const char *const restrict max_string)
+do_parse_uint(uintmax_t *const restrict n,
+	      const char *restrict string,
+	      const unsigned int digit_count_max,
+	      const char *const restrict max_string)
 {
 	while (*string == '0') {
 		++string;
@@ -1070,11 +1070,11 @@ do_parse_digits(uintmax_t *const restrict n,
 }
 
 inline char *
-do_parse_digits_stop(uintmax_t *const restrict n,
-		     char *restrict string,
-		     const char stop,
-		     const unsigned int digit_count_max,
-		     const char *const restrict max_string)
+do_parse_uint_stop(uintmax_t *const restrict n,
+		   char *restrict string,
+		   const char stop,
+		   const unsigned int digit_count_max,
+		   const char *const restrict max_string)
 {
 	while (*string == '0') {
 		++string;
@@ -1148,10 +1148,10 @@ parse_uint(uintmax_t *const restrict n,
 {
 #if HAVE_INT_STRING_ATTRS
 
-	return do_parse_digits(n,
-			       string,
-			       DIGIT_COUNT_UINTMAX_MAX,
-			       DIGIT_STRING_UINTMAX_MAX);
+	return do_parse_uint(n,
+			     string,
+			     DIGIT_COUNT_UINTMAX_MAX,
+			     DIGIT_STRING_UINTMAX_MAX);
 #else
 	*n = strtoumax(string,
 		       NULL,
@@ -1169,10 +1169,10 @@ parse_int(intmax_t *const restrict n,
 	if (*string == '-') {
 		++string;
 
-		if (do_parse_digits((uintmax_t *const restrict) n,
-				    string,
-				    DIGIT_COUNT_INTMAX_MIN,
-				    DIGIT_STRING_INTMAX_MIN)) {
+		if (do_parse_uint((uintmax_t *const restrict) n,
+				  string,
+				  DIGIT_COUNT_INTMAX_MIN,
+				  DIGIT_STRING_INTMAX_MIN)) {
 			*n = -(*n);
 			return true;
 		}
@@ -1180,10 +1180,10 @@ parse_int(intmax_t *const restrict n,
 		return false;
 	}
 
-	return do_parse_digits((uintmax_t *const restrict) n,
-			       string,
-			       DIGIT_COUNT_INTMAX_MAX,
-			       DIGIT_STRING_INTMAX_MAX);
+	return do_parse_uint((uintmax_t *const restrict) n,
+			     string,
+			     DIGIT_COUNT_INTMAX_MAX,
+			     DIGIT_STRING_INTMAX_MAX);
 #else
 	*n = strtoimax(string,
 		       NULL,
@@ -1199,11 +1199,11 @@ parse_uint_stop(uintmax_t *const restrict n,
 		const char stop)
 {
 #if HAVE_INT_STRING_ATTRS
-	return do_parse_digits_stop(n,
-				    string,
-				    stop,
-				    DIGIT_COUNT_UINTMAX_MAX,
-				    DIGIT_STRING_UINTMAX_MAX);
+	return do_parse_uint_stop(n,
+				  string,
+				  stop,
+				  DIGIT_COUNT_UINTMAX_MAX,
+				  DIGIT_STRING_UINTMAX_MAX);
 #else
 	char *restrict stop_ptr;
 
@@ -1227,11 +1227,11 @@ parse_int_stop(intmax_t *const restrict n,
 		++string;
 
 		char *const restrict
-		stop_ptr = do_parse_digits_stop((uintmax_t *const restrict) n,
-						string,
-						stop,
-						DIGIT_COUNT_INTMAX_MIN,
-						DIGIT_STRING_INTMAX_MIN);
+		stop_ptr = do_parse_uint_stop((uintmax_t *const restrict) n,
+					      string,
+					      stop,
+					      DIGIT_COUNT_INTMAX_MIN,
+					      DIGIT_STRING_INTMAX_MIN);
 
 		if (stop_ptr == NULL)
 			return NULL;
@@ -1240,11 +1240,11 @@ parse_int_stop(intmax_t *const restrict n,
 		return stop_ptr;
 	}
 
-	return do_parse_digits_stop((uintmax_t *const restrict) n,
-				    string,
-				    stop,
-				    DIGIT_COUNT_INTMAX_MAX,
-				    DIGIT_STRING_INTMAX_MAX);
+	return do_parse_uint_stop((uintmax_t *const restrict) n,
+				  string,
+				  stop,
+				  DIGIT_COUNT_INTMAX_MAX,
+				  DIGIT_STRING_INTMAX_MAX);
 #else
 	char *restrict stop_ptr;
 
