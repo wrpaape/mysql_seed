@@ -342,8 +342,8 @@ counter_init_internals(struct Counter *const restrict counter)
 	const size_t size_counter = (sizeof(char *) * (counter->upto + 1lu))
 				  + counter->size_digits;
 
-	thread_try_catch_open(free,
-			      counter->pointers);
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &counter->pointers);
 
 	counter->pointers = malloc(size_counter);
 

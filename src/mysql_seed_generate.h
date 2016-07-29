@@ -1013,7 +1013,7 @@ parse_db_name(struct String *const restrict db_name,
 
 	unsigned int width;
 
-	size_t rem_length = DB_NAME_LENGTH_MAX;
+	size_t rem_code_points = DB_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -1033,9 +1033,9 @@ parse_db_name(struct String *const restrict db_name,
 			return true;
 		}
 
-		--rem_length;
+		--rem_code_points;
 
-		if (rem_length == 0lu) {
+		if (rem_code_points == 0lu) {
 			invalid_db_name_long(argv);
 			return false;
 		}
@@ -1057,7 +1057,7 @@ parse_tbl_name(struct String *const restrict tbl_name,
 
 	unsigned int width;
 
-	size_t rem_length = TBL_NAME_LENGTH_MAX;
+	size_t rem_code_points = TBL_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -1077,9 +1077,9 @@ parse_tbl_name(struct String *const restrict tbl_name,
 			return true;
 		}
 
-		--rem_length;
+		--rem_code_points;
 
-		if (rem_length == 0lu) {
+		if (rem_code_points == 0lu) {
 			invalid_tbl_name_long(argv);
 			return false;
 		}
@@ -1101,7 +1101,7 @@ parse_col_name(struct String *const restrict col_name,
 
 	unsigned int width;
 
-	size_t rem_length = COL_NAME_LENGTH_MAX;
+	size_t rem_code_points = COL_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -1121,9 +1121,9 @@ parse_col_name(struct String *const restrict col_name,
 			return true;
 		}
 
-		--rem_length;
+		--rem_code_points;
 
-		if (rem_length == 0lu) {
+		if (rem_code_points == 0lu) {
 			invalid_col_name_long(argv);
 			return false;
 		}
@@ -1140,7 +1140,7 @@ parse_string_base(struct String *const restrict base,
 
 	unsigned int width;
 
-	size_t rem_length = STRING_BASE_LENGTH_MAX;
+	size_t rem_code_points = STRING_BASE_LENGTH_MAX;
 
 	while (1) {
 		if (*octets == '\0') {
@@ -1160,9 +1160,9 @@ parse_string_base(struct String *const restrict base,
 
 		octets += width;
 
-		--rem_length;
+		--rem_code_points;
 
-		if (rem_length == 0lu) {
+		if (rem_code_points == 0lu) {
 			invalid_string_base_long(argv);
 			return false;
 		}
@@ -1482,6 +1482,16 @@ col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 }
 
 inline void
+col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
+{
+	type_set_char(&col_spec->type,
+		      (uintmax_t)
+		      col_spec->type_qualifier.string.base.length);
+
+	col_spec->build = &build_column_string_fixed;
+}
+
+inline void
 col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
 {
 	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
@@ -1571,6 +1581,29 @@ INCOMPLETE_NO_STRING_BASE:
 			if (valid_string_base) {
 				col_spec_set_string_base(state->specs.col,
 							 state->specs.tbl->row_count);
+				parse_column_complete(state);
+			} else {
+				generate_parse_error(state);
+			}
+			return;
+		}
+		goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+	case 'f':
+		if (*rem == '\0') {
+			++(state->argv.arg.from);
+
+			if (state->argv.arg.from == state->argv.arg.until)
+				goto INCOMPLETE_NO_STRING_BASE;
+
+			const bool valid_string_base
+			= parse_string_base(&state->specs.col->type_qualifier.string.base,
+					    &state->argv);
+
+			++(state->argv.arg.from);
+
+			if (valid_string_base) {
+				col_spec_set_string_fixed(state->specs.col);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);

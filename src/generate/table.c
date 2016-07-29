@@ -17,8 +17,8 @@ build_table_header(void *arg)
 
 	table->file.contents.length = table_size_contents(table);
 
-	thread_try_catch_open(free,
-			      table->file.contents.bytes);
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &table->file.contents.bytes);
 
 	table->file.contents.bytes = malloc(table->file.contents.length);
 

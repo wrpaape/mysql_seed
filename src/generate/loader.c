@@ -41,7 +41,7 @@ build_loader(void *arg)
 						     col_count);
 	char *restrict contents = NULL;
 
-	thread_try_ensure_open(free,
+	thread_try_ensure_open(&free,
 			       contents);
 
 	contents = malloc(size_est);

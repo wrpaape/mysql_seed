@@ -457,11 +457,10 @@ build_column_string_names_first(void *arg)
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char)
-			      * (FIRST_NAME_SIZE_MAX * row_count);
+	const size_t size_est = FIRST_NAME_SIZE_MAX * row_count;
 
-	thread_try_catch_open(free,
-			      column->contents);
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
 
 	column->contents = malloc(size_est);
 
@@ -522,10 +521,10 @@ build_column_string_names_last(void *arg)
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char) * (LAST_NAME_SIZE_MAX * row_count);
+	const size_t size_est = LAST_NAME_SIZE_MAX * row_count;
 
-	thread_try_catch_open(free,
-			      column->contents);
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
 
 	column->contents = malloc(size_est);
 
@@ -586,11 +585,10 @@ build_column_string_names_full(void *arg)
 		__builtin_unreachable();
 	}
 
-	const size_t size_est = sizeof(char) * (FULL_NAME_SIZE_MAX * row_count);
+	const size_t size_est = FULL_NAME_SIZE_MAX * row_count;
 
-
-	thread_try_catch_open(free,
-			      column->contents);
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
 
 	column->contents = malloc(size_est);
 
@@ -599,7 +597,6 @@ build_column_string_names_full(void *arg)
 				     BCSN_FULL_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
-
 
 	struct Rowspan *restrict from		   = column->rowspans_from;
 

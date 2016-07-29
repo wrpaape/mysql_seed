@@ -173,12 +173,12 @@ PUT_STRING_WIDTH(PTR, LOADER_HEADER_6, 1)
 PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_1, 15)
 
 #define LOADER_CREATE_TABLE_2						\
-"(id "
+" (\n\tid "
 #define PUT_LOADER_CREATE_TABLE_2(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_2, 4)
+PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_2, 7)
 
 #define LOADER_CREATE_TABLE_3						\
-" NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
+" UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
 #define PUT_LOADER_CREATE_TABLE_3(PTR)					\
 PTR = put_string_size(PTR,						\
 		      LOADER_CREATE_TABLE_3,				\
@@ -194,7 +194,7 @@ PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_FIELD_DELIM, 3)
 
 /* load table template (2 segments) */
 #define LOADER_LOAD_TABLE_1						\
-");"									\
+"\n);"									\
 "\n"									\
 "\nLOAD DATA INFILE '" ABSPATH_PFX /* <table_filepath n> */
 #define PUT_LOADER_LOAD_TABLE_1(PTR)					\
@@ -376,7 +376,7 @@ struct Table;
 struct Column {
 	const struct ColSpec *spec;		/* from raw input */
 	struct Rowspan *restrict rowspans_from;	/* X BLK_COUNT, col_count gap */
-	char *restrict contents;
+	char *contents;
 	struct HandlerClosure fail_cl;		/* cleanup self, then table */
 	struct Table *parent;			/* length, counter, cleanup */
 };
