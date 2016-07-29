@@ -168,7 +168,11 @@ extern inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count);
 extern inline void
+col_spec_set_string_base_name(struct ColSpec *const restrict col_spec);
+extern inline void
 col_spec_set_string_fixed(struct ColSpec *const restrict col_spec);
+extern inline void
+col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec);
 extern inline void
 col_spec_set_string_names_first(struct ColSpec *const restrict col_spec);
 extern inline void

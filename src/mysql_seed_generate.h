@@ -1482,6 +1482,12 @@ col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 }
 
 inline void
+col_spec_set_string_base_name(struct ColSpec *const restrict col_spec)
+{
+	col_spec->type_qualifier.string.base = col_spec->name;
+}
+
+inline void
 col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 {
 	type_set_char(&col_spec->type,
@@ -1489,6 +1495,13 @@ col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 		      col_spec->type_qualifier.string.base.length);
 
 	col_spec->build = &build_column_string_fixed;
+}
+
+inline void
+col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
+{
+	col_spec_set_string_base_name(col_spec);
+	col_spec_set_string_fixed(col_spec);
 }
 
 inline void
@@ -1525,8 +1538,7 @@ inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count)
 {
-	col_spec->type_qualifier.string.base = col_spec->name;
-
+	col_spec_set_string_base_name(col_spec);
 	col_spec_set_string_base(col_spec,
 				 row_count);
 }
@@ -1562,10 +1574,10 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 
 	case 'b':
 		if (*rem == '\0') {
+STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (state->argv.arg.from == state->argv.arg.until) {
-INCOMPLETE_NO_STRING_BASE:
 				no_string_base(&state->argv);
 				*(state->valid.last) = NULL;
 				state->exit_status = EXIT_FAILURE;
@@ -1591,10 +1603,14 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'f':
 		if (*rem == '\0') {
+STRING_FIXED:
 			++(state->argv.arg.from);
 
-			if (state->argv.arg.from == state->argv.arg.until)
-				goto INCOMPLETE_NO_STRING_BASE;
+			if (state->argv.arg.from == state->argv.arg.until) {
+				col_spec_set_string_fixed_default(state->specs.col);
+				parse_column_complete(state);
+				return;
+			}
 
 			const bool valid_string_base
 			= parse_string_base(&state->specs.col->type_qualifier.string.base,
@@ -1616,6 +1632,7 @@ INCOMPLETE_NO_STRING_BASE:
 		switch (*rem) {
 		case 'f':
 			if (rem[1] == '\0') {
+STRING_NAMES_FIRST:
 				col_spec_set_string_names_first(state->specs.col);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
@@ -1625,6 +1642,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 		case 'l':
 			if (rem[1] == '\0') {
+STRING_NAMES_LAST:
 				col_spec_set_string_names_last(state->specs.col);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
@@ -1634,6 +1652,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 		case 'F':
 			if (rem[1] == '\0') {
+STRING_NAMES_FULL:
 				col_spec_set_string_names_full(state->specs.col);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
@@ -1647,6 +1666,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'c':
 		if (*rem == '\0') {
+STRING_DEFAULT_NEXT_COL_SPEC:
 			col_spec_set_string_default(state->specs.col,
 						    state->specs.tbl->row_count);
 			parse_next_col_spec(state);
@@ -1656,6 +1676,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 'd':
 		if (*rem == '\0') {
+STRING_DEFAULT_NEXT_DB_SPEC:
 			col_spec_set_string_default(state->specs.col,
 						    state->specs.tbl->row_count);
 			parse_database_complete(state);
@@ -1666,6 +1687,7 @@ INCOMPLETE_NO_STRING_BASE:
 
 	case 't':
 		if (*rem == '\0') {
+STRING_DEFAULT_NEXT_TBL_SPEC:
 			col_spec_set_string_default(state->specs.col,
 						    state->specs.tbl->row_count);
 			parse_table_complete(state);
@@ -1681,27 +1703,15 @@ INCOMPLETE_NO_STRING_BASE:
 
 	switch (*rem) {
 	case 'b':
-		if (strings_equal("ase", rem + 1l)) {
-			++(state->argv.arg.from);
+		if (strings_equal("ase", rem + 1l))
+			goto STRING_BASE;
 
-			if (state->argv.arg.from == state->argv.arg.until)
-				goto INCOMPLETE_NO_STRING_BASE;
+		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-			const bool valid_string_base
-			= parse_string_base(&state->specs.col->type_qualifier.string.base,
-					    &state->argv);
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			goto STRING_FIXED;
 
-			++(state->argv.arg.from);
-
-			if (valid_string_base) {
-				col_spec_set_string_base(state->specs.col,
-							 state->specs.tbl->row_count);
-				parse_column_complete(state);
-			} else {
-				generate_parse_error(state);
-			}
-			return;
-		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	case 'n':
@@ -1715,21 +1725,15 @@ INCOMPLETE_NO_STRING_BASE:
 		case 'f':
 			switch (arg[1]) {
 			case 'i':
-				if (strings_equal("rst", arg + 2l)) {
-					col_spec_set_string_names_first(state->specs.col);
-					++(state->argv.arg.from);
-					parse_column_complete(state);
-					return;
-				}
+				if (strings_equal("rst", arg + 2l))
+					goto STRING_NAMES_FIRST;
+
 				goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 			case 'u':
-				if (strings_equal("ll", arg + 2l)) {
-					col_spec_set_string_names_full(state->specs.col);
-					++(state->argv.arg.from);
-					parse_column_complete(state);
-					return;
-				}
+				if (strings_equal("ll", arg + 2l))
+					goto STRING_NAMES_FULL;
+
 				goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 			default:
@@ -1737,12 +1741,9 @@ INCOMPLETE_NO_STRING_BASE:
 			}
 
 		case 'l':
-			if (strings_equal("ast", arg + 1l)) {
-				col_spec_set_string_names_last(state->specs.col);
-				++(state->argv.arg.from);
-				parse_column_complete(state);
-				return;
-			}
+			if (strings_equal("ast", arg + 1l))
+					goto STRING_NAMES_LAST;
+
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 		default:
@@ -1750,32 +1751,21 @@ INCOMPLETE_NO_STRING_BASE:
 		}
 
 	case 'c':
-		if (strings_equal("olumn", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
-			parse_next_col_spec(state);
-			return;
-		}
+		if (strings_equal("olumn", rem + 1l))
+			goto STRING_DEFAULT_NEXT_COL_SPEC;
+
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	case 'd':
-		if (strings_equal("atabase", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
+		if (strings_equal("atabase", rem + 1l))
+			goto STRING_DEFAULT_NEXT_DB_SPEC;
+
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	case 't':
-		if (strings_equal("able", rem + 1l)) {
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-			return;
-		}
+		if (strings_equal("able", rem + 1l))
+			goto STRING_DEFAULT_NEXT_TBL_SPEC;
+
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	default:

@@ -33,6 +33,11 @@ build_column_string_base(void *arg)
 		__builtin_unreachable();
 	}
 
+	/* increment table length */
+	length_lock_increment(&table->total,
+			      length_contents,
+			      &column->fail_cl);
+
 	struct Counter *const restrict counter
 	= &table->parent->parent->counter;
 
