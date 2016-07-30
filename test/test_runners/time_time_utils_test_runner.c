@@ -27,7 +27,7 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_time_utils(void);
+extern void test_time_stamp_now(void);
 
 
 //=======Test Reset Option=====
@@ -43,7 +43,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/time_time_utils_test.c");
-  RUN_TEST(test_time_utils, 12);
+  RUN_TEST(test_time_stamp_now, 12);
 
   return (UnityEnd());
 }
