@@ -15,6 +15,18 @@
 #	include <mach/mach.h>
 #endif /* ifdef __MACH__ */
 
+#ifdef WIN32
+#	include <windows.h>
+#	define exp7           10000000i64     /* 1E+7 */
+#	define exp9         1000000000i64     /* 1E+9 */
+#	define w2ux 116444736000000000i64     /* 1.jan1601 to 1.jan1970 */
+
+struct timespec {
+	long tv_sec;
+	long tv_nsec;
+};
+#endif /* ifdef WIN32 */
+
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
  *
@@ -90,6 +102,9 @@ time_report(time_t *const restrict now,
 	switch (errno) {
 	FAIL_SWITCH_ERRNO_CASE_1(ENOSYS,
 				 "function not implemented")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "An argument address referenced invalid memory"
+					 ".")
 	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
 	}
 }
@@ -128,34 +143,66 @@ time_handle_cl(time_t *const restrict now,
 /* tm_sec + tm_min*60 + tm_hour*3600 + tm_yday*86400 + */
 /* (tm_year-70)*31536000 + ((tm_year-69)/4)*86400 - */
 /* ((tm_year-1)/100)*86400 + ((tm_year+299)/400)*86400 */
+
+/* simplifies to:
+ *
+ *	  seconds
+ *	+ minutes * 60
+ *	+ hours	  * 3600
+ *	+ days	  * 86400
+ *	+ year	  * 31556952
+ *	- 62167153752
+ */
+
 inline void
 time_stamp_init(struct TimeStamp *const restrict time_stamp,
 		time_t time)
 {
+	  (tm_year -  69) * 100 / 400
+	- (tm_year -   1) *   4 / 400
+	+ (tm_year + 299) *   1 / 400;
+
 	time_stamp->years = 1970 + (time / SECONDS_PER_YEAR);
 	time %= SECONDS_PER_YEAR;
 }
 
-/* taken from stackoverflow user 'jbenet''s answer to
- * https://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x
- * https://gist.github.com/jbenet/1087739A (source) */
 inline void
 timespec_now(struct timespec *restrict time)
 {
 #ifdef __MACH__ /* OS X does not have clock_gettime, use clock_get_time */
+/* taken from stackoverflow user 'jbenet''s answer to
+ * https://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x
+ * https://gist.github.com/jbenet/1087739A (source) */
 	clock_serv_t calendar_clock;
 	mach_timespec_t mach_time;
 
-	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &calendar_clock);
+	host_get_clock_service(mach_host_self(),
+			       CALENDAR_CLOCK,
+			       &calendar_clock);
 
-	clock_get_time(calendar_clock, &mach_time);
+	clock_get_time(calendar_clock,
+		       &mach_time);
 
-	mach_port_deallocate(mach_task_self(), calendar_clock);
+	mach_port_deallocate(mach_task_self(),
+			     calendar_clock);
 
 	time->tv_sec  = mach_time.tv_sec;
 	time->tv_nsec = mach_time.tv_nsec;
+
+#elif defined(WIN32)
+/* taken from stackoverflow user 'Asain Kujovic''s answer to
+ * http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows */
+	__int64 wintime;
+
+	GetSystemTimeAsFileTime((FILETIME *) &wintime);
+
+	wintime -= w2ux;
+
+	time->tv_sec  = wintime / exp7;
+	time->tv_nsec = (wintime % exp7) * 100;
 #else
-	clock_gettime(CLOCK_REALTIME, time);
+	clock_gettime(CLOCK_REALTIME,
+		      time);
 #endif
 }
 
