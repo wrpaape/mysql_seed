@@ -265,70 +265,93 @@ extern inline void
 timestamp_string_increment(char *restrict ptr)
 {
 	/* "YYYY-MM-DD HH:MM:Sx" */
-	if (*ptr < '9') {
-		++(*ptr);
-		return;
-	}
-
-	*ptr = '0';
-	--ptr;
-
-	/* "YYYY-MM-DD HH:MM:xS" */
-	if (*ptr < '5') {
-		++(*ptr);
-		return;
-	}
-
-	*ptr = '0';
-	ptr -= 2l;
-
-	/* "YYYY-MM-DD HH:Mx:SS" */
-	if (*ptr < '9') {
-		++(*ptr);
-		return;
-	}
-
-	*ptr = '0';
-	--ptr;
-
-	/* "YYYY-MM-DD HH:xM:SS" */
-	if (*ptr < '5') {
-		++(*ptr);
-		return;
-	}
-
-	*ptr = '0';
-	ptr -= 2l;
-
-	/* "YYYY-MM-DD Hx:MM:SS" */
 	switch (*ptr) {
-	case '9':
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	default:
 		*ptr = '0';
 		--ptr;
-		/* fall through */
-
-	default:
-		++(*ptr);
-		return;
-
-	case '3':
-		if (ptr[-1] < '2') {
-			*ptr = '4';
-			return;
-		}
-
-		--ptr;
-
-		SET_STRING_WIDTH(ptr, "00", 2);
-		/* fall through */
 	}
 
-	ptr -= 2l;
+	/* "YYYY-MM-DD HH:MM:x0" */
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	default:
+		*ptr = '0';
+		ptr -= 2l;
+	}
 
-	/* "YYYY-MM-Dx HH:MM:SS" */
+	/* "YYYY-MM-DD HH:Mx:00" */
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	default:
+		*ptr = '0';
+		--ptr;
+	}
+
+	/* "YYYY-MM-DD HH:x0:00" */
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	default:
+		*ptr = '0';
+		ptr -= 2l;
+	}
+
+	/* "YYYY-MM-DD Hx:00:00" */
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3':
+		if (ptr[-1] == '2') {
+			SET_STRING_WIDTH(&ptr[-1], "00", 2);
+			ptr -= 3l;
+			break;
+		}
+		  *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	default:
+		--ptr;
+
+		if (*ptr == '0')
+			SET_STRING_WIDTH(ptr, "10", 2);
+		else
+			SET_STRING_WIDTH(ptr, "20", 2);
+
+		return;
+	}
+
+	/* "YYYY-MM-Dx 00:00:00" */
 	switch (*ptr) {
 	default: /* 'X0' and ill-formed days, guaranteed to set valid, return */
-		if (ptr[-1] < '3') {
+		if (ptr[-1] != '3') {
 			*ptr = '1';
 
 		} else if (ptr[-4] == '1') {
@@ -338,14 +361,14 @@ timestamp_string_increment(char *restrict ptr)
 				SET_STRING_WIDTH(&ptr[-4], "12-01", 5);
 		} else {
 			switch (ptr[-3]) {
-			case '9':
-				SET_STRING_WIDTH(&ptr[-4], "10-01", 5);
+			case '4':
+				SET_STRING_WIDTH(&ptr[-4], "05-01", 5);
 				return;
 			case '6':
 				SET_STRING_WIDTH(&ptr[-4], "07-01", 5);
 				return;
-			case '4':
-				SET_STRING_WIDTH(&ptr[-4], "05-01", 5);
+			case '9':
+				SET_STRING_WIDTH(&ptr[-4], "10-01", 5);
 				return;
 			default:
 				*ptr = '1';
@@ -355,13 +378,22 @@ timestamp_string_increment(char *restrict ptr)
 
 
 	case '1':
-		if (ptr[-1] < '3') {
+		if (ptr[-1] != '3') {
 			*ptr = '2';
+			return;
 
-		} else if (ptr[-4] == '1') {
+		} else if (ptr[-4] == '1') {	/* new year */
 			SET_STRING_WIDTH(&ptr[-4], "01-01", 5);
 			break;
+		}
 
+		switch (ptr[-3]) {
+		case '0': SET_STRING_WIDTH(&ptr[-4], "11-01", 5); return;
+		case '1': SET_STRING_WIDTH(&ptr[-3],  "2-01", 4); return;
+		case '3': SET_STRING_WIDTH(&ptr[-3],  "4-01", 4); return;
+		case '5': SET_STRING_WIDTH(&ptr[-3],  "6-01", 4); return;
+		case '7': SET_STRING_WIDTH(&ptr[-3],  "8-01", 4); return;
+		default:  SET_STRING_WIDTH(&ptr[-3],  "9-01", 4); return;
 		}
 
 
@@ -374,13 +406,25 @@ timestamp_string_increment(char *restrict ptr)
 
 
 	case '8':
-		*ptr = '0';
-		--ptr;
-		/* fall through */
+		if ((ptr[-4] == '1') || (ptr[-3] != '2') || (ptr[-1] != '2')) {
+			++(ptr[-1]);
+			*ptr = '0';
+
+		} else {	/* 02-28 → check if leap year */
+
+		}
+		return;
+
 
 	case '9':
-		if (ptr[-1] < '2') {
+		if ((ptr[-4] == '1') || (ptr[-3] != '2') || (ptr[-1] != '2')) {
+			++(ptr[-1]);
+			*ptr = '0';
+
+		} else {	/* 02-29 → 03-01 */
+			SET_STRING_WIDTH(&ptr[-4], "03-01", 5);
 		}
+		return;
 	}
 
 
