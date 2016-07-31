@@ -154,7 +154,9 @@ time_handle_cl(time_t *const restrict now,
 #define TIME_SECONDS_PER_HOUR	3600u
 #define TIME_SECONDS_PER_DAY	86400u
 #define TIME_SECONDS_PER_YEAR	31556952u
-#define TIME_SECONDS_OFFSET	62167153752u
+/* #define TIME_SECONDS_OFFSET	62167153752u */
+#define TIME_SECONDS_OFFSET	62167190832u
+
 
 inline bool
 is_leap_year(const unsigned int year)
