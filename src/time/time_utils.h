@@ -39,9 +39,9 @@ struct Timestamp {
 	uint8_t leap_year;	/* 0	-    1 */
 	uint8_t month;		/* 01	-   12 */
 	uint8_t day;		/* 01	-   31 */
-	uint8_t hours;		/* 00	-   23 */
-	uint8_t minutes;	/* 00	-   59 */
-	uint8_t seconds;	/* 00	-   59 */
+	uint8_t hour;		/* 00	-   23 */
+	uint8_t minute;		/* 00	-   59 */
+	uint8_t second;		/* 00	-   59 */
 };
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -197,7 +197,7 @@ time_handle_cl(time_t *const restrict now,
  *	+ minutes * 60
  *	+ hours	  * 3600
  *	+ days	  * 86400
- *	+ year	  * 31556952
+ *	+ years	  * 31556952
  *	- 62167153752
  */
 
@@ -328,13 +328,13 @@ timestamp_init(struct Timestamp *const restrict timestamp,
 
 	rem_seconds %= TIME_SECONDS_PER_DAY;
 
-	timestamp->hours = rem_seconds / TIME_SECONDS_PER_HOUR;
+	timestamp->hour = rem_seconds / TIME_SECONDS_PER_HOUR;
 
 	rem_seconds %= TIME_SECONDS_PER_HOUR;
 
-	timestamp->minutes = rem_seconds / TIME_SECONDS_PER_MINUTE;
+	timestamp->minute = rem_seconds / TIME_SECONDS_PER_MINUTE;
 
-	timestamp->seconds = rem_seconds % TIME_SECONDS_PER_MINUTE;
+	timestamp->second = rem_seconds % TIME_SECONDS_PER_MINUTE;
 }
 
 inline bool

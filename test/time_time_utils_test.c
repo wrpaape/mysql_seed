@@ -51,9 +51,9 @@ void test_timestamp_init(void)
 		TEST_FAIL_MESSAGE("invalid month");
 	}
 
-	const uint64_t sum = timestamp.seconds
-			   + (timestamp.minutes * 60u)
-			   + (timestamp.hours * 3600u)
+	const uint64_t sum = timestamp.second
+			   + (timestamp.minute * 60u)
+			   + (timestamp.hour * 3600u)
 			   + (days * 86400u)
 			   + ((timestamp.year - 1970) * 31536000u)
 			   + (((  ((timestamp.year - 1969) * 100u)
@@ -70,16 +70,16 @@ void test_timestamp_now(void)
 
 	TEST_ASSERT_TRUE(timestamp_now_status(&timestamp));
 
-	printf("year:    %u\n"
-	       "month:   %u\n"
-	       "day:     %u\n"
-	       "hours:   %u\n"
-	       "minutes: %u\n"
-	       "seconds: %u\n",
+	printf("year:   %u\n"
+	       "month:  %u\n"
+	       "day:    %u\n"
+	       "hour:   %u\n"
+	       "minute: %u\n"
+	       "second: %u\n",
 	       timestamp.year,
 	       timestamp.month,
 	       timestamp.day,
-	       timestamp.hours,
-	       timestamp.minutes,
-	       timestamp.seconds);
+	       timestamp.hour,
+	       timestamp.minute,
+	       timestamp.second);
 }

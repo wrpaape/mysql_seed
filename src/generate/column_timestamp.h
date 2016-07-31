@@ -75,7 +75,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	case 24u: PUT_STRING_WIDTH(string, "24 ", 3); break;
 	case 23u: PUT_STRING_WIDTH(string, "23 ", 3); break;
 	case 22u: PUT_STRING_WIDTH(string, "22 ", 3); break;
-	case 22u: PUT_STRING_WIDTH(string, "22 ", 3); break;
 	case 21u: PUT_STRING_WIDTH(string, "21 ", 3); break;
 	case 20u: PUT_STRING_WIDTH(string, "20 ", 3); break;
 	case 19u: PUT_STRING_WIDTH(string, "19 ", 3); break;
@@ -85,7 +84,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	case 15u: PUT_STRING_WIDTH(string, "15 ", 3); break;
 	case 14u: PUT_STRING_WIDTH(string, "14 ", 3); break;
 	case 13u: PUT_STRING_WIDTH(string, "13 ", 3); break;
-	case 12u: PUT_STRING_WIDTH(string, "12 ", 3); break;
 	case 12u: PUT_STRING_WIDTH(string, "12 ", 3); break;
 	case 11u: PUT_STRING_WIDTH(string, "11 ", 3); break;
 	case 10u: PUT_STRING_WIDTH(string, "10 ", 3); break;
@@ -104,7 +102,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	switch (timestamp->hour) {
 	case 23u: PUT_STRING_WIDTH(string, "23:", 3); break;
 	case 22u: PUT_STRING_WIDTH(string, "22:", 3); break;
-	case 22u: PUT_STRING_WIDTH(string, "22:", 3); break;
 	case 21u: PUT_STRING_WIDTH(string, "21:", 3); break;
 	case 20u: PUT_STRING_WIDTH(string, "20:", 3); break;
 	case 19u: PUT_STRING_WIDTH(string, "19:", 3); break;
@@ -114,7 +111,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	case 15u: PUT_STRING_WIDTH(string, "15:", 3); break;
 	case 14u: PUT_STRING_WIDTH(string, "14:", 3); break;
 	case 13u: PUT_STRING_WIDTH(string, "13:", 3); break;
-	case 12u: PUT_STRING_WIDTH(string, "12:", 3); break;
 	case 12u: PUT_STRING_WIDTH(string, "12:", 3); break;
 	case 11u: PUT_STRING_WIDTH(string, "11:", 3); break;
 	case 10u: PUT_STRING_WIDTH(string, "10:", 3); break;
@@ -131,7 +127,7 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	}
 
 	/* "MM:" */
-	switch (timestamp->minutes) {
+	switch (timestamp->minute) {
 	case 59u: PUT_STRING_WIDTH(string, "59:", 3); break;
 	case 58u: PUT_STRING_WIDTH(string, "58:", 3); break;
 	case 57u: PUT_STRING_WIDTH(string, "57:", 3); break;
@@ -180,7 +176,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	case 14u: PUT_STRING_WIDTH(string, "14:", 3); break;
 	case 13u: PUT_STRING_WIDTH(string, "13:", 3); break;
 	case 12u: PUT_STRING_WIDTH(string, "12:", 3); break;
-	case 12u: PUT_STRING_WIDTH(string, "12:", 3); break;
 	case 11u: PUT_STRING_WIDTH(string, "11:", 3); break;
 	case 10u: PUT_STRING_WIDTH(string, "10:", 3); break;
 	case  9u: PUT_STRING_WIDTH(string, "09:", 3); break;
@@ -196,7 +191,7 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	}
 
 	/* "SS\0" */
-	switch (timestamp->seconds) {
+	switch (timestamp->second) {
 	case 59u: SET_STRING_WIDTH(string, "59", 3); return;
 	case 58u: SET_STRING_WIDTH(string, "58", 3); return;
 	case 57u: SET_STRING_WIDTH(string, "57", 3); return;
@@ -245,7 +240,6 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	case 14u: SET_STRING_WIDTH(string, "14", 3); return;
 	case 13u: SET_STRING_WIDTH(string, "13", 3); return;
 	case 12u: SET_STRING_WIDTH(string, "12", 3); return;
-	case 12u: SET_STRING_WIDTH(string, "12", 3); return;
 	case 11u: SET_STRING_WIDTH(string, "11", 3); return;
 	case 10u: SET_STRING_WIDTH(string, "10", 3); return;
 	case  9u: SET_STRING_WIDTH(string, "09", 3); return;
@@ -261,7 +255,7 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 	}
 }
 
-extern inline void
+inline void
 timestamp_string_increment(char *restrict ptr)
 {
 	/* "YYYY-MM-DD HH:MM:Sx" */
@@ -275,75 +269,70 @@ timestamp_string_increment(char *restrict ptr)
 	case '6': *ptr = '7'; return;
 	case '7': *ptr = '8'; return;
 	case '8': *ptr = '9'; return;
-	default:
-		*ptr = '0';
-		--ptr;
+	default: --ptr;
 	}
 
 	/* "YYYY-MM-DD HH:MM:x0" */
 	switch (*ptr) {
-	case '0': *ptr = '1'; return;
-	case '1': *ptr = '2'; return;
-	case '2': *ptr = '3'; return;
-	case '3': *ptr = '4'; return;
-	case '4': *ptr = '5'; return;
+	case '0': SET_STRING_WIDTH(ptr, "10", 2); return;
+	case '1': SET_STRING_WIDTH(ptr, "20", 2); return;
+	case '2': SET_STRING_WIDTH(ptr, "30", 2); return;
+	case '3': SET_STRING_WIDTH(ptr, "40", 2); return;
+	case '4': SET_STRING_WIDTH(ptr, "50", 2); return;
 	default:
-		*ptr = '0';
 		ptr -= 2l;
 	}
 
 	/* "YYYY-MM-DD HH:Mx:00" */
 	switch (*ptr) {
-	case '0': *ptr = '1'; return;
-	case '1': *ptr = '2'; return;
-	case '2': *ptr = '3'; return;
-	case '3': *ptr = '4'; return;
-	case '4': *ptr = '5'; return;
-	case '5': *ptr = '6'; return;
-	case '6': *ptr = '7'; return;
-	case '7': *ptr = '8'; return;
-	case '8': *ptr = '9'; return;
+	case '0': SET_STRING_WIDTH(ptr, "1:00", 4); return;
+	case '1': SET_STRING_WIDTH(ptr, "2:00", 4); return;
+	case '2': SET_STRING_WIDTH(ptr, "3:00", 4); return;
+	case '3': SET_STRING_WIDTH(ptr, "4:00", 4); return;
+	case '4': SET_STRING_WIDTH(ptr, "5:00", 4); return;
+	case '5': SET_STRING_WIDTH(ptr, "6:00", 4); return;
+	case '6': SET_STRING_WIDTH(ptr, "7:00", 4); return;
+	case '7': SET_STRING_WIDTH(ptr, "8:00", 4); return;
+	case '8': SET_STRING_WIDTH(ptr, "9:00", 4); return;
 	default:
-		*ptr = '0';
 		--ptr;
 	}
 
 	/* "YYYY-MM-DD HH:x0:00" */
 	switch (*ptr) {
-	case '0': *ptr = '1'; return;
-	case '1': *ptr = '2'; return;
-	case '2': *ptr = '3'; return;
-	case '3': *ptr = '4'; return;
-	case '4': *ptr = '5'; return;
+	case '0': SET_STRING_WIDTH(ptr, "10:00", 5); return;
+	case '1': SET_STRING_WIDTH(ptr, "20:00", 5); return;
+	case '2': SET_STRING_WIDTH(ptr, "30:00", 5); return;
+	case '3': SET_STRING_WIDTH(ptr, "40:00", 5); return;
+	case '4': SET_STRING_WIDTH(ptr, "50:00", 5); return;
 	default:
-		*ptr = '0';
 		ptr -= 2l;
 	}
 
 	/* "YYYY-MM-DD Hx:00:00" */
 	switch (*ptr) {
-	case '0': *ptr = '1'; return;
-	case '1': *ptr = '2'; return;
-	case '2': *ptr = '3'; return;
+	case '0': SET_STRING_WIDTH(ptr, "1:00:00", 7); return;
+	case '1': SET_STRING_WIDTH(ptr, "2:00:00", 7); return;
+	case '2': SET_STRING_WIDTH(ptr, "3:00:00", 7); return;
 	case '3':
 		if (ptr[-1] == '2') {
-			SET_STRING_WIDTH(&ptr[-1], "00", 2);
+			SET_STRING_WIDTH(&ptr[-1], "00:00:00", 8);
 			ptr -= 3l;
 			break;
 		}
-		  *ptr = '4'; return;
-	case '4': *ptr = '5'; return;
-	case '5': *ptr = '6'; return;
-	case '6': *ptr = '7'; return;
-	case '7': *ptr = '8'; return;
-	case '8': *ptr = '9'; return;
+		  SET_STRING_WIDTH(ptr, "4:00:00", 7); return;
+	case '4': SET_STRING_WIDTH(ptr, "5:00:00", 7); return;
+	case '5': SET_STRING_WIDTH(ptr, "6:00:00", 7); return;
+	case '6': SET_STRING_WIDTH(ptr, "7:00:00", 7); return;
+	case '7': SET_STRING_WIDTH(ptr, "8:00:00", 7); return;
+	case '8': SET_STRING_WIDTH(ptr, "9:00:00", 7); return;
 	default:
 		--ptr;
 
 		if (*ptr == '0')
-			SET_STRING_WIDTH(ptr, "10", 2);
+			SET_STRING_WIDTH(ptr, "10:00:00", 8);
 		else
-			SET_STRING_WIDTH(ptr, "20", 2);
+			SET_STRING_WIDTH(ptr, "20:00:00", 8);
 
 		return;
 	}
@@ -358,14 +347,15 @@ timestamp_string_increment(char *restrict ptr)
 			if (ptr[-3] == '2')
 				*ptr = '1';
 			else
-				SET_STRING_WIDTH(&ptr[-4], "12-01", 5);
+				SET_STRING_WIDTH(&ptr[-3],  "2-01", 4);
+
 		} else {
 			switch (ptr[-3]) {
 			case '4':
-				SET_STRING_WIDTH(&ptr[-4], "05-01", 5);
+				SET_STRING_WIDTH(&ptr[-3],  "5-01", 4);
 				return;
 			case '6':
-				SET_STRING_WIDTH(&ptr[-4], "07-01", 5);
+				SET_STRING_WIDTH(&ptr[-3],  "7-01", 4);
 				return;
 			case '9':
 				SET_STRING_WIDTH(&ptr[-4], "10-01", 5);
@@ -383,17 +373,19 @@ timestamp_string_increment(char *restrict ptr)
 			return;
 
 		} else if (ptr[-4] == '1') {	/* new year */
-			SET_STRING_WIDTH(&ptr[-4], "01-01", 5);
+			ptr -= 6l;
 			break;
 		}
 
-		switch (ptr[-3]) {
-		case '0': SET_STRING_WIDTH(&ptr[-4], "11-01", 5); return;
-		case '1': SET_STRING_WIDTH(&ptr[-3],  "2-01", 4); return;
-		case '3': SET_STRING_WIDTH(&ptr[-3],  "4-01", 4); return;
-		case '5': SET_STRING_WIDTH(&ptr[-3],  "6-01", 4); return;
-		case '7': SET_STRING_WIDTH(&ptr[-3],  "8-01", 4); return;
-		default:  SET_STRING_WIDTH(&ptr[-3],  "9-01", 4); return;
+		ptr -= 3l;
+
+		switch (*ptr) {
+		case '0': SET_STRING_WIDTH(ptr, "1-01", 4); return;
+		case '1': SET_STRING_WIDTH(ptr, "2-01", 4); return;
+		case '3': SET_STRING_WIDTH(ptr, "4-01", 4); return;
+		case '5': SET_STRING_WIDTH(ptr, "6-01", 4); return;
+		case '7': SET_STRING_WIDTH(ptr, "8-01", 4); return;
+		default:  SET_STRING_WIDTH(ptr, "9-01", 4); return;
 		}
 
 
@@ -412,6 +404,22 @@ timestamp_string_increment(char *restrict ptr)
 
 		} else {	/* 02-28 → check if leap year */
 
+			const char *restrict year_ptr = ptr - 6l;
+			unsigned int year = ASCII_TO_DIGIT(*year_ptr);
+			--year_ptr;
+
+			year += ASCII_TO_DIGIT(*year_ptr) * 10u;
+			--year_ptr;
+
+			year += ASCII_TO_DIGIT(*year_ptr) * 100u;
+			--year_ptr;
+
+			year += ASCII_TO_DIGIT(*year_ptr) * 1000u;
+
+			if (is_leap_year(year))
+				*ptr = '9';
+			else
+				SET_STRING_WIDTH(&ptr[-3], "3-01", 4);
 		}
 		return;
 
@@ -427,7 +435,64 @@ timestamp_string_increment(char *restrict ptr)
 		return;
 	}
 
+	/* "YYYx-01-01 00:00:00" */
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1-01-01", 7); return;
+	case '1': SET_STRING_WIDTH(ptr, "2-01-01", 7); return;
+	case '2': SET_STRING_WIDTH(ptr, "3-01-01", 7); return;
+	case '3': SET_STRING_WIDTH(ptr, "4-01-01", 7); return;
+	case '4': SET_STRING_WIDTH(ptr, "5-01-01", 7); return;
+	case '5': SET_STRING_WIDTH(ptr, "6-01-01", 7); return;
+	case '6': SET_STRING_WIDTH(ptr, "7-01-01", 7); return;
+	case '7': SET_STRING_WIDTH(ptr, "8-01-01", 7); return;
+	case '8': SET_STRING_WIDTH(ptr, "9-01-01", 7); return;
+	default:
+		--ptr;
+	}
 
+	/* "YYx0-01-01 00:00:00" */
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10-01-01", 8); return;
+	case '1': SET_STRING_WIDTH(ptr, "20-01-01", 8); return;
+	case '2': SET_STRING_WIDTH(ptr, "30-01-01", 8); return;
+	case '3': SET_STRING_WIDTH(ptr, "40-01-01", 8); return;
+	case '4': SET_STRING_WIDTH(ptr, "50-01-01", 8); return;
+	case '5': SET_STRING_WIDTH(ptr, "60-01-01", 8); return;
+	case '6': SET_STRING_WIDTH(ptr, "70-01-01", 8); return;
+	case '7': SET_STRING_WIDTH(ptr, "80-01-01", 8); return;
+	case '8': SET_STRING_WIDTH(ptr, "90-01-01", 8); return;
+	default:
+		--ptr;
+	}
+
+	/* "Yx00-01-01 00:00:00" */
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100-01-01", 9); return;
+	case '1': SET_STRING_WIDTH(ptr, "200-01-01", 9); return;
+	case '2': SET_STRING_WIDTH(ptr, "300-01-01", 9); return;
+	case '3': SET_STRING_WIDTH(ptr, "400-01-01", 9); return;
+	case '4': SET_STRING_WIDTH(ptr, "500-01-01", 9); return;
+	case '5': SET_STRING_WIDTH(ptr, "600-01-01", 9); return;
+	case '6': SET_STRING_WIDTH(ptr, "700-01-01", 9); return;
+	case '7': SET_STRING_WIDTH(ptr, "800-01-01", 9); return;
+	case '8': SET_STRING_WIDTH(ptr, "900-01-01", 9); return;
+	default:
+		--ptr;
+	}
+
+	/* "x000-01-01 00:00:00" */
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1000-01-01", 10); return;
+	case '1': SET_STRING_WIDTH(ptr, "2000-01-01", 10); return;
+	case '2': SET_STRING_WIDTH(ptr, "3000-01-01", 10); return;
+	case '3': SET_STRING_WIDTH(ptr, "4000-01-01", 10); return;
+	case '4': SET_STRING_WIDTH(ptr, "5000-01-01", 10); return;
+	case '5': SET_STRING_WIDTH(ptr, "6000-01-01", 10); return;
+	case '6': SET_STRING_WIDTH(ptr, "7000-01-01", 10); return;
+	case '7': SET_STRING_WIDTH(ptr, "8000-01-01", 10); return;
+	case '8': SET_STRING_WIDTH(ptr, "9000-01-01", 10); return;
+	default:  SET_STRING_WIDTH(ptr, "1000-01-01", 10); /* MySQL min year */
+	}
 }
 
 
