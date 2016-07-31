@@ -22,13 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "time/time_utils.h"
+#include "generate/column_timestamp.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_timestamp_init(void);
-extern void test_timestamp_now(void);
+extern void test_timestamp_string_init(void);
 
 
 //=======Test Reset Option=====
@@ -43,9 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/time_time_utils_test.c");
-  RUN_TEST(test_timestamp_init, 12);
-  RUN_TEST(test_timestamp_now, 67);
+  UnityBegin("../test/generate_column_timestamp_test.c");
+  RUN_TEST(test_timestamp_string_init, 12);
 
   return (UnityEnd());
 }

@@ -9,19 +9,19 @@ void tearDown(void)
 {
 }
 
-void test_time_stamp_init(void)
+void test_timestamp_init(void)
 {
-	struct TimeStamp time_stamp;
+	struct Timestamp timestamp;
 	time_t now;
 
 	TEST_ASSERT_TRUE(time_status(&now));
 
-	time_stamp_init(&time_stamp,
-			now);
+	timestamp_init(&timestamp,
+		       now);
 
-	unsigned int days = time_stamp.day;
+	unsigned int days = timestamp.day;
 
-	switch (time_stamp.month) {
+	switch (timestamp.month) {
 	case 12u:
 		days += 31u;
 	case 11u:
@@ -43,7 +43,7 @@ void test_time_stamp_init(void)
 	case  3u:
 		days += 31u;
 	case  2u:
-		days += is_leap_year(time_stamp.year) ? 29u : 28u;
+		days += is_leap_year(timestamp.year) ? 29u : 28u;
 	case  1u:
 		days -= 1u;
 		break;
@@ -51,24 +51,24 @@ void test_time_stamp_init(void)
 		TEST_FAIL_MESSAGE("invalid month");
 	}
 
-	const uint64_t sum = time_stamp.seconds
-			   + (time_stamp.minutes * 60u)
-			   + (time_stamp.hours * 3600u)
+	const uint64_t sum = timestamp.seconds
+			   + (timestamp.minutes * 60u)
+			   + (timestamp.hours * 3600u)
 			   + (days * 86400u)
-			   + ((time_stamp.year - 1970) * 31536000u)
-			   + (((  ((time_stamp.year - 1969) * 100u)
-			        - ((time_stamp.year - 1901) * 4u)
-			        + ((time_stamp.year - 1601)))
+			   + ((timestamp.year - 1970) * 31536000u)
+			   + (((  ((timestamp.year - 1969) * 100u)
+			        - ((timestamp.year - 1901) * 4u)
+			        + ((timestamp.year - 1601)))
 			       * 86400u) / 400u);
 
 	TEST_ASSERT_EQUAL_UINT(now, sum);
 }
 
-void test_time_stamp_now(void)
+void test_timestamp_now(void)
 {
-	struct TimeStamp time_stamp;
+	struct Timestamp timestamp;
 
-	TEST_ASSERT_TRUE(time_stamp_now_status(&time_stamp));
+	TEST_ASSERT_TRUE(timestamp_now_status(&timestamp));
 
 	printf("year:    %u\n"
 	       "month:   %u\n"
@@ -76,10 +76,10 @@ void test_time_stamp_now(void)
 	       "hours:   %u\n"
 	       "minutes: %u\n"
 	       "seconds: %u\n",
-	       time_stamp.year,
-	       time_stamp.month,
-	       time_stamp.day,
-	       time_stamp.hours,
-	       time_stamp.minutes,
-	       time_stamp.seconds);
+	       timestamp.year,
+	       timestamp.month,
+	       timestamp.day,
+	       timestamp.hours,
+	       timestamp.minutes,
+	       timestamp.seconds);
 }

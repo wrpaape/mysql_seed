@@ -1249,6 +1249,42 @@ TARGETS			+= $(GENERATE_COLUMN_ID_OBJ)		\
 			   $(GENERATE_COLUMN_ID_TEST_BIN)
 
 
+# generate/column_timestamp
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_TIMESTAMP_SRC 		:= $(call HELPER_SOURCE_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_HDR		:= $(call HELPER_HEADER_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_OBJ 		:= $(call HELPER_OBJECT_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_timestamp)
+GENERATE_COLUMN_TIMESTAMP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_timestamp)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_TIMESTAMP_OBJ_PREQS		:= $(GENERATE_COLUMN_TIMESTAMP_SRC) 			\
+			     	   	   	   $(GENERATE_COLUMN_TIMESTAMP_HDR)			\
+			      	   	   	   $(GENERATE_GENERATOR_HDR)
+GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP		:= $(GENERATE_COLUMN_TIMESTAMP_OBJ) 			\
+						   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_COLUMN_TIMESTAMP_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TEST_SRC)		\
+				   	   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_TIMESTAMP_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TEST_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_TIMESTAMP_OBJ_PREQS)		\
+			   	   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ_PREQS)
+GENERATE_COLUMN_TIMESTAMP_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ)		\
+						   $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ)		\
+			   	   	   	   $(GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP)		\
+			   	   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_TIMESTAMP_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_TIMESTAMP_OBJ)		\
+			   $(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC)	\
+			   $(GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ)	\
+			   $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ)	\
+			   $(GENERATE_COLUMN_TIMESTAMP_TEST_BIN)
+
+
 # generate/loader
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_LOADER_SRC 		:= $(call HELPER_SOURCE_PATH,generate loader)
@@ -1683,6 +1719,11 @@ $(GENERATE_TABLE_OBJ): $(GENERATE_TABLE_OBJ_PREQS)
 # make generate/row_block object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_ROW_BLOCK_OBJ): $(GENERATE_ROW_BLOCK_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/column_timestamp object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_TIMESTAMP_OBJ): $(GENERATE_COLUMN_TIMESTAMP_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/column_id object
@@ -2170,6 +2211,26 @@ $(GENERATE_COUNTER_TEST_OBJ): $(GENERATE_COUNTER_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_COUNTER_TRNR_SRC): $(GENERATE_COUNTER_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/column_timestamp
+# make:
+# 	generate_column_timestamp_test		binary,
+# 	generate_column_timestamp_test_runner 	object,
+# 	generate_column_timestamp_test		object, and
+# 	generate_column_timestamp_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_TIMESTAMP_TEST_BIN): $(GENERATE_COLUMN_TIMESTAMP_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ): $(GENERATE_COLUMN_TIMESTAMP_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ): $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC): $(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
