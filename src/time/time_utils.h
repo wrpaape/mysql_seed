@@ -35,12 +35,13 @@ struct timespec {
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 struct Timestamp {
-	uint16_t year;
-	uint8_t month;
-	uint8_t day;
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
+	uint16_t year;		/* 0000 - 9999 */
+	uint8_t leap_year;	/* 0	-    1 */
+	uint8_t month;		/* 01	-   12 */
+	uint8_t day;		/* 01	-   31 */
+	uint8_t hours;		/* 00	-   23 */
+	uint8_t minutes;	/* 00	-   59 */
+	uint8_t seconds;	/* 00	-   59 */
 };
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -51,13 +52,63 @@ struct Timestamp {
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #define TIME_ERROR ((time_t) -1)
+
 #define ONE_BILLION 1000000000l
 
+#define JANUARY	   1u
+#define FEBRUARY   2u
+#define MARCH	   3u
+#define APRIL	   4u
+#define MAY	   5u
+#define JUNE	   6u
+#define JULY	   7u
+#define AUGUST	   8u
+#define SEPTEMBER  9u
+#define OCTOBER	  10u
+#define NOVEMBER  11u
+#define DECEMBER  12u
 
-/* error messages
- * ────────────────────────────────────────────────────────────────────────── */
-#define TIME_FAILURE_MESSAGE						\
-FAILURE_REASON("time", "unknown")
+/* common year values */
+#define JANUARY_DAY_COUNT   31u
+#define FEBRUARY_DAY_COUNT  28u
+#define MARCH_DAY_COUNT	    31u
+#define APRIL_DAY_COUNT	    30u
+#define MAY_DAY_COUNT	    31u
+#define JUNE_DAY_COUNT	    30u
+#define JULY_DAY_COUNT	    31u
+#define AUGUST_DAY_COUNT    31u
+#define SEPTEMBER_DAY_COUNT 30u
+#define OCTOBER_DAY_COUNT   31u
+#define NOVEMBER_DAY_COUNT  30u
+#define DECEMBER_DAY_COUNT  31u
+
+/* offset from january 1st */
+#define JANUARY_DAY_OFFSET_MIN    0u
+#define JANUARY_DAY_OFFSET_MAX   30u
+#define FEBRUARY_DAY_OFFSET_MIN  31u
+#define FEBRUARY_DAY_OFFSET_MAX  58u
+#define MARCH_DAY_OFFSET_MIN     59u
+#define MARCH_DAY_OFFSET_MAX     89u
+#define APRIL_DAY_OFFSET_MIN     90u
+#define APRIL_DAY_OFFSET_MAX     120u
+#define MAY_DAY_OFFSET_MIN	 121u
+#define MAY_DAY_OFFSET_MAX	 150u
+#define JUNE_DAY_OFFSET_MIN	 151u
+#define JUNE_DAY_OFFSET_MAX	 181u
+#define JULY_DAY_OFFSET_MIN	 182u
+#define JULY_DAY_OFFSET_MAX	 212u
+#define AUGUST_DAY_OFFSET_MIN    213u
+#define AUGUST_DAY_OFFSET_MAX    242u
+#define SEPTEMBER_DAY_OFFSET_MIN 243u
+#define SEPTEMBER_DAY_OFFSET_MAX 272u
+#define OCTOBER_DAY_OFFSET_MIN   273u
+#define OCTOBER_DAY_OFFSET_MAX   302u
+#define NOVEMBER_DAY_OFFSET_MIN  303u
+#define NOVEMBER_DAY_OFFSET_MAX  333u
+#define DECEMBER_DAY_OFFSET_MIN  334u
+#define DECEMBER_DAY_OFFSET_MAX  365u
+
+extern const unsigned int DAY_COUNT_MAP[DECEMBER + 1];
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * CONSTANTS
@@ -174,107 +225,87 @@ is_leap_year(const unsigned int year)
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
 timestamp_set_month_day(struct Timestamp *const restrict timestamp,
-			 unsigned int days_since_jan1)
+			unsigned int day_offset)
 {
-	/* jan	31 */
-
-	/* feb	28 / 29	 31 */
-	/* mar	31	 59 / 60 */
-	/* apr	30	 90 / 91 */
-
-	/* may	31	121 / 122 */
-	/* jun	30	151 / 152 */
-
-	/* jul	31	182 / 183 */
-	/* aug	31	213 / 214 */
-	/* sep	30	243 / 244 */
-
-	/* oct	31	273 / 274 */
-	/* nov	30	303 / 304 */
-	/* dec	31	334 / 335 */
-
-
-	if (days_since_jan1 < 31) {
-		timestamp->month = 1u;
-		timestamp->day	  = 1u + days_since_jan1;
+	if (day_offset < FEBRUARY_DAY_OFFSET_MIN) {
+		timestamp->month = JANUARY;
+		timestamp->day	 = 1u + day_offset;
 		return;
 	}
 
-	const unsigned int leap_day = is_leap_year(timestamp->year);
+	day_offset -= timestamp->leap_year;
 
-	days_since_jan1 -= leap_day;
-
-	if (days_since_jan1 < 182) {
-		if (days_since_jan1 < 121) {
-			if (days_since_jan1 < 90) {
-				if (days_since_jan1 < 59) {
-					timestamp->month = 2u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 30u;
+	if (day_offset < JULY_DAY_OFFSET_MIN) {
+		if (day_offset < MAY_DAY_OFFSET_MIN) {
+			if (day_offset < APRIL_DAY_OFFSET_MIN) {
+				if (day_offset < MARCH_DAY_OFFSET_MIN) {
+					timestamp->month = FEBRUARY;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - JANUARY_DAY_OFFSET_MAX;
 				} else {
-					timestamp->month = 3u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 58u;
+					timestamp->month = MARCH;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - FEBRUARY_DAY_OFFSET_MAX;
 				}
 			} else {
-				timestamp->month = 4u;
-				timestamp->day	  = days_since_jan1
-						  + leap_day
-						  - 89u;
+				timestamp->month = APRIL;
+				timestamp->day	 = day_offset
+						 + timestamp->leap_year
+						 - MARCH_DAY_OFFSET_MAX;
 			}
 		} else {
-			if (days_since_jan1 < 151) {
-				timestamp->month = 5u;
-				timestamp->day	  = days_since_jan1
-						  + leap_day
-						  - 120u;
+			if (day_offset < JUNE_DAY_OFFSET_MIN) {
+				timestamp->month = MAY;
+				timestamp->day	 = day_offset
+						 + timestamp->leap_year
+						 - APRIL_DAY_OFFSET_MAX;
 			} else {
-				timestamp->month = 6u;
-				timestamp->day	  = days_since_jan1
-						  + leap_day
-						  - 150u;
+				timestamp->month = JUNE;
+				timestamp->day	 = day_offset
+						 + timestamp->leap_year
+						 - MAY_DAY_OFFSET_MAX;
 			}
 		}
 	} else {
-		if (days_since_jan1 < 273) {
-			if (days_since_jan1 < 243) {
-				if (days_since_jan1 < 213) {
-					timestamp->month = 7u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 181u;
+		if (day_offset < OCTOBER_DAY_OFFSET_MIN) {
+			if (day_offset < SEPTEMBER_DAY_OFFSET_MIN) {
+				if (day_offset < AUGUST_DAY_OFFSET_MIN) {
+					timestamp->month = JULY;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - JUNE_DAY_OFFSET_MAX;
 				} else {
-					timestamp->month = 8u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 212u;
+					timestamp->month = AUGUST;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - JULY_DAY_OFFSET_MAX;
 				}
 			} else {
-				timestamp->month = 9u;
-				timestamp->day	  = days_since_jan1
-						  + leap_day
-						  - 242u;
+				timestamp->month = SEPTEMBER;
+				timestamp->day	 = day_offset
+						 + timestamp->leap_year
+						 - AUGUST_DAY_OFFSET_MAX;
 			}
 		} else {
-			if (days_since_jan1 < 334) {
-				if (days_since_jan1 < 303) {
-					timestamp->month = 10u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 272u;
+			if (day_offset < DECEMBER_DAY_OFFSET_MIN) {
+				if (day_offset < NOVEMBER_DAY_OFFSET_MIN) {
+					timestamp->month = OCTOBER;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - SEPTEMBER_DAY_OFFSET_MAX;
 				} else {
-					timestamp->month = 11u;
-					timestamp->day	  = days_since_jan1
-							  + leap_day
-							  - 302u;
+					timestamp->month = NOVEMBER;
+					timestamp->day	 = day_offset
+							 + timestamp->leap_year
+							 - OCTOBER_DAY_OFFSET_MAX;
 				}
 			} else {
-				timestamp->month = 12u;
-				timestamp->day	  = days_since_jan1
-						  + leap_day
-						  - 333u;
+				timestamp->month = DECEMBER;
+				timestamp->day	 = day_offset
+						 + timestamp->leap_year
+						 - NOVEMBER_DAY_OFFSET_MAX;
 			}
 		}
 	}
@@ -290,12 +321,12 @@ timestamp_init(struct Timestamp *const restrict timestamp,
 
 	rem_seconds %= TIME_SECONDS_PER_YEAR;
 
-	const unsigned int days_since_jan1 = rem_seconds / TIME_SECONDS_PER_DAY;
-
-	rem_seconds %= TIME_SECONDS_PER_DAY;
+	timestamp->leap_year = is_leap_year(timestamp->year);
 
 	timestamp_set_month_day(timestamp,
-				 days_since_jan1);
+				rem_seconds / TIME_SECONDS_PER_DAY);
+
+	rem_seconds %= TIME_SECONDS_PER_DAY;
 
 	timestamp->hours = rem_seconds / TIME_SECONDS_PER_HOUR;
 

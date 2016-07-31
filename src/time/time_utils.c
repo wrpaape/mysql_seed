@@ -1,5 +1,23 @@
 #include "time/time_utils.h"
 
+/* constants
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const unsigned int DAY_COUNT_MAP[DECEMBER + 1] = {
+	[JANUARY]   = JANUARY_DAY_COUNT,
+	[FEBRUARY]  = FEBRUARY_DAY_COUNT,
+	[MARCH]     = MARCH_DAY_COUNT,
+	[APRIL]     = APRIL_DAY_COUNT,
+	[MAY]       = MAY_DAY_COUNT,
+	[JUNE]      = JUNE_DAY_COUNT,
+	[JULY]      = JULY_DAY_COUNT,
+	[AUGUST]    = AUGUST_DAY_COUNT,
+	[SEPTEMBER] = SEPTEMBER_DAY_COUNT,
+	[OCTOBER]   = OCTOBER_DAY_COUNT,
+	[NOVEMBER]  = NOVEMBER_DAY_COUNT,
+	[DECEMBER]  = DECEMBER_DAY_COUNT
+}
+
 /* seconds since 00:00:00, January 1st, 1970 */
 extern inline bool
 time_status(time_t *const restrict now);
@@ -23,7 +41,7 @@ is_leap_year(const unsigned int year);
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
 timestamp_set_month_day(struct Timestamp *const restrict timestamp,
-			unsigned int days_since_jan1);
+			unsigned int day_offset)
 
 extern inline void
 timestamp_init(struct Timestamp *const restrict timestamp,
