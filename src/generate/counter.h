@@ -241,14 +241,114 @@ counter_size_upto(const size_t upto)
 inline void
 count_buffer_increment(char *restrict digit)
 {
-	while ((*digit) == '9') {
-		*digit = '0';
-		--digit;
+	switch (*digit) {
+	case '0': *digit = '1'; return;
+	case '1': *digit = '2'; return;
+	case '2': *digit = '3'; return;
+	case '3': *digit = '4'; return;
+	case '4': *digit = '5'; return;
+	case '5': *digit = '6'; return;
+	case '6': *digit = '7'; return;
+	case '7': *digit = '8'; return;
+	case '8': *digit = '9'; return;
+	default: --digit;
 	}
 
-	/* digit is in '0' ... '9' */
-	++(*digit);
-	return;
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "10", 2); return;
+	case '1': SET_STRING_WIDTH(digit, "20", 2); return;
+	case '2': SET_STRING_WIDTH(digit, "30", 2); return;
+	case '3': SET_STRING_WIDTH(digit, "40", 2); return;
+	case '4': SET_STRING_WIDTH(digit, "50", 2); return;
+	case '5': SET_STRING_WIDTH(digit, "60", 2); return;
+	case '6': SET_STRING_WIDTH(digit, "70", 2); return;
+	case '7': SET_STRING_WIDTH(digit, "80", 2); return;
+	case '8': SET_STRING_WIDTH(digit, "90", 2); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "100", 3); return;
+	case '1': SET_STRING_WIDTH(digit, "200", 3); return;
+	case '2': SET_STRING_WIDTH(digit, "300", 3); return;
+	case '3': SET_STRING_WIDTH(digit, "400", 3); return;
+	case '4': SET_STRING_WIDTH(digit, "500", 3); return;
+	case '5': SET_STRING_WIDTH(digit, "600", 3); return;
+	case '6': SET_STRING_WIDTH(digit, "700", 3); return;
+	case '7': SET_STRING_WIDTH(digit, "800", 3); return;
+	case '8': SET_STRING_WIDTH(digit, "900", 3); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "1000", 4); return;
+	case '1': SET_STRING_WIDTH(digit, "2000", 4); return;
+	case '2': SET_STRING_WIDTH(digit, "3000", 4); return;
+	case '3': SET_STRING_WIDTH(digit, "4000", 4); return;
+	case '4': SET_STRING_WIDTH(digit, "5000", 4); return;
+	case '5': SET_STRING_WIDTH(digit, "6000", 4); return;
+	case '6': SET_STRING_WIDTH(digit, "7000", 4); return;
+	case '7': SET_STRING_WIDTH(digit, "8000", 4); return;
+#if LARGE_UPTO_MAX
+	case '8': SET_STRING_WIDTH(digit, "9000", 4); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "10000", 5); return;
+	case '1': SET_STRING_WIDTH(digit, "20000", 5); return;
+	case '2': SET_STRING_WIDTH(digit, "30000", 5); return;
+	case '3': SET_STRING_WIDTH(digit, "40000", 5); return;
+	case '4': SET_STRING_WIDTH(digit, "50000", 5); return;
+	case '5': SET_STRING_WIDTH(digit, "60000", 5); return;
+	case '6': SET_STRING_WIDTH(digit, "70000", 5); return;
+	case '7': SET_STRING_WIDTH(digit, "80000", 5); return;
+	case '8': SET_STRING_WIDTH(digit, "90000", 5); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "100000", 6); return;
+	case '1': SET_STRING_WIDTH(digit, "200000", 6); return;
+	case '2': SET_STRING_WIDTH(digit, "300000", 6); return;
+	case '3': SET_STRING_WIDTH(digit, "400000", 6); return;
+	case '4': SET_STRING_WIDTH(digit, "500000", 6); return;
+	case '5': SET_STRING_WIDTH(digit, "600000", 6); return;
+	case '6': SET_STRING_WIDTH(digit, "700000", 6); return;
+	case '7': SET_STRING_WIDTH(digit, "800000", 6); return;
+	case '8': SET_STRING_WIDTH(digit, "900000", 6); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "1000000", 7); return;
+	case '1': SET_STRING_WIDTH(digit, "2000000", 7); return;
+	case '2': SET_STRING_WIDTH(digit, "3000000", 7); return;
+	case '3': SET_STRING_WIDTH(digit, "4000000", 7); return;
+	case '4': SET_STRING_WIDTH(digit, "5000000", 7); return;
+	case '5': SET_STRING_WIDTH(digit, "6000000", 7); return;
+	case '6': SET_STRING_WIDTH(digit, "7000000", 7); return;
+	case '7': SET_STRING_WIDTH(digit, "8000000", 7); return;
+	case '8': SET_STRING_WIDTH(digit, "9000000", 7); return;
+	default: --digit;
+	}
+
+	switch (*digit) {
+	case '0': SET_STRING_WIDTH(digit, "10000000", 8); return;
+	case '1': SET_STRING_WIDTH(digit, "20000000", 8); return;
+	case '2': SET_STRING_WIDTH(digit, "30000000", 8); return;
+	case '3': SET_STRING_WIDTH(digit, "40000000", 8); return;
+	case '4': SET_STRING_WIDTH(digit, "50000000", 8); return;
+	case '5': SET_STRING_WIDTH(digit, "60000000", 8); return;
+	case '6': SET_STRING_WIDTH(digit, "70000000", 8); return;
+	case '7': SET_STRING_WIDTH(digit, "80000000", 8); return;
+	default:  SET_STRING_WIDTH(digit, "90000000", 8);
+	}
+
+#else
+	default:  SET_STRING_WIDTH(digit, "9000", 4);
+	}
+#endif /* if LARGE_UPTO_MAX */
 }
 
 

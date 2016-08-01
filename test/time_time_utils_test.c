@@ -59,7 +59,8 @@ void test_timestamp_init(void)
 			   + (((  ((timestamp.year - 1969) * 100u)
 			        - ((timestamp.year - 1901) * 4u)
 			        + ((timestamp.year - 1601)))
-			       * 86400u) / 400u);
+			       * 86400u) / 400u)
+			   - 55080; /* 15 hours, 18 minutes for current UTC */
 
 	TEST_ASSERT_EQUAL_UINT(now, sum);
 }
@@ -70,13 +71,15 @@ void test_timestamp_now(void)
 
 	TEST_ASSERT_TRUE(timestamp_now_status(&timestamp));
 
-	printf("year:   %u\n"
-	       "month:  %u\n"
-	       "day:    %u\n"
-	       "hour:   %u\n"
-	       "minute: %u\n"
-	       "second: %u\n",
+	printf("year:      %u\n"
+	       "leap_year: %u\n"
+	       "month:     %u\n"
+	       "day:       %u\n"
+	       "hour:      %u\n"
+	       "minute:    %u\n"
+	       "second:    %u\n",
 	       timestamp.year,
+	       timestamp.leap_year,
 	       timestamp.month,
 	       timestamp.day,
 	       timestamp.hour,

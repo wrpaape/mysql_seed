@@ -45,7 +45,7 @@ int main(void)
 {
   UnityBegin("../test/time_time_utils_test.c");
   RUN_TEST(test_timestamp_init, 12);
-  RUN_TEST(test_timestamp_now, 67);
+  RUN_TEST(test_timestamp_now, 68);
 
   return (UnityEnd());
 }

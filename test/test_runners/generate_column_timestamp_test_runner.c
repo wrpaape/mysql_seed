@@ -28,6 +28,7 @@
 extern void setUp(void);
 extern void tearDown(void);
 extern void test_timestamp_string_init(void);
+extern void test_timestamp_string_increment(void);
 
 
 //=======Test Reset Option=====
@@ -44,6 +45,7 @@ int main(void)
 {
   UnityBegin("../test/generate_column_timestamp_test.c");
   RUN_TEST(test_timestamp_string_init, 12);
+  RUN_TEST(test_timestamp_string_increment, 26);
 
   return (UnityEnd());
 }

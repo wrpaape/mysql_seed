@@ -55,6 +55,31 @@ struct Timestamp {
 
 #define ONE_BILLION 1000000000l
 
+
+/* UNIX time to timestamp:
+ *
+ * tm_sec + tm_min*60 + tm_hour*3600 + tm_yday*86400 +
+ * (tm_year-70)*31536000 + ((tm_year-69)/4)*86400 -
+ * ((tm_year-1)/100)*86400 + ((tm_year+299)/400)*86400
+ *
+ * simplifies to:
+ *
+ *	  seconds
+ *	+ minutes * 60
+ *	+ hours	  * 3600
+ *	+ days	  * 86400
+ *	+ years	  * 31556952
+ *	- 62167153752
+ */
+
+#define TIME_SECONDS_PER_MINUTE	60u
+#define TIME_SECONDS_PER_HOUR	3600u
+#define TIME_SECONDS_PER_DAY	86400u
+#define TIME_SECONDS_PER_YEAR	31556952u
+/* #define TIME_SECONDS_OFFSET	62167153752u */
+#define TIME_SECONDS_OFFSET	62167208832u /* add 55080 (15 hours, 18 minutes)
+						for current UTC */
+
 #define JANUARY	   1u
 #define FEBRUARY   2u
 #define MARCH	   3u
@@ -186,27 +211,6 @@ time_handle_cl(time_t *const restrict now,
 			     failure);
 	__builtin_unreachable();
 }
-
-/* tm_sec + tm_min*60 + tm_hour*3600 + tm_yday*86400 + */
-/* (tm_year-70)*31536000 + ((tm_year-69)/4)*86400 - */
-/* ((tm_year-1)/100)*86400 + ((tm_year+299)/400)*86400 */
-
-/* simplifies to:
- *
- *	  seconds
- *	+ minutes * 60
- *	+ hours	  * 3600
- *	+ days	  * 86400
- *	+ years	  * 31556952
- *	- 62167153752
- */
-
-#define TIME_SECONDS_PER_MINUTE	60u
-#define TIME_SECONDS_PER_HOUR	3600u
-#define TIME_SECONDS_PER_DAY	86400u
-#define TIME_SECONDS_PER_YEAR	31556952u
-/* #define TIME_SECONDS_OFFSET	62167153752u */
-#define TIME_SECONDS_OFFSET	62167208832u
 
 
 inline bool
