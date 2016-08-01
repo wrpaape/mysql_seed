@@ -149,7 +149,7 @@ PARSE_ERROR_HEADER("invalid ROW_COUNT")
 		"starting with:") "\n"
 
 #define ERROR_INVALID_ROW_COUNT_REASON_LARGE				\
-"\n" ERROR_WRAP("reason: ROW_COUNT exceeds the system-dependent "	\
+"\n" ERROR_WRAP("reason: ROW_COUNT exceeds the system-Dependent "	\
 		"constant UPTO_MAX (" UPTO_MAX_STRING "), ignoring "	\
 		"DB_SPEC starting with:") "\n"
 
@@ -959,8 +959,8 @@ inline bool
 db_flag_match(struct GenerateArgvState *const restrict argv)
 {
 	const bool matched_db_flag = flag_match(*(argv->arg.from),
-						'd',
-						"database");
+						'D',
+						"DATABASE");
 
 	if (matched_db_flag)
 		argv->db_spec.from = argv->arg.from;
@@ -974,8 +974,8 @@ inline bool
 tbl_flag_match(struct GenerateArgvState *const restrict argv)
 {
 	const bool matched_tbl_flag = flag_match(*(argv->arg.from),
-					       't',
-					       "table");
+					       'T',
+					       "TABLE");
 
 	if (!matched_tbl_flag)
 		expected_tbl_flag(argv);
@@ -987,8 +987,8 @@ inline bool
 col_flag_match(struct GenerateArgvState *const restrict argv)
 {
 	const bool matched_col_flag = flag_match(*(argv->arg.from),
-					       'c',
-					       "column");
+					       'C',
+					       "COLUMN");
 
 	if (!matched_col_flag)
 		expected_col_flag(argv);
@@ -1405,14 +1405,14 @@ EXPECTED_COL_TBL_DB_FLAG:
 	case '-':
 		break; /* parse long SPEC */
 
-	case 'c':
+	case 'C':
 		if (*rem == '\0') {
 			parse_next_col_spec(state);
 			return;
 		}
 		goto EXPECTED_COL_TBL_DB_FLAG;
 
-	case 'd':
+	case 'D':
 		if (*rem == '\0') {
 			parse_database_complete(state);
 			parse_next_db_spec(state);
@@ -1420,7 +1420,7 @@ EXPECTED_COL_TBL_DB_FLAG:
 		}
 		goto EXPECTED_COL_TBL_DB_FLAG;
 
-	case 't':
+	case 'T':
 		if (*rem == '\0') {
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
@@ -1433,23 +1433,23 @@ EXPECTED_COL_TBL_DB_FLAG:
 	}
 
 	switch (*rem) {
-	case 'c':
-		if (strings_equal("olumn", rem + 1l)) {
+	case 'C':
+		if (strings_equal("OLUMN", rem + 1l)) {
 			parse_next_col_spec(state);
 			return;
 		}
 		goto EXPECTED_COL_TBL_DB_FLAG;
 
-	case 'd':
-		if (strings_equal("atabase", rem + 1l)) {
+	case 'D':
+		if (strings_equal("ATABASE", rem + 1l)) {
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
 		}
 		goto EXPECTED_COL_TBL_DB_FLAG;
 
-	case 't':
-		if (strings_equal("able", rem + 1l)) {
+	case 'T':
+		if (strings_equal("ABLE", rem + 1l)) {
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;
@@ -1479,7 +1479,7 @@ col_spec_set_id(struct ColSpec *const restrict col_spec,
 
 }
 
-/* -c COL_NAME -s -b BASE_STRING */
+/* -C COL_NAME -s -b BASE_STRING */
 inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count)
@@ -1498,7 +1498,7 @@ col_spec_set_string_base_name(struct ColSpec *const restrict col_spec)
 	col_spec->type_qualifier.string.base = col_spec->name;
 }
 
-/* -c COL_NAME -s -f BASE_STRING */
+/* -C COL_NAME -s -f BASE_STRING */
 inline void
 col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 {
@@ -1509,7 +1509,7 @@ col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_fixed;
 }
 
-/* -c COL_NAME -s -f */
+/* -C COL_NAME -s -f */
 inline void
 col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
 {
@@ -1517,7 +1517,7 @@ col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
 	col_spec_set_string_fixed(col_spec);
 }
 
-/* -c COL_NAME -n1 */
+/* -C COL_NAME -n1 */
 inline void
 col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
 {
@@ -1528,7 +1528,7 @@ col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_first;
 }
 
-/* -c COL_NAME -nl */
+/* -C COL_NAME -nl */
 inline void
 col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
 {
@@ -1539,7 +1539,7 @@ col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_last;
 }
 
-/* -c COL_NAME -nf */
+/* -C COL_NAME -nf */
 inline void
 col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
 {
@@ -1550,7 +1550,7 @@ col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_full;
 }
 
-/* -c COL_NAME -s */
+/* -C COL_NAME -s */
 inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count)
@@ -1560,15 +1560,23 @@ col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 				 row_count);
 }
 
-/* -c COL_NAME -t */
+/* -C COL_NAME -t -u */
 inline void
-col_spec_set_timestamp_default(struct ColSpec *const restrict col_spec)
+col_spec_set_timestamp_unique(struct ColSpec *const restrict col_spec)
 {
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_unique;
 }
 
-/* -c COL_NAME -t */
+/* -C COL_NAME -t -f */
+inline void
+col_spec_set_timestamp_fixed(struct ColSpec *const restrict col_spec)
+{
+	type_set_timestamp(&col_spec->type);
+	col_spec->build = &build_column_timestamp_fixed;
+}
+
+/* -C COL_NAME -t */
 inline void
 col_spec_set_timestamp_default(struct ColSpec *const restrict col_spec)
 {
@@ -1697,7 +1705,7 @@ STRING_NAMES_FULL:
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 		}
 
-	case 'c':
+	case 'C':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_COL_SPEC:
 			col_spec_set_string_default(state->specs.col,
@@ -1707,7 +1715,7 @@ STRING_DEFAULT_NEXT_COL_SPEC:
 		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-	case 'd':
+	case 'D':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_DB_SPEC:
 			col_spec_set_string_default(state->specs.col,
@@ -1718,7 +1726,7 @@ STRING_DEFAULT_NEXT_DB_SPEC:
 		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-	case 't':
+	case 'T':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_TBL_SPEC:
 			col_spec_set_string_default(state->specs.col,
@@ -1783,20 +1791,20 @@ STRING_DEFAULT_NEXT_TBL_SPEC:
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 		}
 
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
+	case 'C':
+		if (strings_equal("OLUMN", rem + 1l))
 			goto STRING_DEFAULT_NEXT_COL_SPEC;
 
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
+	case 'D':
+		if (strings_equal("ATABASE", rem + 1l))
 			goto STRING_DEFAULT_NEXT_DB_SPEC;
 
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-	case 't':
-		if (strings_equal("able", rem + 1l))
+	case 'T':
+		if (strings_equal("ABLE", rem + 1l))
 			goto STRING_DEFAULT_NEXT_TBL_SPEC;
 
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
@@ -1833,7 +1841,27 @@ INVALID_TIMESTAMP_QUALIFIER_NOTSUP:
 	switch (*arg) {
 	case '-':
 		break;	/* parse long string qualifier */
-	case 'c':
+	case 'f':
+		if (*rem == '\0') {
+TIMESTAMP_FIXED:
+			col_spec_set_timestamp_fixed(state->specs.col);
+			++(state->argv.arg.from);
+			parse_column_complete(state);
+			return;
+		}
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'u':
+		if (*rem == '\0') {
+TIMESTAMP_UNIQUE:
+			col_spec_set_timestamp_unique(state->specs.col);
+			++(state->argv.arg.from);
+			parse_column_complete(state);
+			return;
+		}
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'C':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
 			col_spec_set_timestamp_default(state->specs.col);
@@ -1842,7 +1870,7 @@ TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
 		}
 		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
-	case 'd':
+	case 'D':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
 			col_spec_set_timestamp_default(state->specs.col);
@@ -1852,7 +1880,7 @@ TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
 		}
 		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
-	case 't':
+	case 'T':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_TBL_SPEC:
 			col_spec_set_timestamp_default(state->specs.col);
@@ -1868,20 +1896,32 @@ TIMESTAMP_DEFAULT_NEXT_TBL_SPEC:
 
 
 	switch (*rem) {
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			goto TIMESTAMP_FIXED;
+
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			goto TIMESTAMP_UNIQUE;
+
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'C':
+		if (strings_equal("OLUMN", rem + 1l))
 			goto TIMESTAMP_DEFAULT_NEXT_COL_SPEC;
 
 		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
+	case 'D':
+		if (strings_equal("ATABASE", rem + 1l))
 			goto TIMESTAMP_DEFAULT_NEXT_DB_SPEC;
 
 		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
-	case 't':
-		if (strings_equal("able", rem + 1l))
+	case 'T':
+		if (strings_equal("ABLE", rem + 1l))
 			goto TIMESTAMP_DEFAULT_NEXT_TBL_SPEC;
 
 		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
@@ -2252,8 +2292,8 @@ generate_parse_error(struct GenerateParseState *const restrict state)
 	/* find next DB_SPEC */
 	state->argv.arg.from = flag_match_next(state->argv.arg.from,
 					       state->argv.arg.until,
-					       'd',
-					       "database");
+					       'D',
+					       "DATABASE");
 
 	parse_next_db_spec(state);
 }
@@ -2295,7 +2335,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 * │  │          │                      COL_SPEC - 3 args │
 	 * │  │          │                     ┌──────────────────┐
 	 * │  │          │                     │                  │
-	 * -g -d DB_NAME -t TBL_NAME ROW_COUNT -c COL_NAME COL_TYPE
+	 * -g -D DB_NAME -T TBL_NAME ROW_COUNT -C COL_NAME COL_TYPE
 	 *
 	 * generates 1 database with 1 table with 2 columns (1st column of every
 	 * table is reserved for primary key, 'id')

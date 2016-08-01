@@ -166,33 +166,33 @@ type_assign_upto(struct Label *const restrict type,
 extern inline void
 col_spec_set_id(struct ColSpec *const restrict col_spec,
 		const size_t row_count);
-/* -c COL_NAME -s -b BASE_STRING */
+/* -C COL_NAME -s -b BASE_STRING */
 extern inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count);
 extern inline void
 col_spec_set_string_base_name(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -s -f BASE_STRING */
+/* -C COL_NAME -s -f BASE_STRING */
 extern inline void
 col_spec_set_string_fixed(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -s -f */
+/* -C COL_NAME -s -f */
 extern inline void
 col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -n1 */
+/* -C COL_NAME -n1 */
 extern inline void
 col_spec_set_string_names_first(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -nl */
+/* -C COL_NAME -nl */
 extern inline void
 col_spec_set_string_names_last(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -nf */
+/* -C COL_NAME -nf */
 extern inline void
 col_spec_set_string_names_full(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -s */
+/* -C COL_NAME -s */
 extern inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count);
 
-/* -c COL_NAME -t */
+/* -C COL_NAME -t */
 extern inline void
 col_spec_set_timestamp_unique(struct ColSpec *const restrict col_spec);
 extern inline void
