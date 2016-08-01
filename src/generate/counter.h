@@ -237,6 +237,17 @@ counter_size_upto(const size_t upto)
 }
 
 
+inline void
+count_buffer_increment_2(char *restrict digit)
+{
+	while (*digit == '9') {
+		*digit = '0';
+		--digit;
+	}
+
+	++(*digit);
+}
+
 
 inline void
 count_buffer_increment(char *restrict digit)
@@ -344,7 +355,6 @@ count_buffer_increment(char *restrict digit)
 	case '7': SET_STRING_WIDTH(digit, "80000000", 8); return;
 	default:  SET_STRING_WIDTH(digit, "90000000", 8);
 	}
-
 #else
 	default:  SET_STRING_WIDTH(digit, "9000", 4);
 	}

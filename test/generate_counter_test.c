@@ -8,10 +8,61 @@ void setUp(void)
 void tearDown(void)
 {
 }
+/* void test_count_buffer_increment(void) */
+/* { */
+/* 	char buffer[SIZE_UPTO_MAX_STR] = { */
+/* 		[0 ... (SIZE_UPTO_MAX_STR - 2)] = '0', */
+/* 		[SIZE_UPTO_MAX_STR - 1] = '\0' */
+/* 	}; */
 
-void TODO_test_generate_counter(void)
+/* 	char *const restrict ptr = &buffer[SIZE_UPTO_MAX_STR - 2]; */
+
+/* 	for (size_t i = 0; i < UPTO_MAX; ++i) */
+/* 		count_buffer_increment(ptr); */
+
+/* 	TEST_ASSERT_EQUAL_STRING(UPTO_MAX_STRING, &buffer[0]); */
+/* } */
+
+void test_count_buffer_increment(void)
 {
-	TEST_IGNORE();
+	struct timespec start, finish;
+
+	char buffer1[SIZE_UPTO_MAX_STR] = {
+		[0 ... (SIZE_UPTO_MAX_STR - 2)] = '0',
+		[SIZE_UPTO_MAX_STR - 1] = '\0'
+	};
+
+	char *const restrict ptr1 = &buffer1[SIZE_UPTO_MAX_STR - 2];
+
+	char buffer2[SIZE_UPTO_MAX_STR] = {
+		[0 ... (SIZE_UPTO_MAX_STR - 2)] = '0',
+		[SIZE_UPTO_MAX_STR - 1] = '\0'
+	};
+
+	char *const restrict ptr2 = &buffer2[SIZE_UPTO_MAX_STR - 2];
+
+	timespec_now(&start);
+
+	for (size_t i = 0; i < UPTO_MAX; ++i)
+		count_buffer_increment_2(ptr2);
+
+	timespec_now(&finish);
+
+	TEST_ASSERT_EQUAL_STRING(UPTO_MAX_STRING, &buffer2[0]);
+
+	printf("switch: %ld\n", timespec_diff_nano(&start, &finish));
+
+
+	timespec_now(&start);
+
+	for (size_t i = 0; i < UPTO_MAX; ++i)
+		count_buffer_increment(ptr1);
+
+	timespec_now(&finish);
+
+	TEST_ASSERT_EQUAL_STRING(UPTO_MAX_STRING, &buffer1[0]);
+
+	printf("loop:   %ld\n", timespec_diff_nano(&start, &finish));
 }
 
 /* void */

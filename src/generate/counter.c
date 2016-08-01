@@ -20,6 +20,9 @@ extern inline size_t
 counter_size_upto(const size_t upto);
 
 extern inline void
+count_buffer_increment_2(char *restrict digit);
+
+extern inline void
 count_buffer_increment(char *restrict digit);
 
 extern inline void
