@@ -15,9 +15,16 @@ struct TimestampBuffer {
 	char bytes[SIZE_TIMESTAMP_STRING];
 };
 
+/* function-like macros
+ *─────────────────────────────────────────────────────────────────────────── */
+#define PUT_TIMESTAMP_STRING(PTR, STRING)				\
+*((struct TimestampBuffer *restrict) PTR)				\
+= *((const struct TimestampBuffer *const restrict) STRING);		\
+PTR = (__typeof__(PTR)) (((struct TimestampBuffer *restrict) PTR) + 1l)
+
 inline void
-timestamp_string_init(const struct Timestamp *const restrict timestamp,
-		      char *restrict string)
+timestamp_string_init(char *restrict string,
+		      const struct Timestamp *const restrict timestamp)
 {
 	unsigned int rem;
 
@@ -43,24 +50,20 @@ timestamp_string_init(const struct Timestamp *const restrict timestamp,
 
 	++string;
 
-	*string = '-';
-
-	++string;
-
-	/* "MM-" */
+	/* "-MM-" */
 	switch (timestamp->month) {
-	case 12u: PUT_STRING_WIDTH(string, "12-", 3); break;
-	case 11u: PUT_STRING_WIDTH(string, "11-", 3); break;
-	case 10u: PUT_STRING_WIDTH(string, "10-", 3); break;
-	case  9u: PUT_STRING_WIDTH(string, "09-", 3); break;
-	case  8u: PUT_STRING_WIDTH(string, "08-", 3); break;
-	case  7u: PUT_STRING_WIDTH(string, "07-", 3); break;
-	case  6u: PUT_STRING_WIDTH(string, "06-", 3); break;
-	case  5u: PUT_STRING_WIDTH(string, "05-", 3); break;
-	case  4u: PUT_STRING_WIDTH(string, "04-", 3); break;
-	case  3u: PUT_STRING_WIDTH(string, "03-", 3); break;
-	case  2u: PUT_STRING_WIDTH(string, "02-", 3); break;
-	default:  PUT_STRING_WIDTH(string, "01-", 3);
+	case 12u: PUT_STRING_WIDTH(string, "-12-", 4); break;
+	case 11u: PUT_STRING_WIDTH(string, "-11-", 4); break;
+	case 10u: PUT_STRING_WIDTH(string, "-10-", 4); break;
+	case  9u: PUT_STRING_WIDTH(string, "-09-", 4); break;
+	case  8u: PUT_STRING_WIDTH(string, "-08-", 4); break;
+	case  7u: PUT_STRING_WIDTH(string, "-07-", 4); break;
+	case  6u: PUT_STRING_WIDTH(string, "-06-", 4); break;
+	case  5u: PUT_STRING_WIDTH(string, "-05-", 4); break;
+	case  4u: PUT_STRING_WIDTH(string, "-04-", 4); break;
+	case  3u: PUT_STRING_WIDTH(string, "-03-", 4); break;
+	case  2u: PUT_STRING_WIDTH(string, "-02-", 4); break;
+	default:  PUT_STRING_WIDTH(string, "-01-", 4);
 	}
 
 	/* "DD " */
@@ -496,7 +499,9 @@ timestamp_string_increment(char *restrict ptr)
 }
 
 
-/* worker thread entry point */
+/* worker thread entry points */
+void
+build_column_timestamp_unique(void *arg);
 void
 build_column_timestamp_fixed(void *arg);
 

@@ -1236,6 +1236,16 @@ type_set_varchar(struct Label *const restrict type,
 }
 
 inline void
+type_set_timestamp(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "TIMESTAMP",
+			 10);
+	type->width = 9u;
+}
+
+
+inline void
 type_set_tinyint(struct Label *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
@@ -1469,6 +1479,7 @@ col_spec_set_id(struct ColSpec *const restrict col_spec,
 
 }
 
+/* -c COL_NAME -s -b BASE_STRING */
 inline void
 col_spec_set_string_base(struct ColSpec *const restrict col_spec,
 			 const size_t row_count)
@@ -1487,6 +1498,7 @@ col_spec_set_string_base_name(struct ColSpec *const restrict col_spec)
 	col_spec->type_qualifier.string.base = col_spec->name;
 }
 
+/* -c COL_NAME -s -f BASE_STRING */
 inline void
 col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 {
@@ -1497,6 +1509,7 @@ col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_fixed;
 }
 
+/* -c COL_NAME -s -f */
 inline void
 col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
 {
@@ -1504,6 +1517,7 @@ col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
 	col_spec_set_string_fixed(col_spec);
 }
 
+/* -c COL_NAME -n1 */
 inline void
 col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
 {
@@ -1514,6 +1528,7 @@ col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_first;
 }
 
+/* -c COL_NAME -nl */
 inline void
 col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
 {
@@ -1524,6 +1539,7 @@ col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_last;
 }
 
+/* -c COL_NAME -nf */
 inline void
 col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
 {
@@ -1534,6 +1550,7 @@ col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
 	col_spec->build = &build_column_string_names_full;
 }
 
+/* -c COL_NAME -s */
 inline void
 col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count)
@@ -1541,6 +1558,22 @@ col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 	col_spec_set_string_base_name(col_spec);
 	col_spec_set_string_base(col_spec,
 				 row_count);
+}
+
+/* -c COL_NAME -t */
+inline void
+col_spec_set_timestamp_default(struct ColSpec *const restrict col_spec)
+{
+	type_set_timestamp(&col_spec->type);
+	col_spec->build = &build_column_timestamp_unique;
+}
+
+/* -c COL_NAME -t */
+inline void
+col_spec_set_timestamp_default(struct ColSpec *const restrict col_spec)
+{
+	type_set_timestamp(&col_spec->type);
+	col_spec->build = &build_column_timestamp_unique;
 }
 
 inline void
@@ -1630,7 +1663,7 @@ STRING_FIXED:
 
 	case 'n':
 		switch (*rem) {
-		case 'f':
+		case '1':
 			if (rem[1] == '\0') {
 STRING_NAMES_FIRST:
 				col_spec_set_string_names_first(state->specs.col);
@@ -1650,7 +1683,7 @@ STRING_NAMES_LAST:
 			}
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 
-		case 'F':
+		case 'f':
 			if (rem[1] == '\0') {
 STRING_NAMES_FULL:
 				col_spec_set_string_names_full(state->specs.col);
@@ -1774,6 +1807,91 @@ STRING_DEFAULT_NEXT_TBL_SPEC:
 }
 
 inline void
+parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		col_spec_set_timestamp_default(state->specs.col);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+INVALID_TIMESTAMP_QUALIFIER_NOTSUP:
+		invalid_col_type_q_notsup(&state->argv);
+		++(state->argv.arg.from);
+		generate_parse_error(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long string qualifier */
+	case 'c':
+		if (*rem == '\0') {
+TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
+			col_spec_set_timestamp_default(state->specs.col);
+			parse_next_col_spec(state);
+			return;
+		}
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'd':
+		if (*rem == '\0') {
+TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
+			col_spec_set_timestamp_default(state->specs.col);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 't':
+		if (*rem == '\0') {
+TIMESTAMP_DEFAULT_NEXT_TBL_SPEC:
+			col_spec_set_timestamp_default(state->specs.col);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+			return;
+		}
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	default:
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+	}
+
+
+	switch (*rem) {
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto TIMESTAMP_DEFAULT_NEXT_COL_SPEC;
+
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto TIMESTAMP_DEFAULT_NEXT_DB_SPEC;
+
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto TIMESTAMP_DEFAULT_NEXT_TBL_SPEC;
+
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+
+	default:
+		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+	}
+}
+
+inline void
 parse_col_type(struct GenerateParseState *const restrict state)
 {
 	const char *restrict arg = *(state->argv.arg.from);
@@ -1800,7 +1918,12 @@ INVALID_COL_TYPE_NOTSUP:
 		}
 		goto INVALID_COL_TYPE_NOTSUP;
 
-	case 'g':
+	case 't':
+		if (*rem == '\0') {
+			parse_timestamp_qualifier(state);
+			return;
+		}
+		goto INVALID_COL_TYPE_NOTSUP;
 
 	default:
 		goto INVALID_COL_TYPE_NOTSUP;
@@ -1811,6 +1934,13 @@ INVALID_COL_TYPE_NOTSUP:
 	case 's':
 		if (strings_equal("tring", rem + 1l)) {
 			parse_string_qualifier(state);
+			return;
+		}
+		goto INVALID_COL_TYPE_NOTSUP;
+
+	case 't':
+		if (strings_equal("imestamp", rem + 1l)) {
+			parse_timestamp_qualifier(state);
 			return;
 		}
 		goto INVALID_COL_TYPE_NOTSUP;

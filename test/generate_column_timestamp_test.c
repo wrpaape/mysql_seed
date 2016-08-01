@@ -17,8 +17,8 @@ void test_timestamp_string_init(void)
 
 	TEST_ASSERT_TRUE(timestamp_now_status(&timestamp));
 
-	timestamp_string_init(&timestamp,
-			      &string[0]);
+	timestamp_string_init(&string[0],
+			      &timestamp);
 
 	puts(&string[0]);
 }

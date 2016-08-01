@@ -1,6 +1,7 @@
 #include "generate/column_string.h"
 
 #define BCSB_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_column_string_base")
+#define BCSF_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_column_string_fixed")
 
 /* worker thread entry point */
 void
@@ -109,7 +110,7 @@ build_column_string_fixed(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCSB_MALLOC_FAILURE);
+				     BCSF_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 

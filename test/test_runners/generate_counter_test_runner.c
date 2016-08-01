@@ -43,7 +43,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/generate_counter_test.c");
-  RUN_TEST(test_count_buffer_increment, 11);
+  RUN_TEST(test_count_buffer_increment, 12);
 
   return (UnityEnd());
 }

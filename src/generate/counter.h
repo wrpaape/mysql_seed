@@ -238,18 +238,6 @@ counter_size_upto(const size_t upto)
 
 
 inline void
-count_buffer_increment_2(char *restrict digit)
-{
-	while (*digit == '9') {
-		*digit = '0';
-		--digit;
-	}
-
-	++(*digit);
-}
-
-
-inline void
 count_buffer_increment(char *restrict digit)
 {
 	switch (*digit) {

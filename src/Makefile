@@ -93,11 +93,11 @@ endif
 # Path delimiter and chain commands token
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq (T,$(SYSTEM_WINDOWS))
-PATH_DELIM		:= \\
-CMD_DELIM 		:= &
+PATH_DELIM	:= \\
+CMD_DELIM 	:= &
 else
-PATH_DELIM		:= /
-CMD_DELIM 		:= ;
+PATH_DELIM	:= /
+CMD_DELIM 	:= ;
 endif
 
 
@@ -1410,11 +1410,13 @@ GENERATE_GENERATE_OBJ_PREQS		:= $(GENERATE_GENERATE_SRC) 			\
 			   		   $(GENERATE_LOADER_HDR)			\
 			   		   $(GENERATE_COLUMN_ID_HDR)			\
 			   		   $(GENERATE_COLUMN_STRING_HDR)		\
+			   		   $(GENERATE_COLUMN_TIMESTAMP_HDR)		\
 			   		   $(GENERATE_TABLE_HDR)
 GENERATE_GENERATE_OBJ_GROUP		:= $(GENERATE_GENERATE_OBJ)			\
 			   		   $(GENERATE_LOADER_OBJ_GROUP)			\
 			   		   $(GENERATE_COLUMN_ID_OBJ_GROUP)		\
 			   		   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
+			   		   $(GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP)		\
 			   		   $(GENERATE_TABLE_OBJ_GROUP)
 GENERATE_GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_GENERATE_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
