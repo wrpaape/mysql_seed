@@ -2001,13 +2001,13 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		struct ColSpec *restrict col_spec
 		= (struct ColSpec *restrict) (state->specs.tbl + 1l);
 
-		/* reserve first column for 'id' */
-		col_spec_set_id(col_spec,
-				state->specs.tbl->row_count);
+		/* /1* reserve first column for 'id' *1/ */
+		/* col_spec_set_id(col_spec, */
+		/* 		state->specs.tbl->row_count); */
 
-		state->specs.tbl->col_specs.from = col_spec;
+		/* state->specs.tbl->col_specs.from = col_spec; */
 
-		++col_spec;
+		/* ++col_spec; */
 
 
 		const bool valid_col_name = parse_col_name(&col_spec->name,
@@ -2018,7 +2018,7 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		if (valid_col_name) {
 			state->specs.col = col_spec;
 
-			state->database.columns = 2u; /* set column counter */
+			state->database.columns = 1u; /* set column counter */
 
 			parse_col_type(state);
 
@@ -2054,13 +2054,13 @@ TERMINATE_VALID_EXIT_FAILURE:
 	struct ColSpec *restrict col_spec
 	= (struct ColSpec *restrict) (state->specs.tbl + 1l);
 
-	/* reserve first column for 'id' */
-	col_spec_set_id(col_spec,
-			state->specs.tbl->row_count);
+	/* /1* reserve first column for 'id' *1/ */
+	/* col_spec_set_id(col_spec, */
+	/* 		state->specs.tbl->row_count); */
 
-	state->specs.tbl->col_specs.from = col_spec;
+	/* state->specs.tbl->col_specs.from = col_spec; */
 
-	++col_spec;
+	/* ++col_spec; */
 
 	const bool valid_col_name = parse_col_name(&col_spec->name,
 						   &state->argv);
@@ -2079,7 +2079,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 
 	state->specs.col = col_spec;
 
-	state->database.columns += 2u; /* set column counter */
+	++(state->database.columns); /* set column counter */
 
 	parse_col_type(state);
 }
@@ -2116,7 +2116,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 		goto TERMINATE_VALID_EXIT_FAILURE;
 	}
 
-	state->database.columns += 1u;
+	++(state->database.columns);
 
 	parse_col_type(state);
 }
@@ -2337,8 +2337,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 * │  │          │                     │                  │
 	 * -g -D DB_NAME -T TBL_NAME ROW_COUNT -C COL_NAME COL_TYPE
 	 *
-	 * generates 1 database with 1 table with 2 columns (1st column of every
-	 * table is reserved for primary key, 'id')
+	 * generates 1 database with 1 table with 1 column
 	 *
 	 *
 	 * extreme valid cases (mac = argc - 1 for leading mode flag)
