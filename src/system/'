@@ -53,17 +53,14 @@
 
 /* ioctl wrappers */
 #ifndef WIN32
+#	define get_winsize_imp(WINDOW, FILE_DESCRIPTOR)			\
+	ioctl(FILE_DESCRIPTOR, TIOCGWINSZ, WINDOW)
+
 #	define get_interface_addresses_imp(CONFIG, DEVICE_DESCRIPTOR)	\
 	ioctl(DEVICE_DESCRIPTOR, SIOCGIFCONF, CONFIG)
 
-#	define get_device_active_flags_imp(REQUEST, DEVICE_DESCRIPTOR)	\
-	ioctl(DEVICE_DESCRIPTOR, SIOCGIFFLAGS, REQUEST)
-
 #	define get_hardware_address_imp(REQUEST, DEVICE_DESCRIPTOR)	\
 	ioctl(DEVICE_DESCRIPTOR, SIOCGIFHWADDR, REQUEST)
-
-#	define get_winsize_imp(WINDOW, FILE_DESCRIPTOR)			\
-	ioctl(FILE_DESCRIPTOR, TIOCGWINSZ, WINDOW)
 #endif /* ifndef WIN32 */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
@@ -181,162 +178,11 @@ socket_handle_cl(const int domain,
 }
 
 
-#ifdef LINUX
+#ifndef WIN32
 /* get_interface_addresses */
-inline bool
-get_interface_addresses_status(struct ifconf *const restrict configuration,
-			       const int device_descriptor)
-{
-	return get_interface_addresses_imp(configuration,
-					   device_descriptor) != -1;
-}
-
 inline void
-get_interface_addresses_muffle(struct ifconf *const restrict configuration,
-			       const int device_descriptor)
-{
-	(void) get_interface_addresses_imp(configuration,
-					   device_descriptor);
-}
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE get_interface_addresses_imp
-inline bool
-get_interface_addresses_report(struct ifconf *const restrict configuration,
-			       const int device_descriptor,
-			       const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(configuration,
-			       device_descriptor)
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "'device_descriptor', is not a valid "
-				 "descriptor.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'configuration' or ioctl request 'SIOCGIFCONF' is"
-				 " not valid.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
-				 "'device_descriptor' is not associated with a "
-				 "character special device.",
-				 "The specified iotcl configuration 'SIOCGIFCONF' "
-				 "does not apply to the kind of object that the"
-				 " descriptor 'device_descriptor' references.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
-
-inline void
-get_interface_addresses_handle(struct ifconf *const restrict configuration,
-			       const int device_descriptor,
-			       Handler *const handle,
-			       void *arg)
-{
-	const char *restrict failure;
-
-	if (get_interface_addresses_report(configuration,
-					   device_descriptor,
-					   &failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-get_interface_addresses_handle_cl(struct ifconf *const restrict configuration,
-				  const int device_descriptor,
-				  const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (get_interface_addresses_report(configuration,
-					   device_descriptor,
-					   &failure))
-		return;
-
-	handler_closure_call(fail_cl,
-			     failure);
-	__builtin_unreachable();
-}
-
-
-/* get_device_active_flags */
-inline bool
-get_device_active_flags_status(struct ifreq *const restrict request,
-			       const int device_descriptor)
-{
-	return get_device_active_flags_imp(request,
-					   device_descriptor) != -1;
-}
-
-inline void
-get_device_active_flags_muffle(struct ifreq *const restrict request,
-			       const int device_descriptor)
-{
-	(void) get_device_active_flags_imp(request,
-					   device_descriptor);
-}
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE get_device_active_flags_imp
-inline bool
-get_device_active_flags_report(struct ifreq *const restrict request,
-			       const int device_descriptor,
-			       const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(request,
-			       device_descriptor)
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "'device_descriptor', is not a valid "
-				 "descriptor.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'request' or ioctl request 'SIOCGIFFLAGS' is"
-				 " not valid.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
-				 "'device_descriptor' is not associated with a "
-				 "character special device.",
-				 "The specified iotcl request 'SIOCGIFFLAGS' "
-				 "does not apply to the kind of object that the"
-				 " descriptor 'device_descriptor' references.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
-
-inline void
-get_device_active_flags_handle(struct ifreq *const restrict request,
-			       const int device_descriptor,
-			       Handler *const handle,
-			       void *arg)
-{
-	const char *restrict failure;
-
-	if (get_device_active_flags_report(request,
-					   device_descriptor,
-					   &failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-get_device_active_flags_handle_cl(struct ifreq *const restrict request,
-				  const int device_descriptor,
-				  const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (get_device_active_flags_report(request,
-					   device_descriptor,
-					   &failure))
-		return;
-
-	handler_closure_call(fail_cl,
-			     failure);
-	__builtin_unreachable();
-}
-
-
-
+get_hardware_address_status(struct ifconf *const restrict configuration,
+			    const int device_descriptor)
 
 /* get_hardware_address */
 inline void
@@ -490,7 +336,7 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 			     failure);
 	__builtin_unreachable();
 }
-#endif /* ifdef LINUX */
+#endif /* ifndef WIN32 */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

@@ -140,9 +140,13 @@ ifeq (T,$(SYSTEM_WINDOWS))
 
         THREADS_LIB_FLAG	:= -L$(THREADS_LIB_DIR) -lpthreadGC2.dll
         THREADS_INC_FLAG	:= -I$(THREADS_INC_DIR)
+
+        SYSTEM_LIB_FLAGS	:= -lWs2_32 -lKernel32
 else
         THREADS_LIB_FLAG	:= -lpthread
         THREADS_INC_FLAG	:= $(EMPTY)
+
+        SYSTEM_LIB_FLAGS	:= $(EMPTY)
 endif
 
 
@@ -227,7 +231,7 @@ endif
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
 LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
 
 ifeq (T,$(SYSTEM_OSX))
 LD_FLAGS	+= -macosx_version_min 10.11

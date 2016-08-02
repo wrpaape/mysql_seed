@@ -3,7 +3,13 @@
 
 /* EXTERNAL DEPENDENCIES ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include <fcntl.h>		    /* open */
+#ifdef WIN32
+#	include <io.h>		/* _open, _write, _close */
+#	include <direct.h>	/* _chdir */
+#else
+#	include <fcntl.h>	/* open */
+#endif /* ifdef WIN32 */
+
 #include <unistd.h>		    /* close, getcwd, STDOUT/IN/ERR_FILENO */
 #include "utils/utils.h"	    /* FILE/stream API */
 #include "system/system_utils.h"    /* sys headers, FAIL_SWITCH, misc macros */

@@ -1,10 +1,9 @@
-#ifndef MYSQL_SEED_TIME_UUID_UTILS_H_
-#define MYSQL_SEED_TIME_UUID_UTILS_H_
+#ifndef MYSQL_SEED_UUID_UUID_UTILS_H_
+#define MYSQL_SEED_UUID_UUID_UTILS_H_
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include "utils/types/octet.h"
-#include "stdint.h"
+#include "time/time_utils.h"	/* timespec_now, stdint */
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -20,6 +19,35 @@ struct UUID {
 /* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
 #define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
 
+#define UUID_VERSION 1
 
 
-#endif /* ifndef MYSQL_SEED_TIME_UUID_UTILS_H_ */
+inline uint64_t
+uuid_time_now(void)
+{
+	struct timespec time;
+
+	timespec_now(&time);
+
+	return (time.tv_sec * 10000000lu)
+	     + (time.tv_nsec / 100lu)
+	     + GREGORIAN_REFORM_EPOCH_DIFF;
+}
+
+
+inline void
+uuid_init(struct UUID *const restrict uuid)
+{
+	const uint64_t now = uuid_time_now();
+
+	uuid->time_low = (uint32_t) now;
+
+	uuid->time_mid = (uint16_t) (now >> 32);
+
+	uuid->time_hi_and_version = (uint16_t) ((now >> 48)
+						| (UUID_VERSION << 12));
+}
+
+
+
+#endif /* ifndef MYSQL_SEED_UUID_UUID_UTILS_H_ */
