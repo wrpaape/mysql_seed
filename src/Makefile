@@ -455,6 +455,43 @@ TARGETS			+= $(MEMORY_MEMORY_UTILS_OBJ)			\
 			   $(MEMORY_MEMORY_UTILS_TEST_BIN)
 
 
+# memory/memory_zero
+# ──────────────────────────────────────────────────────────────────────────────
+MEMORY_MEMORY_ZERO_SRC 		:= $(call HELPER_SOURCE_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_HDR		:= $(call HELPER_HEADER_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_OBJ 		:= $(call HELPER_OBJECT_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,memory memory_zero)
+MEMORY_MEMORY_ZERO_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,memory memory_zero)
+# ─────────────── target prequisites ───────────────────────────────────────────
+MEMORY_MEMORY_ZERO_OBJ_PREQS		:= $(MEMORY_MEMORY_ZERO_SRC) 		\
+			   	   	   $(MEMORY_MEMORY_ZERO_HDR)		\
+			   	   	   $(MEMORY_WORD_REM_UTILS_HDR)
+MEMORY_MEMORY_ZERO_OBJ_GROUP		:= $(MEMORY_MEMORY_ZERO_OBJ)		\
+					   $(MEMORY_MEMORY_UTILS_OBJ_GROUP)
+MEMORY_MEMORY_ZERO_TRNR_SRC_PREQS	:= $(MEMORY_MEMORY_ZERO_TEST_SRC)	\
+					   $(TEST_RUNNER_SOURCE_DIR)
+MEMORY_MEMORY_ZERO_TEST_OBJ_PREQS	:= $(MEMORY_MEMORY_ZERO_TEST_SRC)	\
+					   $(MEMORY_MEMORY_ZERO_OBJ_PREQS) 	\
+					   $(UNITY_OBJ_PREQS)
+MEMORY_MEMORY_ZERO_TRNR_OBJ_PREQS	:= $(MEMORY_MEMORY_ZERO_TRNR_SRC)	\
+					   $(MEMORY_MEMORY_ZERO_TEST_OBJ_PREQS)
+MEMORY_MEMORY_ZERO_TEST_BIN_PREQS	:= $(MEMORY_MEMORY_ZERO_TRNR_OBJ)	\
+					   $(MEMORY_MEMORY_ZERO_TEST_OBJ)	\
+					   $(MEMORY_MEMORY_ZERO_OBJ_GROUP)	\
+					   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(MEMORY_MEMORY_ZERO_TEST_BIN)
+TARGETS			+= $(MEMORY_MEMORY_ZERO_OBJ)		\
+			   $(MEMORY_MEMORY_ZERO_TRNR_SRC)	\
+			   $(MEMORY_MEMORY_ZERO_TRNR_OBJ)	\
+			   $(MEMORY_MEMORY_ZERO_TEST_OBJ)	\
+			   $(MEMORY_MEMORY_ZERO_TEST_BIN)
+
+
+
 # memory/memory_copy_array
 # ──────────────────────────────────────────────────────────────────────────────
 MEMORY_MEMORY_COPY_ARRAY_SRC 		:= $(call HELPER_SOURCE_PATH,memory memory_copy_array)
@@ -1802,6 +1839,11 @@ $(MEMORY_MEMORY_COPY_ARRAY_OBJ): $(MEMORY_MEMORY_COPY_ARRAY_OBJ_PREQS)
 $(MEMORY_MEMORY_SWAP_OBJ): $(MEMORY_MEMORY_SWAP_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make memory/memory_zero object
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_ZERO_OBJ): $(MEMORY_MEMORY_ZERO_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make memory/memory_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(MEMORY_MEMORY_UTILS_OBJ): $(MEMORY_MEMORY_UTILS_OBJ_PREQS)
@@ -2436,6 +2478,26 @@ $(MEMORY_MEMORY_SWAP_TEST_OBJ): $(MEMORY_MEMORY_SWAP_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(MEMORY_MEMORY_SWAP_TRNR_SRC): $(MEMORY_MEMORY_SWAP_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for memory/memory_zero
+# make:
+# 	memory_memory_zero_test		binary,
+# 	memory_memory_zero_test_runner 	object,
+# 	memory_memory_zero_test		object, and
+# 	memory_memory_zero_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(MEMORY_MEMORY_ZERO_TEST_BIN): $(MEMORY_MEMORY_ZERO_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(MEMORY_MEMORY_ZERO_TRNR_OBJ): $(MEMORY_MEMORY_ZERO_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_ZERO_TEST_OBJ): $(MEMORY_MEMORY_ZERO_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(MEMORY_MEMORY_ZERO_TRNR_SRC): $(MEMORY_MEMORY_ZERO_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
