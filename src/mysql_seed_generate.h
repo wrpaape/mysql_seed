@@ -1481,15 +1481,15 @@ col_spec_set_id(struct ColSpec *const restrict col_spec,
 
 /* -C COL_NAME -s -b BASE_STRING */
 inline void
-col_spec_set_string_base(struct ColSpec *const restrict col_spec,
-			 const size_t row_count)
+col_spec_set_string_unique(struct ColSpec *const restrict col_spec,
+			   const size_t row_count)
 {
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
 			 (col_spec->type_qualifier.string.base.length
 			  + uint_digit_count(row_count)));
 
-	col_spec->build = &build_column_string_base;
+	col_spec->build = &build_column_string_unique;
 }
 
 inline void
@@ -1556,8 +1556,8 @@ col_spec_set_string_default(struct ColSpec *const restrict col_spec,
 			    const size_t row_count)
 {
 	col_spec_set_string_base_name(col_spec);
-	col_spec_set_string_base(col_spec,
-				 row_count);
+	col_spec_set_string_unique(col_spec,
+				   row_count);
 }
 
 /* -C COL_NAME -t -u */
@@ -1632,8 +1632,8 @@ STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				col_spec_set_string_base(state->specs.col,
-							 state->specs.tbl->row_count);
+				col_spec_set_string_unique(state->specs.col,
+							   state->specs.tbl->row_count);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);

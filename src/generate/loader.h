@@ -77,8 +77,8 @@ inline char *
 loader_put_body(char *restrict ptr,
 		const struct Database *const restrict database)
 {
-	const struct Table *const restrict until = database->tables.until;
 	const struct Table *restrict from	 = database->tables.from;
+	const struct Table *const restrict until = database->tables.until;
 
 	const struct ColSpec *restrict col_spec_from;
 	const struct ColSpec *restrict col_spec_until;
@@ -93,12 +93,7 @@ loader_put_body(char *restrict ptr,
 
 		PUT_LOADER_CREATE_TABLE_2(ptr);
 
-		ptr = put_label(ptr,
-				&from->spec->col_specs.from->type);
-
-		PUT_LOADER_CREATE_TABLE_3(ptr);
-
-		col_spec_from  = from->spec->col_specs.from + 1l;
+		col_spec_from  = from->spec->col_specs.from;
 		col_spec_until = from->spec->col_specs.until;
 
 		while (1) {

@@ -94,7 +94,7 @@ PTR = put_string_size(ptr,						\
 #define TABLE_HEADER_5							\
 	"<NEWLINE>"							\
 "\n14)"									\
-"\n15) ╔═══════════════════════════════════════════╗"		\
+"\n15) ╔═══════════════════════════════════════════╗"			\
 "\n16) ║ LINES 1 THROUGH " TABLE_HEADER_LINE_COUNT " ARE IGNORED BY LOADER! ║" \
 "\n17) ╚═══════════════════════════════════════════╝"
 #define PUT_TABLE_HEADER_5(PTR)						\
@@ -173,16 +173,9 @@ PUT_STRING_WIDTH(PTR, LOADER_HEADER_6, 1)
 PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_1, 15)
 
 #define LOADER_CREATE_TABLE_2						\
-" (\n\tid "
+" (\n\t"
 #define PUT_LOADER_CREATE_TABLE_2(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_2, 7)
-
-#define LOADER_CREATE_TABLE_3						\
-" UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,\n\t"
-#define PUT_LOADER_CREATE_TABLE_3(PTR)					\
-PTR = put_string_size(PTR,						\
-		      LOADER_CREATE_TABLE_3,				\
-		      sizeof(LOADER_CREATE_TABLE_3) - 1lu)
+PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_2, 4)
 
 #define LOADER_CREATE_TABLE_FIELD_DELIM					\
 ",\n\t"
@@ -231,7 +224,7 @@ PTR = put_string_size(PTR,						\
 /* GENERATOR COMPONENT SPECS
  * ──────────────────────────────────────────────────────────────────────────
  * ────────────────────────────────────────────────────────────────────────── */
-/* -c username --string --base tastyham			→ tastyham1
+/* -c username --string --unique tastyham		→ tastyham1
  *							  tastyham2
  *			   				  ...
  *			   				  tastyham<ROW_COUNT> */

@@ -1,11 +1,14 @@
 #include "generate/column_string.h"
 
-#define BCSB_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_column_string_base")
-#define BCSF_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_column_string_fixed")
+#define BCSB_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_column_string_unique")
+
+#define BCSF_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_column_string_fixed")
 
 /* worker thread entry point */
 void
-build_column_string_base(void *arg)
+build_column_string_unique(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;

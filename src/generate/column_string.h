@@ -9,7 +9,7 @@
 
 /* worker thread entry point */
 void
-build_column_string_base(void *arg);
+build_column_string_unique(void *arg);
 
 /* worker thread entry point */
 void

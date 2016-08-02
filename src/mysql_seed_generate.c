@@ -166,10 +166,10 @@ type_assign_upto(struct Label *const restrict type,
 extern inline void
 col_spec_set_id(struct ColSpec *const restrict col_spec,
 		const size_t row_count);
-/* -C COL_NAME -s -b BASE_STRING */
+/* -C COL_NAME -s -u BASE_STRING */
 extern inline void
-col_spec_set_string_base(struct ColSpec *const restrict col_spec,
-			 const size_t row_count);
+col_spec_set_string_unique(struct ColSpec *const restrict col_spec,
+			   const size_t row_count);
 extern inline void
 col_spec_set_string_base_name(struct ColSpec *const restrict col_spec);
 /* -C COL_NAME -s -f BASE_STRING */
