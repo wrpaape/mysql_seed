@@ -5,22 +5,23 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#ifdef WIN32
-#	include <windows.h>	/* DeviceIoControl */
-#	include <Winsock2.h>	/* socket */
-#else
-#	include <sys/ioctl.h>	/* iotcl */
-#	include <sys/socket.h>	/* socket */
-#endif /* ifdef WIN32 */
-
-#include <net/if.h>		/* ifreq, ifconf */
-#include <netdb.h>		/* getaddrinfo */
 #include <sys/uio.h>		/* read, write */
 #include <sys/types.h>		/* ssize_t, chmod API */
 #include <sys/stat.h>		/* mkdir */
 #include <sys/param.h>		/* MAXPATHLEN */
 #include "utils/fail_switch.h"	/* stdbool, errno, FAIL_SWITCH */
 #include "utils/closure.h"	/* HandlerClosure */
+
+#ifdef WIN32
+#	include <windows.h>	/* DeviceIoControl */
+#	include <winsock2.h>	/* socket */
+#	include <ws2tcpip.h>	/* getaddrinfo */
+#else
+#	include <sys/ioctl.h>	/* iotcl */
+#	include <sys/socket.h>	/* socket */
+#	include <net/if.h>	/* ifreq, ifconf */
+#	include <netdb.h>	/* getaddrinfo */
+#endif /* ifdef WIN32 */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
