@@ -3,7 +3,8 @@
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include "time/time_utils.h"	/* timespec_now, stdint */
+#include "time/time_utils.h"		/* timespec_now, stdint */
+#include "system/system_utils.h"	/* getaddrinfo */
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -23,22 +24,60 @@ struct UUID {
 
 
 inline uint64_t
-uuid_time_now(void)
+uuid_time_now(const struct HandlerClosure *const restrict fail_cl)
 {
 	struct timespec now;
 
-	timespec_now_muffle(&now);
+	timespec_now_handle_cl(&now,
+			       fail_cl);
 
 	return (now.tv_sec * 10000000lu)
 	     + (now.tv_nsec / 100lu)
 	     + GREGORIAN_REFORM_EPOCH_DIFF;
 }
 
+inline void
+uuid_mac_address(uint8_t *const restrict mac_address,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	struct addrinfo hints = {
+		.ai_family   = AF_UNSPEC,		/* AF_INET, AF_INET6 */
+		.ai_socktype = 0,			/* any socket type */
+		.ai_protocol = 0,			/* any protocol */
+		.ai_flags    = AI_ALL | AI_V4MAPPED	/* IPv6, IPv4 */
+	};
+
+	struct addrinfo *result;
+	struct addrinfo *ptr;
+
+	getaddrinfo_handle_cl("localhost",
+			      NULL,
+			      &hints,
+			      &result,
+			      fail_cl);
+
+	bool found = false;
+
+	uint8_t mac[6] = { 0 };
+
+	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+
+		*((Width6 *) &mac[0]) = *((Width6 *) &ptr->ai_addr->sa_data[0]);
+
+		printf("%02X:%02X:02%X:%02X:%02X:%02X\n",
+		       mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+	}
+
+	freeaddrinfo(result);
+}
+
 
 inline void
-uuid_init(struct UUID *const restrict uuid)
+uuid_init(struct UUID *const restrict uuid,
+	  const struct HandlerClosure *const restrict fail_cl)
 {
-	const uint64_t now = uuid_time_now();
+	const uint64_t now = uuid_time_now(fail_cl);
 
 	uuid->time_low = (uint32_t) now;
 

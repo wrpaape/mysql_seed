@@ -532,11 +532,13 @@ getaddrinfo_report(const char *const node,
 				hints,
 				result)
 	FAIL_SWITCH_STATUS_CASE_1(EAI_ADDRFAMILY,
-				  "address family for hostname not supported")
+				  "The specified network host does not have any"
+				  " network addresses in the requested address "
+				  "family.")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_AGAIN,
 				  "temporary failure in name resolution")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_BADFLAGS,
-				  "invalid value for ai_flags")
+				  "invalid value for 'hints->ai_flags'")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_FAIL,
 				  "non-recoverable failure in name resolution")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_FAMILY,
@@ -544,13 +546,20 @@ getaddrinfo_report(const char *const node,
 	FAIL_SWITCH_STATUS_CASE_1(EAI_MEMORY,
 				  "memory allocation failure")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_NODATA,
-				  "no address associated with hostname")
-	FAIL_SWITCH_STATUS_CASE_1(EAI_NONAME,
-				  "hostname nor servname provided, or not known")
+				  "The specified network host exists, but it "
+				  "does not have any network addresses defined"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_3(EAI_NONAME,
+				  "The node or service is not known",
+				  "both 'node' and 'service' are NULL",
+				  "'AI_NUMERICSERV' was specified in "
+				  "'hints->ai_flags' and 'service' was not a "
+				  "numeric port-number string")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_SERVICE,
-				  "servname not supported for ai_socktype")
+				  "'service' not supported for "
+				  "'hints->ai_socktype'")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_SOCKTYPE,
-				  "ai_socktype not supported")
+				  "'hints->ai_socktype' not supported")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_SYSTEM,
 				  "system error")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_BADHINTS,
