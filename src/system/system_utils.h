@@ -337,8 +337,6 @@ get_device_active_flags_handle_cl(struct ifreq *const restrict request,
 }
 
 
-
-
 /* get_hardware_address */
 inline void
 get_hardware_address_status(struct ifreq *const restrict request,
@@ -492,6 +490,121 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 	__builtin_unreachable();
 }
 #endif /* ifdef LINUX */
+
+
+inline bool
+getaddrinfo_status(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result)
+{
+	return getaddrinfo(node,
+			   service,
+			   hints,
+			   result) == 0;
+}
+
+inline void
+getaddrinfo_muffle(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result)
+{
+	(void) getaddrinfo(node,
+			   service,
+			   hints,
+			   result);
+}
+
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE getaddrinfo
+#define FAIL_SWITCH_STATUS_SUCCESS 0
+
+inline bool
+getaddrinfo_report(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result,
+		   const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_STATUS_OPEN(node,
+				service,
+				hints,
+				result)
+	FAIL_SWITCH_STATUS_CASE_1(EAI_ADDRFAMILY,
+				  "address family for hostname not supported")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_AGAIN,
+				  "temporary failure in name resolution")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_BADFLAGS,
+				  "invalid value for ai_flags")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_FAIL,
+				  "non-recoverable failure in name resolution")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_FAMILY,
+				  "ai_family not supported")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_MEMORY,
+				  "memory allocation failure")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_NODATA,
+				  "no address associated with hostname")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_NONAME,
+				  "hostname nor servname provided, or not known")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_SERVICE,
+				  "servname not supported for ai_socktype")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_SOCKTYPE,
+				  "ai_socktype not supported")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_SYSTEM,
+				  "system error")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_BADHINTS,
+				  "invalid value for 'hints'")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_PROTOCOL,
+				  "resolved protocol is unknown")
+	FAIL_SWITCH_STATUS_CASE_1(EAI_OVERFLOW,
+				  "argument buffer overflow")
+	FAIL_SWITCH_STATUS_CLOSE()
+
+}
+
+inline void
+getaddrinfo_handle(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result,
+		   Handler *const handle,
+		   void *arg)
+{
+	const char *restrict failure;
+
+	if (getaddrinfo_report(node,
+			       service,
+			       hints,
+			       result,
+			       &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+getaddrinfo_handle_cl(const char *const node,
+		      const char *const service,
+		      const struct addrinfo *const hints,
+		      struct addrinfo **const result,
+		      const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (getaddrinfo_report(node,
+			       service,
+			       hints,
+			       result,
+			       &failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

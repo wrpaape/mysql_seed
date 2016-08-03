@@ -25,12 +25,12 @@ struct UUID {
 inline uint64_t
 uuid_time_now(void)
 {
-	struct timespec time;
+	struct timespec now;
 
-	timespec_now(&time);
+	timespec_now_muffle(&now);
 
-	return (time.tv_sec * 10000000lu)
-	     + (time.tv_nsec / 100lu)
+	return (now.tv_sec * 10000000lu)
+	     + (now.tv_nsec / 100lu)
 	     + GREGORIAN_REFORM_EPOCH_DIFF;
 }
 

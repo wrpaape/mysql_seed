@@ -111,3 +111,33 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 		      const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifdef LINUX */
 
+
+extern inline bool
+getaddrinfo_status(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result);
+extern inline void
+getaddrinfo_muffle(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result);
+extern inline bool
+getaddrinfo_report(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result,
+		   const char *restrict *const restrict failure);
+extern inline void
+getaddrinfo_handle(const char *const node,
+		   const char *const service,
+		   const struct addrinfo *const hints,
+		   struct addrinfo **const result,
+		   Handler *const handle,
+		   void *arg);
+extern inline void
+getaddrinfo_handle_cl(const char *const node,
+		      const char *const service,
+		      const struct addrinfo *const hints,
+		      struct addrinfo **const result,
+		      const struct HandlerClosure *const restrict fail_cl);
