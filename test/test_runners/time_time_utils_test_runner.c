@@ -29,6 +29,7 @@ extern void setUp(void);
 extern void tearDown(void);
 extern void test_timestamp_init(void);
 extern void test_timestamp_now(void);
+extern void test_timespec_now(void);
 
 
 //=======Test Reset Option=====
@@ -46,6 +47,7 @@ int main(void)
   UnityBegin("../test/time_time_utils_test.c");
   RUN_TEST(test_timestamp_init, 12);
   RUN_TEST(test_timestamp_now, 68);
+  RUN_TEST(test_timespec_now, 90);
 
   return (UnityEnd());
 }

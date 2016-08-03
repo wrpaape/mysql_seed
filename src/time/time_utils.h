@@ -427,7 +427,7 @@ timespec_now_muffle(struct timespec *const restrict time)
 	clock_serv_t calendar_clock;
 	mach_timespec_t mach_time;
 
-	const mach_port_t host_port = mach_host_self();
+	const host_name_port_t host_port = mach_host_self();
 
 	if (host_port == MACH_PORT_NULL)
 		return;
@@ -465,30 +465,32 @@ timespec_now_muffle(struct timespec *const restrict time)
 #endif
 }
 
+
 inline bool
 timespec_now_status(struct timespec *const restrict time)
 {
+	extern mach_port_t clock_port;
 #ifdef __MACH__
-	clock_serv_t calendar_clock;
+	/* clock_serv_t calendar_clock; */
 	mach_timespec_t mach_time;
 
-	const mach_port_t host_port = mach_host_self();
+	/* const host_name_port_t host_port = mach_host_self(); */
 
-	if (host_port == MACH_PORT_NULL)
-		return false;
+	/* if (host_port == MACH_PORT_NULL) */
+	/* 	return false; */
 
-	if (host_get_clock_service(host_port,
-				   CALENDAR_CLOCK,
-				   &calendar_clock) != KERN_SUCCESS)
-		return false;
+	/* if (host_get_clock_service(host_port, */
+	/* 			   CALENDAR_CLOCK, */
+	/* 			   &calendar_clock) != KERN_SUCCESS) */
+	/* 	return false; */
 
-	if (clock_get_time(calendar_clock,
+	if (clock_get_time(clock_port,
 			   &mach_time) != KERN_SUCCESS)
 		return false;
 
-	if (mach_port_deallocate(host_port,
-				 calendar_clock) != KERN_SUCCESS)
-		return false;
+	/* if (mach_port_deallocate(host_port, */
+	/* 			 calendar_clock) != KERN_SUCCESS) */
+	/* 	return false; */
 
 	time->tv_sec  = mach_time.tv_sec;
 	time->tv_nsec = mach_time.tv_nsec;
@@ -520,7 +522,7 @@ timespec_now_report(struct timespec *const restrict time,
 	clock_serv_t calendar_clock;
 	mach_timespec_t mach_time;
 
-	const mach_port_t host_port = mach_host_self();
+	const host_name_port_t host_port = mach_host_self();
 
 	if (host_port == MACH_PORT_NULL) {
 		*failure = FAILURE_REASON("mach_host_self (NULL host port)",
@@ -854,8 +856,12 @@ timespec_now_report(struct timespec *const restrict time,
 				     calendar_clock)) {
 	case KERN_SUCCESS:
 		break;
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_TASK,
+				  "'host_port' was invalid.")
 	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_RIGHT,
 				  "'calendar_clock' denoted an invalid right.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_NAME,
+				  "'calendar_clock' did not denote a right.")
 	FAIL_SWITCH_STATUS_DEFAULT_CASE()
 	}
 

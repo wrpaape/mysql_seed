@@ -86,3 +86,10 @@ void test_timestamp_now(void)
 	       timestamp.minute,
 	       timestamp.second);
 }
+
+void test_timespec_now(void)
+{
+	struct timespec now;
+	TEST_ASSERT_TRUE(timespec_now_status(&now));
+}
+
