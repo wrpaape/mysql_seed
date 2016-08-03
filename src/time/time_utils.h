@@ -417,7 +417,7 @@ timestamp_now_handle_cl(struct Timestamp *const restrict timestamp,
  * ────────────────────────────────────────────────────────────────────────── */
 
 inline void
-timespec_now(struct timespec *restrict time)
+timespec_now_muffle(struct timespec *restrict time)
 {
 #ifdef __MACH__ /* OS X does not have clock_gettime, use clock_get_time */
 /* taken from stackoverflow user 'jbenet''s answer to
@@ -426,15 +426,23 @@ timespec_now(struct timespec *restrict time)
 	clock_serv_t calendar_clock;
 	mach_timespec_t mach_time;
 
-	host_get_clock_service(mach_host_self(),
-			       CALENDAR_CLOCK,
-			       &calendar_clock);
+	const mach_port_t host_port = mach_host_self();
 
-	clock_get_time(calendar_clock,
-		       &mach_time);
+	if (host_port == MACH_PORT_NULL)
+		return;
 
-	mach_port_deallocate(mach_task_self(),
-			     calendar_clock);
+	if (host_get_clock_service(host_port,
+				   CALENDAR_CLOCK,
+				   &calendar_clock) != KERN_SUCCESS)
+		return;
+
+	if (clock_get_time(calendar_clock,
+			   &mach_time) != KERN_SUCCESS)
+		return;
+
+	if (mach_port_deallocate(host_port,
+				 calendar_clock) != KERN_SUCCESS)
+		return;
 
 	time->tv_sec  = mach_time.tv_sec;
 	time->tv_nsec = mach_time.tv_nsec;
@@ -451,8 +459,111 @@ timespec_now(struct timespec *restrict time)
 	time->tv_sec  = wintime / exp7;
 	time->tv_nsec = (wintime % exp7) * 100;
 #else
-	clock_gettime(CLOCK_REALTIME,
-		      time);
+	(void) clock_gettime(CLOCK_REALTIME,
+			     time);
+#endif
+}
+
+inline bool
+timespec_now_status(struct timespec *restrict time)
+{
+#ifdef __MACH__
+	clock_serv_t calendar_clock;
+	mach_timespec_t mach_time;
+
+	const mach_port_t host_port = mach_host_self();
+
+	if (host_port == MACH_PORT_NULL)
+		return false;
+
+	if (host_get_clock_service(host_port,
+				   CALENDAR_CLOCK,
+				   &calendar_clock) != KERN_SUCCESS)
+		return false;
+
+	if (clock_get_time(calendar_clock,
+			   &mach_time) != KERN_SUCCESS)
+		return false;
+
+	if (mach_port_deallocate(host_port,
+				 calendar_clock) != KERN_SUCCESS)
+		return false;
+
+	time->tv_sec  = mach_time.tv_sec;
+	time->tv_nsec = mach_time.tv_nsec;
+
+	return true;
+
+#elif defined(WIN32)
+	__int64 wintime;
+
+	GetSystemTimeAsFileTime((FILETIME *) &wintime);
+
+	wintime -= w2ux;
+
+	time->tv_sec  = wintime / exp7;
+	time->tv_nsec = (wintime % exp7) * 100;
+
+	return true;
+#else
+	return clock_gettime(CLOCK_REALTIME,
+			     time) == 0;
+#endif
+}
+
+inline bool
+timespec_now_report(struct timespec *restrict time,
+		    const char *restrict *const restrict failure)
+{
+#ifdef __MACH__
+	clock_serv_t calendar_clock;
+	mach_timespec_t mach_time;
+
+	const mach_port_t host_port = mach_host_self();
+
+	if (host_port == MACH_PORT_NULL)
+		return false;
+
+	if (host_get_clock_service(host_port,
+				   CALENDAR_CLOCK,
+				   &calendar_clock) != KERN_SUCCESS)
+		return false;
+
+	if (clock_get_time(calendar_clock,
+			   &mach_time) != KERN_SUCCESS)
+		return false;
+
+	if (mach_port_deallocate(host_port,
+				 calendar_clock) != KERN_SUCCESS)
+		return false;
+
+	time->tv_sec  = mach_time.tv_sec;
+	time->tv_nsec = mach_time.tv_nsec;
+
+	return true;
+
+#elif defined(WIN32)
+	__int64 wintime;
+
+	GetSystemTimeAsFileTime((FILETIME *) &wintime);
+
+	wintime -= w2ux;
+
+	time->tv_sec  = wintime / exp7;
+	time->tv_nsec = (wintime % exp7) * 100;
+
+	return true;
+#else
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE clock_gettime
+
+	FAIL_SWITCH_ERRNO_OPEN(CLOCK_REALTIME,
+			       time)
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'time' points outside the accessible address space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "'CLOCK_REALTIME' is not supported on this system.")
+	FAIL_SWITCH_ERRNO_CLOSE()
 #endif
 }
 
@@ -476,7 +587,7 @@ inline void
 timespec_offset_now(struct timespec *restrict time,
 		    const struct timespec *const restrict offset)
 {
-	timespec_now(time);
+	timespec_now_muffle(time);
 	timespec_offset(time, offset);
 }
 

@@ -65,7 +65,13 @@ timestamp_now_handle_cl(struct Timestamp *const restrict timestamp,
 /* timespec operations
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
-timespec_now(struct timespec *restrict time);
+timespec_now_muffle(struct timespec *restrict time);
+extern inline bool
+timespec_now_status(struct timespec *restrict time);
+extern inline bool
+timespec_now_report(struct timespec *restrict time);
+
+
 extern inline long
 timespec_diff_nano(const struct timespec *const restrict time0,
 		   const struct timespec *const restrict time1);

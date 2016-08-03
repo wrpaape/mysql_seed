@@ -5,13 +5,6 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include <sys/uio.h>		/* read, write */
-#include <sys/types.h>		/* ssize_t, chmod API */
-#include <sys/stat.h>		/* mkdir */
-#include <sys/param.h>		/* MAXPATHLEN */
-#include "utils/fail_switch.h"	/* stdbool, errno, FAIL_SWITCH */
-#include "utils/closure.h"	/* HandlerClosure */
-
 #ifdef WIN32
 #	include <windows.h>	/* DeviceIoControl */
 #	include <winsock2.h>	/* socket */
@@ -22,6 +15,13 @@
 #	include <net/if.h>	/* ifreq, ifconf */
 #	include <netdb.h>	/* getaddrinfo */
 #endif /* ifdef WIN32 */
+
+#include <sys/uio.h>		/* read, write */
+#include <sys/types.h>		/* ssize_t, chmod API */
+#include <sys/stat.h>		/* mkdir */
+#include <sys/param.h>		/* MAXPATHLEN */
+#include "utils/fail_switch.h"	/* stdbool, errno, FAIL_SWITCH */
+#include "utils/closure.h"	/* HandlerClosure */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
