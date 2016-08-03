@@ -65,11 +65,19 @@ timestamp_now_handle_cl(struct Timestamp *const restrict timestamp,
 /* timespec operations
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
-timespec_now_muffle(struct timespec *restrict time);
+timespec_now_muffle(struct timespec *const restrict time);
 extern inline bool
-timespec_now_status(struct timespec *restrict time);
+timespec_now_status(struct timespec *const restrict time);
 extern inline bool
-timespec_now_report(struct timespec *restrict time);
+timespec_now_report(struct timespec *const restrict time,
+		    const char *restrict *const restrict failure);
+extern inline void
+timespec_now_handle(struct timespec *const restrict time,
+		    Handler *const handle,
+		    void *arg);
+extern inline void
+timespec_now_handle_cl(struct timespec *const restrict time,
+		       const struct HandlerClosure *const restrict fail_cl);
 
 
 extern inline long
@@ -78,6 +86,23 @@ timespec_diff_nano(const struct timespec *const restrict time0,
 extern inline void
 timespec_offset(struct timespec *const restrict time,
 		const struct timespec *const restrict offset);
+
+extern inline bool
+timespec_offset_now_status(struct timespec *restrict time,
+			   const struct timespec *const restrict offset);
 extern inline void
-timespec_offset_now(struct timespec *restrict time,
-		    const struct timespec *const restrict offset);
+timespec_offset_now_muffle(struct timespec *restrict time,
+			   const struct timespec *const restrict offset);
+extern inline bool
+timespec_offset_now_report(struct timespec *restrict time,
+			   const struct timespec *const restrict offset,
+			   const char *restrict *const restrict failure);
+extern inline void
+timespec_offset_now_handle(struct timespec *restrict time,
+			   const struct timespec *const restrict offset,
+			   Handler *const handle,
+			   void *arg);
+extern inline void
+timespec_offset_now_handle_cl(struct timespec *restrict time,
+			      const struct timespec *const restrict offset,
+			      const struct HandlerClosure *const restrict fail_cl);

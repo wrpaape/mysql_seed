@@ -1294,10 +1294,9 @@ thread_cond_await_span_status(ThreadCond *const restrict cond,
 {
 	struct timespec limit;
 
-	timespec_offset_now(&limit,
-			    span);
-
-	return thread_cond_await_limit_status(cond,
+	return timespec_offset_now_status(&limit,
+					  span)
+	    && thread_cond_await_limit_status(cond,
 					      lock,
 					      &limit);
 }
@@ -1309,8 +1308,8 @@ thread_cond_await_span_muffle(ThreadCond *const restrict cond,
 {
 	struct timespec limit;
 
-	timespec_offset_now(&limit,
-			    span);
+	timespec_offset_now_muffle(&limit,
+				   span);
 
 	thread_cond_await_limit_muffle(cond,
 				       lock,
@@ -1325,10 +1324,11 @@ thread_cond_await_span_report(ThreadCond *const restrict cond,
 {
 	struct timespec limit;
 
-	timespec_offset_now(&limit,
-			    span);
 
-	return thread_cond_await_limit_report(cond,
+	return timespec_offset_now_report(&limit,
+					  span,
+					  failure)
+	    && thread_cond_await_limit_report(cond,
 					      lock,
 					      &limit,
 					      failure);
