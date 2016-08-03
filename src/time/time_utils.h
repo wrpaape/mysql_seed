@@ -162,6 +162,7 @@ time_muffle(time_t *const restrict now)
 }
 
 #define FAIL_SWITCH_ROUTINE time
+#define FAIL_SWITCH_ERRNO_FAILURE -1
 #define FAIL_SWITCH_FAILURE_POINTER failure
 
 inline bool
@@ -521,21 +522,266 @@ timespec_now_report(struct timespec *restrict time,
 
 	const mach_port_t host_port = mach_host_self();
 
-	if (host_port == MACH_PORT_NULL)
+	if (host_port == MACH_PORT_NULL) {
+		*failure = FAILURE_REASON("mach_host_self (NULL host port)",
+					  "unknown");
 		return false;
+	}
 
-	if (host_get_clock_service(host_port,
-				   CALENDAR_CLOCK,
-				   &calendar_clock) != KERN_SUCCESS)
-		return false;
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE host_get_clock_service
+	switch (host_get_clock_service(host_port,
+				       CALENDAR_CLOCK,
+				       &calendar_clock)) {
+	case KERN_SUCCESS:
+		break;
+	FAIL_SWITCH_STATUS_CASE_1(MACH_MSG_IPC_SPACE,
+				  "no room in IPC name space for another "
+				  "capability name")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_MSG_VM_SPACE,
+				  "no room in VM address space for out-of-line "
+				  "memory")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_MSG_IPC_KERNEL,
+				  "kernel resource shortage handling an IPC "
+				  "capability")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_MSG_VM_KERNEL,
+				  "kernel resource shortage handling "
+				  "out-of-line memory")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_DATA,
+				  "bogus in-line data")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_DEST,
+				  "bogus destination port")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_TIMED_OUT,
+				  "message not sent before timeout expired")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_VOUCHER,
+				  "bogus voucher port")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INTERRUPTED,
+				  "software interrupt")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_MSG_TOO_SMALL,
+				  "Data doesn't contain a complete message.")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_REPLY,
+				  "bogus reply port")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_RIGHT,
+				  "bogus port rights in the message body")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_NOTIFY,
+				  "bogus notify port argument")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_MEMORY,
+				  "invalid out-of-line memory pointer")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_NO_BUFFER,
+				  "no message buffer is available")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_TOO_LARGE,
+				  "send is too large for port")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_TYPE,
+				  "invalid msg-type specification")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_HEADER,
+				  "A field in the header had a bad value.")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_SEND_INVALID_TRAILER,
+				  "The trailer to be sent does not match kernel"
+				  " format.")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INVALID_NAME,
+				  "bogus name for receive port/port-set")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_TIMED_OUT,
+				  "Didn't get a message within the timeout "
+				  "value")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_TOO_LARGE,
+				  "Message buffer is not large enough for "
+				  "inline data")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INTERRUPTED,
+				  "software interrupt")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INVALID_NOTIFY,
+				  "bogus notify port argument")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INVALID_DATA,
+				  "bogus message buffer for inline data")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_PORT_DIED,
+				  "port/set was sent away/died during receive")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_HEADER_ERROR,
+				  "error receiving message header")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_BODY_ERROR,
+				  "error receiving message body")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INVALID_TYPE,
+				  "invalid msg-type specification in scatter "
+				  "list")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_SCATTER_SMALL,
+				  "out-of-line overwrite region is not large "
+				  "enough")
+	FAIL_SWITCH_STATUS_CASE_1(MACH_RCV_INVALID_TRAILER,
+				  "trailer type or number of trailer elements "
+				  "not supported")
+	FAIL_SWITCH_STATUS_DEFAULT_CASE()
+	}
 
-	if (clock_get_time(calendar_clock,
-			   &mach_time) != KERN_SUCCESS)
-		return false;
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE clock_get_time
+	switch (clock_get_time(calendar_clock,
+			       &mach_time)) {
+	case KERN_SUCCESS:
+		break;
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_ADDRESS,
+				  "The specified address is not currently "
+				  "valid.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_PROTECTION_FAILURE,
+				  "The specified memory is valid, but does not "
+				  "permit the required forms of access.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NO_SPACE,
+				  "The address range specified is already in "
+				  "use, or no address range of the size "
+				  "specified could be found.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_ARGUMENT,
+				  "The function requested was not applicable to"
+				  " this type of argument, or an argument is "
+				  "invalid.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_FAILURE,
+				  "The function could not be performed.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_RESOURCE_SHORTAGE,
+				  "A system resource could not be allocated to "
+				  "fulfill this request.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NOT_RECEIVER,
+				  "The task in question does not hold receive "
+				  "rights for the port argument.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NO_ACCESS,
+				  "bogus access restriction")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_MEMORY_FAILURE,
+				  "During a page fault, the target address "
+				  "refers to a memory object that has been "
+				  "destroyed.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_MEMORY_ERROR,
+				  "During a page fault, the memory object "
+				  "indicated that the data could not be "
+				  "returned.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_ALREADY_IN_SET,
+				  "The receive right is already a member of the"
+				  " portset.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NOT_IN_SET,
+				  "The receive right is not a member of a port "
+				  "set.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NAME_EXISTS,
+				  "The name already denotes a right in the task"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_ABORTED,
+				  "The operation was aborted.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_NAME,
+				  "The name doesn't denote a right in the task"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_TASK,
+				  "target task isn't an active task.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_RIGHT,
+				  "The name denotes a right, but not an "
+				  "appropriate right.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_VALUE,
+				  "blatant range error")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_UREFS_OVERFLOW,
+				  "Operation would overflow limit on "
+				  "user-references.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_CAPABILITY,
+				  "The supplied (port) capability is improper.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_RIGHT_EXISTS,
+				  "The task already has send or receive rights "
+				  "for the port under another name.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_HOST,
+				  "target host isn't actually a host.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_MEMORY_PRESENT,
+				  "An attempt was made to supply \"precious\" "
+				  "data for memory that is already present in a"
+				  " memory object.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_PROCESSOR_SET,
+				  "An argument applied to assert processor set "
+				  "privilege was not a processor set control "
+				  "port.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_POLICY_LIMIT,
+				  "The specified scheduling attributes exceed "
+				  "the thread's limits.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_POLICY,
+				  "The specified scheduling policy is not "
+				  "currently enabled for the processor set.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_OBJECT,
+				  "The external memory manager failed to "
+				  "initialize the memory object.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_ALREADY_WAITING,
+				  "A thread is attempting to wait for an event "
+				  "for which there is already a waiting thread"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_DEFAULT_SET,
+				  "An attempt was made to destroy the default "
+				  "processor set.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_EXCEPTION_PROTECTED,
+				  "An attempt was made to fetch an exception "
+				  "port that is protected, or to abort a thread"
+				  " while processing a protected exception.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_LEDGER,
+				  "A ledger was required but not supplied.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_MEMORY_CONTROL,
+				  "The port was not a memory cache control port"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_SECURITY,
+				  "An argument supplied to assert security "
+				  "privilege was not a host security port.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NOT_DEPRESSED,
+				  "thread_depress_abort was called on a thread "
+				  "which was not currently depressed.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_TERMINATED,
+				  "object has been terminated and is no longer "
+				  "available")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_LOCK_SET_DESTROYED,
+				  "The lock set has been destroyed and is no "
+				  "longer available.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_LOCK_UNSTABLE,
+				  "The thread holding the lock terminated "
+				  "before releasing the lock.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_LOCK_OWNED,
+				  "The lock is already owned by another thread"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_LOCK_OWNED_SELF,
+				  "The lock is already owned by the calling "
+				  "thread.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_SEMAPHORE_DESTROYED,
+				  "semaphore has been destroyed and is no "
+				  "longer available.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_RPC_SERVER_TERMINATED,
+				  "return from RPC indicating the target server"
+				  " was terminated before it successfully "
+				  "replied.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_RPC_TERMINATE_ORPHAN,
+				  "terminated an orphaned activation.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_RPC_CONTINUE_ORPHAN,
+				  "Allow an orphaned activation to continue "
+				  "executing.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NOT_SUPPORTED,
+				  "Empty thread activation (No thread linked to"
+				  " it)")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NODE_DOWN,
+				  "remote node down or inaccessible.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_NOT_WAITING,
+				  "A signalled thread was not actually waiting"
+				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_OPERATION_TIMED_OUT,
+				  "Some thread-oriented operation "
+				  "(semaphore_wait) timed out")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_CODESIGN_ERROR,
+				  "During a page fault, indicates that the page"
+				  " was rejectedas a result of a signature "
+				  "check.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_POLICY_STATIC,
+				  "The requested property cannot be changed at "
+				  "this time.")
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INSUFFICIENT_BUFFER_SIZE,
+				  "The provided buffer is of insufficient size "
+				  "for the requested data.")
+	FAIL_SWITCH_STATUS_DEFAULT_CASE()
+	}
 
-	if (mach_port_deallocate(host_port,
-				 calendar_clock) != KERN_SUCCESS)
-		return false;
+
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE mach_port_deallocate
+
+	switch (mach_port_deallocate(host_port,
+				     calendar_clock)) {
+	case KERN_SUCCESS:
+		break;
+	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_RIGHT,
+				  "'calendar_clock' denoted an invalid right.")
+	FAIL_SWITCH_STATUS_DEFAULT_CASE()
+	}
+
 
 	time->tv_sec  = mach_time.tv_sec;
 	time->tv_nsec = mach_time.tv_nsec;
