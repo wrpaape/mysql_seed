@@ -907,6 +907,44 @@ TARGETS			+= $(SYSTEM_EXIT_UTILS_OBJ)					\
 			   $(SYSTEM_EXIT_UTILS_TEST_BIN)
 
 
+# uuid/uuid_utils
+# ──────────────────────────────────────────────────────────────────────────────
+UUID_UUID_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_HDR		:= $(call HELPER_HEADER_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,uuid uuid_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+UUID_UUID_UTILS_OBJ_PREQS	:= $(UUID_UUID_UTILS_SRC) 		\
+			   	   $(UUID_UUID_UTILS_HDR)		\
+				   $(TIME_TIME_UTILS_HDR)		\
+			   	   $(SYSTEM_SYSTEM_UTILS_HDR)
+UUID_UUID_UTILS_OBJ_GROUP	:= $(UUID_UUID_UTILS_OBJ)		\
+				   $(TIME_TIME_UTILS_OBJ_GROUP)		\
+				   $(SYSTEM_SYSTEM_UTILS_OBJ_GROUP)
+UUID_UUID_UTILS_TRNR_SRC_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+UUID_UUID_UTILS_TEST_OBJ_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
+			   	   $(UUID_UUID_UTILS_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+UUID_UUID_UTILS_TRNR_OBJ_PREQS	:= $(UUID_UUID_UTILS_TRNR_SRC)		\
+			   	   $(UUID_UUID_UTILS_TEST_OBJ_PREQS)
+UUID_UUID_UTILS_TEST_BIN_PREQS	:= $(UUID_UUID_UTILS_TRNR_OBJ)		\
+			   	   $(UUID_UUID_UTILS_TEST_OBJ)		\
+			   	   $(UUID_UUID_UTILS_OBJ_GROUP)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(UUID_UUID_UTILS_TEST_BIN)
+TARGETS			+= $(UUID_UUID_UTILS_OBJ)				\
+			   $(UUID_UUID_UTILS_TRNR_SRC)				\
+			   $(UUID_UUID_UTILS_TRNR_OBJ)				\
+			   $(UUID_UUID_UTILS_TEST_OBJ)				\
+			   $(UUID_UUID_UTILS_TEST_BIN)
+
+
 # thread/thread_utils
 # ──────────────────────────────────────────────────────────────────────────────
 THREAD_THREAD_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_utils)
@@ -1799,6 +1837,11 @@ $(SYSTEM_FILE_UTILS_OBJ): $(SYSTEM_FILE_UTILS_OBJ_PREQS)
 $(SYSTEM_EXIT_UTILS_OBJ): $(SYSTEM_EXIT_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make uuid/uuid_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(UUID_UUID_UTILS_OBJ): $(UUID_UUID_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make string/string_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
@@ -2119,6 +2162,26 @@ $(SYSTEM_EXIT_UTILS_TEST_OBJ): $(SYSTEM_EXIT_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(SYSTEM_EXIT_UTILS_TRNR_SRC): $(SYSTEM_EXIT_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for uuid/uuid_utils
+# make:
+# 	uuid_uuid_utils_test		binary,
+# 	uuid_uuid_utils_test_runner 	object,
+# 	uuid_uuid_utils_test		object, and
+# 	uuid_uuid_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(UUID_UUID_UTILS_TEST_BIN): $(UUID_UUID_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(UUID_UUID_UTILS_TRNR_OBJ): $(UUID_UUID_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UUID_UUID_UTILS_TEST_OBJ): $(UUID_UUID_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UUID_UUID_UTILS_TRNR_SRC): $(UUID_UUID_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

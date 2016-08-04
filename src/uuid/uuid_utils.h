@@ -17,6 +17,12 @@ struct UUID {
 	uint8_t node[6];
 };
 
+#define LENGTH_MAC_ADDRESS 6lu
+
+struct MACAddressBuffer {
+	uint8_t octets[LENGTH_MAC_ADDRESS];
+};
+
 /* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
 #define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
 
@@ -45,28 +51,62 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 		.ai_socktype = 0,			/* any socket type */
 		.ai_protocol = 0,			/* any protocol */
 		.ai_flags    = AI_ALL | AI_V4MAPPED	/* IPv6, IPv4 */
+		/* .ai_flags    = AI_DEFAULT */
 	};
 
 	struct addrinfo *result;
 	struct addrinfo *ptr;
 
-	getaddrinfo_handle_cl("localhost",
-			      NULL,
+	char hostname[128];
+
+	gethostname(&hostname[0],
+		    sizeof(hostname));
+
+	puts(&hostname[0]);
+
+	getaddrinfo_handle_cl(NULL,
+			      "http",
 			      &hints,
 			      &result,
 			      fail_cl);
 
 	bool found = false;
+	const char *restrict sock_addr_family;
 
-	uint8_t mac[6] = { 0 };
+	uint8_t mac[LENGTH_MAC_ADDRESS];
 
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
 
-		*((Width6 *) &mac[0]) = *((Width6 *) &ptr->ai_addr->sa_data[0]);
+		*((struct MACAddressBuffer *) &mac[0])
+		= *((struct MACAddressBuffer *) &ptr->ai_addr->sa_data[0]);
 
-		printf("%02X:%02X:02%X:%02X:%02X:%02X\n",
+		switch (ptr->ai_addr->sa_family) {
+		case AF_INET:
+			sock_addr_family = "AF_INET";
+			break;
+		case AF_INET6:
+			sock_addr_family = "AF_INET6";
+			break;
+		case AF_UNIX:
+			 sock_addr_family = "AF_UNIX";
+			 break;
+		case AF_NS:
+			 sock_addr_family = "AF_NS";
+			 break;
+		case AF_IMPLINK:
+			 sock_addr_family = "AF_IMPLINK";
+			 break;
+		default:
+			 sock_addr_family = "unknown";
+		}
+
+
+		printf("%s - %s - %s - %s\n%02X:%02X:%02X:%02X:%02X:%02X\n\n",
+		       ptr->ai_canonname,
+		       sock_addr_family,
+		       ptr->ai_family == AF_INET ? "AF_INET" : "AF_INET6",
+		       ptr->ai_socktype == SOCK_DGRAM ? "SOCK_DGRAM" : "SOCK_STREAM",
 		       mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
 	}
 
 	freeaddrinfo(result);

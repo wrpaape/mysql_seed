@@ -60,12 +60,14 @@
 #	define get_device_active_flags_imp(REQUEST, DEVICE_DESCRIPTOR)	\
 	ioctl(DEVICE_DESCRIPTOR, SIOCGIFFLAGS, REQUEST)
 
-#	define get_hardware_address_imp(REQUEST, DEVICE_DESCRIPTOR)	\
-	ioctl(DEVICE_DESCRIPTOR, SIOCGIFHWADDR, REQUEST)
-
 #	define get_winsize_imp(WINDOW, FILE_DESCRIPTOR)			\
 	ioctl(FILE_DESCRIPTOR, TIOCGWINSZ, WINDOW)
 #endif /* ifndef WIN32 */
+#ifdef LINUX
+#	define get_hardware_address_imp(REQUEST, DEVICE_DESCRIPTOR)	\
+	ioctl(DEVICE_DESCRIPTOR, SIOCGIFHWADDR, REQUEST)
+#endif /* ifdef LINUX */
+
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * FUNCTION-LIKE MACROS
@@ -182,7 +184,7 @@ socket_handle_cl(const int domain,
 }
 
 
-#ifdef LINUX
+#ifndef WIN32
 /* get_interface_addresses */
 inline bool
 get_interface_addresses_status(struct ifconf *const restrict configuration,
@@ -337,83 +339,6 @@ get_device_active_flags_handle_cl(struct ifreq *const restrict request,
 }
 
 
-/* get_hardware_address */
-inline void
-get_hardware_address_status(struct ifreq *const restrict request,
-			    const int device_descriptor)
-{
-	return get_hardware_address_imp(request,
-					device_descriptor) != -1;
-}
-
-inline bool
-get_hardware_address_muffle(struct ifreq *const restrict request,
-			    const int device_descriptor)
-{
-	(void) get_hardware_address_imp(request,
-					device_descriptor);
-}
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE get_hardware_address_imp
-inline bool
-get_hardware_address_report(struct ifreq *const restrict request,
-			    const int device_descriptor,
-			    const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(request,
-			       device_descriptor)
-	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
-				 "'device_descriptor', is not a valid "
-				 "descriptor.")
-	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'request' or ioctl request 'SIOCGIFHWADDR' is"
-				 " not valid.")
-	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
-				 "'device_descriptor' is not associated with a "
-				 "character special device.",
-				 "The specified iotcl request 'SIOCGIFHWADDR' "
-				 "does not apply to the kind of object that the"
-				 " descriptor 'device_descriptor' references.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
-
-inline void
-get_hardware_address_handle(struct ifreq *const restrict request,
-			    const int device_descriptor,
-			    Handler *const handle,
-			    void *arg)
-{
-	const char *restrict failure;
-
-	if (get_hardware_address_report(request,
-					device_descriptor,
-					&failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-get_hardware_address_handle_cl(struct ifreq *const restrict request,
-			       const int device_descriptor,
-			       const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (get_hardware_address_report(request,
-					device_descriptor,
-					&failure))
-		return;
-
-	handler_closure_call(fail_cl,
-			     failure);
-	__builtin_unreachable();
-}
-
-
 /* get_winsize */
 inline bool
 get_winsize_status(struct winsize *const restrict window,
@@ -489,9 +414,90 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 			     failure);
 	__builtin_unreachable();
 }
+#endif /* ifndef WIN32 */
+
+
+#ifdef LINUX
+/* get_hardware_address */
+inline void
+get_hardware_address_status(struct ifreq *const restrict request,
+			    const int device_descriptor)
+{
+	return get_hardware_address_imp(request,
+					device_descriptor) != -1;
+}
+
+inline bool
+get_hardware_address_muffle(struct ifreq *const restrict request,
+			    const int device_descriptor)
+{
+	(void) get_hardware_address_imp(request,
+					device_descriptor);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE get_hardware_address_imp
+inline bool
+get_hardware_address_report(struct ifreq *const restrict request,
+			    const int device_descriptor,
+			    const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(request,
+			       device_descriptor)
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'device_descriptor', is not a valid "
+				 "descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "'request' or ioctl request 'SIOCGIFHWADDR' is"
+				 " not valid.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
+				 "'device_descriptor' is not associated with a "
+				 "character special device.",
+				 "The specified iotcl request 'SIOCGIFHWADDR' "
+				 "does not apply to the kind of object that the"
+				 " descriptor 'device_descriptor' references.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+get_hardware_address_handle(struct ifreq *const restrict request,
+			    const int device_descriptor,
+			    Handler *const handle,
+			    void *arg)
+{
+	const char *restrict failure;
+
+	if (get_hardware_address_report(request,
+					device_descriptor,
+					&failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+get_hardware_address_handle_cl(struct ifreq *const restrict request,
+			       const int device_descriptor,
+			       const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (get_hardware_address_report(request,
+					device_descriptor,
+					&failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
 #endif /* ifdef LINUX */
 
 
+
+/* getaddrinfo */
 inline bool
 getaddrinfo_status(const char *const node,
 		   const char *const service,

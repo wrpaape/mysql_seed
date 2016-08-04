@@ -26,7 +26,7 @@ socket_handle_cl(const int domain,
 		 const int protocol,
 		 const struct HandlerClosure *const restrict fail_cl);
 
-#ifdef LINUX
+#ifndef WIN32
 /* get_interface_addresses */
 extern inline bool
 get_interface_addresses_status(struct ifconf *const restrict configuration,
@@ -69,26 +69,6 @@ get_device_active_flags_handle_cl(struct ifreq *const restrict request,
 				  const int device_descriptor,
 				  const struct HandlerClosure *const restrict fail_cl);
 
-/* get_hardware_address */
-extern inline bool
-get_hardware_address_status(struct ifreq *const restrict request,
-			    const int device_descriptor);
-extern inline void
-get_hardware_address_muffle(struct ifreq *const restrict request,
-			    const int device_descriptor);
-extern inline bool
-get_hardware_address_report(struct ifreq *const restrict request,
-			    const int device_descriptor,
-			    const char *restrict *const restrict failure);
-extern inline void
-get_hardware_address_handle(struct ifreq *const restrict request,
-			    const int device_descriptor,
-			    Handler *const handle,
-			    void *arg);
-extern inline void
-get_hardware_address_handle_cl(struct ifreq *const restrict request,
-			       const int device_descriptor,
-			       const struct HandlerClosure *const restrict fail_cl);
 /* get_winsize */
 extern inline bool
 get_winsize_status(struct winsize *const restrict window,
@@ -109,9 +89,33 @@ extern inline void
 get_winsize_handle_cl(struct winsize *const restrict window,
 		      const int file_descriptor,
 		      const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifndef WIN32 */
+
+#ifdef LINUX
+/* get_hardware_address */
+extern inline bool
+get_hardware_address_status(struct ifreq *const restrict request,
+			    const int device_descriptor);
+extern inline void
+get_hardware_address_muffle(struct ifreq *const restrict request,
+			    const int device_descriptor);
+extern inline bool
+get_hardware_address_report(struct ifreq *const restrict request,
+			    const int device_descriptor,
+			    const char *restrict *const restrict failure);
+extern inline void
+get_hardware_address_handle(struct ifreq *const restrict request,
+			    const int device_descriptor,
+			    Handler *const handle,
+			    void *arg);
+extern inline void
+get_hardware_address_handle_cl(struct ifreq *const restrict request,
+			       const int device_descriptor,
+			       const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifdef LINUX */
 
 
+/* getaddrinfo */
 extern inline bool
 getaddrinfo_status(const char *const node,
 		   const char *const service,
