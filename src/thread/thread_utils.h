@@ -64,6 +64,16 @@ pthread_cleanup_push(ROUTINE, ARG)
 #define thread_cleanup_pop_imp(EXECUTE)					\
 pthread_cleanup_pop(EXECUTE)
 
+#define thread_protect_open()						\
+{									\
+	int _cancelability;						\
+	(void) pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &_cancelability)
+
+#define thread_protect_close()						\
+	(void) pthread_setcanceltype(_cancelability, &_cancelability);	\
+}
+
+
 #define thread_key_create_imp(KEY, CLEANUP)				\
 pthread_key_create(KEY, CLEANUP)
 

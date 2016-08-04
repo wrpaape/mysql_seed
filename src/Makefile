@@ -907,44 +907,6 @@ TARGETS			+= $(SYSTEM_EXIT_UTILS_OBJ)					\
 			   $(SYSTEM_EXIT_UTILS_TEST_BIN)
 
 
-# uuid/uuid_utils
-# ──────────────────────────────────────────────────────────────────────────────
-UUID_UUID_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_HDR		:= $(call HELPER_HEADER_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,uuid uuid_utils)
-UUID_UUID_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,uuid uuid_utils)
-# ─────────────── target prequisites ───────────────────────────────────────────
-UUID_UUID_UTILS_OBJ_PREQS	:= $(UUID_UUID_UTILS_SRC) 		\
-			   	   $(UUID_UUID_UTILS_HDR)		\
-				   $(TIME_TIME_UTILS_HDR)		\
-			   	   $(SYSTEM_FILE_UTILS_HDR)
-UUID_UUID_UTILS_OBJ_GROUP	:= $(UUID_UUID_UTILS_OBJ)		\
-				   $(TIME_TIME_UTILS_OBJ_GROUP)		\
-				   $(SYSTEM_FILE_UTILS_OBJ_GROUP)
-UUID_UUID_UTILS_TRNR_SRC_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
-			   	   $(TEST_RUNNER_SOURCE_DIR)
-UUID_UUID_UTILS_TEST_OBJ_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
-			   	   $(UUID_UUID_UTILS_OBJ_PREQS) 	\
-			   	   $(UNITY_OBJ_PREQS)
-UUID_UUID_UTILS_TRNR_OBJ_PREQS	:= $(UUID_UUID_UTILS_TRNR_SRC)		\
-			   	   $(UUID_UUID_UTILS_TEST_OBJ_PREQS)
-UUID_UUID_UTILS_TEST_BIN_PREQS	:= $(UUID_UUID_UTILS_TRNR_OBJ)		\
-			   	   $(UUID_UUID_UTILS_TEST_OBJ)		\
-			   	   $(UUID_UUID_UTILS_OBJ_GROUP)		\
-			   	   $(UNITY_OBJ)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(UUID_UUID_UTILS_TEST_BIN)
-TARGETS			+= $(UUID_UUID_UTILS_OBJ)				\
-			   $(UUID_UUID_UTILS_TRNR_SRC)				\
-			   $(UUID_UUID_UTILS_TRNR_OBJ)				\
-			   $(UUID_UUID_UTILS_TEST_OBJ)				\
-			   $(UUID_UUID_UTILS_TEST_BIN)
-
-
 # thread/thread_utils
 # ──────────────────────────────────────────────────────────────────────────────
 THREAD_THREAD_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,thread thread_utils)
@@ -1098,6 +1060,43 @@ TARGETS			+= $(THREAD_THREAD_POOL_OBJ)			\
 			   $(THREAD_THREAD_POOL_TRNR_OBJ)		\
 			   $(THREAD_THREAD_POOL_TEST_OBJ)		\
 			   $(THREAD_THREAD_POOL_TEST_BIN)
+
+# uuid/uuid_utils
+# ──────────────────────────────────────────────────────────────────────────────
+UUID_UUID_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_HDR		:= $(call HELPER_HEADER_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,uuid uuid_utils)
+UUID_UUID_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,uuid uuid_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+UUID_UUID_UTILS_OBJ_PREQS	:= $(UUID_UUID_UTILS_SRC) 		\
+			   	   $(UUID_UUID_UTILS_HDR)		\
+			   	   $(THREAD_THREAD_UTILS_HDR)		\
+				   $(SYSTEM_FILE_UTILS_HDR)
+UUID_UUID_UTILS_OBJ_GROUP	:= $(UUID_UUID_UTILS_OBJ)		\
+				   $(THREAD_THREAD_UTILS_OBJ_GROUP)	\
+				   $(SYSTEM_FILE_UTILS_OBJ_GROUP)
+UUID_UUID_UTILS_TRNR_SRC_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+UUID_UUID_UTILS_TEST_OBJ_PREQS	:= $(UUID_UUID_UTILS_TEST_SRC)		\
+			   	   $(UUID_UUID_UTILS_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+UUID_UUID_UTILS_TRNR_OBJ_PREQS	:= $(UUID_UUID_UTILS_TRNR_SRC)		\
+			   	   $(UUID_UUID_UTILS_TEST_OBJ_PREQS)
+UUID_UUID_UTILS_TEST_BIN_PREQS	:= $(UUID_UUID_UTILS_TRNR_OBJ)		\
+			   	   $(UUID_UUID_UTILS_TEST_OBJ)		\
+			   	   $(UUID_UUID_UTILS_OBJ_GROUP)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(UUID_UUID_UTILS_TEST_BIN)
+TARGETS			+= $(UUID_UUID_UTILS_OBJ)				\
+			   $(UUID_UUID_UTILS_TRNR_SRC)				\
+			   $(UUID_UUID_UTILS_TRNR_OBJ)				\
+			   $(UUID_UUID_UTILS_TEST_OBJ)				\
+			   $(UUID_UUID_UTILS_TEST_BIN)
 
 ## PROJECT-HELPER MODULES
 # ══════════════════════════════════════════════════════════════════════════════

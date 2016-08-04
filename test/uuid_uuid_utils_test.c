@@ -34,4 +34,12 @@ void test_uuid_mac_address(void)
 
 	uuid_mac_address(&mac_address[0],
 			 &fail_cl);
+
+	printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
+	       mac_address[0],
+	       mac_address[1],
+	       mac_address[2],
+	       mac_address[3],
+	       mac_address[4],
+	       mac_address[5]);
 }

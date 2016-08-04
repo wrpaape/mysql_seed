@@ -56,6 +56,9 @@
 
 /* ioctl wrappers */
 #ifndef WIN32
+#	define interface_name_to_index_imp(NAME)			\
+	if_nametoindex(NAME)
+
 #	define get_interface_networks_imp(CONFIG, DEVICE_DESCRIPTOR)	\
 	ioctl(DEVICE_DESCRIPTOR, SIOCGIFCONF, CONFIG)
 
@@ -346,6 +349,166 @@ sysctl_handle_cl(int *const restrict mib_name,
 	__builtin_unreachable();
 }
 
+/* interface_name_to_index */
+inline bool
+interface_name_to_index_status(int *const restrict index,
+			       const char *const restrict name)
+{
+	*index = interface_name_to_index_imp(name);
+	return *index != 0;
+}
+
+inline void
+interface_name_to_index_muffle(int *const restrict index,
+			       const char *const restrict name)
+{
+	*index = interface_name_to_index_imp(name);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE interface_name_to_index_imp
+inline bool
+interface_name_to_index_report(int *const restrict index,
+			       const char *const restrict name,
+			       const char *restrict *const restrict failure)
+{
+	*index = interface_name_to_index_imp(name);
+
+	if (*index != 0)
+		return true;
+
+	switch (errno) {
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "sysctl failure - "
+				 "The buffer 'mib_name', 'old_data', 'new_data'"
+				 ", or length pointer 'size_old_data' contains "
+				 "an invalid address.")
+	FAIL_SWITCH_ERRNO_CASE_3(EINVAL,
+				 "sysctl failure - "
+				 "The 'mib_name' array is less than two or "
+				 "greater than 'CTL_MAXNAME'.",
+				 "sysctl failure - "
+				 "A non-null 'new_data' is given and its "
+				 "specified length in 'size_new_data' is too "
+				 "large or too small.",
+				 "ioctl failure - "
+				 "'configuration' or ioctl request is not valid"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_4(ENOMEM,
+				 "sysctl failure - "
+				 "The length pointed to by 'size_old_data' is "
+				 "too short to hold the requested value.",
+				 "sysctl failure - "
+				 "The smaller of either the length pointed to "
+				 "by 'size_old_data' or the estimated size of "
+				 "the returned data exceeds the system limit on"
+				 " locked memory.",
+				 "sysctl failure - "
+				 "Locking the buffer 'old_data', or a portion "
+				 "of the buffer if the estimated size of the "
+				 "data to be returned is smaller, would cause "
+				 "the process to exceed its per-process locked "
+				 "memory limit.",
+				 "socket failure - "
+				 "Insufficient memory was available to fulfill "
+				 "the request.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "sysctl failure - "
+				 "The 'mib_name' array specifies an "
+				 "intermediate rather than terminal name.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "sysctl failure - "
+				 "The 'mib_name' array specifies a terminal "
+				 "name, but the actual name is not terminal.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "sysctl failure - "
+				 "The 'mib_name' array specifies a value that "
+				 "is unknown.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "sysctl failure - "
+				 "An attempt is made to set a read-only value.",
+				 "sysctl failure - "
+				 "A process without appropriate privilege "
+				 "attempts to set a value.")
+	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
+				 "socket failure - "
+				 "Permission to create a socket of the "
+				 "specified type and/or protocol is denied.")
+	FAIL_SWITCH_ERRNO_CASE_1(EAFNOSUPPORT,
+				 "socket failure - "
+				 "The specified address family is not supported"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_1(EMFILE,
+				 "socket failure - "
+				 "The per-process descriptor table is full.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENFILE,
+				 "socket failure - "
+				 "The system file table is full.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOBUFS,
+				 "socket failure - "
+				 "Insufficient buffer space is available. The "
+				 "socket cannot be created until sufficient "
+				 "resources are freed.")
+	FAIL_SWITCH_ERRNO_CASE_1(EPROTONOSUPPORT,
+				 "socket failure - "
+				 "The protocol type or the specified protocol "
+				 "is not supported within this domain.")
+	FAIL_SWITCH_ERRNO_CASE_1(EPROTOTYPE,
+				 "socket failure - "
+				 "The socket type is not supported by the "
+				 "protocol.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "ioctl failure - "
+				 "'device_descriptor', is not a valid "
+				 "descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
+				 "ioctl failure - "
+				 "'device_descriptor' is not associated with a "
+				 "character special device.",
+				 "The specified iotcl configuration 'SIOCGIFCONF' "
+				 "does not apply to the kind of object that the"
+				 " descriptor 'device_descriptor' references.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENXIO,
+				 "no interface found for 'name'")
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+interface_name_to_index_handle(int *const restrict index,
+			       const char *const restrict name,
+			       Handler *const handle,
+			       void *arg)
+{
+	const char *restrict failure;
+
+	if (interface_name_to_index_report(index,
+					   name,
+					   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+interface_name_to_index_handle_cl(int *const restrict index,
+				  const char *const restrict name,
+				  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (interface_name_to_index_report(index,
+					   name,
+					   &failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+
 
 
 /* get_interface_networks */
@@ -611,12 +774,12 @@ get_interface_index_report(struct ifreq *const restrict request,
 				 "'device_descriptor', is not a valid "
 				 "descriptor.")
 	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
-				 "'request' or ioctl request 'SIOCGIFFLAGS' is"
+				 "'request' or ioctl request 'SIOCGIFINDEX' is"
 				 " not valid.")
 	FAIL_SWITCH_ERRNO_CASE_2(ENOTTY,
 				 "'device_descriptor' is not associated with a "
 				 "character special device.",
-				 "The specified iotcl request 'SIOCGIFFLAGS' "
+				 "The specified iotcl request 'SIOCGIFINDEX' "
 				 "does not apply to the kind of object that the"
 				 " descriptor 'device_descriptor' references.")
 	FAIL_SWITCH_ERRNO_CLOSE()

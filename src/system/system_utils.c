@@ -73,6 +73,29 @@ sysctl_handle_cl(int *const restrict mib_name,
 		 const size_t size_new_data,
 		 const struct HandlerClosure *const restrict fail_cl);
 
+/* interface_name_to_index */
+extern inline bool
+interface_name_to_index_status(int *const restrict index,
+			       const char *const restrict name);
+extern inline void
+interface_name_to_index_muffle(int *const restrict index,
+			       const char *const restrict name);
+extern inline bool
+interface_name_to_index_report(int *const restrict index,
+			       const char *const restrict name,
+			       const char *restrict *const restrict failure);
+extern inline void
+interface_name_to_index_handle(int *const restrict index,
+			       const char *const restrict name,
+			       Handler *const handle,
+			       void *arg);
+extern inline void
+interface_name_to_index_handle_cl(int *const restrict index,
+				  const char *const restrict name,
+				  const struct HandlerClosure *const restrict fail_cl);
+
+
+
 /* get_interface_networks */
 extern inline bool
 get_interface_networks_status(struct ifconf *const restrict configuration,
