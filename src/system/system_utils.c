@@ -2,26 +2,31 @@
 
 /* socket */
 extern inline bool
-socket_status(const int domain,
+socket_status(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol);
 extern inline void
-socket_muffle(const int domain,
+socket_muffle(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol);
 extern inline bool
-socket_report(const int domain,
+socket_report(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol,
 	      const char *restrict *const restrict failure);
 extern inline void
-socket_handle(const int domain,
+socket_handle(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol,
 	      Handler *const handle,
 	      void *arg);
 extern inline void
-socket_handle_cl(const int domain,
+socket_handle_cl(int *const restrict socket_descriptor,
+		 const int domain,
 		 const int type,
 		 const int protocol,
 		 const struct HandlerClosure *const restrict fail_cl);

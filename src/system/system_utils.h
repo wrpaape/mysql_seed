@@ -88,35 +88,46 @@
 
 /* socket */
 inline bool
-socket_status(const int domain,
+socket_status(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol)
 {
-	return socket(domain,
-		      type,
-		      protocol) != -1;
+	*socket_descriptor = socket(domain,
+				    type,
+				    protocol);
+
+	return *socket_descriptor >= 0;
 }
 
 inline void
-socket_muffle(const int domain,
+socket_muffle(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol)
 {
-	(void) socket(domain,
-		      type,
-		      protocol);
+	*socket_descriptor = socket(domain,
+				    type,
+				    protocol);
 }
 
 #define FAIL_SWITCH_ROUTINE socket
 inline bool
-socket_report(const int domain,
+socket_report(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol,
 	      const char *restrict *const restrict failure)
 {
-	FAIL_SWITCH_ERRNO_OPEN(domain,
-			       type,
-			       protocol)
+
+	*socket_descriptor = socket(domain,
+				    type,
+				    protocol);
+
+	if (*socket_descriptor >= 0)
+		return true;
+
+	switch (errno) {
 	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
 				 "Permission to create a socket of the "
 				 "specified type and/or protocol is denied.")
@@ -141,11 +152,13 @@ socket_report(const int domain,
 	FAIL_SWITCH_ERRNO_CASE_1(EPROTOTYPE,
 				 "The socket type is not supported by the "
 				 "protocol.")
-	FAIL_SWITCH_ERRNO_CLOSE()
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
 }
 
 inline void
-socket_handle(const int domain,
+socket_handle(int *const restrict socket_descriptor,
+	      const int domain,
 	      const int type,
 	      const int protocol,
 	      Handler *const handle,
@@ -153,7 +166,8 @@ socket_handle(const int domain,
 {
 	const char *restrict failure;
 
-	if (socket_report(domain,
+	if (socket_report(socket_descriptor,
+			  domain,
 			  type,
 			  protocol,
 			  &failure))
@@ -165,14 +179,16 @@ socket_handle(const int domain,
 }
 
 inline void
-socket_handle_cl(const int domain,
+socket_handle_cl(int *const restrict socket_descriptor,
+		 const int domain,
 		 const int type,
 		 const int protocol,
 		 const struct HandlerClosure *const restrict fail_cl)
 {
 	const char *restrict failure;
 
-	if (socket_report(domain,
+	if (socket_report(socket_descriptor,
+			  domain,
 			  type,
 			  protocol,
 			  &failure))
