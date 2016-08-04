@@ -23,17 +23,14 @@ void handle_uuid_mac_address_failure(void *arg,
 	exit(1);
 }
 
-void test_uuid_mac_address(void)
+void test_uuid_state_init_mac_address(void)
 {
-	const struct HandlerClosure fail_cl = {
-		.handle = &handle_uuid_mac_address_failure,
-		.arg	= NULL
-	};
+	const char *restrict failure;
 
 	uint8_t mac_address[LENGTH_MAC_ADDRESS];
 
-	uuid_mac_address(&mac_address[0],
-			 &fail_cl);
+	TEST_ASSERT_TRUE(uuid_state_init_mac_address(&mac_address[0],
+						     &failure));
 
 	printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
 	       mac_address[0],

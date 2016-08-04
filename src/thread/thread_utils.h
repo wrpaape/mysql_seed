@@ -1408,11 +1408,11 @@ thread_attr_prototype_destroy(void)
  *─────────────────────────────────────────────────────────────────────────── */
 void
 thread_utils_start(void)
-__attribute__((constructor));
+__attribute__((constructor (102)));
 
 void
 thread_utils_stop(void)
-__attribute__((destructor));
+__attribute__((destructor (102)));
 
 
 /* undefine fail switch macro constants */

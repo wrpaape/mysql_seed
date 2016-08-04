@@ -4,7 +4,22 @@
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* thread, time utils */
-#include "system/file_utils.h"		/* getaddrinfo */
+#include "system/file_utils.h"	/* system calls for retrieveing MAC */
+#include "random/random.h"		/* psuedo-random number generator */
+#include "string/string_utils.h"	/* string utils */
+
+
+/* macro constants
+ * ────────────────────────────────────────────────────────────────────────── */
+#define LENGTH_MAC_ADDRESS 6lu
+
+/* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
+#define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
+
+#define UUID_VERSION 1
+
+#define MAIN_INTERFACE_NAME "en0"
+
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -14,10 +29,16 @@ struct UUID {
 	uint16_t time_hi_and_version;
 	uint8_t clk_seq_hi_res;
 	uint8_t clk_seq_low;
-	uint8_t node[6];
+	uint8_t node[LENGTH_MAC_ADDRESS];
 };
 
-#define LENGTH_MAC_ADDRESS 6lu
+struct UUIDState {
+	Mutex lock;
+	uint16_t clk_seq;
+	uint8_t node[LENGTH_MAC_ADDRESS];
+};
+
+
 struct MACAddressBuffer {
 	uint8_t octets[LENGTH_MAC_ADDRESS];
 };
@@ -26,17 +47,24 @@ struct MACAddressBuffer {
 *((struct MACAddressBuffer *const restrict) PTR)			\
 = *((const struct MACAddressBuffer *const restrict) MAC)
 
-
-#define MAIN_INTERFACE_NAME "en0"
-
-
-/* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
-#define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
-
-#define UUID_VERSION 1
-
 #define UUID_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("uuid_mac_address")
+
+
+/* global constants
+ * ────────────────────────────────────────────────────────────────────────── */
+extern struct UUIDState uuid_state;
+
+
+/* constructors, destructors
+ * ────────────────────────────────────────────────────────────────────────── */
+void
+uuid_utils_start_failure(const char *restrict failure)
+__attribute__((noreturn));
+
+void
+uuid_utils_start(void)
+__attribute__((constructor (103)));
 
 inline uint64_t
 uuid_time_now(const struct HandlerClosure *const restrict fail_cl)
@@ -51,58 +79,54 @@ uuid_time_now(const struct HandlerClosure *const restrict fail_cl)
 	     + GREGORIAN_REFORM_EPOCH_DIFF;
 }
 
-inline void
-uuid_mac_address(uint8_t *const restrict mac_address,
-		 const struct HandlerClosure *const restrict fail_cl)
+inline bool
+uuid_state_init_mac_address(uint8_t *const restrict mac_address,
+			    const char *restrict *const restrict failure)
 {
-	int mib_name[6u];
 	struct ifconf configuration;
 	size_t size_required;
 	int interface_index;
 
-	thread_protect_open();
+	if (!interface_name_to_index_report(&interface_index,
+					    MAIN_INTERFACE_NAME,
+					    failure))
+		return false;
 
-	interface_name_to_index_handle_cl(&interface_index,
-					  MAIN_INTERFACE_NAME,
-					  fail_cl);
+	int mib_name[6u] = {
+		[0u] = CTL_NET,
+		[1u] = PF_ROUTE,
+		[2u] = 0,
+		[3u] = PF_LINK,
+		[4u] = NET_RT_IFLIST,
+		[5u] = interface_index
+	};
 
-	thread_protect_close();
-
-	mib_name[0] = CTL_NET;
-	mib_name[1] = PF_ROUTE;
-	mib_name[2] = 0;
-	mib_name[3] = PF_LINK;
-	mib_name[4] = NET_RT_IFLIST;
-	mib_name[5] = interface_index;
-
-	sysctl_handle_cl(&mib_name[0],
-			 6u,
-			 NULL,
-			 &size_required,
-			 NULL,
-			 0,
-			 fail_cl);
-
-	configuration.ifc_buf = NULL;
-
-	thread_try_ensure_open(&free,
-			       configuration.ifc_buf);
+	if (!sysctl_report(&mib_name[0],
+			   6u,
+			   NULL,
+			   &size_required,
+			   NULL,
+			   0,
+			   failure))
+		return false;
 
 	configuration.ifc_buf = malloc(size_required);
 
 	if (configuration.ifc_buf == NULL) {
-		handler_closure_call(fail_cl,
-				     UUID_MALLOC_FAILURE);
-		__builtin_unreachable();
+		*failure = UUID_MALLOC_FAILURE;
+		return false;
 	}
 
-	sysctl_handle_cl(&mib_name[0],
-			 6u,
-			 configuration.ifc_buf,
-			 &size_required,
-			 NULL,
-			 0,
-			 fail_cl);
+	if (!sysctl_report(&mib_name[0],
+			   6u,
+			   configuration.ifc_buf,
+			   &size_required,
+			   NULL,
+			   0,
+			   failure)) {
+		free(configuration.ifc_buf);
+		return false;
+	}
 
 	const struct if_msghdr *const restrict header
 	= (const struct if_msghdr *const restrict) configuration.ifc_buf;
@@ -113,7 +137,9 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 	SET_MAC_ADDRESS(mac_address,
 			LLADDR(address));
 
-	thread_try_ensure_close();
+	free(configuration.ifc_buf);
+
+	return true;
 }
 
 

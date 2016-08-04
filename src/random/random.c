@@ -9,6 +9,7 @@ glob_rng_ctor(void)
 			time(NULL),
 			(intptr_t) &glob_rng);
 }
+
 extern inline void
 glob_rng_init(void);
 extern inline urint_t

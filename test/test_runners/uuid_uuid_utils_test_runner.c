@@ -28,7 +28,7 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_uuid_mac_address(void);
+extern void test_uuid_state_init_mac_address(void);
 
 
 //=======Test Reset Option=====
@@ -44,7 +44,7 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/uuid_uuid_utils_test.c");
-  RUN_TEST(test_uuid_mac_address, 26);
+  RUN_TEST(test_uuid_state_init_mac_address, 26);
 
   return (UnityEnd());
 }

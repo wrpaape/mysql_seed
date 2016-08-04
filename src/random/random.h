@@ -15,7 +15,7 @@ rng_t glob_rng; /* global random number generator state */
 
 void
 glob_rng_ctor(void)
-__attribute__((constructor));
+__attribute__((constructor (101)));
 
 inline void
 glob_rng_init(void)
