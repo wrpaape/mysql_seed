@@ -23,6 +23,10 @@ struct MACAddressBuffer {
 	uint8_t octets[LENGTH_MAC_ADDRESS];
 };
 
+
+#define MAIN_INTERFACE_NAME "en0"
+
+
 /* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
 #define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
 
@@ -46,10 +50,39 @@ inline void
 uuid_mac_address(uint8_t *const restrict mac_address,
 		 const struct HandlerClosure *const restrict fail_cl)
 {
-	struct ifreq request;
+	int socket_descriptor;
 
-/* 	socket_muffle */
-/* 	SIOCGIFMAC */
+	socket_handle_cl(&socket_descriptor,
+			 PF_INET,
+			 SOCK_DGRAM,
+			 0,
+			 fail_cl);
+
+	struct ifreq request = {
+		.ifr_name = MAIN_INTERFACE_NAME
+	};
+
+/* 	get_interface_networks_handle_cl(&request, */
+/* 					 socket_descriptor, */
+/* 					 fail_cl); */
+
+/* 	int mib_name[6u] = { */
+/* 		CTL_NET, */
+/* 		AF_ROUTE, */
+/* 		0, */
+/* 		AF_LINK, */
+/* 		NET_RT_IFLIST, */
+/* 		request.ifr_index */
+/* 	}; */
+
+
+	/* *((struct MACAddressBuffer *const restrict) mac_address) */
+	/* = *((const struct MACAddressBuffer *const restrict) */
+	/*     &request.ifr_addr.sa_data[0]); */
+
+
+	close_handle_cl(socket_descriptor,
+			fail_cl);
 }
 
 

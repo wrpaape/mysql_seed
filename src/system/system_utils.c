@@ -32,26 +32,67 @@ socket_handle_cl(int *const restrict socket_descriptor,
 		 const struct HandlerClosure *const restrict fail_cl);
 
 #ifndef WIN32
-/* get_interface_addresses */
+/* sysctl */
 extern inline bool
-get_interface_addresses_status(struct ifconf *const restrict configuration,
-			       const int device_descriptor);
+sysctl_status(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data);
 extern inline void
-get_interface_addresses_muffle(struct ifconf *const restrict configuration,
-			       const int device_descriptor);
+sysctl_muffle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data);
 extern inline bool
-get_interface_addresses_report(struct ifconf *const restrict configuration,
-			       const int device_descriptor,
-			       const char *restrict *const restrict failure);
+sysctl_report(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      const char *restrict *const restrict failure);
 extern inline void
-get_interface_addresses_handle(struct ifconf *const restrict configuration,
-			       const int device_descriptor,
-			       Handler *const handle,
-			       void *arg);
+sysctl_handle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      Handler *const handle,
+	      void *arg);
 extern inline void
-get_interface_addresses_handle_cl(struct ifconf *const restrict configuration,
-				  const int device_descriptor,
-				  const struct HandlerClosure *const restrict fail_cl);
+sysctl_handle_cl(int *const restrict mib_name,
+		 u_int length_name,
+		 void *const restrict old_data,
+		 size_t *const restrict size_old_data,
+		 void *const restrict new_data,
+		 const size_t size_new_data,
+		 const struct HandlerClosure *const restrict fail_cl);
+
+/* get_interface_networks */
+extern inline bool
+get_interface_networks_status(struct ifconf *const restrict configuration,
+			      const int device_descriptor);
+extern inline void
+get_interface_networks_muffle(struct ifconf *const restrict configuration,
+			      const int device_descriptor);
+extern inline bool
+get_interface_networks_report(struct ifconf *const restrict configuration,
+			      const int device_descriptor,
+			      const char *restrict *const restrict failure);
+extern inline void
+get_interface_networks_handle(struct ifconf *const restrict configuration,
+			      const int device_descriptor,
+			      Handler *const handle,
+			      void *arg);
+extern inline void
+get_interface_networks_handle_cl(struct ifconf *const restrict configuration,
+				 const int device_descriptor,
+				 const struct HandlerClosure *const restrict fail_cl);
 
 /* get_device_active_flags */
 extern inline bool
@@ -97,6 +138,27 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 #endif /* ifndef WIN32 */
 
 #ifdef LINUX
+/* get_interface_index */
+extern inline bool
+get_interface_index_status(struct ifreq *const restrict request,
+			   const int device_descriptor);
+extern inline void
+get_interface_index_muffle(struct ifreq *const restrict request,
+			   const int device_descriptor);
+extern inline bool
+get_interface_index_report(struct ifreq *const restrict request,
+			   const int device_descriptor,
+			   const char *restrict *const restrict failure);
+extern inline void
+get_interface_index_handle(struct ifreq *const restrict request,
+			   const int device_descriptor,
+			   Handler *const handle,
+			   void *arg);
+extern inline void
+get_interface_index_handle_cl(struct ifreq *const restrict request,
+			      const int device_descriptor,
+			      const struct HandlerClosure *const restrict fail_cl);
+
 /* get_hardware_address */
 extern inline bool
 get_hardware_address_status(struct ifreq *const restrict request,
