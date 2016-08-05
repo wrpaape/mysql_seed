@@ -35,10 +35,12 @@ uuid_utils_start_failure(const char *restrict failure)
 void
 uuid_utils_start(void)
 {
+	uint8_t node[MAC_ADDRESS_LENGTH];
+
 	const char *restrict failure;
 
-	if (uuid_state_init_mac_address(&uuid_state.node[0],
-					&failure)) {
+	if (uuid_mac_address(&node[0],
+			     &failure)) {
 		mutex_init(&uuid_state.lock);
 
 		uuid_state.clk_seq = (uint16_t) random_uint();
@@ -54,8 +56,8 @@ extern inline uint64_t
 uuid_time_now(const struct HandlerClosure *const restrict fail_cl);
 
 extern inline bool
-uuid_state_init_mac_address(uint8_t *const restrict mac_address,
-			    const char *restrict *const restrict failure);
+uuid_mac_address(uint8_t *const restrict mac_address,
+		 const char *restrict *const restrict failure);
 
 extern inline void
 uuid_init(struct UUID *const restrict uuid,

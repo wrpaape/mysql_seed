@@ -11,7 +11,15 @@
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
-#define LENGTH_MAC_ADDRESS 6lu
+#define MAC_ADDRESS_LENGTH 6lu
+
+/* XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\0 */
+#define UUID_STRING_SIZE 37lu
+
+/* 0123456789
+ * -XXXX-XXXX-XXXXXXXXXXXX\0 */
+#define CLK_SEQ_NODE_SIZE   24lu
+#define CLK_SEQ_LAST_OFFSET 9lu
 
 /* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
 #define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
@@ -29,7 +37,7 @@
 	FAILURE_REASON("uuid_mac_address", "HeapFree failure")
 #else
 #	define MAIN_INTERFACE_NAME "en0"
-#endif /* ifdef WIN32 *?
+#endif /* ifdef WIN32 */
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -39,18 +47,26 @@ struct UUID {
 	uint16_t time_hi_and_version;
 	uint8_t clk_seq_hi_res;
 	uint8_t clk_seq_low;
-	uint8_t node[LENGTH_MAC_ADDRESS];
+	uint8_t node[MAC_ADDRESS_LENGTH];
 };
 
 struct UUIDState {
 	Mutex lock;
-	uint16_t clk_seq;
-	uint8_t node[LENGTH_MAC_ADDRESS];
+	char clk_seq_node[CLK_SEQ_NODE_SIZE];
+	char *restrict clk_seq_last
+	uint8_t node[MAC_ADDRESS_LENGTH];
 };
 
+struct UUIDStringBuffer {
+	char bytes[UUID_STRING_SIZE];
+};
+
+struct ClkSeqNodeBuffer {
+	char bytes[CLK_SEQ_NODE_SIZE];
+};
 
 struct MACAddressBuffer {
-	uint8_t octets[LENGTH_MAC_ADDRESS];
+	uint8_t octets[MAC_ADDRESS_LENGTH];
 };
 
 #define SET_MAC_ADDRESS(PTR, MAC)					\
@@ -90,8 +106,8 @@ uuid_time_now(const struct HandlerClosure *const restrict fail_cl)
 }
 
 inline bool
-uuid_state_init_mac_address(uint8_t *const restrict mac_address,
-			    const char *restrict *const restrict failure)
+uuid_mac_address(uint8_t *const restrict mac_address,
+		 const char *restrict *const restrict failure)
 {
 
 #ifdef WIN32
