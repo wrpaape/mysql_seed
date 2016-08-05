@@ -18,8 +18,18 @@
 
 #define UUID_VERSION 1
 
-#define MAIN_INTERFACE_NAME "en0"
+#ifdef WIN32
+#	define UUID_GET_PROCESS_HEAP_FAILURE				\
+	FAILURE_REASON("uuid_mac_address", "GetProcessHeap failure")
 
+#	define UUID_HEAP_ALLOC_FAILURE					\
+	FAILURE_REASON("uuid_mac_address", "HeapAlloc failure")
+
+#	define UUID_HEAP_FREE_FAILURE					\
+	FAILURE_REASON("uuid_mac_address", "HeapFree failure")
+#else
+#	define MAIN_INTERFACE_NAME "en0"
+#endif /* ifdef WIN32 *?
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -83,6 +93,59 @@ inline bool
 uuid_state_init_mac_address(uint8_t *const restrict mac_address,
 			    const char *restrict *const restrict failure)
 {
+
+#ifdef WIN32
+	ULONG size_required;
+
+	if (!size_adapters_addresses_report(0,
+					    0,
+					    NULL,
+					    &size_required,
+					    failure))
+		return false;
+
+	const WINAPI heap = GetProcessHeap();
+
+	if (heap == NULL) {
+		*failure = UUID_GET_PROCESS_HEAP_FAILURE;
+		return false;
+	}
+
+	const PIP_ADAPTER_ADDRESSES adapter_addresses
+	= HeapAlloc(heap,
+		    0,
+		    size_required):
+
+	if (adapter_addresses == NULL) {
+		*failure = UUID_HEAP_ALLOC_FAILURE;
+		return false;
+	}
+
+	if (!get_adapters_addresses_report(0,
+					   0,
+					   NULL,
+					   adapter_addresses,
+					   &size_required,
+					   failure)) {
+		(void) HeapFree(heap,
+				0,
+				adapter_addresses);
+		return false;
+	}
+
+	SET_MAC_ADDRESS(mac_address,
+			adapter_addresses->Address);
+
+	const bool free_success = HeapFree(heap,
+					   0,
+					   adapter_addresses);
+
+	if (!free_success)
+		*failure = UUID_HEAP_FREE_FAILURE;
+
+	return free_success;
+
+#else
 	struct ifconf configuration;
 	size_t size_required;
 	int interface_index;
@@ -140,6 +203,7 @@ uuid_state_init_mac_address(uint8_t *const restrict mac_address,
 	free(configuration.ifc_buf);
 
 	return true;
+#endif /* ifdef WIN32 */
 }
 
 

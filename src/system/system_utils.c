@@ -32,6 +32,37 @@ socket_handle_cl(int *const restrict socket_descriptor,
 		 const struct HandlerClosure *const restrict fail_cl);
 
 #ifdef WIN32
+/* size_adapters_addresses */
+extern inline bool
+size_adapters_addresses_status(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer);
+extern inline void
+size_adapters_addresses_muffle(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer);
+extern inline bool
+size_adapters_addresses_report(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer);
+extern inline void
+size_adapters_addresses_handle(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer,
+			       Handler *const handle,
+			       void *arg);
+extern inline void
+size_adapters_addresses_handle_cl(ULONG family,
+				  ULONG flags,
+				  PVOID reserved,
+				  PULONG size_pointer,
+				  const struct HandlerClosure *const restrict fail_cl);
+
+/* get_adapters_addresses */
 extern inline bool
 get_adapters_addresses_status(ULONG family,
 			      ULONG flags,

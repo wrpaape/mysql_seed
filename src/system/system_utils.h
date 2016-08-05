@@ -66,6 +66,15 @@
 			     RESERVED,					\
 			     ADAPTER_ADDRESSES,				\
 			     SIZE_POINTER)
+#	define size_adapters_addresses_imp(FAMILY,			\
+					   FLAGS,			\
+					   RESERVED,			\
+					   SIZE_POINTER)		\
+	GetAdaptersAddresses(FAMILY,					\
+			     FLAGS,					\
+			     RESERVED,					\
+			     NULL,					\
+			     SIZE_POINTER)
 #else
 /* ioctl wrappers */
 #	define interface_name_to_index_imp(NAME)			\
@@ -222,6 +231,109 @@ socket_handle_cl(int *const restrict socket_descriptor,
 
 
 #ifdef WIN32
+/* size_adapters_addresses */
+inline bool
+size_adapters_addresses_status(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer)
+{
+	return size_adapters_addresses_imp(family,
+					   flags,
+					   reserved,
+					   size_pointer) == ERROR_BUFFER_OVERFLOW;
+}
+
+inline void
+size_adapters_addresses_muffle(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer)
+{
+	(void) size_adapters_addresses_imp(family,
+					   flags,
+					   reserved,
+					   size_pointer);
+}
+
+#undef	FAIL_SWITCH_ROUTINE
+#define	FAIL_SWITCH_ROUTINE size_adapters_addresses_imp
+#define FAIL_SWITCH_STATUS_SUCCESS ERROR_BUFFER_OVERFLOW
+inline bool
+size_adapters_addresses_report(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer)
+{
+	FAIL_SWITCH_STATUS_OPEN(family,
+				flags,
+				reserved,
+				adapter_addresses,
+				size_pointer)
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_ADDRESS_NOT_ASSOCIATED,
+				  "an address has not yet been associated with "
+				  "the network endpoint  (DHCP lease "
+				  "information was available)")
+	FAIL_SWITCH_STATUS_CASE_3(ERROR_INVALID_PARAMETER,
+				  "The 'size_pointer' parameter is NULL.",
+				  "The 'address' paramter is not 'AF_INET', '"
+				  "AF_INET6', or 'AF_UNSPEC'",
+				  "The address information for the parameters "
+				  "requested is greater than 'ULONG_MAX'.")
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_NOT_ENOUGH_MEMORY,
+				  "Insufficient memory resources are available "
+				  "to complete the operation.")
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_NO_DATA,
+				  "No addresses were found for the requested "
+				  "parameters")
+	FAIL_SWITCH_STATUS_CLOSE()
+}
+
+inline void
+size_adapters_addresses_handle(ULONG family,
+			       ULONG flags,
+			       PVOID reserved,
+			       PULONG size_pointer,
+			       Handler *const handle,
+			       void *arg)
+{
+	const char *restrict failure;
+
+	if (size_adapters_addresses_report(family,
+					   flags,
+					   reserved,
+					   size_pointer,
+					   &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+size_adapters_addresses_handle_cl(ULONG family,
+				  ULONG flags,
+				  PVOID reserved,
+				  PULONG size_pointer,
+				  const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (size_adapters_addresses_report(family,
+					   flags,
+					   reserved,
+					   size_pointer,
+					   &failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+
+
+/* get_adapters_addresses */
 inline bool
 get_adapters_addresses_status(ULONG family,
 			      ULONG flags,
@@ -252,6 +364,7 @@ get_adapters_addresses_muffle(ULONG family,
 
 #undef	FAIL_SWITCH_ROUTINE
 #define	FAIL_SWITCH_ROUTINE get_adapters_addresses_imp
+#undef	FAIL_SWITCH_STATUS_SUCCESS
 #define FAIL_SWITCH_STATUS_SUCCESS ERROR_SUCCESS
 inline bool
 get_adapters_addresses_report(ULONG family,
