@@ -8,6 +8,7 @@
 #ifdef WIN32
 #	include <windows.h>	/* DeviceIoControl */
 #	include <winsock2.h>	/* socket */
+#	include <lphlpapi.h>	/* GetAdaptersAddress */
 #	include <ws2tcpip.h>	/* getaddrinfo */
 #else
 #	include <sys/sysctl.h>	/* sysctl */
@@ -54,8 +55,19 @@
  * FUNCTION-LIKE MACROS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
+#ifdef WIN32
+#	define get_adapters_addresses_imp(FAMILY,			\
+					  FLAGS,			\
+					  RESERVED,			\
+					  ADAPTER_ADDRESSES,		\
+					  SIZE_POINTER)			\
+	GetAdaptersAddresses(FAMILY,					\
+			     FLAGS,					\
+			     RESERVED,					\
+			     ADAPTER_ADDRESSES,				\
+			     SIZE_POINTER)
+#else
 /* ioctl wrappers */
-#ifndef WIN32
 #	define interface_name_to_index_imp(NAME)			\
 	if_nametoindex(NAME)
 
@@ -67,7 +79,8 @@
 
 #	define get_winsize_imp(WINDOW, FILE_DESCRIPTOR)			\
 	ioctl(FILE_DESCRIPTOR, TIOCGWINSZ, WINDOW)
-#endif /* ifndef WIN32 */
+#endif /* ifdef WIN32 */
+
 #ifdef LINUX
 #	define get_interface_index_imp(REQUEST, DEVICE_DESCRIPTOR)	\
 	ioctl(DEVICE_DESCRIPTOR, SIOCGIFINDEX, REQUEST)
@@ -208,7 +221,122 @@ socket_handle_cl(int *const restrict socket_descriptor,
 }
 
 
-#ifndef WIN32
+#ifdef WIN32
+inline bool
+get_adapters_addresses_status(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer)
+{
+	return get_hardware_address_imp(family,
+					flags,
+					reserved,
+					adapter_addresses,
+					size_pointer) == ERROR_SUCCESS;
+}
+
+inline void
+get_adapters_addresses_muffle(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer)
+{
+	(void) get_hardware_address_imp(family,
+					flags,
+					reserved,
+					adapter_addresses,
+					size_pointer);
+}
+
+#undef	FAIL_SWITCH_ROUTINE
+#define	FAIL_SWITCH_ROUTINE get_adapters_addresses_imp
+#define FAIL_SWITCH_STATUS_SUCCESS ERROR_SUCCESS
+inline bool
+get_adapters_addresses_report(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer,
+			      const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_STATUS_OPEN(family,
+				flags,
+				reserved,
+				adapter_addresses,
+				size_pointer)
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_ADDRESS_NOT_ASSOCIATED,
+				  "an address has not yet been associated with "
+				  "the network endpoint  (DHCP lease "
+				  "information was available)")
+	FAIL_SWITCH_STATUS_CASE_2(ERROR_BUFFER_OVERFLOW,
+				 "The buffer size indicated by the '"
+				 "size_pointer' parameter is too small to hold "
+				 "the adapter information.",
+				 "The 'adapter_addresses' parameter is 'NULL'.")
+	FAIL_SWITCH_STATUS_CASE_3(ERROR_INVALID_PARAMETER,
+				  "The 'size_pointer' parameter is NULL.",
+				  "The 'address' paramter is not 'AF_INET', '"
+				  "AF_INET6', or 'AF_UNSPEC'",
+				  "The address information for the parameters "
+				  "requested is greater than 'ULONG_MAX'.")
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_NOT_ENOUGH_MEMORY,
+				  "Insufficient memory resources are available "
+				  "to complete the operation.")
+	FAIL_SWITCH_STATUS_CASE_1(ERROR_NO_DATA,
+				  "No addresses were found for the requested "
+				  "parameters")
+	FAIL_SWITCH_STATUS_CLOSE()
+}
+
+inline void
+get_adapters_addresses_handle(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer,
+			      Handler *const handle,
+			      void *arg)
+{
+	const char *restrict failure;
+
+	if (get_adapters_addresses_report(family,
+					  flags,
+					  reserved,
+					  adapter_addresses,
+					  size_pointer,
+					  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+get_adapters_addresses_handle_cl(ULONG family,
+				 ULONG flags,
+				 PVOID reserved,
+				 PIP_ADAPTER_ADDRESSES adapter_addresses,
+				 PULONG size_pointer,
+				 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (get_adapters_addresses_report(family,
+					  flags,
+					  reserved,
+					  adapter_addresses,
+					  size_pointer,
+					  &failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+#else
 /* sysctl */
 inline bool
 sysctl_status(int *const restrict mib_name,
@@ -740,7 +868,7 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 			     failure);
 	__builtin_unreachable();
 }
-#endif /* ifndef WIN32 */
+#endif /* ifdef WIN32 */
 
 
 #ifdef LINUX
@@ -927,6 +1055,7 @@ getaddrinfo_muffle(const char *const node,
 
 #undef	FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE getaddrinfo
+#undef	FAIL_SWITCH_STATUS_SUCCESS
 #define FAIL_SWITCH_STATUS_SUCCESS 0
 
 inline bool

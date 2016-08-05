@@ -31,7 +31,42 @@ socket_handle_cl(int *const restrict socket_descriptor,
 		 const int protocol,
 		 const struct HandlerClosure *const restrict fail_cl);
 
-#ifndef WIN32
+#ifdef WIN32
+extern inline bool
+get_adapters_addresses_status(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer);
+extern inline void
+get_adapters_addresses_muffle(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer);
+extern inline bool
+get_adapters_addresses_report(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer,
+			      const char *restrict *const restrict failure);
+extern inline void
+get_adapters_addresses_handle(ULONG family,
+			      ULONG flags,
+			      PVOID reserved,
+			      PIP_ADAPTER_ADDRESSES adapter_addresses,
+			      PULONG size_pointer,
+			      Handler *const handle,
+			      void *arg);
+extern inline void
+get_adapters_addresses_handle_cl(ULONG family,
+				 ULONG flags,
+				 PVOID reserved,
+				 PIP_ADAPTER_ADDRESSES adapter_addresses,
+				 PULONG size_pointer,
+				 const struct HandlerClosure *const restrict fail_cl);
+#else
 /* sysctl */
 extern inline bool
 sysctl_status(int *const restrict mib_name,
@@ -158,7 +193,7 @@ extern inline void
 get_winsize_handle_cl(struct winsize *const restrict window,
 		      const int file_descriptor,
 		      const struct HandlerClosure *const restrict fail_cl);
-#endif /* ifndef WIN32 */
+#endif /* ifdef WIN32 */
 
 #ifdef LINUX
 /* get_interface_index */
