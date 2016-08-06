@@ -23,14 +23,22 @@ void handle_uuid_mac_address_failure(void *arg,
 	exit(1);
 }
 
-void test_uuid_state_init_mac_address(void)
+void test_uuid_utils_start(void)
+{
+	puts(&uuid_state.clk_seq_node[0]);
+
+	TEST_ASSERT_EQUAL_PTR(&uuid_state.clk_seq_node[CLK_SEQ_LAST_OFFSET],
+			      uuid_state.clk_seq_last);
+}
+
+void test_uuid_mac_address(void)
 {
 	const char *restrict failure;
 
-	uint8_t mac_address[LENGTH_MAC_ADDRESS];
+	uint8_t mac_address[MAC_ADDRESS_LENGTH];
 
-	TEST_ASSERT_TRUE(uuid_state_init_mac_address(&mac_address[0],
-						     &failure));
+	TEST_ASSERT_TRUE(uuid_mac_address(&mac_address[0],
+					  &failure));
 
 	printf("%02X:%02X:%02X:%02X:%02X:%02X\n",
 	       mac_address[0],

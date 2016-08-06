@@ -38,10 +38,19 @@ struct ThreadLog {
 	char *restrict until;
 };
 
+struct ThreadLogBufferBuffer {
+	char bytes[THREAD_LOG_BUFFER_LENGTH];
+};
+
+#define SET_THREAD_LOG_BUFFER(PTR, BUFFER)				\
+*((struct ThreadLogBufferBuffer *const restrict) (PTR))			\
+= *((const struct ThreadLogBufferBuffer *const restrict) (BUFFER))
+
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
 extern const char thread_log_buffer_prototype[THREAD_LOG_BUFFER_LENGTH];
+
 
 /* accesor functions
  *─────────────────────────────────────────────────────────────────────────── */
@@ -406,9 +415,8 @@ thread_log_init(struct ThreadLog *const restrict log,
 {
 	mutex_init(&log->lock);
 
-	memory_copy(&log->buffer[0],
-		    &thread_log_buffer_prototype[0],
-		    sizeof(thread_log_buffer_prototype));
+	SET_THREAD_LOG_BUFFER(&log->buffer[0],
+			      &thread_log_buffer_prototype[0]);
 
 	thread_log_label_init(&log->label,
 			      name);

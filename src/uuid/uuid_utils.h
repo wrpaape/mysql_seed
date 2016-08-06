@@ -16,15 +16,20 @@
 /* XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX\0 */
 #define UUID_STRING_SIZE 37lu
 
-/* 0123456789
- * -XXXX-XXXX-XXXXXXXXXXXX\0 */
-#define CLK_SEQ_NODE_SIZE   24lu
-#define CLK_SEQ_LAST_OFFSET 9lu
+/* 01234
+ * -XXXX-XXXXXXXXXXXX\0 */
+#define CLK_SEQ_NODE_SIZE   19lu
+#define CLK_SEQ_LAST_OFFSET 4l
 
 /* 100-nanosecond intervals elapsed from October 15, 1582 to January 1, 1970 */
 #define GREGORIAN_REFORM_EPOCH_DIFF 122192928000000000lu
 
 #define UUID_VERSION 1
+
+/* error message
+ * ────────────────────────────────────────────────────────────────────────── */
+#define UUID_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("uuid_mac_address")
 
 #ifdef WIN32
 #	define UUID_GET_PROCESS_HEAP_FAILURE				\
@@ -38,6 +43,7 @@
 #else
 #	define MAIN_INTERFACE_NAME "en0"
 #endif /* ifdef WIN32 */
+
 
 /* typedefs, structs
  * ────────────────────────────────────────────────────────────────────────── */
@@ -53,17 +59,29 @@ struct UUID {
 struct UUIDState {
 	Mutex lock;
 	char clk_seq_node[CLK_SEQ_NODE_SIZE];
-	char *restrict clk_seq_last
-	uint8_t node[MAC_ADDRESS_LENGTH];
+	char *restrict clk_seq_last;
 };
 
 struct UUIDStringBuffer {
 	char bytes[UUID_STRING_SIZE];
 };
 
+#define SET_UUID_STRING(PTR, UUID_STRING)				\
+*((struct UUIDStringBuffer *const restrict) PTR)			\
+= *((const struct UUIDStringBuffer *const restrict) UUID_STRING)
+
+#define PUT_UUID_STRING(PTR, UUID_STRING)				\
+*((struct UUIDStringBuffer *const restrict) PTR)			\
+= *((const struct UUIDStringBuffer *const restrict) UUID_STRING);	\
+PTR += UUID_STRING_SIZE
+
 struct ClkSeqNodeBuffer {
 	char bytes[CLK_SEQ_NODE_SIZE];
 };
+
+#define SET_CLK_SEQ_NODE(PTR, CLK_SEQ_NODE)				\
+*((struct ClkSeqNodeBuffer *const restrict) PTR)			\
+= *((const struct ClkSeqNodeBuffer *const restrict) CLK_SEQ_NODE)
 
 struct MACAddressBuffer {
 	uint8_t octets[MAC_ADDRESS_LENGTH];
@@ -73,8 +91,7 @@ struct MACAddressBuffer {
 *((struct MACAddressBuffer *const restrict) PTR)			\
 = *((const struct MACAddressBuffer *const restrict) MAC)
 
-#define UUID_MALLOC_FAILURE						\
-MALLOC_FAILURE_MESSAGE("uuid_mac_address")
+
 
 
 /* global constants
@@ -91,6 +108,129 @@ __attribute__((noreturn));
 void
 uuid_utils_start(void)
 __attribute__((constructor (103)));
+
+inline void
+uuid_state_init_clk_seq_node(char *restrict clk_seq_node,
+			     const uint8_t *restrict node)
+{
+
+	unsigned int random = (unsigned int) random_uint();
+
+	*clk_seq_node = '-';
+	++clk_seq_node;
+
+	/* put clk_seq_hi */
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   (uint8_t) random);
+
+	/* put clk_seq_low */
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   (uint8_t) (random >> 8));
+
+	*clk_seq_node = '-';
+	++clk_seq_node;
+
+	/* put node */
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+	++node;
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+	++node;
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+	++node;
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+	++node;
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+	++node;
+	clk_seq_node = put_octet_hex_lower(clk_seq_node,
+					   *node);
+
+	*clk_seq_node = '\0';
+}
+
+inline void
+uuid_state_increment_clk_seq(char *restrict ptr)
+{
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	case '9': *ptr = 'a'; return;
+	case 'a': *ptr = 'b'; return;
+	case 'b': *ptr = 'c'; return;
+	case 'c': *ptr = 'd'; return;
+	case 'd': *ptr = 'e'; return;
+	case 'e': *ptr = 'f'; return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10", 2); return;
+	case '1': SET_STRING_WIDTH(ptr, "20", 2); return;
+	case '2': SET_STRING_WIDTH(ptr, "30", 2); return;
+	case '3': SET_STRING_WIDTH(ptr, "40", 2); return;
+	case '4': SET_STRING_WIDTH(ptr, "50", 2); return;
+	case '5': SET_STRING_WIDTH(ptr, "60", 2); return;
+	case '6': SET_STRING_WIDTH(ptr, "70", 2); return;
+	case '7': SET_STRING_WIDTH(ptr, "80", 2); return;
+	case '8': SET_STRING_WIDTH(ptr, "90", 2); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0", 2); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0", 2); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0", 2); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0", 2); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0", 2); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0", 2); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100", 3); return;
+	case '1': SET_STRING_WIDTH(ptr, "200", 3); return;
+	case '2': SET_STRING_WIDTH(ptr, "300", 3); return;
+	case '3': SET_STRING_WIDTH(ptr, "400", 3); return;
+	case '4': SET_STRING_WIDTH(ptr, "500", 3); return;
+	case '5': SET_STRING_WIDTH(ptr, "600", 3); return;
+	case '6': SET_STRING_WIDTH(ptr, "700", 3); return;
+	case '7': SET_STRING_WIDTH(ptr, "800", 3); return;
+	case '8': SET_STRING_WIDTH(ptr, "900", 3); return;
+	case '9': SET_STRING_WIDTH(ptr, "a00", 3); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b00", 3); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c00", 3); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d00", 3); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e00", 3); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f00", 3); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1000", 4); return;
+	case '1': SET_STRING_WIDTH(ptr, "2000", 4); return;
+	case '2': SET_STRING_WIDTH(ptr, "3000", 4); return;
+	case '3': SET_STRING_WIDTH(ptr, "4000", 4); return;
+	case '4': SET_STRING_WIDTH(ptr, "5000", 4); return;
+	case '5': SET_STRING_WIDTH(ptr, "6000", 4); return;
+	case '6': SET_STRING_WIDTH(ptr, "7000", 4); return;
+	case '7': SET_STRING_WIDTH(ptr, "8000", 4); return;
+	case '8': SET_STRING_WIDTH(ptr, "9000", 4); return;
+	case '9': SET_STRING_WIDTH(ptr, "a000", 4); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b000", 4); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c000", 4); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d000", 4); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e000", 4); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f000", 4); return;
+	default:  SET_STRING_WIDTH(ptr, "0000", 4);
+	}
+}
 
 inline uint64_t
 uuid_time_now(const struct HandlerClosure *const restrict fail_cl)
@@ -222,20 +362,373 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 #endif /* ifdef WIN32 */
 }
 
+inline char *
+put_uuid_time(char *restrict ptr,
+	      const uint64_t uuid_time)
+{
+	/* put time_low */
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) (uuid_time >> 24));
+
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) (uuid_time >> 16));
+
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) (uuid_time >>  8));
+
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) uuid_time);
+
+	*ptr = '-';
+	++ptr;
+
+	/* put time_mid */
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) (uuid_time >> 40));
+
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) (uuid_time >> 32));
+
+
+	*ptr = '-';
+	++ptr;
+
+	/* put time_hi_and_version */
+	uuid_time  |= UUID_VERSION;
+	ptr = put_octet_hex_lower(ptr,
+				  (uint8_t) ((UUID_VERSION << 4)
+					     | ((uuid_time >> 56) & 0xF));
+
+	return put_octet_hex_lower(ptr,
+				   (uint8_t) (uuid_time >> 48));
+}
 
 inline void
-uuid_init(struct UUID *const restrict uuid,
-	  const struct HandlerClosure *const restrict fail_cl)
+uuid_string_increment_time(char *restrict ptr)
 {
-	const uint64_t now = uuid_time_now(fail_cl);
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	case '9': *ptr = 'a'; return;
+	case 'a': *ptr = 'b'; return;
+	case 'b': *ptr = 'c'; return;
+	case 'c': *ptr = 'd'; return;
+	case 'd': *ptr = 'e'; return;
+	case 'e': *ptr = 'f'; return;
+	default: --ptr;
+	}
 
-	uuid->time_low = (uint32_t) now;
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10", 2); return;
+	case '1': SET_STRING_WIDTH(ptr, "20", 2); return;
+	case '2': SET_STRING_WIDTH(ptr, "30", 2); return;
+	case '3': SET_STRING_WIDTH(ptr, "40", 2); return;
+	case '4': SET_STRING_WIDTH(ptr, "50", 2); return;
+	case '5': SET_STRING_WIDTH(ptr, "60", 2); return;
+	case '6': SET_STRING_WIDTH(ptr, "70", 2); return;
+	case '7': SET_STRING_WIDTH(ptr, "80", 2); return;
+	case '8': SET_STRING_WIDTH(ptr, "90", 2); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0", 2); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0", 2); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0", 2); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0", 2); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0", 2); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0", 2); return;
+	default: --ptr;
+	}
 
-	uuid->time_mid = (uint16_t) (now >> 32);
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100", 3); return;
+	case '1': SET_STRING_WIDTH(ptr, "200", 3); return;
+	case '2': SET_STRING_WIDTH(ptr, "300", 3); return;
+	case '3': SET_STRING_WIDTH(ptr, "400", 3); return;
+	case '4': SET_STRING_WIDTH(ptr, "500", 3); return;
+	case '5': SET_STRING_WIDTH(ptr, "600", 3); return;
+	case '6': SET_STRING_WIDTH(ptr, "700", 3); return;
+	case '7': SET_STRING_WIDTH(ptr, "800", 3); return;
+	case '8': SET_STRING_WIDTH(ptr, "900", 3); return;
+	case '9': SET_STRING_WIDTH(ptr, "a00", 3); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b00", 3); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c00", 3); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d00", 3); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e00", 3); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f00", 3); return;
+	default: --ptr;
+	}
 
-	uuid->time_hi_and_version = (uint16_t) ((now >> 48)
-						| (UUID_VERSION << 12));
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1000", 4); return;
+	case '1': SET_STRING_WIDTH(ptr, "2000", 4); return;
+	case '2': SET_STRING_WIDTH(ptr, "3000", 4); return;
+	case '3': SET_STRING_WIDTH(ptr, "4000", 4); return;
+	case '4': SET_STRING_WIDTH(ptr, "5000", 4); return;
+	case '5': SET_STRING_WIDTH(ptr, "6000", 4); return;
+	case '6': SET_STRING_WIDTH(ptr, "7000", 4); return;
+	case '7': SET_STRING_WIDTH(ptr, "8000", 4); return;
+	case '8': SET_STRING_WIDTH(ptr, "9000", 4); return;
+	case '9': SET_STRING_WIDTH(ptr, "a000", 4); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b000", 4); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c000", 4); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d000", 4); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e000", 4); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f000", 4); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10000", 5); return;
+	case '1': SET_STRING_WIDTH(ptr, "20000", 5); return;
+	case '2': SET_STRING_WIDTH(ptr, "30000", 5); return;
+	case '3': SET_STRING_WIDTH(ptr, "40000", 5); return;
+	case '4': SET_STRING_WIDTH(ptr, "50000", 5); return;
+	case '5': SET_STRING_WIDTH(ptr, "60000", 5); return;
+	case '6': SET_STRING_WIDTH(ptr, "70000", 5); return;
+	case '7': SET_STRING_WIDTH(ptr, "80000", 5); return;
+	case '8': SET_STRING_WIDTH(ptr, "90000", 5); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0000", 5); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0000", 5); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0000", 5); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0000", 5); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0000", 5); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0000", 5); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100000", 6); return;
+	case '1': SET_STRING_WIDTH(ptr, "200000", 6); return;
+	case '2': SET_STRING_WIDTH(ptr, "300000", 6); return;
+	case '3': SET_STRING_WIDTH(ptr, "400000", 6); return;
+	case '4': SET_STRING_WIDTH(ptr, "500000", 6); return;
+	case '5': SET_STRING_WIDTH(ptr, "600000", 6); return;
+	case '6': SET_STRING_WIDTH(ptr, "700000", 6); return;
+	case '7': SET_STRING_WIDTH(ptr, "800000", 6); return;
+	case '8': SET_STRING_WIDTH(ptr, "900000", 6); return;
+	case '9': SET_STRING_WIDTH(ptr, "a00000", 6); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b00000", 6); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c00000", 6); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d00000", 6); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e00000", 6); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f00000", 6); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1000000", 7); return;
+	case '1': SET_STRING_WIDTH(ptr, "2000000", 7); return;
+	case '2': SET_STRING_WIDTH(ptr, "3000000", 7); return;
+	case '3': SET_STRING_WIDTH(ptr, "4000000", 7); return;
+	case '4': SET_STRING_WIDTH(ptr, "5000000", 7); return;
+	case '5': SET_STRING_WIDTH(ptr, "6000000", 7); return;
+	case '6': SET_STRING_WIDTH(ptr, "7000000", 7); return;
+	case '7': SET_STRING_WIDTH(ptr, "8000000", 7); return;
+	case '8': SET_STRING_WIDTH(ptr, "9000000", 7); return;
+	case '9': SET_STRING_WIDTH(ptr, "a000000", 7); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b000000", 7); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c000000", 7); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d000000", 7); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e000000", 7); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f000000", 7); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10000000", 8); return;
+	case '1': SET_STRING_WIDTH(ptr, "20000000", 8); return;
+	case '2': SET_STRING_WIDTH(ptr, "30000000", 8); return;
+	case '3': SET_STRING_WIDTH(ptr, "40000000", 8); return;
+	case '4': SET_STRING_WIDTH(ptr, "50000000", 8); return;
+	case '5': SET_STRING_WIDTH(ptr, "60000000", 8); return;
+	case '6': SET_STRING_WIDTH(ptr, "70000000", 8); return;
+	case '7': SET_STRING_WIDTH(ptr, "80000000", 8); return;
+	case '8': SET_STRING_WIDTH(ptr, "90000000", 8); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0000000", 8); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0000000", 8); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0000000", 8); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0000000", 8); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0000000", 8); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0000000", 8); return;
+	default:  SET_STRING_WIDTH(ptr, "00000000", 8);
+	}
+
+	/* carry overflow to time_mid */
+	ptr += 12l;
+
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	case '9': *ptr = 'a'; return;
+	case 'a': *ptr = 'b'; return;
+	case 'b': *ptr = 'c'; return;
+	case 'c': *ptr = 'd'; return;
+	case 'd': *ptr = 'e'; return;
+	case 'e': *ptr = 'f'; return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10", 2); return;
+	case '1': SET_STRING_WIDTH(ptr, "20", 2); return;
+	case '2': SET_STRING_WIDTH(ptr, "30", 2); return;
+	case '3': SET_STRING_WIDTH(ptr, "40", 2); return;
+	case '4': SET_STRING_WIDTH(ptr, "50", 2); return;
+	case '5': SET_STRING_WIDTH(ptr, "60", 2); return;
+	case '6': SET_STRING_WIDTH(ptr, "70", 2); return;
+	case '7': SET_STRING_WIDTH(ptr, "80", 2); return;
+	case '8': SET_STRING_WIDTH(ptr, "90", 2); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0", 2); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0", 2); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0", 2); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0", 2); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0", 2); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0", 2); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100", 3); return;
+	case '1': SET_STRING_WIDTH(ptr, "200", 3); return;
+	case '2': SET_STRING_WIDTH(ptr, "300", 3); return;
+	case '3': SET_STRING_WIDTH(ptr, "400", 3); return;
+	case '4': SET_STRING_WIDTH(ptr, "500", 3); return;
+	case '5': SET_STRING_WIDTH(ptr, "600", 3); return;
+	case '6': SET_STRING_WIDTH(ptr, "700", 3); return;
+	case '7': SET_STRING_WIDTH(ptr, "800", 3); return;
+	case '8': SET_STRING_WIDTH(ptr, "900", 3); return;
+	case '9': SET_STRING_WIDTH(ptr, "a00", 3); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b00", 3); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c00", 3); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d00", 3); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e00", 3); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f00", 3); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "1000", 4); return;
+	case '1': SET_STRING_WIDTH(ptr, "2000", 4); return;
+	case '2': SET_STRING_WIDTH(ptr, "3000", 4); return;
+	case '3': SET_STRING_WIDTH(ptr, "4000", 4); return;
+	case '4': SET_STRING_WIDTH(ptr, "5000", 4); return;
+	case '5': SET_STRING_WIDTH(ptr, "6000", 4); return;
+	case '6': SET_STRING_WIDTH(ptr, "7000", 4); return;
+	case '7': SET_STRING_WIDTH(ptr, "8000", 4); return;
+	case '8': SET_STRING_WIDTH(ptr, "9000", 4); return;
+	case '9': SET_STRING_WIDTH(ptr, "a000", 4); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b000", 4); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c000", 4); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d000", 4); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e000", 4); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f000", 4); return;
+	default:  SET_STRING_WIDTH(ptr, "0000", 4);
+	}
+
+	/* carry overflow to time_high_and_version */
+	ptr += 8l;
+
+	switch (*ptr) {
+	case '0': *ptr = '1'; return;
+	case '1': *ptr = '2'; return;
+	case '2': *ptr = '3'; return;
+	case '3': *ptr = '4'; return;
+	case '4': *ptr = '5'; return;
+	case '5': *ptr = '6'; return;
+	case '6': *ptr = '7'; return;
+	case '7': *ptr = '8'; return;
+	case '8': *ptr = '9'; return;
+	case '9': *ptr = 'a'; return;
+	case 'a': *ptr = 'b'; return;
+	case 'b': *ptr = 'c'; return;
+	case 'c': *ptr = 'd'; return;
+	case 'd': *ptr = 'e'; return;
+	case 'e': *ptr = 'f'; return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "10", 2); return;
+	case '1': SET_STRING_WIDTH(ptr, "20", 2); return;
+	case '2': SET_STRING_WIDTH(ptr, "30", 2); return;
+	case '3': SET_STRING_WIDTH(ptr, "40", 2); return;
+	case '4': SET_STRING_WIDTH(ptr, "50", 2); return;
+	case '5': SET_STRING_WIDTH(ptr, "60", 2); return;
+	case '6': SET_STRING_WIDTH(ptr, "70", 2); return;
+	case '7': SET_STRING_WIDTH(ptr, "80", 2); return;
+	case '8': SET_STRING_WIDTH(ptr, "90", 2); return;
+	case '9': SET_STRING_WIDTH(ptr, "a0", 2); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b0", 2); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c0", 2); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d0", 2); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e0", 2); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f0", 2); return;
+	default: --ptr;
+	}
+
+	switch (*ptr) {
+	case '0': SET_STRING_WIDTH(ptr, "100", 3); return;
+	case '1': SET_STRING_WIDTH(ptr, "200", 3); return;
+	case '2': SET_STRING_WIDTH(ptr, "300", 3); return;
+	case '3': SET_STRING_WIDTH(ptr, "400", 3); return;
+	case '4': SET_STRING_WIDTH(ptr, "500", 3); return;
+	case '5': SET_STRING_WIDTH(ptr, "600", 3); return;
+	case '6': SET_STRING_WIDTH(ptr, "700", 3); return;
+	case '7': SET_STRING_WIDTH(ptr, "800", 3); return;
+	case '8': SET_STRING_WIDTH(ptr, "900", 3); return;
+	case '9': SET_STRING_WIDTH(ptr, "a00", 3); return;
+	case 'a': SET_STRING_WIDTH(ptr, "b00", 3); return;
+	case 'b': SET_STRING_WIDTH(ptr, "c00", 3); return;
+	case 'c': SET_STRING_WIDTH(ptr, "d00", 3); return;
+	case 'd': SET_STRING_WIDTH(ptr, "e00", 3); return;
+	case 'e': SET_STRING_WIDTH(ptr, "f00", 3); return;
+	default:  SET_STRING_WIDTH(ptr, "000", 3); /* leave version untouched */
+	}
 }
+
+inline void
+set_uuid_clk_seq_node(char *restrict ptr,
+		      const struct HandlerClosure *const restrict fail_cl)
+{
+	mutex_lock_try_catch_open(&uuid_state.lock);
+
+	mutex_lock_handle_cl(&uuid_state.lock,
+			     fail_cl);
+
+	SET_CLK_SEQ_NODE(ptr,
+			 &uuid_state.clk_seq_node[0]);
+
+	uuid_state_increment_clk_seq(uuid_state.clk_seq_last);
+
+	mutex_unlock_handle_cl(&uuid_state.lock,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+}
+
+inline void
+uuid_string_init(char *restrict ptr,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	ptr = put_uuid_time(ptr,
+			    uuid_time_now(fail_cl));
+
+	set_uuid_clk_seq_node(ptr,
+			      fail_cl);
+}
+
 
 
 

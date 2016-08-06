@@ -3,8 +3,9 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "mysql_seed_file.h"	/* file/exit/string/parallelization utils */
-#include "thread/thread_pool.h"	/* ThreadPool */
+#include "mysql_seed_file.h"		/* file/exit/string/thread utils */
+#include "thread/thread_pool.h"		/* ThreadPool */
+#include  "memory/memory_copy_array.h"	/* memory_copy */
 
 /* minimum valid spec lengths
  *─────────────────────────────────────────────────────────────────────────── */
