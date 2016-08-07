@@ -151,20 +151,30 @@ worker_crew_init(struct WorkerCrew *const restrict worker_crew,
 	} while(worker < until);
 }
 
-inline void
+inline bool
 worker_crew_start(struct WorkerCrew *const restrict worker_crew,
-		  const struct HandlerClosure *const restrict fail_cl)
+		  const char *restrict *const restrict failure)
 {
 	const struct Worker *const restrict until = worker_crew->until;
 	struct Worker *restrict worker		  = worker_crew->from;
 
 	do {
-		thread_create_handle_cl(&worker->thread,
-					&worker_spawn,
-					worker,
-					fail_cl);
-		++worker;
+		if (thread_create_report(&worker->thread,
+					 &worker_spawn,
+					 worker,
+					 failure)) {
+			++worker;
+		} else {
+			for (struct Worker *restrict alive
+			     = worker_crew->from; alive < worker; ++alive)
+				thread_cancel_muffle(alive->thread);
+
+			return false;
+		}
+
 	} while (worker < until);
+
+	return true;
 }
 
 inline void
@@ -276,45 +286,54 @@ thread_pool_status_await_failure(struct ThreadPoolStatus *const restrict status)
 	mutex_lock_try_catch_close();
 }
 
-inline void
+inline bool
 thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
-				 const struct HandlerClosure *const restrict fail_cl)
+				 const char *restrict *const restrict failure)
 {
 	mutex_lock_try_catch_open(&status->processing);
 
-	mutex_lock_handle_cl(&status->processing,
-			     fail_cl);
+	if (!mutex_lock_report(&status->processing,
+			       failure))
+		return false;
 
 	while (status->busy)
-		thread_cond_await_handle_cl(&status->done,
-					    &status->processing,
-					    fail_cl);
+		if (!thread_cond_await_report(&status->done,
+					      &status->processing,
+					      failure)) {
+			mutex_unlock_muffle(&status->processing);
+			return false;
+		}
 
-	mutex_unlock_handle_cl(&status->processing,
-			       fail_cl);
+	if (!mutex_unlock_report(&status->processing,
+				 failure))
+		return false;
 
 	mutex_lock_try_catch_close();
+
+	return true;
 }
 
-inline bool
+inline enum ThreadFlag
 thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
-			      const struct HandlerClosure *const restrict fail_cl)
+			      const char *restrict *const restrict failure)
 {
 	bool busy;
 
 	mutex_lock_try_catch_open(&status->processing);
 
-	mutex_lock_handle_cl(&status->processing,
-			     fail_cl);
+	if (!mutex_lock_report(&status->processing,
+			       failure))
+		return THREAD_FALSE;
 
 	busy = status->busy;
 
-	mutex_unlock_handle_cl(&status->processing,
-			       fail_cl);
+	if (!mutex_unlock_report(&status->processing,
+				 failure))
+		return THREAD_FALSE;
 
 	mutex_lock_try_catch_close();
 
-	return busy;
+	return (enum ThreadFlag) busy;
 }
 
 
@@ -420,14 +439,21 @@ void *
 supervisor_spawn(void *arg)
 __attribute__((noreturn));
 
-inline void
+inline bool
 supervisor_start(struct Supervisor *const restrict supervisor,
-		 const struct HandlerClosure *const restrict fail_cl)
+		 const char *restrict *const restrict failure)
 {
-	thread_create_handle_cl(&supervisor->thread,
-				&supervisor_spawn,
-				supervisor,
-				fail_cl);
+	const bool success = thread_create_report(&supervisor->thread,
+						  &supervisor_spawn,
+						  supervisor,
+						  failure);
+
+	if (!success) {
+		worker_crew_cancel_failure(&supervisor->pool->worker_crew);
+		supervisor->pool->status.busy = false;
+	}
+
+	return success;
 }
 
 inline void
@@ -485,6 +511,33 @@ supervisor_signal_muffle(struct Supervisor *const restrict supervisor,
 	mutex_unlock_muffle(&supervisor->listening);
 
 	mutex_lock_try_catch_close();
+}
+
+inline bool
+supervisor_signal_report(struct Supervisor *const restrict supervisor,
+			 SupervisorEvent *const event,
+			 const char *restrict *const restrict failure)
+{
+	mutex_lock_try_catch_open(&supervisor->listening);
+
+	if (!mutex_lock_report(&supervisor->listening,
+			       failure))
+		return false;
+
+	supervisor->event = event;
+
+	if (!thread_cond_signal_report(&supervisor->trigger,
+				       failure)) {
+		mutex_unlock_muffle(&supervisor->listening);
+		return false;
+	}
+
+	mutex_unlock_handle_cl(&supervisor->listening,
+			       fail_cl);
+
+	mutex_lock_try_catch_close();
+
+	return true;
 }
 
 inline void
@@ -545,15 +598,13 @@ inline struct ThreadPool *
 thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		   const size_t count_init_tasks,
 		   const size_t count_workers,
-		   const struct HandlerClosure *const restrict fail_cl)
+		   const char *restrict *const restrict failure)
 {
-	const char *restrict failure;
-
 	if (count_workers == 0lu) {
-		failure = FAILURE_REASON("thread_pool_create",
-					 "no space allocated for pool from"
-					 " (count_workers == 0)");
-		goto HANDLE_FAILURE;
+		*failure = FAILURE_REASON("thread_pool_create",
+					  "no space allocated for pool from"
+					  " (count_workers == 0)");
+		return NULL;
 	}
 
 	/* allocate space for:
@@ -566,7 +617,9 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		 + (sizeof(struct Worker)   * count_workers)
 		 + (sizeof(struct TaskNode) * count_init_tasks));
 
-	if (pool != NULL) {
+	if (pool == NULL) {
+		*failure = MALLOC_FAILURE_MESSAGE("thread_pool_create");
+	} else {
 		struct TaskStore task_store;
 
 		/* divvy up memory for task queue nodes */
@@ -588,50 +641,42 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 				 &task_store,
 				 workers,
 				 count_workers);
-		return pool;
 	}
 
-	failure = MALLOC_FAILURE_MESSAGE("thread_pool_create");
-
-HANDLE_FAILURE:
-	fail_cl->handle(fail_cl->arg,
-			failure);
-	__builtin_unreachable();
-}
-
-inline void
-thread_pool_start(struct ThreadPool *const restrict pool,
-		  const struct HandlerClosure *const restrict fail_cl)
-{
-	pool->status.busy = true;
-
-	worker_crew_start(&pool->worker_crew,
-			  fail_cl);
-
-	supervisor_start(&pool->supervisor,
-			 fail_cl);
-}
-
-
-inline void
-thread_pool_await(struct ThreadPool *const restrict pool,
-		  const struct HandlerClosure *const restrict fail_cl)
-{
-	/* wait for backlog task_buffer to be completed */
-	task_queue_await_empty_handle_cl(&pool->task_buffer.backlog,
-					 fail_cl);
-
-	/* wait for active task_buffer to be completed */
-	task_queue_await_empty_handle_cl(&pool->task_buffer.active,
-					 fail_cl);
+	return pool;
 }
 
 inline bool
+thread_pool_start(struct ThreadPool *const restrict pool,
+		  const char *restrict *const restrict failure)
+{
+	pool->status.busy = true;
+
+	return worker_crew_start(&pool->worker_crew,
+				 failure)
+	    && supervisor_start(&pool->supervisor,
+				failure);
+}
+
+
+inline bool
+thread_pool_await(struct ThreadPool *const restrict pool,
+		  const char *restrict *const restrict failure)
+{
+	/* wait for backlog task_buffer to be completed */
+	return task_queue_await_empty_report(&pool->task_buffer.backlog,
+					     failure)
+	/* wait for active task_buffer to be completed */
+	    && task_queue_await_empty_handle_cl(&pool->task_buffer.active,
+						failure);
+}
+
+inline enum ThreadFlag
 thread_pool_alive(struct ThreadPool *const restrict pool,
-		  const struct HandlerClosure *const restrict fail_cl)
+		  const char *restrict *const restrict failure)
 {
 	return thread_pool_status_check_busy(&pool->status,
-					     fail_cl);
+					     failure);
 }
 
 inline void
@@ -653,20 +698,27 @@ thread_pool_push_task(struct ThreadPool *const restrict pool,
 }
 
 inline void
-thread_pool_stop(struct ThreadPool *const restrict pool,
-		 const struct HandlerClosure *const restrict fail_cl)
+thread_pool_cancel(struct ThreadPool *const restrict pool)
 {
-	supervisor_signal_handle_cl(&pool->supervisor,
-				    &supervisor_exit_success,
-				    fail_cl);
+	worker_crew_cancel_failure(&pool->worker_crew);
+	thread_cancel_muffle(&pool->supervisor.thread);
 }
 
 inline void
-thread_pool_await_exit_success(struct ThreadPool *const restrict pool,
-			       const struct HandlerClosure *const restrict fail_cl)
+thread_pool_stop(struct ThreadPool *const restrict pool,
+		 const char *restrict *const restrict failure)
 {
-	thread_pool_status_await_success(&pool->status,
-					 fail_cl);
+	return supervisor_signal_report(&pool->supervisor,
+					&supervisor_exit_success,
+					failure);
+}
+
+inline bool
+thread_pool_await_exit_success(struct ThreadPool *const restrict pool,
+			       const char *restrict *const restrict failure)
+{
+	return thread_pool_status_await_success(&pool->status,
+						failure);
 }
 
 inline void
@@ -675,15 +727,15 @@ thread_pool_await_exit_failure(struct ThreadPool *const restrict pool)
 	thread_pool_status_await_failure(&pool->status);
 }
 
-inline int
-thread_pool_exit_status(struct ThreadPool *const restrict pool,
-			const struct HandlerClosure *const restrict fail_cl)
-{
-	thread_pool_status_await_success(&pool->status,
-					 fail_cl);
+/* inline int */
+/* thread_pool_exit_status(struct ThreadPool *const restrict pool, */
+/* 			const char *restrict *const restrict failure) */
+/* { */
+/* 	thread_pool_status_await_success(&pool->status, */
+/* 					 fail_cl); */
 
-	return pool->status.exit;
-}
+/* 	return pool->status.exit; */
+/* } */
 
 inline void
 thread_pool_exit_on_failure(struct ThreadPool *const restrict pool,
@@ -704,14 +756,14 @@ thread_pool_exit_on_failure(struct ThreadPool *const restrict pool,
 				 &supervisor_exit_failure);
 }
 
-inline void
+inline bool
 thread_pool_reload(struct ThreadPool *const restrict pool,
 		   struct TaskStore *const restrict store,
-		   const struct HandlerClosure *const restrict fail_cl)
+		   const char *restrict *const restrict failure)
 {
-	task_queue_reload_handle_cl(&pool->task_buffer.backlog,
-				    store,
-				    fail_cl);
+	return task_queue_reload_report(&pool->task_buffer.backlog,
+					store,
+					failure);
 }
 
 inline void

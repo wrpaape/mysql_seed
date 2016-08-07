@@ -1,14 +1,22 @@
 #include "random/random.h"
 
+/* global variables
+ * ────────────────────────────────────────────────────────────────────────── */
 extern rng_t glob_rng; /* global random number generator state */
 
-void
-glob_rng_ctor(void)
-{
-	pcg32_srandom_r(&glob_rng,
-			time(NULL),
-			(intptr_t) &glob_rng);
-}
+
+/* constructors, destructors
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+random_constructor(const char *restrict *const restrict failure);
+
+/* void */
+/* glob_rng_ctor(void) */
+/* { */
+/* 	pcg32_srandom_r(&glob_rng, */
+/* 			time(NULL), */
+/* 			(intptr_t) &glob_rng); */
+/* } */
 
 extern inline void
 glob_rng_init(void);

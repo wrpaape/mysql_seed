@@ -9,6 +9,10 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 /* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
+generate_failure_constructor(const char *const restrict failure);
+extern inline void
+generate_failure_destructor(const char *const restrict failure);
+extern inline void
 generate_failure_malloc(void);
 
 /* destructors
@@ -28,6 +32,15 @@ free_table_files(struct Table *restrict from,
 extern inline void
 remove_free_table_files(struct Table *restrict from,
 			const struct Table *const restrict until);
+
+/* generate mode constructors, destructors
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+mysql_seed_generate_constructors(const unsigned int ctor_flags);
+extern inline void
+mysql_seed_generate_destructors(int *const restrict exit_status):
+extern inline void
+mysql_seed_generate_destructors_muffle(void);
 
 /* generate mode
  *─────────────────────────────────────────────────────────────────────────── */

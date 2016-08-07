@@ -389,15 +389,6 @@ thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 				 const struct HandlerClosure *const restrict cl);
 
 
-/* Prototypes
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-thread_attr_prototype_init(void);
-
-extern inline void
-thread_attr_prototype_destroy(void);
-
-
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
@@ -406,14 +397,3 @@ extern inline bool
 thread_utils_destructor(const char *restrict *const restrict failure);
 extern inline void
 thread_utils_destructor_muffle(void);
-/* void */
-/* thread_utils_start(void) */
-/* { */
-/* 	thread_attr_prototype_init(); */
-/* } */
-
-/* void */
-/* thread_utils_stop(void) */
-/* { */
-/* 	thread_attr_prototype_destroy(); */
-/* } */

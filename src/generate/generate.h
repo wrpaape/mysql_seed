@@ -17,30 +17,39 @@
 #define GENERATE_FAILURE_MALLOC						\
 GENERATE_FAILURE(MALLOC_FAILURE_REASON)
 
+#define GENERATE_FAILURE_CTOR_HEADER					\
+FAILURE_HEADER_WRAP("generate constructor", ":") "\n"
+
+#define GENERATE_FAILURE_DTOR_HEADER					\
+FAILURE_HEADER_WRAP("generate destructor", ":") "\n"
+
+#define GENERATE_FAILURE_THREAD_POOL_HEADER				\
+FAILURE_HEADER_WRAP("generate thread pool", ":") "\n"
+
 /* constructor flags
  *─────────────────────────────────────────────────────────────────────────── */
-#define RANDOM_CTOR_FLAG 1	/* 00000001 */
-#define UUID_CTOR_FLAG	 2	/* 00000010 (depends on random ctor atm) */
+#define RAND_CTOR_FLAG 1	/* 00000001 */
+#define UUID_CTOR_FLAG 3	/* 00000011 (depends on random ctor atm) */
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct GeneratorCounter {
+	unsigned int ctor_flags;
 	uintmax_t rows;
 	size_t row_count_max;
 	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
 	unsigned int databases;
-	unsigned int ctor_flags;
 };
 
 struct DatabaseCounter {
+	unsigned int ctor_flags;
 	uintmax_t rows;
 	size_t row_count_max;
 	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
-	unsigned int ctor_flags;
 };
 
 /* destructors
@@ -105,7 +114,8 @@ inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database)
 {
-	generator->rows += database->rows;
+	generate->ctor_flags |= database->ctor_flags;
+	generator->rows	     += database->rows;
 
 	if (database->row_count_max > generator->row_count_max)
 		generator->row_count_max = database->row_count_max;
@@ -116,18 +126,124 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 	generator->columns   += database->columns;
 	generator->tables    += database->tables;
 	++(generator->databases);
-	generate->ctor_flags |= database->ctor_flags;
 }
 
 
 /* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
+generate_failure_constructor(const char *const restrict failure)
+{
+	char buffer[ERROR_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  GENERATE_FAILURE_CTOR_HEADER,
+			  sizeof(GENERATE_FAILURE_CTOR_HEADER) - 1lu);
+
+	ptr = put_string(ptr,
+			 failure);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+generate_failure_destructor(const char *const restrict failure)
+{
+	char buffer[ERROR_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  GENERATE_FAILURE_DTOR_HEADER,
+			  sizeof(GENERATE_FAILURE_DTOR_HEADER) - 1lu);
+
+	ptr = put_string(ptr,
+			 failure);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
 generate_failure_malloc(void)
 {
 	write_muffle(STDERR_FILENO,
 		     GENERATE_FAILURE_MALLOC,
 		     sizeof(GENERATE_FAILURE_MALLOC) - 1lu);
+}
+
+inline void
+generate_failure_thread_pool(const char *const restrict failure)
+{
+	char buffer[ERROR_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  GENERATE_FAILURE_THREAD_POOL_HEADER,
+			  sizeof(GENERATE_FAILURE_THREAD_POOL_HEADER) - 1lu);
+
+	ptr = put_string(ptr,
+			 failure);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+
+/* generate mode constructors, destructors
+ *─────────────────────────────────────────────────────────────────────────── */
+inline bool
+mysql_seed_generate_constructors(const unsigned int ctor_flags)
+{
+	const char *restrict failure;
+
+	/* ensure cwd at project root and trigger thread_utils constructor */
+	if (   chdir_report(ROOT_ABSPATH,
+			    &failure)
+	    && thread_utils_constructor(&failure)) {
+		switch (ctor_flags) {
+		case RAND_CTOR_FLAG:
+			if (random_constructor(&failure))
+				return true;
+
+			goto CONSTRUCTOR_FAILURE;
+
+		case UUID_CTOR_FLAG:
+			if (uuid_utils_constructor(&failure))
+				return true;
+
+			goto CONSTRUCTOR_FAILURE;
+
+		default:
+			return true;
+		}
+	} else {
+CONSTRUCTOR_FAILURE:
+		generate_failure_constructor(failure);
+		return false;
+	}
+}
+
+inline void
+mysql_seed_generate_destructors(int *const restrict exit_status)
+{
+	const char *restrict failure;
+
+	if (thread_utils_destructor(&failure))
+		return;
+
+	generate_failure_destructor(failure);
+	*exit_status = EXIT_FAILURE;
+}
+
+inline void
+mysql_seed_generate_destructors_muffle(void)
+{
+	thread_utils_destructor_muffle();
 }
 
 
@@ -138,6 +254,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		    const struct DbSpec *restrict db_spec,
 		    int *const restrict exit_status)
 {
+	const char *restrict failure;
 	struct Database *restrict database;
 	struct Table *restrict table;
 	struct Column *restrict column;
@@ -153,8 +270,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	size_t count_row_blocks_div;
 	unsigned int col_count;
 
-	/* ensure cwd at project root */
-	if (!mysql_seed_chdir_root()) {
+	if (!mysql_seed_generate_constructors(count->ctor_flags)) {
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
@@ -188,6 +304,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	if (generator_alloc == NULL) {
 		generate_failure_malloc();
+		mysql_seed_generate_destructors_muffle();
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
@@ -384,8 +501,17 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			 &generator.workers[0],
 			 COUNT_WORKERS);
 
-	thread_pool_start(&generator.pool,
-			  &generator.fail_cl);
+	if (!thread_pool_start(&generator.pool,
+			       &failure)) {
+		generate_failure_thread_pool(failure);
+
+		free(generator_alloc);
+
+		mysql_seed_generate_destructors_muffle();
+
+		*exit_status = EXIT_FAILURE;
+		return;
+	}
 
 	/* build next set of tasks */
 	generator.build.table_headers.head = next_node;
@@ -415,11 +541,27 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	next_node->next = NULL;
 
 	/* wait for first set of tasks to complete */
-	thread_pool_await(&generator.pool,
-			  &generator.fail_cl);
+	if (!thread_pool_await(&generator.pool,
+			       &failure))
+		goto LIVE_POOL_FAILURE_A;
 
-	if (!thread_pool_alive(&generator.pool,
-			       &generator.fail_cl)) {
+
+	switch (thread_pool_alive(&generator.pool,
+				  &failure)) {
+	case THREAD_TRUE:
+		break;
+
+	case THREAD_ERROR:	/* pool may still be alive */
+LIVE_POOL_FAILURE_A:
+		thread_pool_exit_on_failure(&generator.pool,
+					    failure);
+
+		thread_pool_await_exit_failure(&generator.pool);
+
+	default:		/* thread died for reasons already reported */
+		/* free table files */
+		free_table_files(tables,
+				 (const struct Table *const restrict) columns);
 
 		/* free columns */
 		free_columns(columns,
@@ -428,22 +570,25 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		/* free counter */
 		counter_free_internals(&generator.counter);
 
-		/* delete database directories and loaders loaders */
+		/* delete database directories and loaders */
 		check_remove_loaders_dirs(generator_alloc,
 					  database);
 
 		/* free initial allocation */
 		free(generator_alloc);
 
-		*exit_status = EXIT_FAILURE;
+		/* call generate destructors */
+		mysql_seed_generate_destructors_muffle();
 
+		*exit_status = EXIT_FAILURE;
 		return;
 	}
 
 	/* assign second set of tasks */
-	thread_pool_reload(&generator.pool,
-			   &generator.build.table_headers,
-			   &generator.fail_cl);
+	if (!thread_pool_reload(&generator.pool,
+				&generator.build.table_headers,
+				&failure))
+		goto LIVE_POOL_FAILURE_A;
 
 	/* build next set of tasks */
 	++next_node;
@@ -476,12 +621,24 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	next_node->next = NULL;
 
 	/* wait for second set of tasks to complete */
-	thread_pool_await(&generator.pool,
-			  &generator.fail_cl);
+	if (!thread_pool_await(&generator.pool,
+			       &failure))
+		goto LIVE_POOL_FAILURE_B;
 
-	if (!thread_pool_alive(&generator.pool,
-			       &generator.fail_cl)) {
-FAILURE_FREE_EVERYTHING_AND_RETURN:
+	switch (thread_pool_alive(&generator.pool,
+				  &failure)) {
+	case THREAD_TRUE:
+		break;
+
+	case THREAD_ERROR:	/* pool may still be alive */
+LIVE_POOL_FAILURE_B:
+		thread_pool_exit_on_failure(&generator.pool,
+					    failure);
+
+		thread_pool_await_exit_failure(&generator.pool);
+
+	default:		/* thread died for reasons already reported */
+DEAD_POOL_FAILURE_B:
 		/* free table files */
 		free_table_files(tables,
 				 (const struct Table *const restrict) columns);
@@ -493,22 +650,25 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 		/* free counter */
 		counter_free_internals(&generator.counter);
 
-		/* delete database directories and loaders loaders */
+		/* delete database directories and loaders */
 		remove_loaders_dirs(generator_alloc,
 				    database);
 
 		/* free initial allocation */
 		free(generator_alloc);
 
-		*exit_status = EXIT_FAILURE;
+		/* call generate destructors */
+		mysql_seed_generate_destructors_muffle();
 
+		*exit_status = EXIT_FAILURE;
 		return;
 	}
 
 	/* assign third set of tasks */
-	thread_pool_reload(&generator.pool,
-			   &generator.build.table_contents,
-			   &generator.fail_cl);
+	if (!thread_pool_reload(&generator.pool,
+				&generator.build.table_contents,
+				&failure))
+		goto LIVE_POOL_FAILURE_B;
 
 	/* build fourth and final set of tasks */
 	++next_node;
@@ -540,33 +700,51 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 	next_node->next = NULL;
 
 	/* wait for third set of tasks to complete */
-	thread_pool_await(&generator.pool,
-			  &generator.fail_cl);
+	if (!thread_pool_await(&generator.pool,
+			       &failure))
+		goto LIVE_POOL_FAILURE_B;
 
-	if (!thread_pool_alive(&generator.pool,
-			       &generator.fail_cl))
-		goto FAILURE_FREE_EVERYTHING_AND_RETURN;
+
+	switch (thread_pool_alive(&generator.pool,
+				  &generator.fail_cl)) {
+	case THREAD_TRUE:
+		break;
+
+	case THREAD_ERROR:
+		goto LIVE_POOL_FAILURE_B;
+
+	default:
+		goto DEAD_POOL_FAILURE_B;
+	}
 
 	/* assign fourth and final set of tasks */
-	thread_pool_reload(&generator.pool,
-			   &generator.build.table_files,
-			   &generator.fail_cl);
+	if (!thread_pool_reload(&generator.pool,
+				&generator.build.table_files,
+				&failure))
+		goto LIVE_POOL_FAILURE_B;
 
 	/* free columns */
 	free_columns(columns,
 		     (const struct Column *const restrict) rowspans);
 
 	/* wait for fourth and final set of tasks to complete */
-	thread_pool_await(&generator.pool,
-			  &generator.fail_cl);
+	if (   thread_pool_await(&generator.pool,
+				 &failure)
+	    && thread_pool_stop(&generator.pool,
+				&failure)) {
 
+		if (thread_pool_exit_status(&generator.pool,
+					    &failure) == EXIT_SUCCESS)
+			mysql_seed_generate_destructors(exit_status);
+		else
+			goto DEAD_POOL_FAILURE_C;
+	} else {
+		thread_pool_exit_on_failure(&generator.pool,
+					    failure);
 
-	thread_pool_stop(&generator.pool,
-			 &generator.fail_cl);
+		thread_pool_await_exit_failure(&generator.pool);
 
-	if (thread_pool_exit_status(&generator.pool,
-				    &generator.fail_cl) != EXIT_SUCCESS) {
-
+DEAD_POOL_FAILURE_C:
 		/* remove those that were created, free contents of files not
 		 * yet created */
 		remove_free_table_files(tables,
@@ -575,6 +753,9 @@ FAILURE_FREE_EVERYTHING_AND_RETURN:
 		/* delete database directories and loaders loaders */
 		remove_loaders_dirs(generator_alloc,
 				    database);
+
+		/* call generate destructors */
+		mysql_seed_generate_destructors_muffle();
 
 		*exit_status = EXIT_FAILURE;
 	}

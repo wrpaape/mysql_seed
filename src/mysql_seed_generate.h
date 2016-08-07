@@ -1544,7 +1544,7 @@ column_string_names_first(struct ColSpec *const restrict col_spec,
 
 	col_spec->build = &build_column_string_names_first;
 
-	*ctor_flags |= RANDOM_CTOR_FLAG;
+	*ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -C COL_NAME -nl */
@@ -1558,7 +1558,7 @@ column_string_names_last(struct ColSpec *const restrict col_spec,
 
 	col_spec->build = &build_column_string_names_last;
 
-	*ctor_flags |= RANDOM_CTOR_FLAG;
+	*ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -C COL_NAME -nf */
@@ -1572,7 +1572,7 @@ column_string_names_full(struct ColSpec *const restrict col_spec,
 
 	col_spec->build = &build_column_string_names_full;
 
-	*ctor_flags |= RANDOM_CTOR_FLAG;
+	*ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -C COL_NAME -s */
@@ -2486,12 +2486,12 @@ generate_dispatch(char *const restrict *const restrict arg,
 
 	state.specs.db = spec_alloc;
 
+	state.generator.ctor_flags    = 0u;
 	state.generator.rows	      = 0llu;
 	state.generator.row_count_max = 0lu;
 	state.generator.columns	      = 0u;
 	state.generator.tables	      = 0u;
 	state.generator.databases     = 0u;
-	state.generator.ctor_flags    = 0u;
 
 	state.valid.last  = &state.valid.head;
 

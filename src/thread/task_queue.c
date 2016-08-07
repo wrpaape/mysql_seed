@@ -114,6 +114,9 @@ task_queue_remove_handle_cl(struct TaskQueue *const restrict queue,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 task_queue_await_empty_muffle(struct TaskQueue *const restrict queue);
+extern inline bool
+task_queue_await_empty_report(struct TaskQueue *const restrict queue,
+			      const char *restrict *const restrict failure);
 extern inline void
 task_queue_await_empty_handle_cl(struct TaskQueue *const restrict queue,
 				 const struct HandlerClosure *const restrict fail_cl);
@@ -142,6 +145,10 @@ task_queue_transfer_all_handle_cl(struct TaskQueue *const restrict queue1,
 extern inline void
 task_queue_reload_muffle(struct TaskQueue *const restrict queue,
 			 struct TaskStore *const restrict store);
+extern inline bool
+task_queue_reload_report(struct TaskQueue *const restrict queue,
+			 struct TaskStore *const restrict store,
+			 const char *restrict *const restrict failure);
 extern inline void
 task_queue_reload_handle_cl(struct TaskQueue *const restrict queue,
 			    struct TaskStore *const restrict store,

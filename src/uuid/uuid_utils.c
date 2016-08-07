@@ -1,59 +1,8 @@
 #include "uuid/uuid_utils.h"
 
-#define UUID_UTILS_START_FAILURE_HEADER					\
-FAILURE_HEADER_WRAP("uuid_utils_start", ":")	"\n"
-
-
 /* global constants
  * ────────────────────────────────────────────────────────────────────────── */
 struct UUIDState uuid_state;
-
-/* constructors, destructors
- * ────────────────────────────────────────────────────────────────────────── */
-void
-uuid_utils_start_failure(const char *restrict failure)
-{
-	char buffer[256];
-
-	char *restrict ptr;
-
-	ptr = put_string_size(&buffer[0],
-			      UUID_UTILS_START_FAILURE_HEADER,
-			      sizeof(UUID_UTILS_START_FAILURE_HEADER) - 1lu);
-
-	ptr = put_string(ptr,
-			 failure);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-
-	exit(EXIT_FAILURE);
-	__builtin_unreachable();
-}
-
-void
-uuid_utils_start(void)
-{
-	uint8_t node[MAC_ADDRESS_LENGTH];
-
-	const char *restrict failure;
-
-	if (uuid_mac_address(&node[0],
-			     &failure)) {
-		mutex_init(&uuid_state.lock);
-
-		uuid_state_init_clk_seq_node(&uuid_state.clk_seq_node[0],
-					     &node[0]);
-
-		uuid_state.clk_seq_last = &uuid_state.clk_seq_node[0]
-					+ CLK_SEQ_LAST_OFFSET;
-		return;
-	}
-
-	uuid_utils_start_failure(failure);
-	__builtin_unreachable();
-}
 
 extern inline void
 uuid_state_init_clk_seq_node(char *restrict clk_seq_node,
@@ -83,3 +32,8 @@ set_uuid_clk_seq_node(char *restrict ptr,
 extern inline void
 uuid_string_init(char *restrict ptr,
 		 const struct HandlerClosure *const restrict fail_cl);
+
+/* constructors, destructors
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+uuid_utils_constructor(const char *restrict *const restrict failure);

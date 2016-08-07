@@ -98,23 +98,12 @@ struct MACAddressBuffer {
  * ────────────────────────────────────────────────────────────────────────── */
 extern struct UUIDState uuid_state;
 
-
-/* constructors, destructors
- * ────────────────────────────────────────────────────────────────────────── */
-void
-uuid_utils_start_failure(const char *restrict failure)
-__attribute__((noreturn));
-
-void
-uuid_utils_start(void)
-__attribute__((constructor (103)));
-
 inline void
 uuid_state_init_clk_seq_node(char *restrict clk_seq_node,
 			     const uint8_t *restrict node)
 {
 
-	unsigned int random = (unsigned int) random_uint();
+	const urint_t random = random_uint();
 
 	*clk_seq_node = '-';
 	++clk_seq_node;
@@ -730,6 +719,29 @@ uuid_string_init(char *restrict ptr,
 }
 
 
+/* constructors, destructors
+ * ────────────────────────────────────────────────────────────────────────── */
+inline bool
+uuid_utils_constructor(const char *restrict *const restrict failure)
+{
+	uint8_t node[MAC_ADDRESS_LENGTH];
+
+	const bool success = random_constructor(failure)
+			  && uuid_mac_address(&node[0],
+					      failure);
+
+	if (success) {
+		mutex_init(&uuid_state.lock);
+
+		uuid_state_init_clk_seq_node(&uuid_state.clk_seq_node[0],
+					     &node[0]);
+
+		uuid_state.clk_seq_last = &uuid_state.clk_seq_node[0]
+					+ CLK_SEQ_LAST_OFFSET;
+	}
+
+	return success;
+}
 
 
 #endif /* ifndef MYSQL_SEED_UUID_UUID_UTILS_H_ */

@@ -5,23 +5,39 @@
 
 #include <time.h>			/* unique seed */
 #include <stdbool.h>			/* true, false */
-#include "memory/memory_swap.h"		/* memory swap utils, <utils/utils.h> */
 #include "random/random_types.h"	/* rng_t, rint_t, ruint_t */
+#include "memory/memory_swap.h"		/* memory swap utils, utils/utils.h */
+#include "time/time_utils.h"		/* time_report */
 
 
 /* EXTERNAL DEPENDENCIES ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
+/* global variables
+ * ────────────────────────────────────────────────────────────────────────── */
 rng_t glob_rng; /* global random number generator state */
 
-void
-glob_rng_ctor(void)
-__attribute__((constructor (101)));
-
-inline void
-glob_rng_init(void)
+/* constructors, destructors
+ * ────────────────────────────────────────────────────────────────────────── */
+inline bool
+random_constructor(const char *restrict *const restrict failure)
 {
-	pcg32_srandom_r(&glob_rng, time(NULL), (intptr_t) &glob_rng);
+	time_t now;
+
+	const bool success = time_report(&now,
+					 failure);
+
+	if (success)
+		pcg32_srandom_r(&glob_rng,
+				now,
+				(intptr_t) &glob_rng);
+
+	return success;
 }
+
+/* void */
+/* glob_rng_ctor(void) */
+/* __attribute__((constructor (101))); */
+
 
 inline urint_t
 random_uint(void)
