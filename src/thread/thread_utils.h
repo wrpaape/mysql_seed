@@ -1386,14 +1386,14 @@ thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 
 /* Prototypes
  *─────────────────────────────────────────────────────────────────────────── */
-inline void
-thread_attr_prototype_init(void)
-{
-	thread_attr_init_muffle(&thread_attr_prototype);
+/* inline void */
+/* thread_attr_prototype_init(void) */
+/* { */
+/* 	thread_attr_init_muffle(&thread_attr_prototype); */
 
-	thread_attr_set_detach_state_muffle(&thread_attr_prototype,
-					    THREAD_ATTR_DETACHED);
-}
+/* 	thread_attr_set_detach_state_muffle(&thread_attr_prototype, */
+/* 					    THREAD_ATTR_DETACHED); */
+/* } */
 
 inline void
 thread_attr_prototype_destroy(void)
@@ -1405,13 +1405,37 @@ thread_attr_prototype_destroy(void)
 
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
-void
-thread_utils_start(void)
-__attribute__((constructor (102)));
+inline bool
+thread_utils_constructor(const char *restrict *const restrict failure)
+{
+	return thread_attr_init_report(&thread_attr_prototype,
+				       failure)
+	    && thread_attr_set_detach_state_report(&thread_attr_prototype,
+						   THREAD_ATTR_DETACHED,
+						   failure);
+}
 
-void
-thread_utils_stop(void)
-__attribute__((destructor (102)));
+inline bool
+thread_utils_destructor(const char *restrict *const restrict failure)
+{
+	return thread_attr_destroy_report(&thread_attr_prototype,
+					  failure);
+}
+
+inline void
+thread_utils_destructor_muffle(void)
+{
+	thread_attr_destroy_muffle(&thread_attr_prototype);
+}
+
+/* void */
+
+/* thread_utils_start(void) */
+/* __attribute__((constructor (102))); */
+
+/* void */
+/* thread_utils_stop(void) */
+/* __attribute__((destructor (102))); */
 
 
 /* undefine fail switch macro constants */

@@ -400,14 +400,20 @@ thread_attr_prototype_destroy(void);
 
 /* Constructors, Destructors
  *─────────────────────────────────────────────────────────────────────────── */
-void
-thread_utils_start(void)
-{
-	thread_attr_prototype_init();
-}
+extern inline bool
+thread_utils_constructor(const char *restrict *const restrict failure);
+extern inline bool
+thread_utils_destructor(const char *restrict *const restrict failure);
+extern inline void
+thread_utils_destructor_muffle(void);
+/* void */
+/* thread_utils_start(void) */
+/* { */
+/* 	thread_attr_prototype_init(); */
+/* } */
 
-void
-thread_utils_stop(void)
-{
-	thread_attr_prototype_destroy();
-}
+/* void */
+/* thread_utils_stop(void) */
+/* { */
+/* 	thread_attr_prototype_destroy(); */
+/* } */
