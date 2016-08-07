@@ -4,7 +4,7 @@
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
 #include "thread/thread_utils.h"	/* thread, time utils */
-#include "system/file_utils.h"	/* system calls for retrieveing MAC */
+#include "system/file_utils.h"		/* system calls for retrieveing MAC */
 #include "random/random.h"		/* psuedo-random number generator */
 #include "string/string_utils.h"	/* string utils */
 

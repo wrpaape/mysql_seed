@@ -6,6 +6,7 @@
  * ────────────────────────────────────────────────────────────────────────── */
 #include "generate/counter.h"		  /* string/thread utils, Counter */
 #include "generate/column_string_names.h" /* build_column_string_names_X */
+#include "generate/column_string_uuid.h"  /* build_column_string_uuid */
 
 /* worker thread entry point */
 void

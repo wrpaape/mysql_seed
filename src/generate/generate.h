@@ -17,22 +17,30 @@
 #define GENERATE_FAILURE_MALLOC						\
 GENERATE_FAILURE(MALLOC_FAILURE_REASON)
 
+/* constructor flags
+ *─────────────────────────────────────────────────────────────────────────── */
+#define RANDOM_CTOR_FLAG 1	/* 00000001 */
+#define UUID_CTOR_FLAG	 2	/* 00000010 (depends on random ctor atm) */
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct GeneratorCounter {
 	uintmax_t rows;
 	size_t row_count_max;
+	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
 	unsigned int databases;
+	unsigned int ctor_flags;
 };
 
 struct DatabaseCounter {
 	uintmax_t rows;
 	size_t row_count_max;
+	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
+	unsigned int ctor_flags;
 };
 
 /* destructors
@@ -97,14 +105,18 @@ inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database)
 {
-	generator->rows      += database->rows;
+	generator->rows += database->rows;
 
 	if (database->row_count_max > generator->row_count_max)
 		generator->row_count_max = database->row_count_max;
 
+	if (database->counter_upto > generator->counter_upto)
+		generator->counter_upto = database->counter_upto;
+
 	generator->columns   += database->columns;
 	generator->tables    += database->tables;
-	generator->databases += 1u;
+	++(generator->databases);
+	generate->ctor_flags |= database->ctor_flags;
 }
 
 

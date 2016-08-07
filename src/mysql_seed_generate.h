@@ -208,12 +208,10 @@ struct GenerateSpecState {
 	struct ColSpec *col;
 };
 
-
 struct GenerateArgvState {
 	struct ArgvInterval arg;
 	struct ArgvInterval db_spec;
 };
-
 
 struct GenerateParseState {
 	struct GenerateArgvState argv;
@@ -1466,7 +1464,7 @@ EXPECTED_COL_TBL_DB_FLAG:
  *─────────────────────────────────────────────────────────────────────────── */
 /* COL_SPEC */
 inline void
-col_spec_set_id(struct ColSpec *const restrict col_spec,
+column_id(struct ColSpec *const restrict col_spec,
 		const size_t row_count)
 {
 	col_spec->name.bytes  = "id";
@@ -1476,13 +1474,13 @@ col_spec_set_id(struct ColSpec *const restrict col_spec,
 			 row_count);
 
 	col_spec->build = &build_column_id;
-
 }
 
-/* -C COL_NAME -s -b BASE_STRING */
+/* -C COL_NAME -s -u BASE_STRING */
 inline void
-col_spec_set_string_unique(struct ColSpec *const restrict col_spec,
-			   const size_t row_count)
+column_string_unique(struct ColSpec *const restrict col_spec,
+		     const size_t row_count,
+		     size_t *const restrict counter_upto)
 {
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
@@ -1490,6 +1488,9 @@ col_spec_set_string_unique(struct ColSpec *const restrict col_spec,
 			  + uint_digit_count(row_count)));
 
 	col_spec->build = &build_column_string_unique;
+
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
 }
 
 inline void
@@ -1500,7 +1501,7 @@ col_spec_set_string_base_name(struct ColSpec *const restrict col_spec)
 
 /* -C COL_NAME -s -f BASE_STRING */
 inline void
-col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
+column_string_fixed(struct ColSpec *const restrict col_spec)
 {
 	type_set_char(&col_spec->type,
 		      (uintmax_t)
@@ -1511,58 +1512,84 @@ col_spec_set_string_fixed(struct ColSpec *const restrict col_spec)
 
 /* -C COL_NAME -s -f */
 inline void
-col_spec_set_string_fixed_default(struct ColSpec *const restrict col_spec)
+column_string_fixed_default(struct ColSpec *const restrict col_spec)
 {
 	col_spec_set_string_base_name(col_spec);
-	col_spec_set_string_fixed(col_spec);
+	column_string_fixed(col_spec);
 }
+
+/* -C COL_NAME -s -uu */
+inline void
+column_string_uuid(struct ColSpec *const restrict col_spec,
+		   unsigned int *const restrict ctor_flags)
+{
+	SET_UUID_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = UUID_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_uuid;
+
+	*ctor_flags |= UUID_CTOR_FLAG;
+}
+
 
 /* -C COL_NAME -n1 */
 inline void
-col_spec_set_string_names_first(struct ColSpec *const restrict col_spec)
+column_string_names_first(struct ColSpec *const restrict col_spec,
+			  unsigned int *const restrict ctor_flags)
 {
 	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_first;
+
+	*ctor_flags |= RANDOM_CTOR_FLAG;
 }
 
 /* -C COL_NAME -nl */
 inline void
-col_spec_set_string_names_last(struct ColSpec *const restrict col_spec)
+column_string_names_last(struct ColSpec *const restrict col_spec,
+			 unsigned int *const restrict ctor_flags)
 {
 	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_last;
+
+	*ctor_flags |= RANDOM_CTOR_FLAG;
 }
 
 /* -C COL_NAME -nf */
 inline void
-col_spec_set_string_names_full(struct ColSpec *const restrict col_spec)
+column_string_names_full(struct ColSpec *const restrict col_spec,
+			 unsigned int *const restrict ctor_flags)
 {
 	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_full;
+
+	*ctor_flags |= RANDOM_CTOR_FLAG;
 }
 
 /* -C COL_NAME -s */
 inline void
-col_spec_set_string_default(struct ColSpec *const restrict col_spec,
-			    const size_t row_count)
+column_string_default(struct ColSpec *const restrict col_spec,
+		      const size_t row_count,
+		      size_t *const restrict counter_upto)
 {
 	col_spec_set_string_base_name(col_spec);
-	col_spec_set_string_unique(col_spec,
-				   row_count);
+	column_string_unique(col_spec,
+			     row_count,
+			     counter_upto);
 }
 
 /* -C COL_NAME -t -u */
 inline void
-col_spec_set_timestamp_unique(struct ColSpec *const restrict col_spec)
+column_timestamp_unique(struct ColSpec *const restrict col_spec)
 {
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_unique;
@@ -1570,7 +1597,7 @@ col_spec_set_timestamp_unique(struct ColSpec *const restrict col_spec)
 
 /* -C COL_NAME -t -f */
 inline void
-col_spec_set_timestamp_fixed(struct ColSpec *const restrict col_spec)
+column_timestamp_fixed(struct ColSpec *const restrict col_spec)
 {
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_fixed;
@@ -1578,7 +1605,7 @@ col_spec_set_timestamp_fixed(struct ColSpec *const restrict col_spec)
 
 /* -C COL_NAME -t */
 inline void
-col_spec_set_timestamp_default(struct ColSpec *const restrict col_spec)
+column_timestamp_default(struct ColSpec *const restrict col_spec)
 {
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_unique;
@@ -1590,8 +1617,9 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		col_spec_set_string_default(state->specs.col,
-					    state->specs.tbl->row_count);
+		column_string_default(state->specs.col,
+				      state->specs.tbl->row_count,
+				      &state->database.counter_upto);
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
@@ -1613,9 +1641,10 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 	case '-':
 		break;	/* parse long string qualifier */
 
-	case 'b':
-		if (*rem == '\0') {
-STRING_BASE:
+	case 'u':
+		switch (*rem) {
+		case '\0':
+STRING_UNIQUE:
 			++(state->argv.arg.from);
 
 			if (state->argv.arg.from == state->argv.arg.until) {
@@ -1632,15 +1661,28 @@ STRING_BASE:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				col_spec_set_string_unique(state->specs.col,
-							   state->specs.tbl->row_count);
+				column_string_unique(state->specs.col,
+						     state->specs.tbl->row_count,
+						     &state->database.counter_upto);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);
 			}
 			return;
+
+		case 'u':
+			if (rem[1] == '\0') {
+STRING_UUID:
+				column_string_uuid(state->specs.col,
+						   &state->database.ctor_flags);
+				parse_column_complete(state);
+				return;
+			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		default:
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
 		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	case 'f':
 		if (*rem == '\0') {
@@ -1648,7 +1690,7 @@ STRING_FIXED:
 			++(state->argv.arg.from);
 
 			if (state->argv.arg.from == state->argv.arg.until) {
-				col_spec_set_string_fixed_default(state->specs.col);
+				column_string_fixed_default(state->specs.col);
 				parse_column_complete(state);
 				return;
 			}
@@ -1660,7 +1702,7 @@ STRING_FIXED:
 			++(state->argv.arg.from);
 
 			if (valid_string_base) {
-				col_spec_set_string_fixed(state->specs.col);
+				column_string_fixed(state->specs.col);
 				parse_column_complete(state);
 			} else {
 				generate_parse_error(state);
@@ -1674,7 +1716,8 @@ STRING_FIXED:
 		case '1':
 			if (rem[1] == '\0') {
 STRING_NAMES_FIRST:
-				col_spec_set_string_names_first(state->specs.col);
+				column_string_names_first(state->specs.col,
+							  &state->database.ctor_flags);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
 				return;
@@ -1684,7 +1727,8 @@ STRING_NAMES_FIRST:
 		case 'l':
 			if (rem[1] == '\0') {
 STRING_NAMES_LAST:
-				col_spec_set_string_names_last(state->specs.col);
+				column_string_names_last(state->specs.col,
+							 &state->database.ctor_flags);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
 				return;
@@ -1694,7 +1738,8 @@ STRING_NAMES_LAST:
 		case 'f':
 			if (rem[1] == '\0') {
 STRING_NAMES_FULL:
-				col_spec_set_string_names_full(state->specs.col);
+				column_string_names_full(state->specs.col,
+							 &state->database.ctor_flags);
 				++(state->argv.arg.from);
 				parse_column_complete(state);
 				return;
@@ -1708,8 +1753,9 @@ STRING_NAMES_FULL:
 	case 'C':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_COL_SPEC:
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
+			column_string_default(state->specs.col,
+					      state->specs.tbl->row_count,
+					      &state->database.counter_upto);
 			parse_next_col_spec(state);
 			return;
 		}
@@ -1718,8 +1764,9 @@ STRING_DEFAULT_NEXT_COL_SPEC:
 	case 'D':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_DB_SPEC:
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
+			column_string_default(state->specs.col,
+					      state->specs.tbl->row_count,
+					      &state->database.counter_upto);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
@@ -1729,8 +1776,9 @@ STRING_DEFAULT_NEXT_DB_SPEC:
 	case 'T':
 		if (*rem == '\0') {
 STRING_DEFAULT_NEXT_TBL_SPEC:
-			col_spec_set_string_default(state->specs.col,
-						    state->specs.tbl->row_count);
+			column_string_default(state->specs.col,
+					      state->specs.tbl->row_count,
+					      &state->database.counter_upto);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;
@@ -1743,11 +1791,23 @@ STRING_DEFAULT_NEXT_TBL_SPEC:
 
 
 	switch (*rem) {
-	case 'b':
-		if (strings_equal("ase", rem + 1l))
-			goto STRING_BASE;
+	case 'u':
+		switch (rem[1]) {
+		case 'n':
+			if (strings_equal("ique", rem + 2l))
+				goto STRING_UNIQUE;
 
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		case 'u':
+			if (strings_equal("id", rem + 2l))
+				goto STRING_UUID;
+
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+		default:
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
+		}
 
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
@@ -1820,7 +1880,7 @@ parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		col_spec_set_timestamp_default(state->specs.col);
+		column_timestamp_default(state->specs.col);
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
@@ -1844,7 +1904,7 @@ INVALID_TIMESTAMP_QUALIFIER_NOTSUP:
 	case 'f':
 		if (*rem == '\0') {
 TIMESTAMP_FIXED:
-			col_spec_set_timestamp_fixed(state->specs.col);
+			column_timestamp_fixed(state->specs.col);
 			++(state->argv.arg.from);
 			parse_column_complete(state);
 			return;
@@ -1854,7 +1914,7 @@ TIMESTAMP_FIXED:
 	case 'u':
 		if (*rem == '\0') {
 TIMESTAMP_UNIQUE:
-			col_spec_set_timestamp_unique(state->specs.col);
+			column_timestamp_unique(state->specs.col);
 			++(state->argv.arg.from);
 			parse_column_complete(state);
 			return;
@@ -1864,7 +1924,7 @@ TIMESTAMP_UNIQUE:
 	case 'C':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
-			col_spec_set_timestamp_default(state->specs.col);
+			column_timestamp_default(state->specs.col);
 			parse_next_col_spec(state);
 			return;
 		}
@@ -1873,7 +1933,7 @@ TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
 	case 'D':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
-			col_spec_set_timestamp_default(state->specs.col);
+			column_timestamp_default(state->specs.col);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
@@ -1883,7 +1943,7 @@ TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
 	case 'T':
 		if (*rem == '\0') {
 TIMESTAMP_DEFAULT_NEXT_TBL_SPEC:
-			col_spec_set_timestamp_default(state->specs.col);
+			column_timestamp_default(state->specs.col);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
 			return;
@@ -1998,17 +2058,8 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (matched_col_flag) {
-		struct ColSpec *restrict col_spec
-		= (struct ColSpec *restrict) (state->specs.tbl + 1l);
-
-		/* /1* reserve first column for 'id' *1/ */
-		/* col_spec_set_id(col_spec, */
-		/* 		state->specs.tbl->row_count); */
-
-		/* state->specs.tbl->col_specs.from = col_spec; */
-
-		/* ++col_spec; */
-
+		struct ColSpec *const restrict col_spec
+		= (struct ColSpec *const restrict) (state->specs.tbl + 1l);
 
 		const bool valid_col_name = parse_col_name(&col_spec->name,
 							   &state->argv);
@@ -2017,6 +2068,8 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 
 		if (valid_col_name) {
 			state->specs.col = col_spec;
+
+			state->database.columns = 1u; /* set column counter */
 
 			state->database.columns = 1u; /* set column counter */
 
@@ -2051,16 +2104,9 @@ TERMINATE_VALID_EXIT_FAILURE:
 		return;
 	}
 
-	struct ColSpec *restrict col_spec
-	= (struct ColSpec *restrict) (state->specs.tbl + 1l);
+	struct ColSpec *const restrict col_spec
+	= (struct ColSpec *const restrict) (state->specs.tbl + 1l);
 
-	/* /1* reserve first column for 'id' *1/ */
-	/* col_spec_set_id(col_spec, */
-	/* 		state->specs.tbl->row_count); */
-
-	/* state->specs.tbl->col_specs.from = col_spec; */
-
-	/* ++col_spec; */
 
 	const bool valid_col_name = parse_col_name(&col_spec->name,
 						   &state->argv);
@@ -2445,6 +2491,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	state.generator.columns	      = 0u;
 	state.generator.tables	      = 0u;
 	state.generator.databases     = 0u;
+	state.generator.ctor_flags    = 0u;
 
 	state.valid.last  = &state.valid.head;
 

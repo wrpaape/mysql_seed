@@ -33,7 +33,7 @@ build_column_string_unique(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCSB_MALLOC_FAILURE);
+				     BCSU_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
