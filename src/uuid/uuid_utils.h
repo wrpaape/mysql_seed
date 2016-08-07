@@ -383,10 +383,9 @@ put_uuid_time(char *restrict ptr,
 	++ptr;
 
 	/* put time_hi_and_version */
-	uuid_time  |= UUID_VERSION;
 	ptr = put_octet_hex_lower(ptr,
 				  (uint8_t) ((UUID_VERSION << 4)
-					     | ((uuid_time >> 56) & 0xF));
+					     | ((uuid_time >> 56) & 0xF)));
 
 	return put_octet_hex_lower(ptr,
 				   (uint8_t) (uuid_time >> 48));

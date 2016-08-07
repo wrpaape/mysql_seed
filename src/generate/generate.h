@@ -5,7 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/loader.h"		/* build_loader */
 #include "generate/column_id.h"		/* build_column_id */
-#include "generate/column_string.h"	/* build_column_string_X */
+#include "generate/column_string.h"	/* build_column_string_X|uuid */
 #include "generate/column_timestamp.h"	/* build_column_timestamp_X */
 #include "generate/table.h"		/* build_table_header */
 
@@ -114,8 +114,8 @@ inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database)
 {
-	generate->ctor_flags |= database->ctor_flags;
-	generator->rows	     += database->rows;
+	generator->ctor_flags |= database->ctor_flags;
+	generator->rows	      += database->rows;
 
 	if (database->row_count_max > generator->row_count_max)
 		generator->row_count_max = database->row_count_max;
@@ -123,8 +123,8 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 	if (database->counter_upto > generator->counter_upto)
 		generator->counter_upto = database->counter_upto;
 
-	generator->columns   += database->columns;
-	generator->tables    += database->tables;
+	generator->columns    += database->columns;
+	generator->tables     += database->tables;
 	++(generator->databases);
 }
 
@@ -706,7 +706,7 @@ DEAD_POOL_FAILURE_B:
 
 
 	switch (thread_pool_alive(&generator.pool,
-				  &generator.fail_cl)) {
+				  &failure)) {
 	case THREAD_TRUE:
 		break;
 
@@ -733,11 +733,20 @@ DEAD_POOL_FAILURE_B:
 	    && thread_pool_stop(&generator.pool,
 				&failure)) {
 
-		if (thread_pool_exit_status(&generator.pool,
-					    &failure) == EXIT_SUCCESS)
-			mysql_seed_generate_destructors(exit_status);
-		else
+		if (thread_pool_await_exit_success(&generator.pool,
+						   &failure)) {
+			if (   thread_pool_exit_status(&generator.pool)
+			    == EXIT_SUCCESS)
+				mysql_seed_generate_destructors(exit_status);
+			else
+				goto DEAD_POOL_FAILURE_C;
+		} else {
+			generate_failure_thread_pool(failure);
+
+			thread_pool_cancel(&generator.pool);
+
 			goto DEAD_POOL_FAILURE_C;
+		}
 	} else {
 		thread_pool_exit_on_failure(&generator.pool,
 					    failure);
@@ -748,7 +757,8 @@ DEAD_POOL_FAILURE_C:
 		/* remove those that were created, free contents of files not
 		 * yet created */
 		remove_free_table_files(tables,
-					(const struct Table *const restrict) columns);
+					(const struct Table *const restrict)
+					columns);
 
 		/* delete database directories and loaders loaders */
 		remove_loaders_dirs(generator_alloc,

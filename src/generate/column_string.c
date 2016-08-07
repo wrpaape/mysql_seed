@@ -1,6 +1,6 @@
 #include "generate/column_string.h"
 
-#define BCSB_MALLOC_FAILURE						\
+#define BCSU_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_string_unique")
 
 #define BCSF_MALLOC_FAILURE						\

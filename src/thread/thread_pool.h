@@ -532,8 +532,9 @@ supervisor_signal_report(struct Supervisor *const restrict supervisor,
 		return false;
 	}
 
-	mutex_unlock_handle_cl(&supervisor->listening,
-			       fail_cl);
+	if (!mutex_unlock_report(&supervisor->listening,
+				 failure))
+	    return false;
 
 	mutex_lock_try_catch_close();
 
@@ -667,8 +668,8 @@ thread_pool_await(struct ThreadPool *const restrict pool,
 	return task_queue_await_empty_report(&pool->task_buffer.backlog,
 					     failure)
 	/* wait for active task_buffer to be completed */
-	    && task_queue_await_empty_handle_cl(&pool->task_buffer.active,
-						failure);
+	    && task_queue_await_empty_report(&pool->task_buffer.active,
+					     failure);
 }
 
 inline enum ThreadFlag
@@ -701,10 +702,10 @@ inline void
 thread_pool_cancel(struct ThreadPool *const restrict pool)
 {
 	worker_crew_cancel_failure(&pool->worker_crew);
-	thread_cancel_muffle(&pool->supervisor.thread);
+	thread_cancel_muffle(pool->supervisor.thread);
 }
 
-inline void
+inline bool
 thread_pool_stop(struct ThreadPool *const restrict pool,
 		 const char *restrict *const restrict failure)
 {
@@ -727,15 +728,11 @@ thread_pool_await_exit_failure(struct ThreadPool *const restrict pool)
 	thread_pool_status_await_failure(&pool->status);
 }
 
-/* inline int */
-/* thread_pool_exit_status(struct ThreadPool *const restrict pool, */
-/* 			const char *restrict *const restrict failure) */
-/* { */
-/* 	thread_pool_status_await_success(&pool->status, */
-/* 					 fail_cl); */
-
-/* 	return pool->status.exit; */
-/* } */
+inline int
+thread_pool_exit_status(struct ThreadPool *const restrict pool)
+{
+	return pool->status.exit;
+}
 
 inline void
 thread_pool_exit_on_failure(struct ThreadPool *const restrict pool,

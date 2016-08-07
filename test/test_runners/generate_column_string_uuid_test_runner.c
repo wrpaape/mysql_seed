@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "generate/column_string.h"
+#include "generate/column_string_uuid.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_build_column_string_unique(void);
+extern void test_build_column_string_uuid(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/generate_column_string_test.c");
-  RUN_TEST(test_build_column_string_unique, 12);
+  UnityBegin("../test/generate_column_string_uuid_test.c");
+  RUN_TEST(test_build_column_string_uuid, 12);
 
   return (UnityEnd());
 }

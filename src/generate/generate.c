@@ -14,6 +14,8 @@ extern inline void
 generate_failure_destructor(const char *const restrict failure);
 extern inline void
 generate_failure_malloc(void);
+extern inline void
+generate_failure_thread_pool(const char *const restrict failure);
 
 /* destructors
  *─────────────────────────────────────────────────────────────────────────── */
@@ -38,7 +40,7 @@ remove_free_table_files(struct Table *restrict from,
 extern inline bool
 mysql_seed_generate_constructors(const unsigned int ctor_flags);
 extern inline void
-mysql_seed_generate_destructors(int *const restrict exit_status):
+mysql_seed_generate_destructors(int *const restrict exit_status);
 extern inline void
 mysql_seed_generate_destructors_muffle(void);
 

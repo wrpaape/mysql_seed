@@ -208,9 +208,8 @@ thread_pool_await_exit_failure(struct ThreadPool *const restrict pool);
 extern inline bool
 thread_pool_await_exit_success(struct ThreadPool *const restrict pool,
 			       const char *restrict *const restrict failure);
-/* extern inline int */
-/* thread_pool_exit_status(struct ThreadPool *const restrict pool, */
-/* 			const char *restrict *const restrict failure); */
+extern inline int
+thread_pool_exit_status(struct ThreadPool *const restrict pool);
 extern inline void
 thread_pool_exit_on_failure(struct ThreadPool *const restrict pool,
 			    const char *restrict failure);
