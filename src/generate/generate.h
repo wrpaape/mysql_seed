@@ -562,6 +562,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	next_node->next = NULL;
 
+	printf("alive at line: %d\n\n", __LINE__);
+
 	/* wait for first set of tasks to complete */
 	if (!thread_pool_await(&generator.pool,
 			       &failure))
@@ -571,16 +573,19 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
 	case THREAD_TRUE:
+		puts("THREAD_TRUE");
 		break;
 
 	case THREAD_ERROR:	/* pool may still be alive */
 LIVE_POOL_FAILURE_A:
+		puts("THREAD_ERROR");
 		thread_pool_exit_on_failure(&generator.pool,
 					    failure);
 
 		thread_pool_await_exit_failure(&generator.pool);
 
 	default:		/* thread died for reasons already reported */
+		puts("THREAD_FALSE");
 		/* free table files */
 		free_table_files(tables,
 				 (const struct Table *const restrict) columns);
@@ -605,6 +610,7 @@ LIVE_POOL_FAILURE_A:
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* assign second set of tasks */
 	if (!thread_pool_reload(&generator.pool,
@@ -641,6 +647,7 @@ LIVE_POOL_FAILURE_A:
 	generator.build.table_contents.last = next_node;
 
 	next_node->next = NULL;
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* wait for second set of tasks to complete */
 	if (!thread_pool_await(&generator.pool,
@@ -650,16 +657,19 @@ LIVE_POOL_FAILURE_A:
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
 	case THREAD_TRUE:
+		puts("THREAD_TRUE");
 		break;
 
 	case THREAD_ERROR:	/* pool may still be alive */
 LIVE_POOL_FAILURE_B:
+		puts("THREAD_ERROR");
 		thread_pool_exit_on_failure(&generator.pool,
 					    failure);
 
 		thread_pool_await_exit_failure(&generator.pool);
 
 	default:		/* thread died for reasons already reported */
+		puts("THREAD_FALSE");
 DEAD_POOL_FAILURE_B:
 		/* free table files */
 		free_table_files(tables,
@@ -685,6 +695,7 @@ DEAD_POOL_FAILURE_B:
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* assign third set of tasks */
 	if (!thread_pool_reload(&generator.pool,
@@ -700,6 +711,8 @@ DEAD_POOL_FAILURE_B:
 	next_node->prev = NULL;
 
 	table = tables;
+
+	printf("alive at line: %d\n\n", __LINE__);
 
 	while (1) {
 		procedure_closure_init(&next_node->task,
@@ -717,6 +730,8 @@ DEAD_POOL_FAILURE_B:
 		next_node->prev = prev_node;
 	}
 
+	printf("alive at line: %d\n\n", __LINE__);
+
 	generator.build.table_files.last = next_node;
 
 	next_node->next = NULL;
@@ -730,20 +745,27 @@ DEAD_POOL_FAILURE_B:
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
 	case THREAD_TRUE:
+		puts("THREAD_TRUE");
 		break;
 
 	case THREAD_ERROR:
+		puts("THREAD_ERROR");
 		goto LIVE_POOL_FAILURE_B;
 
 	default:
+		puts("THREAD_FALSE");
 		goto DEAD_POOL_FAILURE_B;
 	}
+
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* assign fourth and final set of tasks */
 	if (!thread_pool_reload(&generator.pool,
 				&generator.build.table_files,
 				&failure))
 		goto LIVE_POOL_FAILURE_B;
+
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* free columns */
 	free_columns(columns,
