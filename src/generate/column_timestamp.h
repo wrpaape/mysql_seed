@@ -258,6 +258,7 @@ timestamp_string_init(char *restrict string,
 	}
 }
 
+/* TODO: TIMESTAMP rules instead of DATETIME */
 inline void
 timestamp_string_increment(char *restrict ptr)
 {
