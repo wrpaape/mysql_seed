@@ -37,19 +37,19 @@ struct GeneratorCounter {
 	unsigned int ctor_flags;
 	uintmax_t rows;
 	size_t row_count_max;
-	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
 	unsigned int databases;
+	size_t counter_upto;
 };
 
 struct DatabaseCounter {
 	unsigned int ctor_flags;
 	uintmax_t rows;
 	size_t row_count_max;
-	size_t counter_upto;
 	unsigned int columns;
 	unsigned int tables;
+	size_t counter_upto;
 };
 
 /* destructors
@@ -120,12 +120,12 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 	if (database->row_count_max > generator->row_count_max)
 		generator->row_count_max = database->row_count_max;
 
-	if (database->counter_upto > generator->counter_upto)
-		generator->counter_upto = database->counter_upto;
-
 	generator->columns    += database->columns;
 	generator->tables     += database->tables;
 	++(generator->databases);
+
+	if (database->counter_upto > generator->counter_upto)
+		generator->counter_upto = database->counter_upto;
 }
 
 
@@ -330,32 +330,43 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	struct TaskNode *const restrict task_nodes
 	= (struct TaskNode *const restrict) (row_block + count_row_blocks_max);
-	prev_node = task_nodes;
 
 
 	/* Hook up generator pointers
 	 * ────────────────────────────────────────────────────────────────── */
 	struct Generator generator;
 
-	/* ensure Counter gets assigned first task */
-	generator.build.counter_columns_loaders.head = prev_node;
+	generator.build.counter_columns_loaders.head = task_nodes;
 
-	procedure_closure_init(&prev_node->task,
-			       &build_counter,
-			       &generator.counter);
+	/* ensure Counter gets assigned first task if needed */
+	if (count->counter_upto > 0) {
+		/* initialize counter */
+		counter_init(&generator.counter,
+			     &generator,
+			     count->counter_upto);
 
-	prev_node->prev	= NULL;
-	next_node = prev_node + 1l;
+		prev_node = task_nodes;
+
+		procedure_closure_init(&prev_node->task,
+				       &build_counter,
+				       &generator.counter);
+
+		prev_node->prev	= NULL;
+		next_node = prev_node + 1l;
+		prev_node->next = next_node;
+
+
+	} else {
+		/* nullify so no-op on free */
+		counter_nullify_internals(&generator.counter);
+		prev_node = NULL;
+		next_node = task_nodes;
+	}
 
 
 	/* initialize thread log */
 	thread_log_init(&generator.log,
 			"generator");
-
-	/* initialize counter */
-	counter_init(&generator.counter,
-		     &generator,
-		     count->row_count_max);
 
 	generator.databases.from = database;		     /* <databases> */
 
@@ -381,7 +392,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				       database);
 
 		next_node->prev = prev_node;
-		prev_node->next = next_node;
+		/* prev_node->next = next_node; */
 
 		prev_node = next_node;
 		++next_node;

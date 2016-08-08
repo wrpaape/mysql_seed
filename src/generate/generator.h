@@ -446,8 +446,8 @@ struct Generator {
 	struct ThreadPool pool;			/* all child threads */
 	struct Worker workers[COUNT_WORKERS];
 	struct GeneratorTaskList build;
-	struct ThreadLog log;
 	struct Counter counter;			/* shared by all */
+	struct ThreadLog log;
 	struct DatabaseInterval databases;
 	const struct DbSpec *db_specs;		/* from raw input */
 	struct HandlerClosure fail_cl;		/* cleanup self, then main */

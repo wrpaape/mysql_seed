@@ -484,6 +484,12 @@ counter_init(struct Counter *const restrict counter,
 }
 
 inline void
+counter_nullify_internals(struct Counter *const restrict counter)
+{
+	counter->pointers = NULL;
+}
+
+inline void
 counter_free_internals(struct Counter *const restrict counter)
 {
 	free(counter->pointers);

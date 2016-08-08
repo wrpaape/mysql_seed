@@ -70,6 +70,9 @@ counter_init(struct Counter *const restrict counter,
 	     const size_t upto);
 
 extern inline void
+counter_nullify_internals(struct Counter *const restrict counter);
+
+extern inline void
 counter_free_internals(struct Counter *const restrict counter);
 
 void
