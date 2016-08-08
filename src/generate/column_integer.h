@@ -1,6 +1,5 @@
-#ifndef MYSQL_SEED_GENERATE_COLUMN_ID_H_
-#define MYSQL_SEED_GENERATE_COLUMN_ID_H_
-
+#ifndef MYSQL_SEED_COLUMN_INTEGER_H_
+#define MYSQL_SEED_COLUMN_INTEGER_H_
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
@@ -8,7 +7,6 @@
 
 /* worker thread entry point */
 void
-build_column_id(void *arg);
+build_column_integer_unique(void *arg);
 
-
-#endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_ID_H_ */
+#endif /* ifndef MYSQL_SEED_COLUMN_INTEGER_H_ */

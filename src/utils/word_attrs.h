@@ -4,7 +4,7 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include <stdint.h>		/* UINT8/16/32/84_MAX */
+#include <stdint.h>		/* UINT8/16/32/64_MAX */
 #include "utils/types/word.h"	/* word_t, WORD_MAX */
 #include "utils/char_attrs.h"	/* OCTET_CHAR */
 
@@ -17,6 +17,7 @@
 
 #if HAVE_CHAR_ATTRS
 #	if   (WORD_MAX == UINT64_MAX)
+#		define WORD_BITS  64
 #		define OCTET_WORD 8
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -55,6 +56,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == ((1llu << 56) - 1llu))
+#		define WORD_BITS  56
 #		define OCTET_WORD 7
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -79,6 +81,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == ((1llu << 48) - 1llu))
+#		define WORD_BITS  48
 #		define OCTET_WORD 6
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -117,6 +120,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == ((1llu << 40) - 1llu))
+#		define WORD_BITS  40
 #		define OCTET_WORD 5
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -141,6 +145,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == UINT32_MAX)
+#		define WORD_BITS  32
 #		define OCTET_WORD 4
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -172,6 +177,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == ((1llu << 24) - 1llu))
+#		define WORD_BITS  24
 #		define OCTET_WORD 3
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -196,6 +202,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == UINT16_MAX)
+#		define WORD_BITS  16
 #		define OCTET_WORD 2
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -220,6 +227,7 @@
 #			undef  REM_WORD_SIZE
 #		endif /* if (OCTET_CHAR == 1) */
 #	elif (WORD_MAX == UINT8_MAX)
+#		define WORD_BITS  8
 #		define OCTET_WORD 1
 #		if   (OCTET_CHAR == 1)
 #			define HAVE_WORD_ATTRS	 1
@@ -239,6 +247,7 @@
 #	endif /* if (WORD_MAX == UINT64_MAX) */
 #else
 #			define HAVE_WORD_ATTRS	 0
+#			undef  WORD_BITS
 #			undef  OCTET_WORD
 #			undef  WORD_WIDTH
 #			undef  WORD_SIZE

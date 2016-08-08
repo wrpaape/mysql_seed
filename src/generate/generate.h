@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/loader.h"		/* build_loader */
-#include "generate/column_id.h"		/* build_column_id */
+#include "generate/column_integer.h"	/* build_column_integer_X */
 #include "generate/column_string.h"	/* build_column_string_X|uuid */
 #include "generate/column_timestamp.h"	/* build_column_timestamp_X */
 #include "generate/table.h"		/* build_table_header */

@@ -1,12 +1,11 @@
-#include "generate/column_id.h"
+#include "generate/column_integer.h"
 
 /* worker thread entry point */
 void
-build_column_id(void *arg)
+build_column_integer_unique(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
-
 
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
