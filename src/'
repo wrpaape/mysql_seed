@@ -1648,8 +1648,12 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 STRING_UNIQUE:
 			++(state->argv.arg.from);
 
-			if (state->argv.arg.from == state->argv.arg.until)
-				goto STRING_DEFAULT_PARSE_COMPLETE;
+			if (state->argv.arg.from == state->argv.arg.until) {
+				no_string_base(&state->argv);
+				*(state->valid.last) = NULL;
+				state->exit_status = EXIT_FAILURE;
+				return;
+			}
 
 			const bool valid_string_base
 			= parse_string_base(&state->specs.col->type_qualifier.string.base,
@@ -1670,8 +1674,6 @@ STRING_UNIQUE:
 		case 'u':
 			if (rem[1] == '\0') {
 STRING_UUID:
-				++(state->argv.arg.from);
-
 				column_string_uuid(state->specs.col,
 						   &state->database.ctor_flags);
 				parse_column_complete(state);
@@ -1799,9 +1801,8 @@ STRING_DEFAULT_NEXT_TBL_SPEC:
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 		case 'u':
-			if (strings_equal("id", rem + 2l)) {
+			if (strings_equal("id", rem + 2l))
 				goto STRING_UUID;
-			}
 
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
 

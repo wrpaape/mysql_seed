@@ -100,11 +100,9 @@ build_column_string_fixed(void *arg)
 
 	const unsigned int col_count = table->col_count;
 
-	const size_t row_count = table->spec->row_count;
-
 	const size_t base_size = base->length + 1lu;
 
-	const size_t length_contents = row_count * base_size;
+	const size_t length_contents = base_size * table->spec->row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -129,10 +127,18 @@ build_column_string_fixed(void *arg)
 
 	const char *restrict contents_until;
 
-	do {
-		from->cell = ptr;
+	size_t size_rowspan;
 
-		contents_until = ptr + (base_size * from->parent->row_count);
+	do {
+		size_rowspan = base_size * from->parent->row_count;
+
+		length_lock_increment(&from->parent->total,
+				      size_rowspan,
+				      &column->fail_cl);
+
+		contents_until = ptr + size_rowspan;
+
+		from->cell = ptr;
 
 		do {
 			ptr = put_string_size(ptr,
@@ -140,10 +146,6 @@ build_column_string_fixed(void *arg)
 					      base_size);
 
 		} while (ptr < contents_until);
-
-		length_lock_increment(&from->parent->total,
-				      ptr - from->cell,
-				      &column->fail_cl);
 
 		/* skip to rowspan in next row */
 		from += col_count;
