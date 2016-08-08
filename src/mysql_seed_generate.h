@@ -2067,11 +2067,9 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 		++(state->argv.arg.from);
 
 		if (valid_col_name) {
+			state->specs.tbl->col_specs.from = col_spec;
+
 			state->specs.col = col_spec;
-
-			state->database.columns = 1u; /* set column counter */
-
-			state->database.columns = 1u; /* set column counter */
 
 			parse_col_type(state);
 
@@ -2199,10 +2197,13 @@ parse_first_tbl_spec(struct GenerateParseState *const restrict state)
 				state->specs.tbl = tbl_spec;
 
 				/* set initial counter values */
+				state->database.ctor_flags = 0u;
 				state->database.rows = tbl_spec->row_count;
 				state->database.row_count_max
 				= tbl_spec->row_count;
 				state->database.tables = 1u;
+				state->database.columns = 1u;
+				state->database.counter_upto = 0lu;
 
 				parse_first_col_spec_safe(state);
 
@@ -2492,6 +2493,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	state.generator.columns	      = 0u;
 	state.generator.tables	      = 0u;
 	state.generator.databases     = 0u;
+	state.generator.counter_upto  = 0lu;
 
 	state.valid.last  = &state.valid.head;
 
@@ -2507,38 +2509,42 @@ generate_dispatch(char *const restrict *const restrict arg,
 		return EXIT_FAILURE;
 	}
 
-	/* for (struct DbSpec *db_spec = state.valid.head; */
-	/*      db_spec != NULL; */
-	/*      db_spec = db_spec->next) { */
+	for (struct DbSpec *db_spec = state.valid.head;
+	     db_spec != NULL;
+	     db_spec = db_spec->next) {
 
-	/* 	printf("db_name: %s\n", db_spec->name.bytes); */
+		printf("db_name: %s\n", db_spec->name.bytes);
 
-	/* 	for (struct TblSpec *tbl_spec = db_spec->tbl_specs; */
-	/* 	     tbl_spec != NULL; */
-	/* 	     tbl_spec = tbl_spec->next) { */
-	/* 		printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes); */
-	/* 		printf("\trow_count: %zu\n", tbl_spec->row_count); */
+		for (struct TblSpec *tbl_spec = db_spec->tbl_specs;
+		     tbl_spec != NULL;
+		     tbl_spec = tbl_spec->next) {
+			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes);
+			printf("\trow_count: %zu\n", tbl_spec->row_count);
 
-	/* 		for (struct ColSpec *col_spec = tbl_spec->col_specs.from; */
-	/* 		     col_spec < tbl_spec->col_specs.until; */
-	/* 		     ++col_spec) { */
-	/* 			printf("\t\tcol_name:  %s\n", col_spec->name.bytes); */
-	/* 		} */
-	/* 	} */
-	/* } */
+			for (struct ColSpec *col_spec = tbl_spec->col_specs.from;
+			     col_spec < tbl_spec->col_specs.until;
+			     ++col_spec) {
+				printf("\t\tcol_name:  %s\n", col_spec->name.bytes);
+			}
+		}
+	}
 
-	/* printf("rows:          %lu\n" */
-	/*        "row_count_max: %zu\n" */
-	/*        "columns:       %u\n" */
-	/*        "tables:        %u\n" */
-	/*        "databases:     %u\n" */
-	/*        "exit_status:   EXIT_%s\n", */
-	/*        state.generator.rows, */
-	/*        state.generator.row_count_max, */
-	/*        state.generator.columns, */
-	/*        state.generator.tables, */
-	/*        state.generator.databases, */
-	/*        state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE"); */
+	printf("ctor_flags:    %u\n"
+	       "rows:          %lu\n"
+	       "row_count_max: %zu\n"
+	       "columns:       %u\n"
+	       "tables:        %u\n"
+	       "databases:     %u\n"
+	       "counter_upto:  %zu\n"
+	       "exit_status:   EXIT_%s\n",
+	       state.generator.ctor_flags,
+	       state.generator.rows,
+	       state.generator.row_count_max,
+	       state.generator.columns,
+	       state.generator.tables,
+	       state.generator.databases,
+	       state.generator.counter_upto,
+	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
 
 	mysql_seed_generate(&state.generator,
 			    state.valid.head,

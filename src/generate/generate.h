@@ -275,6 +275,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		return;
 	}
 
+	printf("alive at line: %d\n\n", __LINE__);
+
 	const size_t row_block_row_count_max
 	= (count->row_count_max < COUNT_WORKERS)
 	? count->row_count_max
@@ -308,6 +310,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
+
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* divvy up memory */
 	database = generator_alloc;
@@ -363,6 +367,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		next_node = task_nodes;
 	}
 
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* initialize thread log */
 	thread_log_init(&generator.log,
@@ -376,7 +381,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			     &generator_exit_on_failure,
 			     &generator);
 
-	do {
+	while (1) {
 		database->spec = db_spec;
 
 		database->tables.from = table;		     /* <tables> */
@@ -392,8 +397,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 				       database);
 
 		next_node->prev = prev_node;
-		/* prev_node->next = next_node; */
-
 		prev_node = next_node;
 		++next_node;
 
@@ -497,14 +500,22 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		++database;
 
 		db_spec = db_spec->next;
-	} while (db_spec != NULL);
 
-	generator.databases.until = database;		     /* </databases> */
+		if (db_spec == NULL) {
+			prev_node->next = NULL;
+			break;
+		}
+
+		prev_node->next = next_node;
+	}
+
+	printf("alive at line: %d\n\n", __LINE__);
 
 	/* terminate first task store */
 	generator.build.counter_columns_loaders.last = prev_node;
 
-	prev_node->next = NULL;
+	generator.databases.until = database;		     /* </databases> */
+
 
 	/* initialize thread pool */
 	thread_pool_init(&generator.pool,
