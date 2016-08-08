@@ -31,12 +31,12 @@ put_row_block_row(char *restrict ptr,
 				&from->cell);
 	++from;
 
-	do {
+	while (from < until) {
 		*ptr = FIELD_DELIM;
 		ptr  = put_rowspan_cell(ptr + 1l,
 					&from->cell);
 		++from;
-	} while (from < until);
+	}
 
 	return ptr;
 }
@@ -46,21 +46,18 @@ copy_row_block_row(char *restrict ptr,
 		   struct Rowspan *restrict from,
 		   const struct Rowspan *const restrict until)
 {
-	*ptr = '\n';
-	ptr  = put_string(ptr + 1l,
-			  from->cell);
-	++from;
-
 	const struct Rowspan *const restrict last = until - 1l;
 
+	*ptr = '\n';
+
 	while (from < last) {
-		*ptr = FIELD_DELIM;
 		ptr  = put_string(ptr + 1l,
 				  from->cell);
+		*ptr = FIELD_DELIM;
+
 		++from;
 	}
 
-	*ptr = FIELD_DELIM;
 	copy_string(ptr + 1l,
 		    last->cell);
 }
