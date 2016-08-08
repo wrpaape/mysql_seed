@@ -2393,9 +2393,9 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 *                                      always 1 or 0
 	 *	DbSpec  X DB_CNT  = mac / 8    ┌─────────────┐
 	 *	TblSpec X TBL_CNT = DB_CNT  +  ((mac % 8) / 6)
-	 *	ColSpec X COL_CNT = (2 * TBL_CNT) + (((mac % 8) % 6) / 3)
-	 *	                                    └───────────────────┘
-	 *	with                                       always 0
+	 *	ColSpec X COL_CNT = TBL_CNT + (((mac % 8) % 6) / 3)
+	 *	                              └───────────────────┘
+	 *	with                                always 0
 	 *
 	 *	((mac % 8) % 6) % 3
 	 *
@@ -2406,9 +2406,9 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 *
 	 *	DbSpec  X DB_CNT  = 1
 	 *	TblSpec X TBL_CNT = (mac - 2) / 6
-	 *	ColSpec X COL_CNT = (2 * TBL_CNT) + (((mac - 2) % 6) / 3)
-	 *	                                    └───────────────────┘
-	 *	with                                     always 1 or 0
+	 *	ColSpec X COL_CNT = TBL_CNT + (((mac - 2) % 6) / 3)
+	 *	                              └───────────────────┘
+	 *	with                              always 1 or 0
 	 *
 	 *	((mac - 2) % 6) % 3
 	 *
@@ -2419,8 +2419,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 *
 	 *	DbSpec	X DB_CNT  = 1
 	 *	TblSpec	X TBL_CNT = 1
-	 *	ColSpec	X COL_CNT = (margc - 5) / 3 + 1
-	 *                                            └ TBL_CNT
+	 *	ColSpec	X COL_CNT = (margc - 5) / 3
 	 *
 	 *	with
 	 *
@@ -2470,13 +2469,12 @@ generate_dispatch(char *const restrict *const restrict arg,
 	spec_alloc = malloc(sizeof(struct DbSpec)
 			    + sizeof(struct TblSpec)
 			    + (sizeof(struct ColSpec)
-			       * ((rem_argc - 6) / 3) + 1));
+			       * ((rem_argc - 5) / 3)));
 
 	if (spec_alloc == NULL) {
 		generate_failure_malloc();
 		return EXIT_FAILURE;
 	}
-
 
 	/* initialize parsing state */
 	struct GenerateParseState state;
@@ -2509,42 +2507,42 @@ generate_dispatch(char *const restrict *const restrict arg,
 		return EXIT_FAILURE;
 	}
 
-	for (struct DbSpec *db_spec = state.valid.head;
-	     db_spec != NULL;
-	     db_spec = db_spec->next) {
+/* 	for (struct DbSpec *db_spec = state.valid.head; */
+/* 	     db_spec != NULL; */
+/* 	     db_spec = db_spec->next) { */
 
-		printf("db_name: %s\n", db_spec->name.bytes);
+/* 		printf("db_name: %s\n", db_spec->name.bytes); */
 
-		for (struct TblSpec *tbl_spec = db_spec->tbl_specs;
-		     tbl_spec != NULL;
-		     tbl_spec = tbl_spec->next) {
-			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes);
-			printf("\trow_count: %zu\n", tbl_spec->row_count);
+/* 		for (struct TblSpec *tbl_spec = db_spec->tbl_specs; */
+/* 		     tbl_spec != NULL; */
+/* 		     tbl_spec = tbl_spec->next) { */
+/* 			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes); */
+/* 			printf("\trow_count: %zu\n", tbl_spec->row_count); */
 
-			for (struct ColSpec *col_spec = tbl_spec->col_specs.from;
-			     col_spec < tbl_spec->col_specs.until;
-			     ++col_spec) {
-				printf("\t\tcol_name:  %s\n", col_spec->name.bytes);
-			}
-		}
-	}
+/* 			for (struct ColSpec *col_spec = tbl_spec->col_specs.from; */
+/* 			     col_spec < tbl_spec->col_specs.until; */
+/* 			     ++col_spec) { */
+/* 				printf("\t\tcol_name:  %s\n", col_spec->name.bytes); */
+/* 			} */
+/* 		} */
+/* 	} */
 
-	printf("ctor_flags:    %u\n"
-	       "rows:          %lu\n"
-	       "row_count_max: %zu\n"
-	       "columns:       %u\n"
-	       "tables:        %u\n"
-	       "databases:     %u\n"
-	       "counter_upto:  %zu\n"
-	       "exit_status:   EXIT_%s\n",
-	       state.generator.ctor_flags,
-	       state.generator.rows,
-	       state.generator.row_count_max,
-	       state.generator.columns,
-	       state.generator.tables,
-	       state.generator.databases,
-	       state.generator.counter_upto,
-	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
+/* 	printf("ctor_flags:    %u\n" */
+/* 	       "rows:          %lu\n" */
+/* 	       "row_count_max: %zu\n" */
+/* 	       "columns:       %u\n" */
+/* 	       "tables:        %u\n" */
+/* 	       "databases:     %u\n" */
+/* 	       "counter_upto:  %zu\n" */
+/* 	       "exit_status:   EXIT_%s\n", */
+/* 	       state.generator.ctor_flags, */
+/* 	       state.generator.rows, */
+/* 	       state.generator.row_count_max, */
+/* 	       state.generator.columns, */
+/* 	       state.generator.tables, */
+/* 	       state.generator.databases, */
+/* 	       state.generator.counter_upto, */
+/* 	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE"); */
 
 	mysql_seed_generate(&state.generator,
 			    state.valid.head,
