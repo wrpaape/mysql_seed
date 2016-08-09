@@ -4,6 +4,7 @@
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
 #include "generate/generator.h"	/* string/thread utils */
+#include "time/time_utils.h"	/* for seeding hash state */
 
 void
 build_column_string_hash(void *arg);

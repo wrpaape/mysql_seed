@@ -418,6 +418,42 @@ TARGETS			+= $(TIME_TIME_UTILS_OBJ)			\
 			   $(TIME_TIME_UTILS_TEST_OBJ)			\
 			   $(TIME_TIME_UTILS_TEST_BIN)
 
+
+# bitwise/bitwise_utils
+# ──────────────────────────────────────────────────────────────────────────────
+BITWISE_BITWISE_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_HDR	:= $(call HELPER_HEADER_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_OBJ 	:= $(call HELPER_OBJECT_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,bitwise bitwise_utils)
+BITWISE_BITWISE_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,bitwise bitwise_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+BITWISE_BITWISE_UTILS_OBJ_PREQS		:= $(BITWISE_BITWISE_UTILS_SRC) 		\
+			   	   	   $(BITWISE_BITWISE_UTILS_HDR)			\
+				   	   $(UTILS_WORD_ATTRS_HDR)
+BITWISE_BITWISE_UTILS_OBJ_GROUP		:= $(BITWISE_BITWISE_UTILS_OBJ)
+BITWISE_BITWISE_UTILS_TRNR_SRC_PREQS	:= $(BITWISE_BITWISE_UTILS_TEST_SRC)		\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+BITWISE_BITWISE_UTILS_TEST_OBJ_PREQS	:= $(BITWISE_BITWISE_UTILS_TEST_SRC)		\
+			   	   	   $(BITWISE_BITWISE_UTILS_OBJ_PREQS) 		\
+			   	   	   $(UNITY_OBJ_PREQS)
+BITWISE_BITWISE_UTILS_TRNR_OBJ_PREQS	:= $(BITWISE_BITWISE_UTILS_TRNR_SRC)		\
+			   	   	   $(BITWISE_BITWISE_UTILS_TEST_OBJ_PREQS)
+BITWISE_BITWISE_UTILS_TEST_BIN_PREQS	:= $(BITWISE_BITWISE_UTILS_TRNR_OBJ)		\
+				   	   $(BITWISE_BITWISE_UTILS_TEST_OBJ)		\
+			   	   	   $(BITWISE_BITWISE_UTILS_OBJ_GROUP)		\
+			   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(BITWISE_BITWISE_UTILS_TEST_BIN)
+TARGETS			+= $(BITWISE_BITWISE_UTILS_OBJ)		\
+			   $(BITWISE_BITWISE_UTILS_TRNR_SRC)	\
+			   $(BITWISE_BITWISE_UTILS_TRNR_OBJ)	\
+			   $(BITWISE_BITWISE_UTILS_TEST_OBJ)	\
+			   $(BITWISE_BITWISE_UTILS_TEST_BIN)
+
+
 # memory/memory_utils
 # ──────────────────────────────────────────────────────────────────────────────
 MEMORY_MEMORY_UTILS_SRC 	:= $(call HELPER_SOURCE_PATH,memory memory_utils)
@@ -1943,6 +1979,11 @@ $(MEMORY_MEMORY_ZERO_OBJ): $(MEMORY_MEMORY_ZERO_OBJ_PREQS)
 $(MEMORY_MEMORY_UTILS_OBJ): $(MEMORY_MEMORY_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make bitwise/bitwise_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(BITWISE_BITWISE_UTILS_OBJ): $(BITWISE_BITWISE_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make time/time_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(TIME_TIME_UTILS_OBJ): $(TIME_TIME_UTILS_OBJ_PREQS)
@@ -2652,6 +2693,26 @@ $(MEMORY_MEMORY_UTILS_TEST_OBJ): $(MEMORY_MEMORY_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(MEMORY_MEMORY_UTILS_TRNR_SRC): $(MEMORY_MEMORY_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for bitwise/bitwise_utils
+# make:
+# 	bitwise_bitwise_utils_test		binary,
+# 	bitwise_bitwise_utils_test_runner 	object,
+# 	bitwise_bitwise_utils_test		object, and
+# 	bitwise_bitwise_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(BITWISE_BITWISE_UTILS_TEST_BIN): $(BITWISE_BITWISE_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(BITWISE_BITWISE_UTILS_TRNR_OBJ): $(BITWISE_BITWISE_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(BITWISE_BITWISE_UTILS_TEST_OBJ): $(BITWISE_BITWISE_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(BITWISE_BITWISE_UTILS_TRNR_SRC): $(BITWISE_BITWISE_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
