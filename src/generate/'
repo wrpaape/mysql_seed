@@ -3,63 +3,27 @@
 #define BCSH_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_string_hash")
 
-extern inline void
-hash_state_init(struct HashState *const restrict state,
-		void *const restrict buffer,
-		const void *const restrict until);
-
-extern inline void
-set_last_hash_nibble(char *const restrict buffer,
-		     const word_t last);
-
 void
 build_column_string_hash(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	struct Table *const restrict table
-	= column->parent;
+	const size_t size_hash = column->spec->string.length_scale.fixed + 1lu;
 
-	/* length of hex character string */
-	const size_t length_hash = column->spec->string.length_scale.fixed;
-
-	/* one octet → 2 hex characters */
-	const size_t length_octets = (length_hash / 2lu) + (length_hash & 1lu);
-
-	const size_t size_hash_state_buffer = (sizeof(uint8_t)
-					       * (length_octets - 2lu))
-					    + (sizeof(word_t) * 2lu);
-
-	const size_t length_column = (length_hash + 1lu)
-				   * table->spec->row_count;
+	/* enough even if odd length */
+	const size_t length_octets = size_hash / 2lu;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
 
-	column->contents = malloc(size_hash_state_buffer + length_column);
+	column->contents = malloc(sizeof(uint8_t));
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
 				     BCSH_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
-
-	/* increment table length */
-	length_lock_increment(&table->total,
-			      length_column,
-			      &column->fail_cl);
-
-	char *restrict ptr;
-	struct HashState state;
-
-	ptr = column->contents + size_hash_state_buffer;
-
-	hash_state_init(&state,
-			column->contents,
-			ptr);
-
-
 
 
 	thread_try_catch_close();

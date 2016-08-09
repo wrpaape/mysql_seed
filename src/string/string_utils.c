@@ -193,6 +193,14 @@ extern inline char *
 put_octet_hex_upper(char *const restrict buffer,
 		    const octet_t octet);
 
+extern inline char *
+put_word_hex_lower(char *restrict buffer,
+		   const word_t word);
+
+extern inline char *
+put_word_hex_upper(char *restrict buffer,
+		   const word_t word);
+
 extern inline int
 string_compare(const char *restrict string1,
 	       const char *restrict string2);

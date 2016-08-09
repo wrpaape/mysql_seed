@@ -238,7 +238,7 @@ union StringLengthScale {
 	struct StringLengthRange range;
 	size_t from;
 	size_t upto;
-	size_t constant;
+	size_t fixed;
 };
 
 union StringQualifier {
@@ -259,7 +259,7 @@ union IntegerUnsignedScale {
 	struct IntegerUnsignedRange range;
 	uintmax_t from;
 	uintmax_t upto;
-	uintmax_t constant;
+	uintmax_t fixed;
 };
 
 /* -c temperature --integer --range -100 100		→ 45
@@ -275,7 +275,7 @@ union IntegerSignedScale {
 	struct IntegerSignedRange range;
 	intmax_t from;
 	intmax_t upto;
-	intmax_t constant;
+	intmax_t fixed;
 };
 
 union IntegerQualifier {
@@ -296,7 +296,7 @@ union FloatScale {
 	struct FloatRange range;
 	long double from;
 	long double upto;
-	long double constant;
+	long double fixed;
 };
 
 struct FloatQualifier {
