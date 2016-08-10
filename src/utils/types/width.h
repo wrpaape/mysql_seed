@@ -21,34 +21,34 @@
 /* byte buffers where sizeof(Width<WIDTH>) = WIDTH
  * ========================================================================== */
 #if   (OCTET_CHAR == 1)
-	typedef uint_fast8_t  Width1;
-	typedef uint_fast16_t Width2;
-	typedef uint_fast32_t Width4;
-	typedef uint_fast64_t Width8;
-	typedef __uint128_t   Width16;
+	typedef uint8_t	    Width1;
+	typedef uint16_t    Width2;
+	typedef uint32_t    Width4;
+	typedef uint64_t    Width8;
+	typedef __uint128_t Width16;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #	define WIDTH8_ZERO_INITIALIZER 0u
 #	define WIDTH16_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 2)
-	typedef uint_fast16_t Width1;
-	typedef uint_fast32_t Width2;
-	typedef uint_fast64_t Width4;
+	typedef uint16_t      Width1;
+	typedef uint32_t      Width2;
+	typedef uint64_t      Width4;
 	typedef __uint128_t   Width8;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #	define WIDTH8_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 4)
-	typedef uint_fast32_t Width1;
-	typedef uint_fast64_t Width2;
+	typedef uint32_t      Width1;
+	typedef uint64_t      Width2;
 	typedef __uint128_t   Width4;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 8)
-	typedef uint_fast64_t Width1;
+	typedef uint64_t      Width1;
 	typedef __uint128_t   Width2;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
