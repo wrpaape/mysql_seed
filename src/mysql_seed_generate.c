@@ -54,14 +54,24 @@ extern inline void
 no_col_type(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv);
+
+/* parsing COL_TYPE_Q */
 extern inline void
 invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv);
 extern inline void
-no_string_base(const struct GenerateArgvState *const restrict argv);
+no_base_string(const struct GenerateArgvState *const restrict argv);
 extern inline void
-invalid_string_base_invalid(const struct GenerateArgvState *const restrict argv);
+invalid_base_string_invalid(const struct GenerateArgvState *const restrict argv);
 extern inline void
-invalid_string_base_long(const struct GenerateArgvState *const restrict argv);
+invalid_base_string_long(const struct GenerateArgvState *const restrict argv);
+extern inline void
+no_hash_length(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_hash_length_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_hash_length_zero(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
 /* parsing next SPEC */
 extern inline void
@@ -104,7 +114,7 @@ parse_col_name(struct String *const restrict col_name,
 	       struct GenerateArgvState *const restrict argv);
 
 extern inline bool
-parse_string_base(struct String *const restrict base,
+parse_base_string(struct String *const restrict base,
 		  struct GenerateArgvState *const restrict argv);
 
 
@@ -113,11 +123,16 @@ parse_string_base(struct String *const restrict base,
 extern inline bool
 parse_row_count(size_t *const restrict row_count,
 		struct GenerateArgvState *const restrict argv);
+extern inline bool
+parse_hash_length(size_t *const restrict hash_length,
+		  struct GenerateArgvState *const restrict argv);
+
 
 /* recover from parse error
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 generate_parse_error(struct GenerateParseState *const restrict state);
+
 
 /* finished parsing
  *─────────────────────────────────────────────────────────────────────────── */
@@ -138,6 +153,9 @@ parse_column_complete(struct GenerateParseState *const restrict state);
 extern inline void
 type_set_char(struct Label *const restrict type,
 	      const uintmax_t length);
+extern inline void
+type_set_char_parsed_length(struct Label *const restrict type,
+			    const char *restrict length);
 extern inline void
 type_set_varchar(struct Label *const restrict type,
 		 const uintmax_t length);
@@ -172,21 +190,17 @@ extern inline void
 column_string_unique(struct ColSpec *const restrict col_spec,
 		     const size_t row_count,
 		     size_t *const restrict counter_upto);
-extern inline void
-col_spec_set_string_base_name(struct ColSpec *const restrict col_spec);
 /* -c COL_NAME -s -f BASE_STRING */
 extern inline void
 column_string_fixed(struct ColSpec *const restrict col_spec);
-/* -c COL_NAME -s -f */
-extern inline void
-column_string_fixed_default(struct ColSpec *const restrict col_spec);
 /* -c COL_NAME -s -uu */
 extern inline void
 column_string_uuid(struct ColSpec *const restrict col_spec,
 		   unsigned int *const restrict ctor_flags);
-/* -c COL_NAME -s -h */
+/* -c COL_NAME -s -h LENGTH_HASH */
 extern inline void
-column_string_hash_default(struct ColSpec *const restrict col_spec);
+column_string_hash(struct ColSpec *const restrict col_spec,
+		   const char *const restrict length);
 /* -c COL_NAME -n1 */
 extern inline void
 column_string_names_first(struct ColSpec *const restrict col_spec,

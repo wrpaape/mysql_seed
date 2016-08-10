@@ -9,14 +9,15 @@
 
 /* typedefs, struct declarations
  * ────────────────────────────────────────────────────────────────────────── */
-struct HashStateBufferPointer {
+union HashStateBufferPointer {
 	word_t *restrict word;
 	uint8_t *restrict octet;
 };
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
-#define DEFAULT_HASH_LENGTH 32lu	/* hex characters for 128 bit hash */
+#define HASH_LENGTH_MAX	       255lu	/* arbitrary upper limit on length */
+#define HASH_LENGTH_MAX_STRING "255"
 
 struct HashState {
 	word_t *restrict words;
@@ -30,10 +31,19 @@ hash_state_init(struct HashState *const restrict state,
 		void *const restrict buffer,
 		const void *const restrict until)
 {
-	struct HashStateBufferPointer buffer_ptr;
+	union HashStateBufferPointer buffer_ptr;
 
 	buffer_ptr.word = (word_t *restrict) buffer;
 
+	/* printf("sizeof(word_t *restrict): %zu\n" */
+	/*        "sizeof(uint8_t *restrict): %zu\n", sizeof(word_t *restrict), sizeof(uint8_t *restrict)); */
+
+	/* printf("buffer_ptr.word:  %p\n" */
+	/*        "buffer_ptr.octet: %p\n" */
+	/*        "buffer: %p\n" */
+	/* exit(0); */
+	/* state->words  = (word_t *restrict) buffer; */
+	/* state->octets = ((uint8_t *restrict) buffer) + (OCTET_WORD - 1l); */
 	state->words  = buffer_ptr.word;
 	state->octets = buffer_ptr.octet + (OCTET_WORD - 1l);
 	state->upto   = ((uint8_t *restrict) until) - 1l;
@@ -52,7 +62,7 @@ hash_state_init(struct HashState *const restrict state,
 inline void
 hash_state_shuffle(struct HashState *const restrict state)
 {
-	struct HashStateBufferPointer buffer_ptr;
+	union HashStateBufferPointer buffer_ptr;
 
 	buffer_ptr.word = state->words;
 
@@ -141,13 +151,33 @@ put_hash_state_even(char *restrict ptr,
 {
 	const uint8_t *restrict octet;
 
+	printf("ALIVE @ LINE: %d\n", __LINE__);
+	fflush(stdout);
+
 	hash_state_shuffle(state);
+
+	printf("ALIVE @ LINE: %d\n", __LINE__);
+	fflush(stdout);
 
 	octet = state->octets;
 
 	while (1) {
+		printf("ALIVE @ LINE: %d\n", __LINE__);
+		fflush(stdout);
+
+		printf("octet: %p\n", octet);
+		fflush(stdout);
+
+		printf("hex: 0x%x\n", *octet);
+		fflush(stdout);
+
+		printf("ptr: %p\n", ptr);
+		fflush(stdout);
+
 		ptr = put_octet_hex_lower(ptr,
 					  *octet);
+		printf("ALIVE @ LINE: %d\n", __LINE__);
+		fflush(stdout);
 		if (octet == state->upto) {
 			*ptr = '\0';
 			return ptr + 1l;

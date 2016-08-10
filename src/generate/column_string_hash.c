@@ -75,6 +75,16 @@ build_column_string_hash(void *arg)
 			      length_column,
 			      &column->fail_cl);
 
+	printf("size_hash:		%zu\n"
+	       "size_hash_state_buffer: %zu\n"
+	       "odd_nibble:		%zu\n"
+	       "length_column:		%zu\n",
+	       size_hash,
+	       size_hash_state_buffer,
+	       odd_nibble,
+	       length_column);
+
+
 	size_t length_rowspan;
 	char *restrict ptr;
 	const char *restrict contents_until;
@@ -82,10 +92,14 @@ build_column_string_hash(void *arg)
 
 	ptr = column->contents + size_hash_state_buffer;
 
+	printf("ALIVE @ LINE: %d\n", __LINE__);
+
 	/* initialize the hash state */
 	hash_state_init(&state,
 			column->contents,
 			ptr);
+
+	printf("ALIVE @ LINE: %d\n", __LINE__);
 
 	const unsigned int col_count = table->col_count;
 
@@ -104,9 +118,15 @@ build_column_string_hash(void *arg)
 		do {
 			length_rowspan = size_hash * from->parent->row_count;
 
+			printf("ALIVE @ LINE: %d\n", __LINE__);
+			fflush(stdout);
+
 			length_lock_increment(&from->parent->total,
 					      length_rowspan,
 					      &column->fail_cl);
+
+			printf("ALIVE @ LINE: %d\n", __LINE__);
+			fflush(stdout);
 
 			contents_until = ptr + length_rowspan;
 
