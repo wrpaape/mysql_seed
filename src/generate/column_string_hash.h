@@ -37,13 +37,13 @@ hash_state_init(struct HashState *const restrict state,
 
 	state->words  = buffer_ptr.word;
 	state->octets = buffer_ptr.octet + (OCTET_WORD - 1l);
-	state->upto   = ((uint8_t *restrict) until) - 1l;
+	state->upto   = ((uint8_t *restrict) until) - OCTET_WORD;
 	state->rotate = (uintptr_t) until;
 
 	*(buffer_ptr.word) = (uintptr_t) buffer_ptr.word;
 	++(buffer_ptr.octet);
 
-	while (buffer_ptr.octet < (uint8_t *restrict) until) {
+	while (buffer_ptr.octet <= state->upto) {
 		*(buffer_ptr.word) ^= (uintptr_t) buffer_ptr.word;
 		++(buffer_ptr.octet);
 	}
