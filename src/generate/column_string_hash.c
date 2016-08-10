@@ -20,16 +20,16 @@ put_last_hash_nibble(char *const restrict buffer,
 		     const unsigned int last);
 
 extern inline char *
-put_hash_state_odd(char *const restrict ptr,
+put_hash_state_odd(char *restrict ptr,
 		   struct HashState *const restrict state);
 extern inline char *
-put_hash_state_even(char *const restrict ptr,
+put_hash_state_even(char *restrict ptr,
 		    struct HashState *const restrict state);
 extern inline void
-set_hash_state_odd(char *const restrict ptr,
+set_hash_state_odd(char *restrict ptr,
 		   struct HashState *const restrict state);
 extern inline void
-set_hash_state_even(char *const restrict ptr,
+set_hash_state_even(char *restrict ptr,
 		    struct HashState *const restrict state);
 
 void
@@ -42,7 +42,8 @@ build_column_string_hash(void *arg)
 	= column->parent;
 
 	/* length of hex character string */
-	const size_t length_hash = column->spec->string.length_scale.fixed;
+	const size_t length_hash
+	= column->spec->type_qualifier.string.length_scale.fixed;
 
 	/* 1/0 -> odd/even number of hex charaters */
 	const size_t odd_nibble = length_hash & 1lu;

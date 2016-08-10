@@ -1533,6 +1533,15 @@ column_string_uuid(struct ColSpec *const restrict col_spec,
 	*ctor_flags |= UUID_CTOR_FLAG;
 }
 
+/* -c COL_NAME -s -h */
+inline void
+column_string_hash_default(struct ColSpec *const restrict col_spec)
+{
+	colspec->type_qualifier.string.length_scale.fixed
+	= DEFAULT_HASH_LENGTH;
+	col_spec->build = &build_column_string_hash;
+}
+
 
 /* -c COL_NAME -n1 */
 inline void
@@ -1725,6 +1734,19 @@ STRING_FIXED:
 				generate_parse_error(state);
 			}
 			return;
+		}
+		goto INVALID_STRING_QUALIFIER_NOTSUP;
+
+	case 'h':
+		if (*rem == '\0') {
+STRING_HASH:
+			++(state->argv.arg.from);
+
+			if (state->argv.arg.from == state->argv.arg.until) {
+				column_string_hash_default(state->specs.col);
+				parse_column_complete(state);
+				return;
+			}
 		}
 		goto INVALID_STRING_QUALIFIER_NOTSUP;
 

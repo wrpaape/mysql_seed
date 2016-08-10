@@ -184,6 +184,9 @@ column_string_fixed_default(struct ColSpec *const restrict col_spec);
 extern inline void
 column_string_uuid(struct ColSpec *const restrict col_spec,
 		   unsigned int *const restrict ctor_flags);
+/* -c COL_NAME -s -h */
+extern inline void
+column_string_hash_default(struct ColSpec *const restrict col_spec);
 /* -c COL_NAME -n1 */
 extern inline void
 column_string_names_first(struct ColSpec *const restrict col_spec,

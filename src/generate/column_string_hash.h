@@ -14,6 +14,9 @@ struct HashStateBufferPointer {
 	uint8_t *restrict octet;
 };
 
+/* macro constants
+ * ────────────────────────────────────────────────────────────────────────── */
+#define DEFAULT_HASH_LENGTH 32lu	/* hex characters for 128 bit hash */
 
 struct HashState {
 	word_t *restrict words;
@@ -88,7 +91,7 @@ set_last_hash_nibble(char *const restrict buffer,
 	}
 }
 
-extern inline char *
+inline char *
 put_last_hash_nibble(char *const restrict buffer,
 		     const unsigned int last)
 {
@@ -113,7 +116,7 @@ put_last_hash_nibble(char *const restrict buffer,
 }
 
 inline char *
-put_hash_state_odd(char *const restrict ptr,
+put_hash_state_odd(char *restrict ptr,
 		   struct HashState *const restrict state)
 {
 	const uint8_t *restrict octet;
@@ -133,7 +136,7 @@ put_hash_state_odd(char *const restrict ptr,
 }
 
 inline char *
-put_hash_state_even(char *const restrict ptr,
+put_hash_state_even(char *restrict ptr,
 		    struct HashState *const restrict state)
 {
 	const uint8_t *restrict octet;
@@ -154,7 +157,7 @@ put_hash_state_even(char *const restrict ptr,
 }
 
 inline void
-set_hash_state_odd(char *const restrict ptr,
+set_hash_state_odd(char *restrict ptr,
 		   struct HashState *const restrict state)
 {
 	const uint8_t *restrict octet;
@@ -174,7 +177,7 @@ set_hash_state_odd(char *const restrict ptr,
 }
 
 inline void
-set_hash_state_even(char *const restrict ptr,
+set_hash_state_even(char *restrict ptr,
 		    struct HashState *const restrict state)
 {
 	const uint8_t *restrict octet;

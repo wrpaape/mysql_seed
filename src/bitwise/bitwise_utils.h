@@ -5,9 +5,7 @@
  * ────────────────────────────────────────────────────────────────────────── */
 #include "utils/word_attrs.h"	/* word_t, WORD_BITS, stdint */
 
-#ifdef WORD_BITS
-#	define WORD_SHIFT_MAX WORD_BITS
-#else
+#ifndef WORD_BITS
 #	error "compile-time constant 'WORD_BITS' unknown"
 #endif /* ifndef WORD_BITS */
 
@@ -40,11 +38,6 @@ uint16_rotate_right(const uint16_t value,
 {
 	return (value >> rotate) | (value << (-rotate & 15));
 }
-
-inline uint32_t
-uint32_rotate_left(const uint32_t value,
-		   const unsigned int rotate)
-
 
 inline uint32_t
 uint32_rotate_left(const uint32_t value,
