@@ -1334,6 +1334,44 @@ TARGETS			+= $(GENERATE_COLUMN_STRING_UUID_OBJ)			\
 			   $(GENERATE_COLUMN_STRING_UUID_TEST_BIN)
 
 
+# generate/column_string_hash
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_STRING_HASH_SRC 	:= $(call HELPER_SOURCE_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_HDR		:= $(call HELPER_HEADER_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_OBJ 	:= $(call HELPER_OBJECT_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_string_hash)
+GENERATE_COLUMN_STRING_HASH_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_string_hash)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_STRING_HASH_OBJ_PREQS		:= $(GENERATE_COLUMN_STRING_HASH_SRC) 			\
+			     	   		   $(GENERATE_COLUMN_STRING_HASH_HDR)			\
+			      	   	   	   $(BITWISE_BITWISE_UTILS_HDR)				\
+						   $(GENERATE_GENERATOR_HDR)
+GENERATE_COLUMN_STRING_HASH_OBJ_GROUP		:= $(GENERATE_COLUMN_STRING_HASH_OBJ) 			\
+			      	   	   	   $(BITWISE_BITWISE_UTILS_OBJ_GROUP)			\
+				   	   	   $(GENERATE_GENERATOR_OBJ_GROUP)
+GENERATE_COLUMN_STRING_HASH_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_STRING_HASH_TEST_SRC)		\
+				   	   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_STRING_HASH_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_HASH_TEST_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_HASH_OBJ_PREQS)		\
+			   	   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_STRING_HASH_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_HASH_TRNR_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_HASH_TEST_OBJ_PREQS)
+GENERATE_COLUMN_STRING_HASH_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_STRING_HASH_TRNR_OBJ)		\
+				   	   	   $(GENERATE_COLUMN_STRING_HASH_TEST_OBJ)		\
+			   	   	   	   $(GENERATE_COLUMN_STRING_HASH_OBJ_GROUP)		\
+			   	   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_STRING_HASH_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_STRING_HASH_OBJ)			\
+			   $(GENERATE_COLUMN_STRING_HASH_TRNR_SRC)		\
+			   $(GENERATE_COLUMN_STRING_HASH_TRNR_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_HASH_TEST_OBJ)		\
+			   $(GENERATE_COLUMN_STRING_HASH_TEST_BIN)
+
+
 # generate/column_string
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_COLUMN_STRING_SRC 	:= $(call HELPER_SOURCE_PATH,generate column_string)
@@ -1349,11 +1387,13 @@ GENERATE_COLUMN_STRING_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_SRC) 		\
 			     	   	   $(GENERATE_COLUMN_STRING_HDR)		\
 			      	   	   $(GENERATE_COUNTER_HDR)			\
 			      	   	   $(GENERATE_COLUMN_STRING_NAMES_HDR)		\
-			      	   	   $(GENERATE_COLUMN_STRING_UUID_HDR)
+			      	   	   $(GENERATE_COLUMN_STRING_UUID_HDR)		\
+			      	   	   $(GENERATE_COLUMN_STRING_HASH_HDR)
 GENERATE_COLUMN_STRING_OBJ_GROUP	:= $(GENERATE_COLUMN_STRING_OBJ) 		\
 				   	   $(GENERATE_COUNTER_OBJ_GROUP)		\
 				   	   $(GENERATE_COLUMN_STRING_NAMES_OBJ_GROUP)	\
-			      	   	   $(GENERATE_COLUMN_STRING_UUID_OBJ_GROUP)
+			      	   	   $(GENERATE_COLUMN_STRING_UUID_OBJ_GROUP)	\
+			      	   	   $(GENERATE_COLUMN_STRING_HASH_OBJ_GROUP)
 GENERATE_COLUMN_STRING_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_STRING_TEST_SRC)		\
 				   	   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_COLUMN_STRING_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_STRING_TEST_SRC)		\
@@ -1897,6 +1937,11 @@ $(GENERATE_COLUMN_INTEGER_OBJ): $(GENERATE_COLUMN_INTEGER_OBJ_PREQS)
 # make generate/column_string object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_COLUMN_STRING_OBJ): $(GENERATE_COLUMN_STRING_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/column_string_hash object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_HASH_OBJ): $(GENERATE_COLUMN_STRING_HASH_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/column_string_uuid object
@@ -2474,6 +2519,26 @@ $(GENERATE_COLUMN_STRING_TEST_OBJ): $(GENERATE_COLUMN_STRING_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_COLUMN_STRING_TRNR_SRC): $(GENERATE_COLUMN_STRING_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/column_string_hash
+# make:
+# 	generate_column_string_hash_test		binary,
+# 	generate_column_string_hash_test_runner 	object,
+# 	generate_column_string_hash_test		object, and
+# 	generate_column_string_hash_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_STRING_HASH_TEST_BIN): $(GENERATE_COLUMN_STRING_HASH_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_STRING_HASH_TRNR_OBJ): $(GENERATE_COLUMN_STRING_HASH_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_HASH_TEST_OBJ): $(GENERATE_COLUMN_STRING_HASH_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_STRING_HASH_TRNR_SRC): $(GENERATE_COLUMN_STRING_HASH_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

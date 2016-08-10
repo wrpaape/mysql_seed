@@ -54,8 +54,9 @@ build_column_string_hash(void *arg)
 					       * (length_octets - 2lu))
 					    + (sizeof(word_t) * 2lu);
 
-	const size_t length_column = (length_hash + 1lu)
-				   * table->spec->row_count;
+	const size_t size_hash = length_hash + 1lu;
+
+	const size_t length_column = size_hash * table->spec->row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -73,7 +74,9 @@ build_column_string_hash(void *arg)
 			      length_column,
 			      &column->fail_cl);
 
+	size_t length_rowspan;
 	char *restrict ptr;
+	const char *restrict contents_until;
 	struct HashState state;
 
 	ptr = column->contents + size_hash_state_buffer;
@@ -83,42 +86,58 @@ build_column_string_hash(void *arg)
 			column->contents,
 			ptr);
 
-	/* */
+	const unsigned int col_count = table->col_count;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
+	struct Rowspan *restrict from		   = column->rowspans_from;
+
+	/* inline char * */
+	/* (*const put_hash_state)(char *const restrict, */
+	/* 			struct HashState *const restrict) */
+	/* = (odd_nibble == 0lu) */
+	/* ? put_hash_state_even */
+	/* : put_hash_state_odd; */
+
+	/* direct call to put_hash_state function for inlining opportunity */
 	if (odd_nibble == 0lu) {
+		do {
+			length_rowspan = size_hash * from->parent->row_count;
 
+			length_lock_increment(&from->parent->total,
+					      length_rowspan,
+					      &column->fail_cl);
+
+			contents_until = ptr + length_rowspan;
+
+			from->cell = ptr;
+
+			do {
+				ptr = put_hash_state_even(ptr,
+							  &state);
+			} while (ptr < contents_until);
+
+			from += col_count;
+		} while (from < until);
 	} else {
+		do {
+			length_rowspan = size_hash * from->parent->row_count;
 
+			length_lock_increment(&from->parent->total,
+					      length_rowspan,
+					      &column->fail_cl);
+
+			contents_until = ptr + length_rowspan;
+
+			from->cell = ptr;
+
+			do {
+				ptr = put_hash_state_odd(ptr,
+							 &state);
+			} while (ptr < contents_until);
+
+			from += col_count;
+		} while (from < until);
 	}
 
 	thread_try_catch_close();
 }
-
-/* hash_t hash_bytes(byte_t *bytes, */
-/* 		  const size_t length, */
-/* 		  const hash_t m_prime) */
-/* { */
-
-/* 	/1* size_t rem_words = length / sizeof(hash_t); *1/ */
-/* 	size_t rem_bytes = length % sizeof(hash_t); */
-
-/* 	ptrdiff_t i = length - rem_bytes; */
-
-/* 	hash_t *word = (hash_t *) bytes; */
-
-/* 	hash_t hash = (word[i] << (sizeof(hash_t) - rem_bytes)) & m_prime; */
-
-/* 	i -= rem_bytes; */
-
-/* 	if (i < 0l) */
-/* 		return hash; */
-
-/* 	const hash_t base_mod_size = HASH_MAX & m_prime; */
-
-/* 	do { */
-/* 		hash += (base_mod_size * (word[i] & m_prime)) & m_prime; */
-/* 		i -= sizeof(hash_t); */
-
-/* 	} while (i >= 0l); */
-
-/* 	return hash; */
-/* } */

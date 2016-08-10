@@ -127,16 +127,16 @@ build_column_string_fixed(void *arg)
 
 	const char *restrict contents_until;
 
-	size_t size_rowspan;
+	size_t length_rowspan;
 
 	do {
-		size_rowspan = base_size * from->parent->row_count;
+		length_rowspan = base_size * from->parent->row_count;
 
 		length_lock_increment(&from->parent->total,
-				      size_rowspan,
+				      length_rowspan,
 				      &column->fail_cl);
 
-		contents_until = ptr + size_rowspan;
+		contents_until = ptr + length_rowspan;
 
 		from->cell = ptr;
 
@@ -144,7 +144,6 @@ build_column_string_fixed(void *arg)
 			ptr = put_string_size(ptr,
 					      base->bytes,
 					      base_size);
-
 		} while (ptr < contents_until);
 
 		/* skip to rowspan in next row */

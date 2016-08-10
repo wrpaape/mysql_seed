@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "generate/column_id.h"
+#include "bitwise/bitwise_utils.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_build_column_id(void);
+extern void test_bitwise_utils(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/generate_column_id_test.c");
-  RUN_TEST(test_build_column_id, 12);
+  UnityBegin("../test/bitwise_bitwise_utils_test.c");
+  RUN_TEST(test_bitwise_utils, 12);
 
   return (UnityEnd());
 }

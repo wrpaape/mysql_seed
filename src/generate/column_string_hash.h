@@ -3,8 +3,8 @@
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include "generate/generator.h"	/* string/thread utils */
-/* #include "time/time_utils.h"	/1* for seeding hash state *1/ */
+#include "bitwise/bitwise_utils.h"	/* for shuffling hash state */
+#include "generate/generator.h"		/* string/thread utils */
 
 
 /* typedefs, struct declarations
