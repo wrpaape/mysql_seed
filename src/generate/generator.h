@@ -310,10 +310,16 @@ union TypeQualifier {
 	struct FloatQualifier flt_pt;
 };
 
+struct GrpSpec {
+	GroupPartitioner *partition;
+	size_t group_count;
+};
+
 struct ColSpec {
 	struct String name;
 	struct Label type;
 	union TypeQualifier type_qualifier;
+	struct GrpSpec grp_spec;
 	Procedure *build;
 };
 

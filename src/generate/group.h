@@ -7,14 +7,22 @@
 #include <math.h>		/* log */
 #include "generate/generator"	/* UPTO_MAX */
 
+
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
-
 #if LARGE_UPTO_MAX
 #	define GROUPS_EXP_SCALE_MAX_CEIL 24.0
 #else
 #	define GROUPS_EXP_SCALE_MAX_CEIL 11.7
 #endif /* if LARGE_UPTO_MAX */
+
+
+/* typedefs, struct declarations
+ * ────────────────────────────────────────────────────────────────────────── */
+typedef void *
+GroupPartitioner(size_t *restrict group,
+		 const size_t group_count,
+		 const size_t row_count);
 
 extern inline double
 groups_linear_slope(const size_t group_count,
@@ -28,12 +36,12 @@ groups_linear_slope(const size_t group_count,
 	return (group_max - 1.0) / group_count_dbl;
 }
 
-void
+void *
 partition_groups_linear(size_t *restrict group,
 			const size_t group_count,
 			const size_t row_count);
 
-void
+void *
 partition_groups_even(size_t *restrict group,
 		      const size_t group_count,
 		      const size_t row_count);
