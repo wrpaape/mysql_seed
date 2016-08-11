@@ -231,7 +231,7 @@ endif
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
 LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lm -lc
 
 ifeq (T,$(SYSTEM_OSX))
 LD_FLAGS	+= -macosx_version_min 10.11
@@ -268,7 +268,7 @@ UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
 UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_SCRIPT_PATH,generate_test_runner)
 UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
 UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
-UNITY_LD_LIB_FLAGS	:= -lm
+UNITY_LD_LIB_FLAGS	:= $(EMPTY)
 # ─────────────── run all tests ────────────────────────────────────────────────
 TEST_FILES_GLOB	:= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),*_test)
 ifeq (T,$(SYSTEM_WINDOWS))

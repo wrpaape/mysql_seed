@@ -259,9 +259,6 @@ parse_int_stop(intmax_t *const restrict n,
 	       char *restrict string,
 	       const char stop);
 
-extern inline bool
-parse_size(size_t *const restrict n,
-	   const char *restrict string);
 
 /* String operations
  * ────────────────────────────────────────────────────────────────────────── */

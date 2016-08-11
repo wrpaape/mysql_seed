@@ -1874,6 +1874,7 @@ parse_int_stop(intmax_t *const restrict n,
 #endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
+
 /* String operations
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
