@@ -311,8 +311,8 @@ union TypeQualifier {
 };
 
 struct GrpSpec {
+	size_t count;
 	GroupPartitioner *partition;
-	size_t group_count;
 };
 
 struct ColSpec {

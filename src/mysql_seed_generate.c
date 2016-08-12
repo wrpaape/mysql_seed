@@ -55,6 +55,14 @@ no_col_type(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv);
 
+/* GRP_SPEC */
+extern inline void
+invalid_grp_count_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_grp_count_zero(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_grp_count_large(const struct GenerateArgvState *const restrict argv);
+
 /* parsing COL_TYPE_Q */
 extern inline void
 invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv);
@@ -76,6 +84,8 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 /* parsing next SPEC */
 extern inline void
 expected_spec_flag(const struct GenerateArgvState *const restrict argv);
+extern inline void
+expected_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 
 /* incomplete DB_SPEC */
 extern inline void
@@ -126,6 +136,9 @@ parse_row_count(size_t *const restrict row_count,
 extern inline bool
 parse_hash_length(size_t *const restrict hash_length,
 		  struct GenerateArgvState *const restrict argv);
+extern inline bool
+parse_grp_count(size_t *const restrict grp_count,
+		struct GenerateArgvState *const restrict argv);
 
 
 /* recover from parse error
@@ -180,46 +193,58 @@ extern inline void
 type_assign_upto(struct Label *const restrict type,
 		 const size_t upto);
 
+/* parse GRP_SPEC
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+no_grp_count(const struct GenerateArgvState *const restrict argv);
+extern inline void
+multiple_grp_specs(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_multiple_grp_specs(struct GenerateParseState *const restrict state);
+extern inline void
+parse_grp_spec(struct GenerateParseState *const restrict state,
+	       GenerateParseNode *const set_col_spec)
+
 /* set COL_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
 /* -c COL_NAME -i */
 extern inline void
-column_integer_default(struct ColSpec *const restrict col_spec,
-		       const size_t row_count,
-		       size_t *const restrict counter_upto);
+column_integer_default(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s -u BASE_STRING */
 extern inline void
-column_string_unique(struct ColSpec *const restrict col_spec,
-		     const size_t row_count,
-		     size_t *const restrict counter_upto);
+column_string_unique(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -s -u BASE_STRING -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_string_unique_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s -f BASE_STRING */
 extern inline void
-column_string_fixed(struct ColSpec *const restrict col_spec);
+column_string_fixed(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s -uu */
 extern inline void
-column_string_uuid(struct ColSpec *const restrict col_spec,
-		   unsigned int *const restrict ctor_flags);
+column_string_uuid(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -s -uu -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_string_uuid_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s -h LENGTH_HASH */
 extern inline void
-column_string_hash(struct ColSpec *const restrict col_spec,
-		   const char *const restrict length);
+column_string_hash(struct GenerateParseState *const restrict state);
+extern inline void
+column_string_hash_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -n1 */
 extern inline void
-column_string_names_first(struct ColSpec *const restrict col_spec,
-			  unsigned int *const restrict ctor_flags);
+column_string_names_first(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -nl */
 extern inline void
-column_string_names_last(struct ColSpec *const restrict col_spec,
-			 unsigned int *const restrict ctor_flags);
+column_string_names_last(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -nf */
 extern inline void
-column_string_names_full(struct ColSpec *const restrict col_spec,
-			 unsigned int *const restrict ctor_flags);
+column_string_names_full(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s */
 extern inline void
-column_string_default(struct ColSpec *const restrict col_spec,
-		      const size_t row_count,
-		      size_t *const restrict counter_upto);
+column_string_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -s -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_string_default_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -t -u */
 extern inline void
 column_timestamp_unique(struct ColSpec *const restrict col_spec);
@@ -232,6 +257,10 @@ column_timestamp_default(struct ColSpec *const restrict col_spec);
 
 /* parse COL_TYPE_Q
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_string_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_string_uuid_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_unique_group(struct GenerateParseState *const restrict state);
 extern inline void

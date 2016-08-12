@@ -2107,21 +2107,6 @@ column_string_uuid(struct GenerateParseState *const restrict state)
 	state->database.ctor_flags |= UUID_CTOR_FLAG;
 }
 
-/* -c COL_NAME -s -uu -g GRP_COUNT [PART_TYPE] */
-inline void
-column_string_uuid_group(struct GenerateParseState *const restrict state)
-{
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
-	SET_UUID_TYPE(&col_spec->type.buffer[0]);
-
-	col_spec->type.width = UUID_TYPE_NN_WIDTH;
-
-	col_spec->build = &build_column_string_uuid_group;
-
-	state->database.ctor_flags |= UUID_CTOR_FLAG;
-}
-
 /* -c COL_NAME -s -h HASH_LENGTH */
 inline void
 column_string_hash(struct GenerateParseState *const restrict state)
@@ -2134,39 +2119,26 @@ column_string_hash(struct GenerateParseState *const restrict state)
 	col_spec->build = &build_column_string_hash;
 }
 
-/* -c COL_NAME -s -h HASH_LENGTH -g GRP_COUNT [PART_TYPE] */
-inline void
-column_string_hash_group(struct GenerateParseState *const restrict state)
-{
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
-	type_set_char_parsed_length(&col_spec->type,
-				    state->argv.cache);
-
-	col_spec->build = &build_column_string_hash_group;
-}
 
 /* -c COL_NAME -n1 */
 inline void
-column_string_names_first(struct GenerateParseState *const restrict state)
+column_string_names_first(struct ColSpec *const restrict col_spec,
+			  unsigned int *const restrict ctor_flags)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
 	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_first;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	*ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -nl */
 inline void
-column_string_names_last(struct GenerateParseState *const restrict state)
+column_string_names_last(struct ColSpec *const restrict col_spec,
+			 unsigned int *const restrict ctor_flags)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
 	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
@@ -2178,10 +2150,9 @@ column_string_names_last(struct GenerateParseState *const restrict state)
 
 /* -c COL_NAME -nf */
 inline void
-column_string_names_full(struct GenerateParseState *const restrict state)
+column_string_names_full(struct ColSpec *const restrict col_spec,
+			 unsigned int *const restrict ctor_flags)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
 	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
 
 	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
@@ -2266,13 +2237,6 @@ parse_string_default_group(struct GenerateParseState *const restrict state)
 }
 
 inline void
-parse_string_uuid_group(struct GenerateParseState *const restrict state)
-{
-	parse_grp_spec(state,
-		       &column_string_uuid_group);
-}
-
-inline void
 parse_string_unique_group(struct GenerateParseState *const restrict state)
 {
 	parse_grp_spec(state,
@@ -2299,7 +2263,6 @@ parse_string_unique(struct GenerateParseState *const restrict state)
 		generate_parse_error(state);
 }
 
-
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -2321,6 +2284,7 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
+STRING_DEFAULT_PARSE_COMPLETE:
 		column_string_default(state);
 		generate_parse_complete(state); /* done parsing */
 		return;
@@ -2343,28 +2307,38 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 	case '-':
 		break;	/* parse long string qualifier */
 
-	case 'g':
-		if (*rem == '\0') {
-			parse_string_default_group(state);
-			return;
-		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
-
 	case 'u':
 		switch (*rem) {
 		case '\0':
-			parse_string_unique(state);
-			return;
+STRING_UNIQUE:
+			/* ++(state->argv.arg.from); */
+
+			/* if (state->argv.arg.from == state->argv.arg.until) */
+			/* 	goto STRING_DEFAULT_PARSE_COMPLETE; */
+
+			/* const bool valid_base_string */
+			/* = parse_base_string(&state->specs.col->type_qualifier.string.base, */
+			/* 		    &state->argv); */
+
+			/* ++(state->argv.arg.from); */
+
+			/* if (valid_base_string) { */
+			/* 	column_string_unique(state); */
+			/* 	parse_column_complete(state); */
+			/* } else { */
+			/* 	generate_parse_error(state); */
+			/* } */
+			/* return; */
 
 		case 'u':
 			if (rem[1] == '\0') {
+STRING_UUID:
 				++(state->argv.arg.from);
 				column_string_uuid(state);
-				parse_column_complete(state,
-						      &column_string_uuid,
-						      &parse_string_uuid_group);
+				parse_column_complete(state);
 				return;
 			}
+			goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 		default:
 			goto INVALID_STRING_QUALIFIER_NOTSUP;
@@ -2728,6 +2702,13 @@ INVALID_COL_TYPE_NOTSUP:
 	switch (*arg) {
 	case '-':
 		break;	/* parse long COL_TYPE */
+
+	case 'g':
+		if (*rem == '\0') {
+			parse_string_default_group(state);
+			return;
+		}
+		goto INVALID_COL_TYPE_NOTSUP;
 
 	case 'i':
 		if (*rem == '\0') {
