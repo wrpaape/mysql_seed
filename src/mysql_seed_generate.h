@@ -169,9 +169,13 @@ PARSE_ERROR_HEADER("invalid COL_TYPE")
 #define ERROR_INVALID_COL_TYPE_Q_HEADER					\
 PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 
-#define ERROR_INVALID_COL_TYPE_Q_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC starting "	\
-		"with:") "\n"
+#define ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP			\
+"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'string', ignoring"	\
+		" DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'timestamp', "	\
+		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_NO_BASE_STRING						\
 PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
@@ -231,6 +235,10 @@ PARSE_ERROR_HEADER("no GRP_COUNT provided, ignoring DB_SPEC starting "	\
 
 #define ERROR_MULTIPLE_GRP_SPECS					\
 PARSE_ERROR_HEADER("may have no more than 1 GRP_SPEC per column, "	\
+		   "ignoring DB_SPEC starting with")
+
+#define ERROR_GRP_SPEC_FOR_FIXED_DATA					\
+PARSE_ERROR_HEADER("cannot have GRP_SPEC for fixed column data, "	\
 		   "ignoring DB_SPEC starting with")
 
 /* parsing next SPEC */
@@ -869,7 +877,7 @@ invalid_grp_count_large(const struct GenerateArgvState *const restrict argv)
 
 /* parsing COL_TYPE_Q */
 inline void
-invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv)
+invalid_string_type_q(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
@@ -883,13 +891,51 @@ invalid_col_type_q_notsup(const struct GenerateArgvState *const restrict argv)
 				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
-			      ERROR_INVALID_COL_TYPE_Q_REASON_NOTSUP,
-			      sizeof(ERROR_INVALID_COL_TYPE_Q_REASON_NOTSUP)
+			      ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP)
 			      - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_string_type_q(struct GenerateParseState *const restrict state)
+{
+	invalid_string_type_q(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_timestamp_type_q(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_timestamp_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_Q_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+
+	ptr = put_timestamp_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_timestamp_size(ptr,
+			      ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP)
+			      - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_timestamp_type_q(struct GenerateParseState *const restrict state)
+{
+	invalid_timestamp_type_q(&state->argv);
+	generate_parse_error(state);
 }
 
 
@@ -911,6 +957,15 @@ no_base_string(const struct GenerateArgvState *const restrict argv)
 		     &buffer[0],
 		     ptr - &buffer[0]);
 }
+
+inline void
+error_no_base_string(struct GenerateParseState *const restrict state)
+{
+	no_base_string(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
 
 inline void
 invalid_base_string_invalid(const struct GenerateArgvState *const restrict argv)
@@ -985,6 +1040,14 @@ no_hash_length(const struct GenerateArgvState *const restrict argv)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_hash_length(struct GenerateParseState *const restrict state)
+{
+	no_hash_length(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
 }
 
 inline void
@@ -1099,7 +1162,14 @@ expected_spec_flag(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-expected_spec_flags_five(const struct GenerateArgvState *const restrict argv)
+error_expected_spec_flag(struct GenerateParseState *const restrict state)
+{
+	expected_spec_flag(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+expected_grp_spec_close(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
@@ -1123,6 +1193,40 @@ expected_spec_flags_five(const struct GenerateArgvState *const restrict argv)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+error_expected_grp_spec_close(struct GenerateParseState *const restrict state)
+{
+	expected_grp_spec_close(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+grp_spec_for_fixed_data(const struct GenerateArgvState *const restrict argv)
+{
+
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_GRP_SPEC_FOR_FIXED_DATA,
+			  sizeof(ERROR_GRP_SPEC_FOR_FIXED_DATA) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_grp_spec_for_fixed_data(struct GenerateParseState *const restrict state)
+{
+	grp_spec_for_fixed_data(&state->argv);
+	generate_parse_error(state);
 }
 
 /* incomplete DB_SPEC */
@@ -1844,6 +1948,14 @@ no_grp_count(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
+error_no_grp_count(struct GenerateParseState *const restrict state)
+{
+	no_grp_count(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
 multiple_grp_specs(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
@@ -1877,26 +1989,21 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		no_grp_count(&state->argv);
-		*(state->valid.last) = NULL;
-		state->exit_status = EXIT_FAILURE;
+		error_no_grp_count(state);
 		return;
 	}
 
 	struct ColSpec *const restrict col_spec = state->specs.col;
 	struct GrpSpec *const restrict grp_spec = &col_spec->grp_spec;
 
-	const bool valid_grp_count =
-	parse_grp_count(&grp_spec->count,
-			state->specs.tbl->row_count,
-			&state->argv);
-
-	++(state->argv.arg.from);
-
-	if (!valid_grp_count) {
+	if (!parse_grp_count(&grp_spec->count,
+			     state->specs.tbl->row_count,
+			     &state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
+
+	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
 		grp_spec->partition = &partition_groups_even;
@@ -1908,10 +2015,7 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 	char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-EXPECTED_GRP_SPEC_CLOSE:
-		expected_grp_spec_close(&state->argv);
-		++(state->argv.arg.from);
-		generate_parse_error(state);
+		error_expected_grp_spec_close(state);
 		return;
 	}
 
@@ -1928,9 +2032,10 @@ PART_GROUPS_EVEN:	grp_spec->partition = &partition_groups_even;
 			parse_column_complete(state,
 					      set_col_spec,
 					      &error_multiple_grp_specs);
-			return;
+		} else {
+			error_expected_grp_spec_close(state);
 		}
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		return;
 
 	case 'l':
 		if (*rem == '\0') {
@@ -1938,24 +2043,27 @@ PART_GROUPS_LINEAR:	grp_spec->partition = &partition_groups_linear;
 			parse_column_complete(state,
 					      set_col_spec,
 					      &error_multiple_grp_specs);
+		} else {
+			error_expected_grp_spec_close(state);
 		}
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		return;
 
 	case 'g':
-		if (*rem == '\0') {
-MULTIPLE_GRP_SPECS:	error_multiple_grp_specs(state);
-			return;
-		}
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		if (*rem == '\0')
+			error_multiple_grp_specs(state);
+		else
+			error_expected_grp_spec_close(state);
+		return;
 
 	case 'c':
 		if (*rem == '\0') {
 NEXT_COL_SPEC:		grp_spec->partition = &partition_groups_even;
 			set_col_spec(state);
 			parse_next_col_spec(state);
-			return;
+		} else {
+			error_expected_grp_spec_close(state);
 		}
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		return;
 
 	case 't':
 		if (*rem == '\0') {
@@ -1963,9 +2071,10 @@ NEXT_TBL_SPEC:		grp_spec->partition = &partition_groups_even;
 			set_col_spec(state);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
-			return;
+		} else {
+			error_expected_grp_spec_close(state);
 		}
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		return;
 
 	case 'd':
 		if (*rem == '\0') {
@@ -1977,7 +2086,8 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 		}
 
 	default:
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
+		return;
 	}
 
 	switch (*rem) {
@@ -1985,39 +2095,43 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 		if (strings_equal("ven", rem + 1l))
 			goto PART_GROUPS_EVEN;
 
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
+		return;
 
 	case 'l':
 		if (strings_equal("inear", rem + 1l))
 			goto PART_GROUPS_LINEAR;
 
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
+		return;
 
 	case 'g':
 		if (strings_equal("roup", rem + 1l))
-			goto MULTIPLE_GRP_SPECS;
-
-		goto EXPECTED_GRP_SPEC_CLOSE;
+			error_multiple_grp_specs(state);
+		else
+			error_expected_grp_spec_close(state);
+		return;
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))
 			goto NEXT_COL_SPEC;
 
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
+		return;
 
 	case 't':
-		if (strings_equal("able", rem + 1l)) {
+		if (strings_equal("able", rem + 1l))
 			goto NEXT_TBL_SPEC;
-		}
 
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
+		return;
 
 	case 'd':
 		if (strings_equal("atabase", rem + 1l))
 			goto NEXT_DB_SPEC;
 
 	default:
-		goto EXPECTED_GRP_SPEC_CLOSE;
+		error_expected_grp_spec_close(state);
 	}
 }
 
@@ -2161,7 +2275,22 @@ column_string_names_first(struct GenerateParseState *const restrict state)
 	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
-/* -c COL_NAME -nl */
+/* -c COL_NAME -s -n1 -g GRP_COUNT [PART_TYPE] */
+inline void
+column_string_names_first_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_first_group;
+
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
+}
+
+/* -c COL_NAME -s -nl */
 inline void
 column_string_names_last(struct GenerateParseState *const restrict state)
 {
@@ -2172,6 +2301,20 @@ column_string_names_last(struct GenerateParseState *const restrict state)
 	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_last;
+
+	*ctor_flags |= RAND_CTOR_FLAG;
+}
+/* -c COL_NAME -s -nl -g GRP_COUNT [PART_TYPE] */
+inline void
+column_string_names_last_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_last_group;
 
 	*ctor_flags |= RAND_CTOR_FLAG;
 }
@@ -2187,6 +2330,21 @@ column_string_names_full(struct GenerateParseState *const restrict state)
 	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
 
 	col_spec->build = &build_column_string_names_full;
+
+	*ctor_flags |= RAND_CTOR_FLAG;
+}
+
+/* -c COL_NAME -s -nf -g GRP_COUNT [PART_TYPE] */
+inline void
+column_string_names_full_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
+
+	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
+
+	col_spec->build = &build_column_string_names_full_group;
 
 	*ctor_flags |= RAND_CTOR_FLAG;
 }
@@ -2212,6 +2370,7 @@ column_string_default(struct GenerateParseState *const restrict state)
 		*counter_upto = row_count;
 }
 
+/* -c COL_NAME -s -g GRP_COUNT [PART_TYPE] */
 inline void
 column_string_default_group(struct GenerateParseState *const restrict state)
 {
@@ -2234,24 +2393,50 @@ column_string_default_group(struct GenerateParseState *const restrict state)
 
 /* -c COL_NAME -ts -u */
 inline void
-column_timestamp_unique(struct ColSpec *const restrict col_spec)
+column_timestamp_unique(struct GenerateParseState *const restrict state)
 {
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_unique;
 }
 
+/* -c COL_NAME -ts -u -g GRP_COUNT [PART_TYPE] */
+inline void
+column_timestamp_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_timestamp(&col_spec->type);
+	col_spec->build = &build_column_timestamp_unique_group;
+}
+
 /* -c COL_NAME -ts -f */
 inline void
-column_timestamp_fixed(struct ColSpec *const restrict col_spec)
+column_timestamp_fixed(struct GenerateParseState *const restrict state)
 {
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_fixed;
 }
 
 /* -c COL_NAME -ts */
 inline void
-column_timestamp_default(struct ColSpec *const restrict col_spec)
+column_timestamp_default(struct GenerateParseState *const restrict state)
 {
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_timestamp(&col_spec->type);
+	col_spec->build = &build_column_timestamp_unique;
+}
+
+/* -c COL_NAME -ts -g GRP_COUNT [PART_TYPE] */
+inline void
+column_timestamp_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
 	type_set_timestamp(&col_spec->type);
 	col_spec->build = &build_column_timestamp_unique;
 }
@@ -2266,10 +2451,11 @@ parse_string_default_group(struct GenerateParseState *const restrict state)
 }
 
 inline void
-parse_string_uuid_group(struct GenerateParseState *const restrict state)
+parse_string_default(struct GenerateParseState *const restrict state)
 {
-	parse_grp_spec(state,
-		       &column_string_uuid_group);
+	parse_column_complete(state,
+			      &column_string_default,
+			      &parse_string_default_group);
 }
 
 inline void
@@ -2297,6 +2483,140 @@ parse_string_unique(struct GenerateParseState *const restrict state)
 				      &parse_string_unique_group);
 	else
 		generate_parse_error(state);
+}
+
+inline void
+parse_string_fixed(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_base_string(state);
+		return;
+	}
+
+	if (parse_base_string(&state->specs.col->type_qualifier.string.base,
+			      &state->argv))
+		parse_column_complete(state,
+				      &column_string_fixed,
+				      &error_grp_spec_for_fixed_data);
+	else
+		generate_parse_error(state);
+}
+
+inline void
+parse_string_uuid_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_string_uuid_group);
+}
+
+
+inline void
+parse_string_uuid(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_string_uuid,
+			      &parse_string_uuid_group);
+}
+
+inline void
+parse_string_hash_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_string_hash_group);
+}
+
+inline void
+parse_string_hash(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_hash_length(state);
+		return;
+	}
+
+	if (parse_hash_length(&state->specs.col->type_qualifier.string
+							       .length_scale
+							       .fixed,
+			      &state->argv)) {
+
+		state->argv.cache = *(state->argv.arg.from);
+		parse_column_complete(state,
+				      &column_string_hash,
+				      &parse_string_hash_group);
+	} else {
+		generate_parse_error(state);
+	}
+}
+
+inline void
+parse_string_names_first_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_string_names_first_group);
+}
+
+inline void
+parse_string_names_first(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_string_names_first,
+			      &parse_string_names_first_group);
+}
+
+inline void
+parse_string_names_last_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_string_names_last_group);
+}
+
+inline void
+parse_string_names_last(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_string_names_last,
+			      &parse_string_names_last_group);
+}
+
+inline void
+parse_string_names_full_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_string_names_full_group);
+}
+
+inline void
+parse_string_names_full(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_string_names_full,
+			      &parse_string_names_full_group);
+}
+
+inline void
+parse_timestamp_fixed(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_timestamp_fixed,
+			      &error_grp_spec_for_fixed_data);
+}
+
+inline void
+parse_timestamp_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_timestamp_unique_group);
+}
+
+inline void
+parse_timestamp_unique(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_timestamp_unique,
+			      &parse_timestamp_unique_group);
 }
 
 
@@ -2329,10 +2649,7 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-INVALID_STRING_QUALIFIER_NOTSUP:
-		invalid_col_type_q_notsup(&state->argv);
-		++(state->argv.arg.from);
-		generate_parse_error(state);
+		error_invalid_string_type_q(state);
 		return;
 	}
 
@@ -2344,11 +2661,11 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 		break;	/* parse long string qualifier */
 
 	case 'g':
-		if (*rem == '\0') {
+		if (*rem == '\0')
 			parse_string_default_group(state);
-			return;
-		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'u':
 		switch (*rem) {
@@ -2358,147 +2675,85 @@ INVALID_STRING_QUALIFIER_NOTSUP:
 
 		case 'u':
 			if (rem[1] == '\0') {
-				++(state->argv.arg.from);
-				column_string_uuid(state);
-				parse_column_complete(state,
-						      &column_string_uuid,
-						      &parse_string_uuid_group);
+				parse_string_uuid(state);
 				return;
 			}
 
 		default:
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			error_invalid_string_type_q(state);
+			return;
 		}
 
 	case 'f':
-		if (*rem == '\0') {
-STRING_FIXED:
-			++(state->argv.arg.from);
-
-			if (state->argv.arg.from == state->argv.arg.until) {
-				no_base_string(&state->argv);
-TERMINATE_VALID_EXIT_FAILURE:
-				*(state->valid.last) = NULL;
-				state->exit_status = EXIT_FAILURE;
-				return;
-			}
-
-			const bool valid_base_string
-			= parse_base_string(&state->specs.col->type_qualifier.string.base,
-					    &state->argv);
-
-			++(state->argv.arg.from);
-
-			if (valid_base_string) {
-				column_string_fixed(state);
-				parse_column_complete(state);
-			} else {
-				generate_parse_error(state);
-			}
-			return;
-		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		if (*rem == '\0')
+			parse_string_fixed(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'h':
-		if (*rem == '\0') {
-STRING_HASH:
-			++(state->argv.arg.from);
-
-			if (state->argv.arg.from == state->argv.arg.until) {
-				no_hash_length(&state->argv);
-				goto TERMINATE_VALID_EXIT_FAILURE;
-			}
-
-			if (parse_hash_length(&state->specs.col->type_qualifier.string.length_scale.fixed,
-					      &state->argv)) {
-
-				state->argv.cache = *(state->argv.arg.from);
-				parse_column_complete(state,
-						      &column_string_hash);
-			} else {
-				++(state->argv.arg.from);
-				generate_parse_error(state);
-			}
-			return;
-		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		if (*rem == '\0')
+			parse_string_hash(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'n':
 		switch (*rem) {
 		case '1':
-			if (rem[1] == '\0') {
-STRING_NAMES_FIRST:
-				column_string_names_first(state->specs.col,
-							  &state->database.ctor_flags);
-				++(state->argv.arg.from);
-				parse_column_complete(state);
-				return;
-			}
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			if (rem[1] == '\0')
+				parse_string_names_first(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
 
 		case 'l':
-			if (rem[1] == '\0') {
-STRING_NAMES_LAST:
-				column_string_names_last(state->specs.col,
-							 &state->database.ctor_flags);
-				++(state->argv.arg.from);
-				parse_column_complete(state);
-				return;
-			}
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			if (rem[1] == '\0')
+				parse_string_names_last(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
 
 		case 'f':
-			if (rem[1] == '\0') {
-STRING_NAMES_FULL:
-				column_string_names_full(state->specs.col,
-							 &state->database.ctor_flags);
-				++(state->argv.arg.from);
-				parse_column_complete(state);
-				return;
-			}
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			if (rem[1] == '\0')
+				parse_string_names_full(state);
+			else
 
 		default:
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			error_invalid_string_type_q(state);
+			return;
 		}
 
 	case 'c':
 		if (*rem == '\0') {
-STRING_DEFAULT_NEXT_COL_SPEC:
-			column_string_default(state->specs.col,
-					      state->specs.tbl->row_count,
-					      &state->database.counter_upto);
+NEXT_COL_SPEC:		column_string_default(state);
 			parse_next_col_spec(state);
-			return;
+		} else {
+			error_invalid_string_type_q(state);
 		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_string_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_string_type_q(state);
+		}
+		return;
 
 	case 'd':
 		if (*rem == '\0') {
-STRING_DEFAULT_NEXT_DB_SPEC:
-			column_string_default(state->specs.col,
-					      state->specs.tbl->row_count,
-					      &state->database.counter_upto);
+NEXT_DB_SPEC:		column_string_default(state);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
 		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
-
-	case 't':
-		if (*rem == '\0') {
-STRING_DEFAULT_NEXT_TBL_SPEC:
-			column_string_default(state->specs.col,
-					      state->specs.tbl->row_count,
-					      &state->database.counter_upto);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-			return;
-		}
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
 
 	default:
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		error_invalid_string_type_q(state);
+		return;
 	}
 
 
@@ -2507,89 +2762,97 @@ STRING_DEFAULT_NEXT_TBL_SPEC:
 		switch (rem[1]) {
 		case 'n':
 			if (strings_equal("ique", rem + 2l))
-				goto STRING_UNIQUE;
-
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+				parse_string_unique(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
 
 		case 'u':
 			if (strings_equal("id", rem + 2l)) {
-				goto STRING_UUID;
+				parse_string_uuid(state);
+				return;
 			}
 
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
-
 		default:
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			error_invalid_string_type_q(state);
+			return;
 		}
 
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
-			goto STRING_FIXED;
-
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+			parse_string_fixed(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'h':
 		if (strings_equal("ash", rem + 1l))
-			goto STRING_HASH;
-
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+			parse_string_hash(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'n':
 		arg = string_starts_with(rem + 1l,
 					 "ames-");
 
-		if (arg == NULL)
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+		if (arg == NULL) {
+			error_invalid_string_type_q(state);
+			return;
+		}
 
 		switch (*arg) {
 		case 'f':
 			switch (arg[1]) {
 			case 'i':
 				if (strings_equal("rst", arg + 2l))
-					goto STRING_NAMES_FIRST;
-
-				goto INVALID_STRING_QUALIFIER_NOTSUP;
+					parse_string_names_first(state);
+				else
+					error_invalid_string_type_q(state);
+				return;
 
 			case 'u':
-				if (strings_equal("ll", arg + 2l))
-					goto STRING_NAMES_FULL;
-
-				goto INVALID_STRING_QUALIFIER_NOTSUP;
+				if (strings_equal("ll", arg + 2l)) {
+					parse_string_names_full(state);
+					return;
+				}
 
 			default:
-				goto INVALID_STRING_QUALIFIER_NOTSUP;
+				error_invalid_string_type_q(state);
+				return;
 			}
 
 		case 'l':
-			if (strings_equal("ast", arg + 1l))
-					goto STRING_NAMES_LAST;
-
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			if (strings_equal("ast", arg + 1l)) {
+				parse_string_names_last(state);
+				return;
+			}
 
 		default:
-			goto INVALID_STRING_QUALIFIER_NOTSUP;
+			error_invalid_string_type_q(state);
+			return;
 		}
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))
-			goto STRING_DEFAULT_NEXT_COL_SPEC;
+			goto NEXT_COL_SPEC;
 
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		error_invalid_string_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_string_type_q(state);
+		return;
 
 	case 'd':
 		if (strings_equal("atabase", rem + 1l))
 			goto STRING_DEFAULT_NEXT_DB_SPEC;
 
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto STRING_DEFAULT_NEXT_TBL_SPEC;
-
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
-
 	default:
-		goto INVALID_STRING_QUALIFIER_NOTSUP;
+		error_invalid_string_type_q(state);
 	}
 }
 
@@ -2607,10 +2870,7 @@ parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-INVALID_TIMESTAMP_QUALIFIER_NOTSUP:
-		invalid_col_type_q_notsup(&state->argv);
-		++(state->argv.arg.from);
-		generate_parse_error(state);
+		error_invalid_timestamp_type_q(state);
 		return;
 	}
 
@@ -2621,23 +2881,18 @@ INVALID_TIMESTAMP_QUALIFIER_NOTSUP:
 	case '-':
 		break;	/* parse long string qualifier */
 	case 'f':
-		if (*rem == '\0') {
-TIMESTAMP_FIXED:
-			column_timestamp_fixed(state->specs.col);
-			++(state->argv.arg.from);
-			parse_column_complete(state);
-			return;
-		}
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		if (*rem == '\0')
+			parse_timestamp_fixed(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
 
 	case 'u':
-		if (*rem == '\0') {
-TIMESTAMP_UNIQUE:
-			column_timestamp_unique(state->specs.col);
-			parse_column_complete(state);
-			return;
-		}
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		if (*rem == '\0')
+			parse_timestamp_unique(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
 
 	case 'c':
 		if (*rem == '\0') {
