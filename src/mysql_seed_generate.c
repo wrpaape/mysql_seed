@@ -75,7 +75,7 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
 /* parsing next SPEC */
 extern inline void
-expected_col_tbl_db_flag(const struct GenerateArgvState *const restrict argv);
+expected_spec_flag(const struct GenerateArgvState *const restrict argv);
 
 /* incomplete DB_SPEC */
 extern inline void
@@ -145,7 +145,9 @@ parse_database_complete(struct GenerateParseState *const restrict state);
 extern inline void
 generate_parse_complete(struct GenerateParseState *const restrict state);
 extern inline void
-parse_column_complete(struct GenerateParseState *const restrict state);
+parse_column_complete(struct GenerateParseState *const restrict state,
+		      GenerateParseNode *const set_col_spec,
+		      GenerateParseNode *const handle_grp_spec);
 
 
 /* assign type according to MySQL data types, limits
@@ -227,6 +229,13 @@ column_timestamp_fixed(struct ColSpec *const restrict col_spec);
 /* -c COL_NAME -t */
 extern inline void
 column_timestamp_default(struct ColSpec *const restrict col_spec);
+
+/* parse COL_TYPE_Q
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_string_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_string_unique(struct GenerateParseState *const restrict state);
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
