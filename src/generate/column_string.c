@@ -85,6 +85,12 @@ build_column_string_unique(void *arg)
 	thread_try_catch_close();
 }
 
+/* TODO: build_column_string_unique_group */
+void
+build_column_string_unique_group(void *arg)
+{
+}
+
 /* worker thread entry point */
 void
 build_column_string_fixed(void *arg)
@@ -151,4 +157,10 @@ build_column_string_fixed(void *arg)
 	} while (from < until);
 
 	thread_try_catch_close();
+}
+
+/* TODO: build_column_string_fixed_group */
+void
+build_column_string_fixed_group(void *arg)
+{
 }

@@ -151,14 +151,19 @@ put_full_names(char *restrict ptr,
 }
 
 
+/* worker thread entry points */
 void
 build_column_string_names_first(void *arg);
-
+void
+build_column_string_names_first_group(void *arg);
 void
 build_column_string_names_last(void *arg);
-
+void
+build_column_string_names_last_group(void *arg);
 void
 build_column_string_names_full(void *arg);
+void
+build_column_string_names_full_group(void *arg);
 
 
 #endif	/* ifndef MYSQL_SEED_GENERATE_COLUMN_STRING_NAMES_H_ */

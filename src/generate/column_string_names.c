@@ -499,6 +499,12 @@ build_column_string_names_first(void *arg)
 	thread_try_catch_close();
 }
 
+/* TODO: build_column_string_names_first_group */
+void
+build_column_string_names_first_group(void *arg)
+{
+}
+
 
 void
 build_column_string_names_last(void *arg)
@@ -563,6 +569,11 @@ build_column_string_names_last(void *arg)
 	thread_try_catch_close();
 }
 
+/* TODO: build_column_string_names_last_group */
+void
+build_column_string_names_last_group(void *arg)
+{
+}
 
 void
 build_column_string_names_full(void *arg)
@@ -624,4 +635,10 @@ build_column_string_names_full(void *arg)
 			      &column->fail_cl);
 
 	thread_try_catch_close();
+}
+
+/* TODO: build_column_string_names_full_group */
+void
+build_column_string_names_full_group(void *arg)
+{
 }

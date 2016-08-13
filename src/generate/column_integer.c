@@ -46,3 +46,9 @@ build_column_integer_unique(void *arg)
 			      *count_ptr - *(counter->pointers),
 			      &column->fail_cl);
 }
+
+/* TODO: build_column_integer_unique_group */
+void
+build_column_integer_unique_group(void *arg)
+{
+}

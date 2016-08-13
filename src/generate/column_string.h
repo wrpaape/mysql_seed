@@ -9,12 +9,14 @@
 #include "generate/column_string_uuid.h"  /* build_column_string_uuid */
 #include "generate/column_string_hash.h"  /* build_column_string_hash */
 
-/* worker thread entry point */
+/* worker thread entry points */
 void
 build_column_string_unique(void *arg);
-
-/* worker thread entry point */
+void
+build_column_string_unique_group(void *arg);
 void
 build_column_string_fixed(void *arg);
+void
+build_column_string_fixed_group(void *arg);
 
 #endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_STRING_H_ */
