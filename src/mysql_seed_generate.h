@@ -58,22 +58,22 @@ PARSE_ERROR_MESSAGE("DB_SPEC too short - need at least "		\
 #define ERROR_EXPECTED_DB_FLAG_HEADER					\
 PARSE_ERROR_HEADER("expected DATABASE flag instead of")
 
-#define ERROR_INCOMPLETE_DB_SPEC_HEADER					\
+#define ERROR_INC_DB_SPEC_HEADER					\
 PARSE_ERROR_HEADER("incomplete DB_SPEC")
 
-#define ERROR_INCOMPLETE_DB_SPEC_COL_NAME				\
+#define ERROR_INC_DB_SPEC_COL_NAME					\
 "\n" ERROR_WRAP("reason: expected COL_NAME to follow COLUMN flag, "	\
 		"ignoring above DB_SPEC") "\n"
 
-#define ERROR_INCOMPLETE_DB_SPEC_TBL_NAME				\
+#define ERROR_INC_DB_SPEC_TBL_NAME					\
 "\n" ERROR_WRAP("reason: expected TBL_NAME to follow TABLE flag, "	\
 		"ignoring above DB_SPEC") "\n"
 
-#define ERROR_INCOMPLETE_DB_SPEC_ROW_COUNT				\
+#define ERROR_INC_DB_SPEC_ROW_COUNT					\
 "\n" ERROR_WRAP("reason: expected ROW_COUNT to follow TBL_NAME, "	\
 		"ignoring above DB_SPEC") "\n"
 
-#define ERROR_INCOMPLETE_DB_SPEC_COL_FLAG				\
+#define ERROR_INC_DB_SPEC_COL_FLAG					\
 "\n" ERROR_WRAP("reason: expected COLUMN flag to follow ROW_COUNT, "	\
 		"ignoring above DB_SPEC") "\n"
 
@@ -242,7 +242,7 @@ PARSE_ERROR_HEADER("cannot have GRP_SPEC for fixed column data, "	\
 		   "ignoring DB_SPEC starting with")
 
 /* parsing next SPEC */
-#define ERROR_EXPECTED_SPEC_FLAG_HEADER					\
+#define ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected GROUP flag, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
@@ -762,9 +762,16 @@ no_col_type(const struct GenerateArgvState *const restrict argv)
 		     ptr - &buffer[0]);
 }
 
+inline void
+error_no_col_type(struct GenerateParseState *const restrict state)
+{
+	no_col_type(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
 
 inline void
-invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv)
+invalid_col_type(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
@@ -785,6 +792,13 @@ invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_col_type(struct GenerateParseState *const restrict state)
+{
+	invalid_col_type(&state->argv);
+	generate_parse_error(state);
 }
 
 /* GRP_SPEC */
@@ -1135,14 +1149,14 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-expected_spec_flag(const struct GenerateArgvState *const restrict argv)
+expected_col_spec_close(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_SPEC_FLAG_HEADER,
-			  sizeof(ERROR_EXPECTED_SPEC_FLAG_HEADER) - 1);
+			  ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER,
+			  sizeof(ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER) - 1);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1162,9 +1176,9 @@ expected_spec_flag(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-error_expected_spec_flag(struct GenerateParseState *const restrict state)
+error_expected_col_spec_close(struct GenerateParseState *const restrict state)
 {
-	expected_spec_flag(&state->argv);
+	expected_col_spec_close(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -1231,22 +1245,22 @@ error_grp_spec_for_fixed_data(struct GenerateParseState *const restrict state)
 
 /* incomplete DB_SPEC */
 inline void
-incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
+inc_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
-			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+			  ERROR_INC_DB_SPEC_HEADER,
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
 			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
-			      ERROR_INCOMPLETE_DB_SPEC_COL_NAME,
-			      sizeof(ERROR_INCOMPLETE_DB_SPEC_COL_NAME) - 1lu);
+			      ERROR_INC_DB_SPEC_COL_NAME,
+			      sizeof(ERROR_INC_DB_SPEC_COL_NAME) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -1254,22 +1268,30 @@ incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
+error_inc_db_spec_col_name(struct GenerateParseState *const restrict state)
+{
+	inc_db_spec_col_name(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
+inc_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
-			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+			  ERROR_INC_DB_SPEC_HEADER,
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
 			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
-			      ERROR_INCOMPLETE_DB_SPEC_TBL_NAME,
-			      sizeof(ERROR_INCOMPLETE_DB_SPEC_TBL_NAME) - 1lu);
+			      ERROR_INC_DB_SPEC_TBL_NAME,
+			      sizeof(ERROR_INC_DB_SPEC_TBL_NAME) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -1277,22 +1299,22 @@ incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
+inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
-			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+			  ERROR_INC_DB_SPEC_HEADER,
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
 			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
-			      ERROR_INCOMPLETE_DB_SPEC_ROW_COUNT,
-			      sizeof(ERROR_INCOMPLETE_DB_SPEC_ROW_COUNT) - 1lu);
+			      ERROR_INC_DB_SPEC_ROW_COUNT,
+			      sizeof(ERROR_INC_DB_SPEC_ROW_COUNT) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -1301,22 +1323,22 @@ incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv
 
 
 inline void
-incomplete_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
+inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_INCOMPLETE_DB_SPEC_HEADER,
-			  sizeof(ERROR_INCOMPLETE_DB_SPEC_HEADER) - 1);
+			  ERROR_INC_DB_SPEC_HEADER,
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
 			       argv->arg.from - 1l);
 
 	ptr = put_string_size(ptr,
-			      ERROR_INCOMPLETE_DB_SPEC_COL_FLAG,
-			      sizeof(ERROR_INCOMPLETE_DB_SPEC_COL_FLAG) - 1lu);
+			      ERROR_INC_DB_SPEC_COL_FLAG,
+			      sizeof(ERROR_INC_DB_SPEC_COL_FLAG) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -1838,10 +1860,7 @@ parse_column_complete(struct GenerateParseState *const restrict state,
 	char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-EXPECTED_COL_TBL_DB_FLAG:
-		expected_col_tbl_db_flag(&state->argv);
-		++(state->argv.arg.from);
-		generate_parse_error(state);
+		error_expected_col_spec_close(state);
 		return;
 	}
 
@@ -1853,76 +1872,73 @@ EXPECTED_COL_TBL_DB_FLAG:
 		break; /* parse long SPEC */
 
 	case 'g':
-		if (*rem == '\0') {
+		if (*rem == '\0')
 			handle_grp_spec(state);
-			return;
-		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		else
+			error_expected_col_spec_close(state);
+		return;
 
 	case 'c':
 		if (*rem == '\0') {
-			set_col_spec(state);
+NEXT_COL_SPEC:		set_col_spec(state);
 			parse_next_col_spec(state);
-			return;
+		} else {
+			error_expected_col_spec_close(state);
 		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		set_col_spec(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_expected_col_spec_close(state);
+		}
+		return;
 
 	case 'd':
 		if (*rem == '\0') {
-			set_col_spec(state);
+NEXT_DB_SPEC:		set_col_spec(state);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
 		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
-
-	case 't':
-		if (*rem == '\0') {
-			set_col_spec(state);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-			return;
-		}
 
 	default:
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		error_expected_col_spec_close(state);
+		return;
 	}
+
 
 	switch (*rem) {
 	case 'g':
-		if (strings_equal("roup", rem + 1l)) {
+		if (strings_equal("roup", rem + 1l))
 			handle_grp_spec(state);
-			return;
-		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		else
+			error_expected_col_spec_close(state);
+		return;
 
 	case 'c':
-		if (strings_equal("olumn", rem + 1l)) {
-			set_col_spec(state);
-			parse_next_col_spec(state);
-			return;
-		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
 
-	case 'd':
-		if (strings_equal("atabase", rem + 1l)) {
-			set_col_spec(state);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		error_expected_col_spec_close(state);
+		return;
 
 	case 't':
-		if (strings_equal("able", rem + 1l)) {
-			set_col_spec(state);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-			return;
-		}
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_expected_col_spec_close(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
 
 	default:
-		goto EXPECTED_COL_TBL_DB_FLAG;
+		error_expected_col_spec_close(state);
 	}
 }
 
@@ -2715,9 +2731,10 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 			return;
 
 		case 'f':
-			if (rem[1] == '\0')
+			if (rem[1] == '\0') {
 				parse_string_names_full(state);
-			else
+				return
+			}
 
 		default:
 			error_invalid_string_type_q(state);
@@ -2849,7 +2866,7 @@ NEXT_DB_SPEC:		column_string_default(state);
 
 	case 'd':
 		if (strings_equal("atabase", rem + 1l))
-			goto STRING_DEFAULT_NEXT_DB_SPEC;
+			goto NEXT_DB_SPEC;
 
 	default:
 		error_invalid_string_type_q(state);
@@ -2896,84 +2913,83 @@ parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
 
 	case 'c':
 		if (*rem == '\0') {
-TIMESTAMP_DEFAULT_NEXT_COL_SPEC:
-			column_timestamp_default(state->specs.col);
+NEXT_COL_SPEC:		column_timestamp_default(state);
 			parse_next_col_spec(state);
-			return;
+		} else {
+			error_invalid_timestamp_type_q(state);
 		}
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_timestamp_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_timestamp_type_q(state);
+		}
+		return;
 
 	case 'd':
 		if (*rem == '\0') {
-TIMESTAMP_DEFAULT_NEXT_DB_SPEC:
-			column_timestamp_default(state->specs.col);
+NEXT_DB_SPEC:		column_timestamp_default(state);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
 			return;
 		}
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
-
-	case 't':
-		if (*rem == '\0') {
-TIMESTAMP_DEFAULT_NEXT_TBL_SPEC:
-			column_timestamp_default(state->specs.col);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-			return;
-		}
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
 	default:
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		error_invalid_timestamp_type_q(state);
+		return;
 	}
 
 
 	switch (*rem) {
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
-			goto TIMESTAMP_FIXED;
-
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+			parse_timestamp_fixed(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
 
 	case 'u':
 		if (strings_equal("nique", rem + 1l))
-			goto TIMESTAMP_UNIQUE;
-
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+			parse_timestamp_unique(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))
-			goto TIMESTAMP_DEFAULT_NEXT_COL_SPEC;
+			goto NEXT_COL_SPEC;
 
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		error_invalid_timestamp_type_q(state);
+		return;
 
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto TIMESTAMP_DEFAULT_NEXT_DB_SPEC;
-
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
 
 	case 't':
 		if (strings_equal("able", rem + 1l))
-			goto TIMESTAMP_DEFAULT_NEXT_TBL_SPEC;
+			goto NEXT_TBL_SPEC;
 
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
 
 	default:
-		goto INVALID_TIMESTAMP_QUALIFIER_NOTSUP;
+		error_invalid_timestamp_type_q(state);
 	}
 }
 
 inline void
 parse_col_type(struct GenerateParseState *const restrict state)
-{
+
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-INVALID_COL_TYPE_NOTSUP:
-		invalid_col_type_notsup(&state->argv);
-		++(state->argv.arg.from);
-		generate_parse_error(state);
+		error_invalid_col_type(&state->argv);
 		return;
 	}
 
@@ -2985,132 +3001,120 @@ INVALID_COL_TYPE_NOTSUP:
 		break;	/* parse long COL_TYPE */
 
 	case 'i':
-		if (*rem == '\0') {
+		if (*rem == '\0')
 			parse_integer_qualifier(state);
-			return;
-		}
-		goto INVALID_COL_TYPE_NOTSUP;
+		else
+			error_invalid_col_type(state);
+		return;
 
 	case 's':
-		if (*rem == '\0') {
+		if (*rem == '\0')
 			parse_string_qualifier(state);
-			return;
-		}
-		goto INVALID_COL_TYPE_NOTSUP;
+		else
+			error_invalid_col_type(state);
+		return;
 
 	case 't':
 		if (*rem == 's' && rem[1] == '\0') {
 			parse_timestamp_qualifier(state);
 			return;
 		}
-		goto INVALID_COL_TYPE_NOTSUP;
 
 	default:
-		goto INVALID_COL_TYPE_NOTSUP;
+		error_invalid_col_type(state);
+		return;
 	}
 
 	/* long COL_TYPE */
 	switch (*rem) {
 	case 'i':
-		if (strings_equal("nteger", rem + 1l)) {
+		if (strings_equal("nteger", rem + 1l))
 			parse_integer_qualifier(state);
-			return;
-		}
-		goto INVALID_COL_TYPE_NOTSUP;
+		else
+			error_invalid_col_type(state);
+		return;
 
 	case 's':
-		if (strings_equal("tring", rem + 1l)) {
+		if (strings_equal("tring", rem + 1l))
 			parse_string_qualifier(state);
-			return;
-		}
-		goto INVALID_COL_TYPE_NOTSUP;
+		else
+			error_invalid_col_type(state);
+		return;
 
 	case 't':
 		if (strings_equal("imestamp", rem + 1l)) {
 			parse_timestamp_qualifier(state);
 			return;
 		}
-		goto INVALID_COL_TYPE_NOTSUP;
 
 	default:
-		goto INVALID_COL_TYPE_NOTSUP;
+		error_invalid_col_type(state);
 	}
 }
 
 inline void
 parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 {
-	const bool matched_col_flag = col_flag_match(&state->argv);
-
 	++(state->argv.arg.from);
 
-	if (matched_col_flag) {
+	if (col_flag_match(&state->argv)) {
 		struct ColSpec *const restrict col_spec
 		= (struct ColSpec *const restrict) (state->specs.tbl + 1l);
 
-		const bool valid_col_name = parse_col_name(&col_spec->name,
-							   &state->argv);
-
 		++(state->argv.arg.from);
 
-		if (valid_col_name) {
+		if (parse_col_name(&col_spec->name,
+				   &state->argv)) {
 			state->specs.tbl->col_specs.from = col_spec;
-
 			state->specs.col = col_spec;
 
-			parse_col_type(state);
+			++(state->argv.arg.from);
 
-		} else {
-			generate_parse_error(state);
+			parse_col_type(state);
+			return;
 		}
-	} else {
-		generate_parse_error(state);
 	}
+
+	generate_parse_error(state);
 }
 
 
 inline void
 parse_first_col_spec(struct GenerateParseState *const restrict state)
 {
-	const bool matched_col_flag = col_flag_match(&state->argv);
-
 	++(state->argv.arg.from);
 
-	if (!matched_col_flag) {
+	if (!col_flag_match(&state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
 
+	++(state->argv.arg.from);
+
 	if (state->argv.arg.from == state->argv.arg.until) {
-		incomplete_db_spec_col_name(&state->argv);
-TERMINATE_VALID_EXIT_FAILURE:
-		*(state->valid.last) = NULL;
-		state->exit_status = EXIT_FAILURE;
+		error_inc_db_spec_col_name(state);
 		return;
 	}
 
 	struct ColSpec *const restrict col_spec
 	= (struct ColSpec *const restrict) (state->specs.tbl + 1l);
 
-
-	const bool valid_col_name = parse_col_name(&col_spec->name,
-						   &state->argv);
-
-	++(state->argv.arg.from);
-
-	if (!valid_col_name) {
+	if (!parse_col_name(&col_spec->name,
+			    &state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
 
+	++(state->argv.arg.from);
+
 	if (state->argv.arg.from == state->argv.arg.until) {
-		no_col_type(&state->argv);
-		goto TERMINATE_VALID_EXIT_FAILURE;
+		error_no_col_type(state);
+		return;
 	}
 
 	state->specs.col = col_spec;
 
-	++(state->database.columns); /* set column counter */
+	++(state->database.columns); /* update column counter */
 
 	parse_col_type(state);
 }
@@ -3122,34 +3126,26 @@ parse_next_col_spec(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		incomplete_db_spec_col_name(&state->argv);
-TERMINATE_VALID_EXIT_FAILURE:
-		*(state->valid.last) = NULL;
-		state->exit_status = EXIT_FAILURE;
+		error_inc_db_spec_col_name(state);
 		return;
 	}
 
-	++(state->specs.col);
+	++(state->specs.col);	/* increment col_spec interval */
 
-	const bool valid_col_name
-	= parse_col_name(&state->specs.col->name,
-			 &state->argv);
-
-	++(state->argv.arg.from);
-
-	if (!valid_col_name) {
+	if (!parse_col_name(&state->specs.col->name,
+			    &state->argv) {
 		generate_parse_error(state);
 		return;
 	}
 
+	++(state->argv.arg.from);
+
 	if (state->argv.arg.from == state->argv.arg.until) {
-		no_col_type(&state->argv);
-		goto TERMINATE_VALID_EXIT_FAILURE;
+		error_no_col_type(state);
+	} else {
+		++(state->database.columns); /* update column counter */
+		parse_col_type(state);
 	}
-
-	++(state->database.columns);
-
-	parse_col_type(state);
 }
 
 
@@ -3157,40 +3153,26 @@ TERMINATE_VALID_EXIT_FAILURE:
 inline void
 parse_first_tbl_spec(struct GenerateParseState *const restrict state)
 {
-	const bool matched_tbl_flag = tbl_flag_match(&state->argv);
-
 	++(state->argv.arg.from);
 
-	if (matched_tbl_flag) {
+	if (tbl_flag_match(&state->argv)) {
 
 		struct TblSpec *const restrict tbl_spec
 		= (struct TblSpec *const restrict) (state->specs.db + 1l);
 
-		const bool valid_tbl_name = parse_tbl_name(&tbl_spec->name,
-							   &state->argv);
-
-		++(state->argv.arg.from);
-
-		if (valid_tbl_name) {
-
-			const bool valid_row_count
-			= parse_row_count(&tbl_spec->row_count,
-					  &state->argv);
+		if (parse_tbl_name(&tbl_spec->name,
+				   &state->argv)) {
 
 			++(state->argv.arg.from);
 
-			if (valid_row_count) {
+			if (parse_row_count(&tbl_spec->row_count,
+					    &state->argv)) {
 				state->specs.db->tbl_specs = tbl_spec;
 				state->specs.tbl = tbl_spec;
 
 				/* set initial counter values */
-				state->database.ctor_flags = 0u;
-				state->database.rows = tbl_spec->row_count;
-				state->database.row_count_max
-				= tbl_spec->row_count;
-				state->database.tables = 1u;
-				state->database.columns = 1u;
-				state->database.counter_upto = 0lu;
+				database_counter_init(&state->database,
+						      tbl_spec->row_count);
 
 				parse_first_col_spec_safe(state);
 				return;
@@ -3207,7 +3189,7 @@ parse_next_tbl_spec(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		incomplete_db_spec_tbl_name(&state->argv);
+		inc_db_spec_tbl_name(&state->argv);
 TERMINATE_VALID_EXIT_FAILURE:
 		*(state->valid.last) = NULL;
 		state->exit_status = EXIT_FAILURE;
@@ -3231,7 +3213,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 	}
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		incomplete_db_spec_row_count(&state->argv);
+		inc_db_spec_row_count(&state->argv);
 		goto TERMINATE_VALID_EXIT_FAILURE;
 	}
 
@@ -3247,7 +3229,7 @@ TERMINATE_VALID_EXIT_FAILURE:
 	}
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		incomplete_db_spec_col_flag(&state->argv);
+		inc_db_spec_col_flag(&state->argv);
 		goto TERMINATE_VALID_EXIT_FAILURE;
 	}
 
@@ -3269,12 +3251,8 @@ TERMINATE_VALID_EXIT_FAILURE:
 inline void
 parse_first_db_spec(struct GenerateParseState *const restrict state)
 {
-	const bool valid_db_name = parse_db_name(&state->specs.db->name,
-						 &state->argv);
-
-	++(state->argv.arg.from);
-
-	if (valid_db_name)
+	if (parse_db_name(&state->specs.db->name,
+			  &state->argv)
 		parse_first_tbl_spec(state);
 	else
 		generate_parse_error(state);
@@ -3289,13 +3267,8 @@ parse_next_db_spec(struct GenerateParseState *const restrict state)
 
 		++(state->argv.arg.from);
 
-		const bool valid_db_name
-		= parse_db_name(&state->specs.db->name,
-				&state->argv);
-
-		++(state->argv.arg.from);
-
-		if (valid_db_name)
+		if (parse_db_name(&state->specs.db->name,
+				  &state->argv))
 			parse_first_tbl_spec(state);
 		else
 			generate_parse_error(state);
@@ -3305,7 +3278,6 @@ parse_next_db_spec(struct GenerateParseState *const restrict state)
 			short_db_spec(&state->argv); /* error spec too short */
 
 		*(state->valid.last) = NULL; /* terminate valid db_specs */
-
 		state->exit_status = EXIT_FAILURE;
 	}
 }
@@ -3317,7 +3289,7 @@ generate_parse_error(struct GenerateParseState *const restrict state)
 	state->exit_status = EXIT_FAILURE;
 
 	/* find next DB_SPEC */
-	state->argv.arg.from = flag_match_next(state->argv.arg.from,
+	state->argv.arg.from = flag_match_next(state->argv.arg.from + 1l,
 					       state->argv.arg.until,
 					       'd',
 					       "database");
@@ -3329,11 +3301,7 @@ generate_parse_error(struct GenerateParseState *const restrict state)
 inline void
 parse_db_specs(struct GenerateParseState *const restrict state)
 {
-	const bool matched_db_flag = db_flag_match(&state->argv);
-
-	++(state->argv.arg.from);
-
-	if (matched_db_flag)
+	if (db_flag_match(&state->argv))
 		parse_first_db_spec(state);
 	else
 		generate_parse_error(state);

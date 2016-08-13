@@ -5,6 +5,9 @@
 extern inline void
 generator_counter_update(struct GeneratorCounter *const restrict generator,
 			 struct DatabaseCounter *const restrict database);
+extern inline void
+database_counter_init(struct DatabaseCounter *const restrict database,
+		      const size_t row_count);
 
 /* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */

@@ -28,6 +28,7 @@ FAILURE_HEADER_WRAP("generate thread pool", ":") "\n"
 
 /* constructor flags
  *─────────────────────────────────────────────────────────────────────────── */
+#define NONE_CTOR_FLAG 0	/* 00000000 */
 #define RAND_CTOR_FLAG 1	/* 00000001 */
 #define UUID_CTOR_FLAG 3	/* 00000011 (depends on random ctor atm) */
 
@@ -126,6 +127,18 @@ generator_counter_update(struct GeneratorCounter *const restrict generator,
 
 	if (database->counter_upto > generator->counter_upto)
 		generator->counter_upto = database->counter_upto;
+}
+
+inline void
+database_counter_init(struct DatabaseCounter *const restrict database,
+		      const size_t row_count)
+{
+	database->ctor_flags	= NONE_CTOR_FLAG;
+	database->rows		= row_count;
+	database->row_count_max = row_count;
+	database->tables	= 1u;
+	database->columns	= 1u;
+	database->counter_upto	= 0lu;
 }
 
 

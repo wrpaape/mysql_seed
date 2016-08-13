@@ -53,7 +53,11 @@ invalid_row_count_large(const struct GenerateArgvState *const restrict argv);
 extern inline void
 no_col_type(const struct GenerateArgvState *const restrict argv);
 extern inline void
-invalid_col_type_notsup(const struct GenerateArgvState *const restrict argv);
+error_no_col_type(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_col_type(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_col_type(struct GenerateParseState *const restrict state);
 
 /* GRP_SPEC */
 extern inline void
@@ -93,9 +97,9 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
 /* parsing next SPEC */
 extern inline void
-expected_spec_flag(const struct GenerateArgvState *const restrict argv);
+expected_col_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
-error_expected_spec_flag(struct GenerateParseState *const restrict state);
+error_expected_col_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
 expected_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
@@ -107,13 +111,15 @@ error_grp_spec_for_fixed_data(struct GenerateParseState *const restrict state);
 
 /* incomplete DB_SPEC */
 extern inline void
-incomplete_db_spec_col_name(const struct GenerateArgvState *const restrict argv);
+inc_db_spec_col_name(const struct GenerateArgvState *const restrict argv);
 extern inline void
-incomplete_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv);
+error_inc_db_spec_col_name(struct GenerateParseState *const restrict state);
 extern inline void
-incomplete_db_spec_row_count(const struct GenerateArgvState *const restrict argv);
+inc_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv);
 extern inline void
-incomplete_db_spec_col_flag(const struct GenerateArgvState *const restrict argv);
+inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv);
+extern inline void
+inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv);
 
 /* confirm flag match
  *─────────────────────────────────────────────────────────────────────────── */
