@@ -11,12 +11,10 @@
 
 /* worker thread entry points */
 void
+build_column_string_fixed(void *arg);
+void
 build_column_string_unique(void *arg);
 void
 build_column_string_unique_group(void *arg);
-void
-build_column_string_fixed(void *arg);
-void
-build_column_string_fixed_group(void *arg);
 
 #endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_STRING_H_ */

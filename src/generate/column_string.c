@@ -1,12 +1,82 @@
 #include "generate/column_string.h"
 
-#define BCSU_MALLOC_FAILURE						\
-MALLOC_FAILURE_MESSAGE("build_column_string_unique")
-
 #define BCSF_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_string_fixed")
+#define BCSU_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_column_string_unique")
+#define BCSU_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_unique_group")
 
-/* worker thread entry point */
+
+/* worker thread entry points */
+void
+build_column_string_fixed(void *arg)
+{
+	struct Column *const restrict column
+	= (struct Column *const restrict) arg;
+
+	const struct String *const restrict base
+	= &column->spec->type_qualifier.string.base;
+
+	struct Table *const restrict table
+	= column->parent;
+
+	const unsigned int col_count = table->col_count;
+
+	const size_t base_size = base->length + 1lu;
+
+	const size_t length_contents = base_size * table->spec->row_count;
+
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
+
+	column->contents = malloc(length_contents);
+
+	if (column->contents == NULL) {
+		handler_closure_call(&column->fail_cl,
+				     BCSF_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	/* increment table length */
+	length_lock_increment(&table->total,
+			      length_contents,
+			      &column->fail_cl);
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
+	struct Rowspan *restrict from		   = column->rowspans_from;
+
+	char *restrict ptr = column->contents;
+
+	const char *restrict contents_until;
+
+	size_t length_rowspan;
+
+	do {
+		length_rowspan = base_size * from->parent->row_count;
+
+		length_lock_increment(&from->parent->total,
+				      length_rowspan,
+				      &column->fail_cl);
+
+		contents_until = ptr + length_rowspan;
+
+		from->cell = ptr;
+
+		do {
+			ptr = put_string_size(ptr,
+					      base->bytes,
+					      base_size);
+		} while (ptr < contents_until);
+
+		/* skip to rowspan in next row */
+		from += col_count;
+	} while (from < until);
+
+	thread_try_catch_close();
+}
+
+
 void
 build_column_string_unique(void *arg)
 {
@@ -85,15 +155,8 @@ build_column_string_unique(void *arg)
 	thread_try_catch_close();
 }
 
-/* TODO: build_column_string_unique_group */
 void
 build_column_string_unique_group(void *arg)
-{
-}
-
-/* worker thread entry point */
-void
-build_column_string_fixed(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -106,9 +169,19 @@ build_column_string_fixed(void *arg)
 
 	const unsigned int col_count = table->col_count;
 
-	const size_t base_size = base->length + 1lu;
+	const size_t row_count = table->spec->row_count;
 
-	const size_t length_contents = base_size * table->spec->row_count;
+
+	const size_t length_column = counter_size_upto(row_count)
+				   + (row_count * base->length);
+
+	const size_t grp_count = column->spec->grp_spec.count;
+
+	GroupPartitioner *const partition_groups
+	= column->spec->grp_spec.partition;
+
+	const size_t length_contents = (sizeof(size_t) * grp_count)
+				     + length_column;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -117,50 +190,124 @@ build_column_string_fixed(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCSF_MALLOC_FAILURE);
+				     BCSU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
+
 	/* increment table length */
 	length_lock_increment(&table->total,
-			      length_contents,
+			      length_column,
 			      &column->fail_cl);
 
-	const struct Rowspan *const restrict until = table->rowspans_until;
+
+	struct Counter *const restrict counter
+	= &table->parent->parent->counter;
+
+	/* const struct Rowspan *const restrict until = table->rowspans_until; */
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
-	char *restrict ptr = column->contents;
+	size_t *restrict group = (size_t *restrict) column->contents;
 
-	const char *restrict contents_until;
 
-	size_t length_rowspan;
+	const size_t *const restrict group_until = partition_groups(group,
+								    grp_count,
+								    row_count);
 
-	do {
-		length_rowspan = base_size * from->parent->row_count;
+	/* wait for counter to be built */
+	counter_await(counter,
+		      &column->fail_cl);
 
-		length_lock_increment(&from->parent->total,
-				      length_rowspan,
-				      &column->fail_cl);
+	char *restrict ptr;
 
-		contents_until = ptr + length_rowspan;
+	char *restrict *restrict count_ptr;
 
-		from->cell = ptr;
+	const char *restrict rowspan_until;
 
-		do {
+	char *restrict group_string;
+
+	size_t group_string_size;
+
+	const char *restrict group_string_until;
+
+	count_ptr = counter->pointers;
+
+	ptr = (char *restrict) group_until;
+
+	group_string = ptr;
+
+	ptr = put_string_size(ptr,
+			      base->bytes,
+			      base->length);
+
+	ptr = put_string_stop(ptr,
+			      *count_ptr);
+
+	group_string_size = ptr - group_string;
+
+	from->cell = group_string;
+
+	rowspan_until	   = group_string
+			   + (group_string_size * from->parent->row_count);
+
+	group_string_until = group_string
+			   + (group_string_size * (*group));
+
+	puts("OOGA BOOGA");
+	exit(0);
+
+
+	while (1) {
+		if (group_string_until > rowspan_until) {
+			while (ptr < rowspan_until)
+				ptr = put_string_size(ptr,
+						      group_string,
+						      group_string_size);
+
+			length_lock_increment(&from->parent->total,
+					      ptr - from->cell,
+					      &column->fail_cl);
+
+			/* skip to rowspan in next row */
+			from += col_count;
+
+			from->cell = ptr;
+
+			rowspan_until = ptr + (group_string_size
+					       * from->parent->row_count);
+		} else {
+			while (ptr < group_string_until)
+				ptr = put_string_size(ptr,
+						      group_string,
+						      group_string_size);
+
+			++group;
+
+			if (group == group_until)
+				break;
+
+			group_string = ptr;
+
 			ptr = put_string_size(ptr,
 					      base->bytes,
-					      base_size);
-		} while (ptr < contents_until);
+					      base->length);
 
-		/* skip to rowspan in next row */
-		from += col_count;
-	} while (from < until);
+			++count_ptr;
+
+			ptr = put_string_stop(ptr,
+					      *count_ptr);
+
+			group_string_size = ptr - group_string;
+
+			group_string_until = group_string
+					   + (group_string_size * (*group));
+		}
+	}
+
+	/* increment final rowspan total */
+	length_lock_increment(&from->parent->total,
+			      ptr - from->cell,
+			      &column->fail_cl);
 
 	thread_try_catch_close();
-}
-
-/* TODO: build_column_string_fixed_group */
-void
-build_column_string_fixed_group(void *arg)
-{
 }

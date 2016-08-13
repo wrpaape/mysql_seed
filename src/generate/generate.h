@@ -580,6 +580,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	case THREAD_ERROR:	/* pool may still be alive */
 LIVE_POOL_FAILURE_A:
+		puts("I'M DOING IT");
+		fflush(stdout);
 		thread_pool_exit_on_failure(&generator.pool,
 					    failure);
 

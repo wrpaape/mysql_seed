@@ -2426,7 +2426,7 @@ column_string_default_group(struct GenerateParseState *const restrict state)
 			 (col_spec->type_qualifier.string.base.length
 			  + uint_digit_count(grp_count)));
 
-	col_spec->build = &build_column_string_unique;
+	col_spec->build = &build_column_string_unique_group;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
