@@ -1299,6 +1299,14 @@ inc_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
+error_inc_db_spec_tbl_name(struct GenerateParseState *const restrict state)
+{
+	inc_db_spec_tbl_name(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
 inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
@@ -1321,8 +1329,14 @@ inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
 		     ptr - &buffer[0]);
 }
 
-
 inline void
+error_inc_db_spec_row_count(struct GenerateParseState *const restrict state)
+{
+	inc_db_spec_row_count(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
 inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
@@ -1343,6 +1357,14 @@ inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+error_inc_db_spec_col_flag(struct GenerateParseState *const restrict state)
+{
+	inc_db_spec_col_flag(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
 }
 
 
@@ -2966,7 +2988,6 @@ NEXT_DB_SPEC:		column_timestamp_default(state);
 		error_invalid_timestamp_type_q(state);
 		return;
 
-
 	case 't':
 		if (strings_equal("able", rem + 1l))
 			goto NEXT_TBL_SPEC;
@@ -3082,8 +3103,6 @@ parse_first_col_spec_safe(struct GenerateParseState *const restrict state)
 inline void
 parse_first_col_spec(struct GenerateParseState *const restrict state)
 {
-	++(state->argv.arg.from);
-
 	if (!col_flag_match(&state->argv)) {
 		generate_parse_error(state);
 		return;
@@ -3189,10 +3208,7 @@ parse_next_tbl_spec(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		inc_db_spec_tbl_name(&state->argv);
-TERMINATE_VALID_EXIT_FAILURE:
-		*(state->valid.last) = NULL;
-		state->exit_status = EXIT_FAILURE;
+		error_inc_db_spec_tbl_name(state);
 		return;
 	}
 
@@ -3201,36 +3217,30 @@ TERMINATE_VALID_EXIT_FAILURE:
 
 	state->specs.tbl = state->specs.tbl->next;
 
-	const bool valid_tbl_name
-	= parse_tbl_name(&state->specs.tbl->name,
-			 &state->argv);
-
-	++(state->argv.arg.from);
-
-	if (!valid_tbl_name) {
+	if (!parse_tbl_name(&state->specs.tbl->name,
+			    &state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
 
-	if (state->argv.arg.from == state->argv.arg.until) {
-		inc_db_spec_row_count(&state->argv);
-		goto TERMINATE_VALID_EXIT_FAILURE;
-	}
-
-	const bool valid_row_count
-	= parse_row_count(&state->specs.tbl->row_count,
-			  &state->argv);
-
 	++(state->argv.arg.from);
 
-	if (!valid_row_count) {
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_inc_db_spec_row_count(state);
+		return;
+	}
+
+	if (!parse_row_count(&state->specs.tbl->row_count,
+			     &state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
 
+	++(state->argv.arg.from);
+
 	if (state->argv.arg.from == state->argv.arg.until) {
-		inc_db_spec_col_flag(&state->argv);
-		goto TERMINATE_VALID_EXIT_FAILURE;
+		error_inc_db_spec_col_flag(state);
+		return;
 	}
 
 	/* set counter values */

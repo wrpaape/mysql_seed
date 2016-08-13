@@ -117,9 +117,15 @@ error_inc_db_spec_col_name(struct GenerateParseState *const restrict state);
 extern inline void
 inc_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv);
 extern inline void
+error_inc_db_spec_tbl_name(struct GenerateParseState *const restrict state);
+extern inline void
 inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv);
 extern inline void
+error_inc_db_spec_row_count(struct GenerateParseState *const restrict state);
+extern inline void
 inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_inc_db_spec_col_flag(struct GenerateParseState *const restrict state);
 
 /* confirm flag match
  *─────────────────────────────────────────────────────────────────────────── */
