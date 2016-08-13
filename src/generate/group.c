@@ -4,9 +4,9 @@ extern inline double
 groups_linear_slope(const size_t group_count,
 		    const size_t row_count);
 
-extern inline double
-groups_exponential_scale(const size_t group_count,
-			 const size_t row_count);
+/* extern inline double */
+/* groups_exponential_scale(const size_t group_count, */
+/* 			 const size_t row_count); */
 
 /* group[i] = slope * i + 1.0		(group[0] = 1) */
 void *

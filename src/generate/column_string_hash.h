@@ -199,8 +199,11 @@ set_hash_state_even(char *restrict ptr,
 }
 
 
+/* worker thread entry points */
 void
 build_column_string_hash(void *arg);
+void
+build_column_string_hash_group(void *arg);
 
 
 #endif /* ifndef MYSQL_SEED_COLUMN_STRING_HASH_H_ */

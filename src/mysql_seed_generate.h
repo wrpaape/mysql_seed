@@ -282,7 +282,20 @@ struct GenerateParseState {
 typedef void
 GenerateParseNode(struct GenerateParseState *const restrict state);
 
-/* print error messsage and return 'EXIT_FAILURE'
+
+/* make compiler happy
+ *─────────────────────────────────────────────────────────────────────────── */
+inline void
+parse_next_col_spec(struct GenerateParseState *const restrict state);
+inline void
+parse_next_db_spec(struct GenerateParseState *const restrict state);
+inline void
+parse_next_tbl_spec(struct GenerateParseState *const restrict state);
+inline void
+generate_parse_error(struct GenerateParseState *const restrict state);
+
+
+/* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 inline void
@@ -927,15 +940,15 @@ invalid_timestamp_type_q(const struct GenerateArgvState *const restrict argv)
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
-	= put_timestamp_size(&buffer[0],
+	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_Q_HEADER,
 			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
 
-	ptr = put_timestamp_inspect(ptr,
+	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
 				 LENGTH_INSPECT_MAX);
 
-	ptr = put_timestamp_size(ptr,
+	ptr = put_string_size(ptr,
 			      ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP,
 			      sizeof(ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP)
 			      - 1lu);
@@ -1337,6 +1350,8 @@ error_inc_db_spec_row_count(struct GenerateParseState *const restrict state)
 	state->exit_status = EXIT_FAILURE;
 }
 
+
+inline void
 inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
@@ -1821,18 +1836,6 @@ type_assign_upto(struct Label *const restrict type,
 }
 
 
-/* make compiler happy
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-parse_next_col_spec(struct GenerateParseState *const restrict state);
-inline void
-parse_next_db_spec(struct GenerateParseState *const restrict state);
-inline void
-parse_next_tbl_spec(struct GenerateParseState *const restrict state);
-inline void
-generate_parse_error(struct GenerateParseState *const restrict state);
-
-
 /* finished parsing
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -2178,7 +2181,7 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
  *─────────────────────────────────────────────────────────────────────────── */
 /* -c COL_NAME -i */
 inline void
-column_integer_default(struct GenerateParseState *const restrict state);
+column_integer_default(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 	const size_t row_count			= state->specs.tbl->row_count;
@@ -2340,7 +2343,7 @@ column_string_names_last(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_last;
 
-	*ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 /* -c COL_NAME -s -nl -g GRP_COUNT [PART_TYPE] */
 inline void
@@ -2354,7 +2357,7 @@ column_string_names_last_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_last_group;
 
-	*ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -nf */
@@ -2369,7 +2372,7 @@ column_string_names_full(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_full;
 
-	*ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -nf -g GRP_COUNT [PART_TYPE] */
@@ -2384,7 +2387,7 @@ column_string_names_full_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_full_group;
 
-	*ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s */
@@ -2755,7 +2758,7 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 		case 'f':
 			if (rem[1] == '\0') {
 				parse_string_names_full(state);
-				return
+				return;
 			}
 
 		default:
@@ -2901,7 +2904,7 @@ parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		column_timestamp_default(state->specs.col);
+		column_timestamp_default(state);
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
@@ -3006,11 +3009,11 @@ NEXT_DB_SPEC:		column_timestamp_default(state);
 
 inline void
 parse_col_type(struct GenerateParseState *const restrict state)
-
+{
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-		error_invalid_col_type(&state->argv);
+		error_invalid_col_type(state);
 		return;
 	}
 
@@ -3152,7 +3155,7 @@ parse_next_col_spec(struct GenerateParseState *const restrict state)
 	++(state->specs.col);	/* increment col_spec interval */
 
 	if (!parse_col_name(&state->specs.col->name,
-			    &state->argv) {
+			    &state->argv)) {
 		generate_parse_error(state);
 		return;
 	}
@@ -3262,7 +3265,7 @@ inline void
 parse_first_db_spec(struct GenerateParseState *const restrict state)
 {
 	if (parse_db_name(&state->specs.db->name,
-			  &state->argv)
+			  &state->argv))
 		parse_first_tbl_spec(state);
 	else
 		generate_parse_error(state);

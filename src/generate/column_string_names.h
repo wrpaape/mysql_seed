@@ -36,39 +36,22 @@ SET_STRING_WIDTH(PTR, NAMES_LAST_TYPE_STRING, NAMES_LAST_TYPE_WIDTH)
 SET_STRING_WIDTH(PTR, NAMES_FULL_TYPE_STRING, NAMES_FULL_TYPE_WIDTH)
 
 
-#if (SIZE_MAX < UINT32_MAX)
-#	define FIRST_NAMES_COUNT_MAX SIZE_MAX
-#	define LAST_NAMES_COUNT_MAX  SIZE_MAX
-#	define FULL_NAMES_COUNT_MAX  SIZE_MAX
-#else
-#	define FIRST_NAMES_COUNT_MAX 450000lu
-#	define LAST_NAMES_COUNT_MAX  450000lu
-#	define FULL_NAMES_COUNT_MAX  150000lu
-#endif /* if (SIZE_MAX < UINT32_MAX) */
-
-
 /* failure messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define BCSN_FIRST_MAX_EXCEEDED						\
-FAILURE_REASON("build_column_string_names_first",			\
-	       "'FIRST_NAMES_COUNT_MAX' ("				\
-	       EXPAND_STRINGIFY(FIRST_NAMES_COUNT_MAX) ") exceeded\n")
 #define BCSN_FIRST_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_string_names_first")
+#define BCSN_FIRST_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_first_group")
 
-#define BCSN_LAST_MAX_EXCEEDED						\
-FAILURE_REASON("build_column_string_names_last",			\
-	       "'LAST_NAMES_COUNT_MAX' ("				\
-	       EXPAND_STRINGIFY(LAST_NAMES_COUNT_MAX) ") exceeded\n")
 #define BCSN_LAST_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_string_names_last")
+#define BCSN_LAST_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_last_group")
 
-#define BCSN_FULL_MAX_EXCEEDED						\
-FAILURE_REASON("build_column_string_names_full",			\
-	       "'FULL_NAMES_COUNT_MAX' ("				\
-	       EXPAND_STRINGIFY(FULL_NAMES_COUNT_MAX) ") exceeded\n")
 #define BCSN_FULL_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_string_names_full")
+#define BCSN_FULL_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_full_group")
 
 
 /* enum, struct declarations

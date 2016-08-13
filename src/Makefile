@@ -1182,6 +1182,40 @@ TARGETS			+= $(FILE_OBJ)					\
 
 ## GENERATE MODULES
 # ══════════════════════════════════════════════════════════════════════════════
+# generate/group
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_GROUP_SRC 		:= $(call HELPER_SOURCE_PATH,generate group)
+GENERATE_GROUP_HDR		:= $(call HELPER_HEADER_PATH,generate group)
+GENERATE_GROUP_OBJ 		:= $(call HELPER_OBJECT_PATH,generate group)
+GENERATE_GROUP_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate group)
+GENERATE_GROUP_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate group)
+GENERATE_GROUP_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate group)
+GENERATE_GROUP_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate group)
+GENERATE_GROUP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate group)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_GROUP_OBJ_PREQS	:= $(GENERATE_GROUP_SRC) 		\
+			     	   $(GENERATE_GROUP_HDR)
+GENERATE_GROUP_OBJ_GROUP	:= $(GENERATE_GROUP_OBJ)
+GENERATE_GROUP_TRNR_SRC_PREQS	:= $(GENERATE_GROUP_TEST_SRC)		\
+				   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_GROUP_TEST_OBJ_PREQS	:= $(GENERATE_GROUP_TEST_SRC)		\
+			   	   $(GENERATE_GROUP_OBJ_PREQS)		\
+			   	   $(UNITY_OBJ_PREQS)
+GENERATE_GROUP_TRNR_OBJ_PREQS	:= $(GENERATE_GROUP_TRNR_SRC)		\
+			   	   $(GENERATE_GROUP_TEST_OBJ_PREQS)
+GENERATE_GROUP_TEST_BIN_PREQS	:= $(GENERATE_GROUP_TRNR_OBJ)		\
+				   $(GENERATE_GROUP_TEST_OBJ)		\
+			   	   $(GENERATE_GROUP_OBJ_GROUP)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_GROUP_TEST_BIN)
+TARGETS			+= $(GENERATE_GROUP_OBJ)		\
+			   $(GENERATE_GROUP_TRNR_SRC)		\
+			   $(GENERATE_GROUP_TRNR_OBJ)		\
+			   $(GENERATE_GROUP_TEST_OBJ)		\
+			   $(GENERATE_GROUP_TEST_BIN)
+
+
 # generate/generator
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_GENERATOR_SRC 		:= $(call HELPER_SOURCE_PATH,generate generator)
@@ -1193,25 +1227,27 @@ GENERATE_GENERATOR_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate ge
 GENERATE_GENERATOR_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate generator)
 GENERATE_GENERATOR_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate generator)
 # ─────────────── target prequisites ───────────────────────────────────────────
-GENERATE_GENERATOR_OBJ_PREQS		:= $(GENERATE_GENERATOR_SRC) 		\
-			     	   	   $(GENERATE_GENERATOR_HDR)		\
-			     	   	   $(FILE_HDR)				\
-			      	   	   $(THREAD_THREAD_POOL_HDR)		\
-			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_HDR)
-GENERATE_GENERATOR_OBJ_GROUP		:= $(GENERATE_GENERATOR_OBJ) 		\
-				   	   $(FILE_OBJ_GROUP)			\
-				   	   $(THREAD_THREAD_POOL_OBJ_GROUP)	\
-			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)
-GENERATE_GENERATOR_TRNR_SRC_PREQS	:= $(GENERATE_GENERATOR_TEST_SRC)	\
+GENERATE_GENERATOR_OBJ_PREQS		:= $(GENERATE_GENERATOR_SRC) 			\
+			     	   	   $(GENERATE_GENERATOR_HDR)			\
+			     	   	   $(FILE_HDR)					\
+			      	   	   $(THREAD_THREAD_POOL_HDR)			\
+			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_HDR)		\
+			   	   	   $(GENERATE_GROUP_HDR)
+GENERATE_GENERATOR_OBJ_GROUP		:= $(GENERATE_GENERATOR_OBJ) 			\
+				   	   $(FILE_OBJ_GROUP)				\
+				   	   $(THREAD_THREAD_POOL_OBJ_GROUP)		\
+			   	   	   $(MEMORY_MEMORY_COPY_ARRAY_OBJ_GROUP)	\
+			   	   	   $(GENERATE_GROUP_OBJ_GROUP)
+GENERATE_GENERATOR_TRNR_SRC_PREQS	:= $(GENERATE_GENERATOR_TEST_SRC)		\
 				   	   $(TEST_RUNNER_SOURCE_DIR)
-GENERATE_GENERATOR_TEST_OBJ_PREQS	:= $(GENERATE_GENERATOR_TEST_SRC)	\
-			   	   	   $(GENERATE_GENERATOR_OBJ_PREQS)	\
+GENERATE_GENERATOR_TEST_OBJ_PREQS	:= $(GENERATE_GENERATOR_TEST_SRC)		\
+			   	   	   $(GENERATE_GENERATOR_OBJ_PREQS)		\
 			   	   	   $(UNITY_OBJ_PREQS)
-GENERATE_GENERATOR_TRNR_OBJ_PREQS	:= $(GENERATE_GENERATOR_TRNR_SRC)	\
+GENERATE_GENERATOR_TRNR_OBJ_PREQS	:= $(GENERATE_GENERATOR_TRNR_SRC)		\
 			   	   	   $(GENERATE_GENERATOR_TEST_OBJ_PREQS)
-GENERATE_GENERATOR_TEST_BIN_PREQS	:= $(GENERATE_GENERATOR_TRNR_OBJ)	\
-				   	   $(GENERATE_GENERATOR_TEST_OBJ)	\
-			   	   	   $(GENERATE_GENERATOR_OBJ_GROUP)	\
+GENERATE_GENERATOR_TEST_BIN_PREQS	:= $(GENERATE_GENERATOR_TRNR_OBJ)		\
+				   	   $(GENERATE_GENERATOR_TEST_OBJ)		\
+			   	   	   $(GENERATE_GENERATOR_OBJ_GROUP)		\
 			   	   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(GENERATE_GENERATOR_TEST_BIN)
@@ -1904,6 +1940,11 @@ $(GENERATE_GENERATE_OBJ): $(GENERATE_GENERATE_OBJ_PREQS)
 $(GENERATE_GENERATOR_OBJ): $(GENERATE_GENERATOR_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make generate/group object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_GROUP_OBJ): $(GENERATE_GROUP_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make generate/counter object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_COUNTER_OBJ): $(GENERATE_COUNTER_OBJ_PREQS)
@@ -2459,6 +2500,26 @@ $(GENERATE_COUNTER_TEST_OBJ): $(GENERATE_COUNTER_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_COUNTER_TRNR_SRC): $(GENERATE_COUNTER_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/group
+# make:
+# 	generate_group_test		binary,
+# 	generate_group_test_runner 	object,
+# 	generate_group_test		object, and
+# 	generate_group_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_GROUP_TEST_BIN): $(GENERATE_GROUP_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_GROUP_TRNR_OBJ): $(GENERATE_GROUP_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_GROUP_TEST_OBJ): $(GENERATE_GROUP_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_GROUP_TRNR_SRC): $(GENERATE_GROUP_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

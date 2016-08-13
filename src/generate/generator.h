@@ -5,7 +5,8 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_file.h"		/* file/exit/string/thread utils */
 #include "thread/thread_pool.h"		/* ThreadPool */
-#include  "memory/memory_copy_array.h"	/* memory_copy */
+#include "memory/memory_copy_array.h"	/* memory_copy */
+#include "generate/group.h"		/* group partitioner */
 
 /* minimum valid spec lengths
  *─────────────────────────────────────────────────────────────────────────── */

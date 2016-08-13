@@ -2,6 +2,8 @@
 
 #define BCSH_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_string_hash")
+#define BCSH_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_hash_group")
 
 extern inline void
 hash_state_init(struct HashState *const restrict state,
@@ -141,4 +143,10 @@ build_column_string_hash(void *arg)
 	}
 
 	thread_try_catch_close();
+}
+
+/* TODO: build_column_string_hash_group */
+void
+build_column_string_hash_group(void *arg)
+{
 }

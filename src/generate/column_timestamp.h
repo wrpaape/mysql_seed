@@ -502,8 +502,10 @@ timestamp_string_increment(char *restrict ptr)
 
 /* worker thread entry points */
 void
+build_column_timestamp_fixed(void *arg);
+void
 build_column_timestamp_unique(void *arg);
 void
-build_column_timestamp_fixed(void *arg);
+build_column_timestamp_unique_group(void *arg);
 
 #endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_TIMESTAMP_H_ */

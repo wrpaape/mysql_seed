@@ -4,9 +4,8 @@
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include <math.h>		/* log */
-#include "generate/generator"	/* UPTO_MAX */
-
+#include <math.h>	/* log */
+#include <stddef.h>	/* size_t */
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
@@ -24,7 +23,7 @@ GroupPartitioner(size_t *restrict group,
 		 const size_t group_count,
 		 const size_t row_count);
 
-extern inline double
+inline double
 groups_linear_slope(const size_t group_count,
 		    const size_t row_count)
 {

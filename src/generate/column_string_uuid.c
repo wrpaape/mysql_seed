@@ -2,6 +2,8 @@
 
 #define BCSUUID_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_string_uuid")
+#define BCSUUID_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_uuid_group")
 
 void
 build_column_string_uuid(void *arg)
@@ -81,4 +83,10 @@ build_column_string_uuid(void *arg)
 	}
 
 	thread_try_catch_close();
+}
+
+/* TODO: build_column_string_uuid_group */
+void
+build_column_string_uuid_group(void *arg)
+{
 }

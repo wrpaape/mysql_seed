@@ -168,6 +168,7 @@ parse_hash_length(size_t *const restrict hash_length,
 		  struct GenerateArgvState *const restrict argv);
 extern inline bool
 parse_grp_count(size_t *const restrict grp_count,
+		const size_t row_count,
 		struct GenerateArgvState *const restrict argv);
 
 
@@ -235,7 +236,7 @@ extern inline void
 error_multiple_grp_specs(struct GenerateParseState *const restrict state);
 extern inline void
 parse_grp_spec(struct GenerateParseState *const restrict state,
-	       GenerateParseNode *const set_col_spec)
+	       GenerateParseNode *const set_col_spec);
 
 /* set COL_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -296,7 +297,7 @@ extern inline void
 column_timestamp_unique_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -ts -f */
 extern inline void
-column_timestamp_fixed(struct GenerateParseState *const restrict state):
+column_timestamp_fixed(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -ts */
 extern inline void
 column_timestamp_default(struct GenerateParseState *const restrict state);
@@ -309,7 +310,7 @@ column_timestamp_default_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_string_default(struct GenerateParseState *const restrict state)
+parse_string_default(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
@@ -319,7 +320,7 @@ parse_string_fixed(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_uuid_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_string_uuid(struct GenerateParseState *const restrict state)
+parse_string_uuid(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_hash_group(struct GenerateParseState *const restrict state);
 extern inline void

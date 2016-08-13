@@ -451,12 +451,6 @@ build_column_string_names_first(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	if (row_count > FIRST_NAMES_COUNT_MAX) {
-		handler_closure_call(&column->fail_cl,
-				     BCSN_FIRST_MAX_EXCEEDED);
-		__builtin_unreachable();
-	}
-
 	const size_t size_est = FIRST_NAME_SIZE_MAX * row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
@@ -521,12 +515,6 @@ build_column_string_names_last(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	if (row_count > LAST_NAMES_COUNT_MAX) {
-		handler_closure_call(&column->fail_cl,
-				     BCSN_LAST_MAX_EXCEEDED);
-		__builtin_unreachable();
-	}
-
 	const size_t size_est = LAST_NAME_SIZE_MAX * row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
@@ -589,12 +577,6 @@ build_column_string_names_full(void *arg)
 	const unsigned int col_count = table->col_count;
 
 	const size_t row_count = table->spec->row_count;
-
-	if (row_count > FULL_NAMES_COUNT_MAX) {
-		handler_closure_call(&column->fail_cl,
-				     BCSN_FULL_MAX_EXCEEDED);
-		__builtin_unreachable();
-	}
 
 	const size_t size_est = FULL_NAME_SIZE_MAX * row_count;
 

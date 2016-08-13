@@ -3,8 +3,8 @@
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include "uuid/uuid_utils.h"		/* uuid_state, uuid_string_init */
-#include "generate/generator.h"		/* generator components */
+#include "uuid/uuid_utils.h"	/* uuid_state, uuid_string_init */
+#include "generate/generator.h"	/* generator components */
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
@@ -14,7 +14,10 @@
 #define SET_UUID_TYPE(PTR)						\
 SET_STRING_WIDTH(PTR, UUID_TYPE_STRING, UUID_TYPE_WIDTH)
 
+/* worker thread entry points */
 void
 build_column_string_uuid(void *arg);
+void
+build_column_string_uuid_group(void *arg);
 
 #endif /* ifndef MYSQL_SEED_GENERATE_COLUMN_STRING_UUID_H_ */
