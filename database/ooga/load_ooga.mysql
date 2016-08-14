@@ -1,0 +1,22 @@
+# database/ooga/load_ooga.mysql
+#
+# seeds MySQL database ooga according to the tabular data files:
+#
+# 	- database/ooga/booga.csv
+
+CREATE DATABASE ooga;
+
+USE ooga;
+
+CREATE TABLE booga (
+	looga VARCHAR(7)
+);
+
+LOAD DATA INFILE '/Users/Reid/lifesize/mysql_seed/database/ooga/booga.csv'
+	IGNORE INTO TABLE booga
+	FIELDS TERMINATED BY ','
+	       ENCLOSED BY   ''
+	       ESCAPED BY    '\\'
+	LINES  STARTING BY   ''
+	       TERMINATED BY '\n'
+	IGNORE 17 LINES;

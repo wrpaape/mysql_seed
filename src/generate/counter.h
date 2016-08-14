@@ -237,6 +237,38 @@ counter_size_upto(const size_t upto)
 }
 
 
+/* sizeof("upto") */
+inline size_t
+counter_size_mag_upto(const size_t upto)
+{
+#if LARGE_UPTO_MAX
+	if (upto < MAG_4_MIN) {
+#endif	/*  if LARGE_UPTO_MAX */
+		if (upto < MAG_2_MIN) {
+			return (upto < MAG_1_MIN)
+			     ? SIZE_MAG_0_STR
+			     : SIZE_MAG_1_STR;
+		} else {
+			return (upto < MAG_3_MIN)
+			     ? SIZE_MAG_2_STR
+			     : SIZE_MAG_3_STR;
+		}
+#if LARGE_UPTO_MAX
+	} else {
+		if (upto < MAG_6_MIN) {
+			return (upto < MAG_5_MIN)
+			     ? SIZE_MAG_4_STR
+			     : SIZE_MAG_5_STR;
+		} else {
+			return (upto < MAG_7_MIN)
+			     ? SIZE_MAG_6_STR
+			     : SIZE_MAG_7_STR;
+		}
+	}
+#endif	/*  if LARGE_UPTO_MAX */
+}
+
+
 inline void
 count_buffer_increment(char *restrict digit)
 {

@@ -171,16 +171,16 @@ build_column_string_unique_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-
-	const size_t length_column = counter_size_upto(row_count)
-				   + (row_count * base->length);
-
-	const size_t grp_count = column->spec->grp_spec.count;
+	const size_t group_count = column->spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
 	= column->spec->grp_spec.partition;
 
-	const size_t length_contents = (sizeof(size_t) * grp_count)
+	const size_t length_column = (base->length
+				      + counter_size_mag_upto(group_count))
+				   * row_count;
+
+	const size_t length_contents = (sizeof(size_t) * group_count)
 				     + length_column;
 
 	thread_try_catch_open(&free_nullify_cleanup,
@@ -195,23 +195,17 @@ build_column_string_unique_group(void *arg)
 	}
 
 
-	/* increment table length */
-	length_lock_increment(&table->total,
-			      length_column,
-			      &column->fail_cl);
-
-
 	struct Counter *const restrict counter
 	= &table->parent->parent->counter;
 
-	/* const struct Rowspan *const restrict until = table->rowspans_until; */
+	const struct Rowspan *const restrict until = table->rowspans_until;
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	size_t *restrict group = (size_t *restrict) column->contents;
 
 
 	const size_t *const restrict group_until = partition_groups(group,
-								    grp_count,
+								    group_count,
 								    row_count);
 
 	/* wait for counter to be built */
@@ -253,11 +247,28 @@ build_column_string_unique_group(void *arg)
 	group_string_until = group_string
 			   + (group_string_size * (*group));
 
-	puts("OOGA BOOGA");
-	exit(0);
-
-
 	while (1) {
+		/* printf("\ngroup_string:       %s\n" */
+		/*        "group_string_size:  %zu\n" */
+		/*        "ptr:                %p\n" */
+		/*        "group_string_until: %p\n" */
+		/*        "rowspan_until:      %p\n" */
+		/*        "group:              %p\n" */
+		/*        "group_until:        %p\n" */
+		/*        "from:               %p\n" */
+		/*        "until:              %p\n" */
+		/*        "delta:              %zd\n", */
+		/*        group_string, */
+		/*        group_string_size, */
+		/*        ptr, */
+		/*        group_string_until, */
+		/*        rowspan_until, */
+		/*        group, */
+		/*        group_until, */
+		/*        from, */
+		/*        until, */
+		/*        group_until - group); */
+		/* fflush(stdout); */
 		if (group_string_until > rowspan_until) {
 			while (ptr < rowspan_until)
 				ptr = put_string_size(ptr,
@@ -270,6 +281,9 @@ build_column_string_unique_group(void *arg)
 
 			/* skip to rowspan in next row */
 			from += col_count;
+
+			if (from >= until)
+				break;
 
 			from->cell = ptr;
 
@@ -303,11 +317,21 @@ build_column_string_unique_group(void *arg)
 					   + (group_string_size * (*group));
 		}
 	}
+	/* puts("DID IT"); */
+	/* fflush(stdout); */
+
+	/* increment table length */
+	length_lock_increment(&table->total,
+			      ptr - ((const char *restrict) group_until),
+			      &column->fail_cl);
+
+
 
 	/* increment final rowspan total */
-	length_lock_increment(&from->parent->total,
-			      ptr - from->cell,
-			      &column->fail_cl);
+	/* length_lock_increment(&from->parent->total, */
+	/* 		      ptr - from->cell, */
+	/* 		      &column->fail_cl); */
+
 
 	thread_try_catch_close();
 }

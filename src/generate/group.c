@@ -9,7 +9,7 @@ groups_linear_slope(const size_t group_count,
 /* 			 const size_t row_count); */
 
 /* group[i] = slope * i + 1.0		(group[0] = 1) */
-void *
+size_t *
 partition_groups_linear(size_t *restrict group,
 			const size_t group_count,
 			const size_t row_count)
@@ -39,12 +39,13 @@ partition_groups_linear(size_t *restrict group,
 	/* spread undershoot evenly, with leftovers padding groups upfront */
 	const size_t undershoot = row_count - sum_rows;
 
+
 	const size_t undershoot_div = undershoot / group_count;
 	const size_t undershoot_rem = undershoot % group_count;
 
-	const size_t *const restrict extra_until = group + undershoot_rem;
-
 	const size_t group_extra = undershoot_div + 1lu;
+
+	const size_t *const restrict extra_until = from + undershoot_rem;
 
 	for (group = from; group < extra_until; ++group)
 		*group += group_extra;
@@ -56,15 +57,15 @@ partition_groups_linear(size_t *restrict group,
 		} while (group < until);
 	}
 
-	return (void *) until;
+	return until;
 }
 
-void *
+size_t *
 partition_groups_even(size_t *restrict group,
 		      const size_t group_count,
 		      const size_t row_count)
 {
-	const size_t *const restrict until = group + group_count;
+	size_t *const restrict until = group + group_count;
 
 	const size_t group_div = row_count / group_count;
 	const size_t group_rem = row_count % group_count;
@@ -83,11 +84,11 @@ partition_groups_even(size_t *restrict group,
 		++group;
 	} while (group < until);
 
-	return (void *) until;
+	return until;
 }
 
 /* group[i] = e^(scale * i)		(group[0] = 1) */
-/* void */
+/* size_t */
 /* partition_groups_exponential(size_t *restrict group, */
 /* 			     const size_t group_count, */
 /* 			     const size_t row_count) */

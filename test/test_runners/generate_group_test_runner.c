@@ -27,7 +27,8 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_generate_group(void);
+extern void test_generate_groups_even(void);
+extern void test_generate_groups_linear(void);
 
 
 //=======Test Reset Option=====
@@ -43,7 +44,8 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/generate_group_test.c");
-  RUN_TEST(test_generate_group, 12);
+  RUN_TEST(test_generate_groups_even, 12);
+  RUN_TEST(test_generate_groups_linear, 31);
 
   return (UnityEnd());
 }

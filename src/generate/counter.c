@@ -19,6 +19,9 @@ counter_size_internals(struct Counter *const restrict counter);
 extern inline size_t
 counter_size_upto(const size_t upto);
 
+extern inline size_t
+counter_size_mag_upto(const size_t upto);
+
 extern inline void
 count_buffer_increment(char *restrict digit);
 

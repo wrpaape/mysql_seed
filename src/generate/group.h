@@ -18,7 +18,7 @@
 
 /* typedefs, struct declarations
  * ────────────────────────────────────────────────────────────────────────── */
-typedef void *
+typedef size_t *
 GroupPartitioner(size_t *restrict group,
 		 const size_t group_count,
 		 const size_t row_count);
@@ -35,12 +35,12 @@ groups_linear_slope(const size_t group_count,
 	return (group_max - 1.0) / group_count_dbl;
 }
 
-void *
+size_t *
 partition_groups_linear(size_t *restrict group,
 			const size_t group_count,
 			const size_t row_count);
 
-void *
+size_t *
 partition_groups_even(size_t *restrict group,
 		      const size_t group_count,
 		      const size_t row_count);
@@ -80,7 +80,7 @@ partition_groups_even(size_t *restrict group,
 
 /* 	return scale; */
 /* } */
-/* void */
+/* size_t */
 /* partition_groups_exponential(size_t *restrict group, */
 /* 			     const size_t group_count, */
 /* 			     const size_t row_count); */
