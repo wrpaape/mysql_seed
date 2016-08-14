@@ -213,18 +213,12 @@ build_column_string_unique_group(void *arg)
 		      &column->fail_cl);
 
 	char *restrict ptr;
-
 	char *restrict *restrict count_ptr;
-
-	const char *restrict rowspan_until;
-
 	char *restrict group_string;
-
 	size_t group_string_size;
-
-	const char *restrict group_string_until;
-
-	count_ptr = counter->pointers;
+	size_t length_rowspan;
+	const char *restrict rowspan_until;	 /* rowspan boundary */
+	const char *restrict group_string_until; /* group boundary */
 
 	ptr = (char *restrict) group_until;
 
@@ -234,71 +228,29 @@ build_column_string_unique_group(void *arg)
 			      base->bytes,
 			      base->length);
 
-	ptr = put_string_stop(ptr,
-			      *count_ptr);
+	PUT_STRING_WIDTH(ptr,
+			 "1",
+			 2);
 
-	group_string_size = ptr - group_string;
+	group_string_size = base->length + 2lu;
 
 	from->cell = group_string;
 
-	rowspan_until	   = group_string
-			   + (group_string_size * from->parent->row_count);
+	length_rowspan = group_string_size * from->parent->row_count;
+
+	rowspan_until	   = group_string + length_rowspan;
 
 	group_string_until = group_string
 			   + (group_string_size * (*group));
 
+	count_ptr = counter->pointers;
+
 	while (1) {
-		/* printf("\ngroup_string:       %s\n" */
-		/*        "group_string_size:  %zu\n" */
-		/*        "ptr:                %p\n" */
-		/*        "group_string_until: %p\n" */
-		/*        "rowspan_until:      %p\n" */
-		/*        "group:              %p\n" */
-		/*        "group_until:        %p\n" */
-		/*        "from:               %p\n" */
-		/*        "until:              %p\n" */
-		/*        "delta:              %zd\n", */
-		/*        group_string, */
-		/*        group_string_size, */
-		/*        ptr, */
-		/*        group_string_until, */
-		/*        rowspan_until, */
-		/*        group, */
-		/*        group_until, */
-		/*        from, */
-		/*        until, */
-		/*        group_until - group); */
-		/* fflush(stdout); */
-		if (group_string_until > rowspan_until) {
-			while (ptr < rowspan_until)
-				ptr = put_string_size(ptr,
-						      group_string,
-						      group_string_size);
-
-			length_lock_increment(&from->parent->total,
-					      ptr - from->cell,
-					      &column->fail_cl);
-
-			/* skip to rowspan in next row */
-			from += col_count;
-
-			if (from >= until)
-				break;
-
-			from->cell = ptr;
-
-			rowspan_until = ptr + (group_string_size
-					       * from->parent->row_count);
-		} else {
+		if (rowspan_until > group_string_until) {
 			while (ptr < group_string_until)
 				ptr = put_string_size(ptr,
 						      group_string,
 						      group_string_size);
-
-			++group;
-
-			if (group == group_until)
-				break;
 
 			group_string = ptr;
 
@@ -313,25 +265,40 @@ build_column_string_unique_group(void *arg)
 
 			group_string_size = ptr - group_string;
 
+			++group;
+
 			group_string_until = group_string
 					   + (group_string_size * (*group));
+
+		} else {
+			while (ptr < rowspan_until)
+				ptr = put_string_size(ptr,
+						      group_string,
+						      group_string_size);
+
+			/* increment row_block length */
+			length_lock_increment(&from->parent->total,
+					      length_rowspan,
+					      &column->fail_cl);
+
+			from += col_count;
+
+			if (from >= until)
+				break;
+
+			from->cell = ptr;
+
+			length_rowspan = group_string_size
+				       * from->parent->row_count;
+
+			rowspan_until = ptr + length_rowspan;
 		}
 	}
-	/* puts("DID IT"); */
-	/* fflush(stdout); */
 
 	/* increment table length */
 	length_lock_increment(&table->total,
 			      ptr - ((const char *restrict) group_until),
 			      &column->fail_cl);
-
-
-
-	/* increment final rowspan total */
-	/* length_lock_increment(&from->parent->total, */
-	/* 		      ptr - from->cell, */
-	/* 		      &column->fail_cl); */
-
 
 	thread_try_catch_close();
 }
