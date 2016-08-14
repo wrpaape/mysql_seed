@@ -45,7 +45,7 @@ int main(void)
 {
   UnityBegin("../test/generate_group_test.c");
   RUN_TEST(test_generate_groups_even, 12);
-  RUN_TEST(test_generate_groups_linear, 31);
+  RUN_TEST(test_generate_groups_linear, 35);
 
   return (UnityEnd());
 }

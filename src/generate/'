@@ -216,10 +216,9 @@ build_column_string_unique_group(void *arg)
 	char *restrict *restrict count_ptr;
 	char *restrict group_string;
 	size_t group_string_size;
+	size_t length_rowspan;
 	size_t rem_cells;
 	size_t rem_group;
-	size_t cells_put;
-	size_t groups_put;
 
 	ptr = (char *restrict) group_until;
 
@@ -229,13 +228,17 @@ build_column_string_unique_group(void *arg)
 			      base->bytes,
 			      base->length);
 
-	PUT_STRING_WIDTH(ptr, "1", 2);
+	PUT_STRING_WIDTH(ptr,
+			 "1",
+			 2);
 
 	group_string_size = base->length + 2lu;
 
 	from->cell = group_string;
 
-	rem_cells = from->parent->row_count - 1lu;
+	length_rowspan = group_string_size * from->parent->row_count;
+
+	rem_cells = length_rowspan - 1lu;
 
 	rem_group = *group - 1lu;
 
@@ -243,8 +246,6 @@ build_column_string_unique_group(void *arg)
 
 	while (1) {
 		if (rem_cells > rem_group) {
-			groups_put = rem_group;
-
 			while (rem_group > 0lu) {
 				ptr = put_string_size(ptr,
 						      group_string,
@@ -266,22 +267,17 @@ build_column_string_unique_group(void *arg)
 
 			++group;
 
-			rem_group = *group - 1lu;
-			rem_cells -= (groups_put + 1lu);
 		} else {
-
-			cells_put = rem_cells;
-
-			while (rem_cells > 0lu) {
+			while (ptr < rem_cells) {
+				printf("in loop 2: %s\n", group_string);
 				ptr = put_string_size(ptr,
 						      group_string,
 						      group_string_size);
-				--rem_cells;
 			}
 
 			/* increment row_block length */
 			length_lock_increment(&from->parent->total,
-					      ptr - from->cell,
+					      length_rowspan,
 					      &column->fail_cl);
 
 			from += col_count;
@@ -291,8 +287,10 @@ build_column_string_unique_group(void *arg)
 
 			from->cell = ptr;
 
-			rem_cells = from->parent->row_count;
-			rem_group -= cells_put;
+			length_rowspan = group_string_size
+				       * from->parent->row_count;
+
+			rowspan_until = ptr + length_rowspan;
 		}
 	}
 
