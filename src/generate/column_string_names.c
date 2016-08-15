@@ -467,7 +467,7 @@ build_column_string_names_first(void *arg)
 		__builtin_unreachable();
 	}
 
-	struct Rowspan *restrict from		   = column->rowspans_from;
+	struct Rowspan *restrict from = column->rowspans_from;
 
 	char *restrict ptr = column->contents;
 
@@ -632,7 +632,7 @@ build_column_string_names_last(void *arg)
 		__builtin_unreachable();
 	}
 
-	struct Rowspan *restrict from		   = column->rowspans_from;
+	struct Rowspan *restrict from = column->rowspans_from;
 
 	char *restrict ptr = column->contents;
 
@@ -661,7 +661,6 @@ build_column_string_names_last(void *arg)
 	thread_try_catch_close();
 }
 
-/* TODO: build_column_string_names_last_group */
 void
 build_column_string_names_last_group(void *arg)
 {
@@ -690,7 +689,7 @@ build_column_string_names_last_group(void *arg)
 	= column->spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
-			      + (FIRST_NAME_SIZE_MAX * row_count);
+			      + (LAST_NAME_SIZE_MAX * row_count);
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -699,7 +698,7 @@ build_column_string_names_last_group(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCSN_FIRST_GROUP_MALLOC_FAILURE);
+				     BCSN_LAST_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
@@ -797,7 +796,7 @@ build_column_string_names_full(void *arg)
 		__builtin_unreachable();
 	}
 
-	struct Rowspan *restrict from		   = column->rowspans_from;
+	struct Rowspan *restrict from = column->rowspans_from;
 
 	char *restrict ptr = column->contents;
 
@@ -825,7 +824,6 @@ build_column_string_names_full(void *arg)
 	thread_try_catch_close();
 }
 
-/* TODO: build_column_string_names_full_group */
 void
 build_column_string_names_full_group(void *arg)
 {
@@ -855,7 +853,7 @@ build_column_string_names_full_group(void *arg)
 	= column->spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
-			      + (FIRST_NAME_SIZE_MAX * row_count);
+			      + (FULL_NAME_SIZE_MAX * row_count);
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -864,7 +862,7 @@ build_column_string_names_full_group(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCSN_FIRST_GROUP_MALLOC_FAILURE);
+				     BCSN_FULL_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
