@@ -9,7 +9,7 @@ groups_linear_slope(const size_t group_count,
 /* 			 const size_t row_count); */
 
 /* group[i] = slope * i + 1.0		(group[0] = 1) */
-size_t *
+void *
 partition_groups_linear(size_t *restrict group,
 			const size_t group_count,
 			const size_t row_count)
@@ -57,10 +57,10 @@ partition_groups_linear(size_t *restrict group,
 		} while (group < until);
 	}
 
-	return until;
+	return (void *) until;
 }
 
-size_t *
+void *
 partition_groups_even(size_t *restrict group,
 		      const size_t group_count,
 		      const size_t row_count)
@@ -84,7 +84,7 @@ partition_groups_even(size_t *restrict group,
 		++group;
 	} while (group < until);
 
-	return until;
+	return (void *) until;
 }
 
 /* group[i] = e^(scale * i)		(group[0] = 1) */

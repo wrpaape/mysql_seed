@@ -158,6 +158,16 @@ build_column_string_unique(void *arg)
 void
 build_column_string_unique_group(void *arg)
 {
+	char *restrict ptr;
+	char *restrict column_from;
+	char *restrict *restrict count_ptr;
+	char *restrict group_string;
+	size_t group_string_size;
+	size_t rem_cells;
+	size_t rem_group;
+	size_t cells_put;
+	size_t groups_put;
+
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
@@ -204,24 +214,11 @@ build_column_string_unique_group(void *arg)
 	size_t *restrict group = (size_t *restrict) column->contents;
 
 
-	const size_t *const restrict group_until = partition_groups(group,
-								    group_count,
-								    row_count);
+	column_from = partition_groups(group,
+				       group_count,
+				       row_count);
 
-	/* wait for counter to be built */
-	counter_await(counter,
-		      &column->fail_cl);
-
-	char *restrict ptr;
-	char *restrict *restrict count_ptr;
-	char *restrict group_string;
-	size_t group_string_size;
-	size_t rem_cells;
-	size_t rem_group;
-	size_t cells_put;
-	size_t groups_put;
-
-	ptr = (char *restrict) group_until;
+	ptr = column_from;
 
 	group_string = ptr;
 
@@ -238,6 +235,10 @@ build_column_string_unique_group(void *arg)
 	rem_cells = from->parent->row_count - 1lu;
 
 	rem_group = *group - 1lu;
+
+	/* wait for counter to be built */
+	counter_await(counter,
+		      &column->fail_cl);
 
 	count_ptr = counter->pointers;
 
@@ -266,7 +267,7 @@ build_column_string_unique_group(void *arg)
 
 			++group;
 
-			rem_group = *group - 1lu;
+			rem_group  = *group - 1lu;
 			rem_cells -= (groups_put + 1lu);
 		} else {
 
@@ -291,14 +292,14 @@ build_column_string_unique_group(void *arg)
 
 			from->cell = ptr;
 
-			rem_cells = from->parent->row_count;
+			rem_cells  = from->parent->row_count;
 			rem_group -= cells_put;
 		}
 	}
 
 	/* increment table length */
 	length_lock_increment(&table->total,
-			      ptr - ((const char *restrict) group_until),
+			      ptr - column_from,
 			      &column->fail_cl);
 
 	thread_try_catch_close();

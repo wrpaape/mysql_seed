@@ -44,7 +44,7 @@ hash_state_init(struct HashState *const restrict state,
 	++(buffer_ptr.octet);
 
 	while (buffer_ptr.octet <= state->upto) {
-		*(buffer_ptr.word) ^= (uintptr_t) buffer_ptr.word;
+		*(buffer_ptr.word) |= (uintptr_t) buffer_ptr.word;
 		++(buffer_ptr.octet);
 	}
 }
@@ -60,7 +60,7 @@ hash_state_shuffle(struct HashState *const restrict state)
 	do {
 		++(state->rotate);
 
-		*(buffer_ptr.word) = word_rotate_right(*(buffer_ptr.word),
+		*(buffer_ptr.word) += word_rotate_left(*(buffer_ptr.word),
 						       state->rotate);
 
 		++(buffer_ptr.octet);
