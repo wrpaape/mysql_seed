@@ -5,15 +5,9 @@
 MALLOC_FAILURE_MESSAGE("build_column_timestamp_fixed")
 #define BCTU_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_timestamp_unique")
-#define BCTU_GROUP_MALLOC_FAILURE						\
+#define BCTU_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_timestamp_unique_group")
 
-
-extern inline void
-timestamp_string_init(char *restrict string,
-		      const struct Timestamp *const restrict timestamp);
-extern inline void
-timestamp_string_increment(char *restrict ptr);
 
 void
 build_column_timestamp_fixed(void *arg)

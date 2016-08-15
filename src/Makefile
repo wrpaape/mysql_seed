@@ -231,7 +231,7 @@ endif
 # ──────────────────────────────────────────────────────────────────────────────
 LD		:= ld
 LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lm -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
 
 ifeq (T,$(SYSTEM_OSX))
 LD_FLAGS	+= -macosx_version_min 10.11
@@ -829,6 +829,44 @@ TARGETS			+= $(STRING_STRING_UTILS_OBJ)					\
 			   $(STRING_STRING_UTILS_TRNR_OBJ)				\
 			   $(STRING_STRING_UTILS_TEST_OBJ)				\
 			   $(STRING_STRING_UTILS_TEST_BIN)
+
+
+# time/time_string
+# ──────────────────────────────────────────────────────────────────────────────
+TIME_TIME_STRING_SRC 		:= $(call HELPER_SOURCE_PATH,time time_string)
+TIME_TIME_STRING_HDR		:= $(call HELPER_HEADER_PATH,time time_string)
+TIME_TIME_STRING_OBJ 		:= $(call HELPER_OBJECT_PATH,time time_string)
+TIME_TIME_STRING_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,time time_string)
+TIME_TIME_STRING_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,time time_string)
+TIME_TIME_STRING_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,time time_string)
+TIME_TIME_STRING_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,time time_string)
+TIME_TIME_STRING_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,time time_string)
+# ─────────────── target prequisites ───────────────────────────────────────────
+TIME_TIME_STRING_OBJ_PREQS	:= $(TIME_TIME_STRING_SRC) 		\
+			   	   $(TIME_TIME_STRING_HDR)		\
+			   	   $(TIME_TIME_UTILS_HDR)		\
+			   	   $(STRING_STRING_UTILS_HDR)
+TIME_TIME_STRING_OBJ_GROUP	:= $(TIME_TIME_STRING_OBJ)		\
+				   $(TIME_TIME_UTILS_OBJ_GROUP)		\
+				   $(STRING_STRING_UTILS_OBJ_GROUP)
+TIME_TIME_STRING_TRNR_SRC_PREQS	:= $(TIME_TIME_STRING_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+TIME_TIME_STRING_TEST_OBJ_PREQS	:= $(TIME_TIME_STRING_TEST_SRC)		\
+			   	   $(TIME_TIME_STRING_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+TIME_TIME_STRING_TRNR_OBJ_PREQS	:= $(TIME_TIME_STRING_TRNR_SRC)		\
+			   	   $(TIME_TIME_STRING_TEST_OBJ_PREQS)
+TIME_TIME_STRING_TEST_BIN_PREQS	:= $(TIME_TIME_STRING_TRNR_OBJ)		\
+			   	   $(TIME_TIME_STRING_TEST_OBJ)		\
+			   	   $(TIME_TIME_STRING_OBJ_GROUP)	\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(TIME_TIME_STRING_TEST_BIN)
+TARGETS			+= $(TIME_TIME_STRING_OBJ)		\
+			   $(TIME_TIME_STRING_TRNR_SRC)		\
+			   $(TIME_TIME_STRING_TRNR_OBJ)		\
+			   $(TIME_TIME_STRING_TEST_OBJ)		\
+			   $(TIME_TIME_STRING_TEST_BIN)
 
 
 # system/system_utils
@@ -1499,9 +1537,11 @@ GENERATE_COLUMN_TIMESTAMP_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate co
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_COLUMN_TIMESTAMP_OBJ_PREQS		:= $(GENERATE_COLUMN_TIMESTAMP_SRC) 			\
 			     	   	   	   $(GENERATE_COLUMN_TIMESTAMP_HDR)			\
-			      	   	   	   $(GENERATE_GENERATOR_HDR)
+			      	   	   	   $(GENERATE_GENERATOR_HDR)				\
+			      	   	   	   $(TIME_TIME_STRING_HDR)
 GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP		:= $(GENERATE_COLUMN_TIMESTAMP_OBJ) 			\
-						   $(GENERATE_GENERATOR_OBJ_GROUP)
+						   $(GENERATE_GENERATOR_OBJ_GROUP)			\
+			      	   	   	   $(TIME_TIME_STRING_OBJ_GROUP)
 GENERATE_COLUMN_TIMESTAMP_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TEST_SRC)		\
 				   	   	   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_COLUMN_TIMESTAMP_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_TIMESTAMP_TEST_SRC)		\
@@ -2015,6 +2055,11 @@ $(SYSTEM_EXIT_UTILS_OBJ): $(SYSTEM_EXIT_UTILS_OBJ_PREQS)
 $(UUID_UUID_UTILS_OBJ): $(UUID_UUID_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make time/time_string object
+# ──────────────────────────────────────────────────────────────────────────────
+$(TIME_TIME_STRING_OBJ): $(TIME_TIME_STRING_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make string/string_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_STRING_UTILS_OBJ): $(STRING_STRING_UTILS_OBJ_PREQS)
@@ -2360,6 +2405,26 @@ $(UUID_UUID_UTILS_TEST_OBJ): $(UUID_UUID_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(UUID_UUID_UTILS_TRNR_SRC): $(UUID_UUID_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for time/time_string
+# make:
+# 	time_time_string_test		binary,
+# 	time_time_string_test_runner 	object,
+# 	time_time_string_test		object, and
+# 	time_time_string_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(TIME_TIME_STRING_TEST_BIN): $(TIME_TIME_STRING_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(TIME_TIME_STRING_TRNR_OBJ): $(TIME_TIME_STRING_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(TIME_TIME_STRING_TEST_OBJ): $(TIME_TIME_STRING_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(TIME_TIME_STRING_TRNR_SRC): $(TIME_TIME_STRING_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

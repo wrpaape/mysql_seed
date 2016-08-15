@@ -71,9 +71,9 @@ struct UUIDStringBuffer {
 = *((const struct UUIDStringBuffer *const restrict) UUID_STRING)
 
 #define PUT_UUID_STRING(PTR, UUID_STRING)				\
-*((struct UUIDStringBuffer *const restrict) PTR)			\
+({*((struct UUIDStringBuffer *const restrict) PTR)			\
 = *((const struct UUIDStringBuffer *const restrict) UUID_STRING);	\
-PTR += UUID_STRING_SIZE
+PTR += UUID_STRING_SIZE;})
 
 struct ClkSeqNodeBuffer {
 	char bytes[CLK_SEQ_NODE_SIZE];

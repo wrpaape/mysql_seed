@@ -179,7 +179,7 @@ time_report(time_t *const restrict now,
 				 "function not implemented")
 	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
 				 "An argument address referenced invalid memory"
-					 ".")
+				 ".")
 	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
 	}
 }
@@ -351,7 +351,7 @@ timestamp_now_status(struct Timestamp *const restrict timestamp)
 
 	if (time_status(&now)) {
 		timestamp_init(timestamp,
-				now);
+			       now);
 		return true;
 	}
 
@@ -378,7 +378,7 @@ timestamp_now_report(struct Timestamp *const restrict timestamp,
 	if (time_report(&now,
 			failure)) {
 		timestamp_init(timestamp,
-				now);
+			       now);
 		return true;
 	}
 
@@ -393,7 +393,7 @@ timestamp_now_handle(struct Timestamp *const restrict timestamp,
 	const char *restrict failure;
 
 	if (timestamp_now_report(timestamp,
-				  &failure))
+				 &failure))
 		return;
 
 	handle(arg,
@@ -408,7 +408,7 @@ timestamp_now_handle_cl(struct Timestamp *const restrict timestamp,
 	const char *restrict failure;
 
 	if (timestamp_now_report(timestamp,
-				  &failure))
+				 &failure))
 		return;
 
 	handler_closure_call(fail_cl,
