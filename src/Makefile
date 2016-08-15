@@ -1562,6 +1562,44 @@ TARGETS			+= $(GENERATE_COLUMN_TIMESTAMP_OBJ)		\
 			   $(GENERATE_COLUMN_TIMESTAMP_TEST_BIN)
 
 
+# generate/column_datetime
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_DATETIME_SRC 		:= $(call HELPER_SOURCE_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_HDR		:= $(call HELPER_HEADER_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_OBJ 		:= $(call HELPER_OBJECT_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_datetime)
+GENERATE_COLUMN_DATETIME_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_datetime)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_DATETIME_OBJ_PREQS	:= $(GENERATE_COLUMN_DATETIME_SRC) 		\
+			     	   	   $(GENERATE_COLUMN_DATETIME_HDR)		\
+			      	   	   $(GENERATE_GENERATOR_HDR)			\
+			      	   	   $(TIME_TIME_STRING_HDR)
+GENERATE_COLUMN_DATETIME_OBJ_GROUP	:= $(GENERATE_COLUMN_DATETIME_OBJ) 		\
+					   $(GENERATE_GENERATOR_OBJ_GROUP)		\
+			      	   	   $(TIME_TIME_STRING_OBJ_GROUP)
+GENERATE_COLUMN_DATETIME_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_DATETIME_TEST_SRC)		\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_DATETIME_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_DATETIME_TEST_SRC)		\
+			   	   	   $(GENERATE_COLUMN_DATETIME_OBJ_PREQS)	\
+			   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_DATETIME_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_DATETIME_TRNR_SRC)		\
+			   	   	   $(GENERATE_COLUMN_DATETIME_TEST_OBJ_PREQS)
+GENERATE_COLUMN_DATETIME_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_DATETIME_TRNR_OBJ)		\
+					   $(GENERATE_COLUMN_DATETIME_TEST_OBJ)		\
+			   	   	   $(GENERATE_COLUMN_DATETIME_OBJ_GROUP)	\
+			   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_DATETIME_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_DATETIME_OBJ)	\
+			   $(GENERATE_COLUMN_DATETIME_TRNR_SRC)	\
+			   $(GENERATE_COLUMN_DATETIME_TRNR_OBJ)	\
+			   $(GENERATE_COLUMN_DATETIME_TEST_OBJ)	\
+			   $(GENERATE_COLUMN_DATETIME_TEST_BIN)
+
+
 # generate/loader
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_LOADER_SRC 		:= $(call HELPER_SOURCE_PATH,generate loader)
@@ -1685,15 +1723,17 @@ GENERATE_GENERATE_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate generate)
 GENERATE_GENERATE_OBJ_PREQS		:= $(GENERATE_GENERATE_SRC) 			\
 			   		   $(GENERATE_GENERATE_HDR) 			\
 			   		   $(GENERATE_LOADER_HDR)			\
-			   		   $(GENERATE_COLUMN_INTEGER_HDR)			\
+			   		   $(GENERATE_COLUMN_INTEGER_HDR)		\
 			   		   $(GENERATE_COLUMN_STRING_HDR)		\
 			   		   $(GENERATE_COLUMN_TIMESTAMP_HDR)		\
+			   		   $(GENERATE_COLUMN_DATETIME_HDR)		\
 			   		   $(GENERATE_TABLE_HDR)
 GENERATE_GENERATE_OBJ_GROUP		:= $(GENERATE_GENERATE_OBJ)			\
 			   		   $(GENERATE_LOADER_OBJ_GROUP)			\
 			   		   $(GENERATE_COLUMN_INTEGER_OBJ_GROUP)		\
 			   		   $(GENERATE_COLUMN_STRING_OBJ_GROUP)		\
-			   		   $(GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP)		\
+			   		   $(GENERATE_COLUMN_TIMESTAMP_OBJ_GROUP)	\
+			   		   $(GENERATE_COLUMN_DATETIME_OBJ_GROUP)	\
 			   		   $(GENERATE_TABLE_OBJ_GROUP)
 GENERATE_GENERATE_TRNR_SRC_PREQS	:= $(GENERATE_GENERATE_TEST_SRC)		\
 			   		   $(TEST_RUNNER_SOURCE_DIR)
@@ -2008,6 +2048,11 @@ $(GENERATE_ROW_BLOCK_OBJ): $(GENERATE_ROW_BLOCK_OBJ_PREQS)
 # make generate/column_timestamp object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_COLUMN_TIMESTAMP_OBJ): $(GENERATE_COLUMN_TIMESTAMP_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make generate/column_datetime object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_DATETIME_OBJ): $(GENERATE_COLUMN_DATETIME_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/column_integer object
@@ -2605,6 +2650,26 @@ $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ): $(GENERATE_COLUMN_TIMESTAMP_TEST_OBJ_PREQ
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC): $(GENERATE_COLUMN_TIMESTAMP_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for generate/column_datetime
+# make:
+# 	generate_column_datetime_test		binary,
+# 	generate_column_datetime_test_runner 	object,
+# 	generate_column_datetime_test		object, and
+# 	generate_column_datetime_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_DATETIME_TEST_BIN): $(GENERATE_COLUMN_DATETIME_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_DATETIME_TRNR_OBJ): $(GENERATE_COLUMN_DATETIME_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_DATETIME_TEST_OBJ): $(GENERATE_COLUMN_DATETIME_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_DATETIME_TRNR_SRC): $(GENERATE_COLUMN_DATETIME_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "generate/column_timestamp.h"
+#include "generate/column_datetime.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_column_timestamp(void);
+extern void test_column_datetime(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/generate_column_timestamp_test.c");
-  RUN_TEST(test_column_timestamp, 12);
+  UnityBegin("../test/generate_column_datetime_test.c");
+  RUN_TEST(test_column_datetime, 12);
 
   return (UnityEnd());
 }

@@ -53,15 +53,15 @@ build_column_string_fixed(void *arg)
 	size_t length_rowspan;
 
 	do {
+		from->cell = ptr;
+
 		length_rowspan = base_size * from->parent->row_count;
+
+		contents_until = ptr + length_rowspan;
 
 		length_lock_increment(&from->parent->total,
 				      length_rowspan,
 				      &column->fail_cl);
-
-		contents_until = ptr + length_rowspan;
-
-		from->cell = ptr;
 
 		do {
 			ptr = put_string_size(ptr,

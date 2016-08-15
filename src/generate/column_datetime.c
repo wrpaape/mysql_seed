@@ -1,19 +1,19 @@
-#include "generate/column_timestamp.h"
+#include "generate/column_datetime.h"
 
 /* "YYYY-MM-DD HH:MM:SS" */
-#define BCTF_MALLOC_FAILURE						\
-MALLOC_FAILURE_MESSAGE("build_column_timestamp_fixed")
-#define BCTU_MALLOC_FAILURE						\
-MALLOC_FAILURE_MESSAGE("build_column_timestamp_unique")
-#define BCTU_GROUP_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_timestamp_unique_group")
+#define BCDF_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_column_datetime_fixed")
+#define BCDU_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_column_datetime_unique")
+#define BCDU_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_datetime_unique_group")
 
 
 void
-build_column_timestamp_fixed(void *arg)
+build_column_datetime_fixed(void *arg)
 {
-	char string[SIZE_TIMESTAMP_STRING];
-	struct Timestamp timestamp;
+	char string[SIZE_DATETIME_STRING];
+	struct Timestamp datetime;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -34,7 +34,7 @@ build_column_timestamp_fixed(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCTF_MALLOC_FAILURE);
+				     BCDF_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
@@ -49,12 +49,12 @@ build_column_timestamp_fixed(void *arg)
 	char *restrict ptr = column->contents;
 
 	/* fetch current time */
-	timestamp_now_handle_cl(&timestamp,
+	timestamp_now_handle_cl(&datetime,
 				&column->fail_cl);
 
 	/* stringify current time */
-	timestamp_string_init(&string[0],
-			      &timestamp);
+	datetime_string_init(&string[0],
+			      &datetime);
 
 	const char *restrict contents_until;
 
@@ -65,8 +65,8 @@ build_column_timestamp_fixed(void *arg)
 			       + (sizeof(string) * from->parent->row_count);
 
 		do {
-			PUT_TIMESTAMP_STRING(ptr,
-					     &string[0]);
+			PUT_DATETIME_STRING(ptr,
+					    &string[0]);
 		} while (ptr < contents_until);
 
 		length_lock_increment(&from->parent->total,
@@ -82,10 +82,10 @@ build_column_timestamp_fixed(void *arg)
 
 
 void
-build_column_timestamp_unique(void *arg)
+build_column_datetime_unique(void *arg)
 {
-	char string[SIZE_TIMESTAMP_STRING];
-	struct Timestamp timestamp;
+	char string[SIZE_DATETIME_STRING];
+	struct Timestamp datetime;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -106,7 +106,7 @@ build_column_timestamp_unique(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCTU_MALLOC_FAILURE);
+				     BCDU_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
@@ -121,12 +121,12 @@ build_column_timestamp_unique(void *arg)
 	char *restrict ptr = column->contents;
 
 	/* fetch current time */
-	timestamp_now_handle_cl(&timestamp,
+	timestamp_now_handle_cl(&datetime,
 				&column->fail_cl);
 
 	/* stringify current time */
-	timestamp_string_init(&string[0],
-			      &timestamp);
+	datetime_string_init(&string[0],
+			     &datetime);
 
 	char *const restrict last_digit = &string[sizeof(string) - 2lu];
 
@@ -139,13 +139,13 @@ build_column_timestamp_unique(void *arg)
 			       + (sizeof(string) * from->parent->row_count);
 
 		while (1) {
-			PUT_TIMESTAMP_STRING(ptr,
-					     &string[0]);
+			PUT_DATETIME_STRING(ptr,
+					    &string[0]);
 
 			if (ptr == contents_until)
 				break;
 
-			timestamp_string_increment(last_digit);
+			datetime_string_increment(last_digit);
 		}
 
 		length_lock_increment(&from->parent->total,
@@ -161,14 +161,14 @@ build_column_timestamp_unique(void *arg)
 
 
 void
-build_column_timestamp_unique_group(void *arg)
+build_column_datetime_unique_group(void *arg)
 {
 	const char *restrict group_contents_until;
 	const char *restrict rowspan_contents_until;
 	size_t length_rowspan;
 
-	char string[SIZE_TIMESTAMP_STRING];
-	struct Timestamp timestamp;
+	char string[SIZE_DATETIME_STRING];
+	struct Timestamp datetime;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -197,7 +197,7 @@ build_column_timestamp_unique_group(void *arg)
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
-				     BCTU_GROUP_MALLOC_FAILURE);
+				     BCDU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
@@ -210,12 +210,12 @@ build_column_timestamp_unique_group(void *arg)
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
 	/* fetch current time */
-	timestamp_now_handle_cl(&timestamp,
+	timestamp_now_handle_cl(&datetime,
 				&column->fail_cl);
 
 	/* stringify current time */
-	timestamp_string_init(&string[0],
-			      &timestamp);
+	datetime_string_init(&string[0],
+			      &datetime);
 
 
 	char *const restrict last_digit = &string[sizeof(string) - 2lu];
@@ -240,18 +240,18 @@ build_column_timestamp_unique_group(void *arg)
 	while (1) {
 		if (rowspan_contents_until > group_contents_until) {
 			while (ptr < group_contents_until)
-				PUT_TIMESTAMP_STRING(ptr,
-						     &string[0]);
+				PUT_DATETIME_STRING(ptr,
+						    &string[0]);
 
-			timestamp_string_increment(last_digit);
+			datetime_string_increment(last_digit);
 
 			++group;
 			group_contents_until = ptr
 					     + (sizeof(string) * (*group));
 		} else {
 			while (ptr < rowspan_contents_until)
-				PUT_TIMESTAMP_STRING(ptr,
-						     &string[0]);
+				PUT_DATETIME_STRING(ptr,
+						    &string[0]);
 
 			/* skip to rowspan in next row */
 			from += col_count;

@@ -368,10 +368,16 @@ timestamp_string_increment_overflow(char *const restrict last)
 
 	--ptr;
 
-	if (*ptr == '2')
-		SET_TIMESTAMP_STRING(ptr, "1970-01-01 00:00:01");
-	else
+	if (*ptr != '2') {
 		*last = '8';
+		return;
+	}
+
+	SET_STRING_WIDTH(ptr, "1970", 4);
+
+	ptr += 8l;
+
+	SET_STRING_WIDTH(ptr, "01 00:00:01", 11);
 }
 
 inline void

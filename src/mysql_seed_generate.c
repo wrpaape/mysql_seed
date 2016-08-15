@@ -77,6 +77,10 @@ invalid_timestamp_type_q(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_timestamp_type_q(struct GenerateParseState *const restrict state);
 extern inline void
+invalid_datetime_type_q(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_datetime_type_q(struct GenerateParseState *const restrict state);
+extern inline void
 no_base_string(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_no_base_string(struct GenerateParseState *const restrict state);
@@ -208,6 +212,8 @@ type_set_varchar(struct Label *const restrict type,
 extern inline void
 type_set_timestamp(struct Label *const restrict type);
 extern inline void
+type_set_datetime(struct Label *const restrict type);
+extern inline void
 type_set_tinyint(struct Label *const restrict type);
 extern inline void
 type_set_smallint(struct Label *const restrict type);
@@ -305,6 +311,22 @@ column_timestamp_default(struct GenerateParseState *const restrict state);
 extern inline void
 column_timestamp_default_group(struct GenerateParseState *const restrict state);
 
+/* -c COL_NAME -dt -u */
+extern inline void
+column_datetime_unique(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -dt -u -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_datetime_unique_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -dt -f */
+extern inline void
+column_datetime_fixed(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -dt */
+extern inline void
+column_datetime_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -dt -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_datetime_default_group(struct GenerateParseState *const restrict state);
+
 /* parse COL_TYPE_Q
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
@@ -338,11 +360,25 @@ parse_string_names_full_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_names_full(struct GenerateParseState *const restrict state);
 extern inline void
+parse_timestamp_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_timestamp_default(struct GenerateParseState *const restrict state);
+extern inline void
 parse_timestamp_fixed(struct GenerateParseState *const restrict state);
 extern inline void
 parse_timestamp_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_timestamp_unique(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_unique(struct GenerateParseState *const restrict state);
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
@@ -352,6 +388,8 @@ extern inline void
 parse_string_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_timestamp_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_datetime_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_col_type(struct GenerateParseState *const restrict state);
 extern inline void

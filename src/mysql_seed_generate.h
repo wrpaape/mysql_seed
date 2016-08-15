@@ -177,6 +177,10 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 "\n" ERROR_WRAP("reason: not supported for COL_TYPE 'timestamp', "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
+#define ERROR_INVALID_DT_TYPE_Q_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'datetime', "	\
+		"ignoring DB_SPEC starting with:") "\n"
+
 #define ERROR_NO_BASE_STRING						\
 PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
 		   "starting with")
@@ -965,6 +969,36 @@ error_invalid_timestamp_type_q(struct GenerateParseState *const restrict state)
 	generate_parse_error(state);
 }
 
+inline void
+invalid_datetime_type_q(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_Q_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_DT_TYPE_Q_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_DT_TYPE_Q_REASON_NOTSUP)
+			      - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_datetime_type_q(struct GenerateParseState *const restrict state)
+{
+	invalid_datetime_type_q(&state->argv);
+	generate_parse_error(state);
+}
 
 inline void
 no_base_string(const struct GenerateArgvState *const restrict argv)
@@ -1745,6 +1779,15 @@ type_set_timestamp(struct Label *const restrict type)
 	type->width = 9u;
 }
 
+inline void
+type_set_datetime(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "DATETIME",
+			 9);
+	type->width = 8u;
+}
+
 
 inline void
 type_set_tinyint(struct Label *const restrict type)
@@ -2479,7 +2522,58 @@ column_timestamp_default_group(struct GenerateParseState *const restrict state)
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
 	type_set_timestamp(&col_spec->type);
-	col_spec->build = &build_column_timestamp_unique;
+	col_spec->build = &build_column_timestamp_unique_group;
+}
+
+
+/* -c COL_NAME -dt -u */
+inline void
+column_datetime_unique(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_datetime(&col_spec->type);
+	col_spec->build = &build_column_datetime_unique;
+}
+
+/* -c COL_NAME -dt -u -g GRP_COUNT [PART_TYPE] */
+inline void
+column_datetime_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_datetime(&col_spec->type);
+	col_spec->build = &build_column_datetime_unique_group;
+}
+
+/* -c COL_NAME -dt -f */
+inline void
+column_datetime_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_datetime(&col_spec->type);
+	col_spec->build = &build_column_datetime_fixed;
+}
+
+/* -c COL_NAME -dt */
+inline void
+column_datetime_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_datetime(&col_spec->type);
+	col_spec->build = &build_column_datetime_unique;
+}
+
+/* -c COL_NAME -dt -g GRP_COUNT [PART_TYPE] */
+inline void
+column_datetime_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_datetime(&col_spec->type);
+	col_spec->build = &build_column_datetime_unique_group;
 }
 
 /* parse COL_TYPE_Q
@@ -2637,6 +2731,21 @@ parse_string_names_full(struct GenerateParseState *const restrict state)
 }
 
 inline void
+parse_timestamp_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_timestamp_default_group);
+}
+
+inline void
+parse_timestamp_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_timestamp_default,
+			      &parse_timestamp_default_group);
+}
+
+inline void
 parse_timestamp_fixed(struct GenerateParseState *const restrict state)
 {
 	parse_column_complete(state,
@@ -2657,6 +2766,44 @@ parse_timestamp_unique(struct GenerateParseState *const restrict state)
 	parse_column_complete(state,
 			      &column_timestamp_unique,
 			      &parse_timestamp_unique_group);
+}
+
+inline void
+parse_datetime_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_datetime_default_group);
+}
+
+inline void
+parse_datetime_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_datetime_default,
+			      &parse_datetime_default_group);
+}
+
+inline void
+parse_datetime_fixed(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_datetime_fixed,
+			      &error_grp_spec_for_fixed_data);
+}
+
+inline void
+parse_datetime_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_datetime_unique_group);
+}
+
+inline void
+parse_datetime_unique(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_datetime_unique,
+			      &parse_datetime_unique_group);
 }
 
 
@@ -2799,6 +2946,13 @@ NEXT_DB_SPEC:		column_string_default(state);
 
 
 	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_string_default_group(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
 	case 'u':
 		switch (rem[1]) {
 		case 'n':
@@ -2921,6 +3075,13 @@ parse_timestamp_qualifier(struct GenerateParseState *const restrict state)
 	switch (*arg) {
 	case '-':
 		break;	/* parse long string qualifier */
+	case 'g':
+		if (*rem == '\0')
+			parse_timestamp_default_group(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
 	case 'f':
 		if (*rem == '\0')
 			parse_timestamp_fixed(state);
@@ -2969,6 +3130,12 @@ NEXT_DB_SPEC:		column_timestamp_default(state);
 
 
 	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_timestamp_default_group(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
 			parse_timestamp_fixed(state);
@@ -3007,6 +3174,128 @@ NEXT_DB_SPEC:		column_timestamp_default(state);
 }
 
 inline void
+parse_datetime_qualifier(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		column_datetime_default(state);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		error_invalid_datetime_type_q(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long string qualifier */
+	case 'g':
+		if (*rem == '\0')
+			parse_datetime_default_group(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_datetime_fixed(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_datetime_unique(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		column_datetime_default(state);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_datetime_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_datetime_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_datetime_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		column_datetime_default(state);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_datetime_type_q(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_datetime_default_group(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_datetime_fixed(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_datetime_unique(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_datetime_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_datetime_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_datetime_type_q(state);
+	}
+}
+
+inline void
 parse_col_type(struct GenerateParseState *const restrict state)
 {
 	const char *restrict arg = *(state->argv.arg.from);
@@ -3038,8 +3327,15 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		return;
 
 	case 't':
-		if (*rem == 's' && rem[1] == '\0') {
+		if (*rem == 's' && rem[1] == '\0')
 			parse_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (*rem == 't' && rem[1] == '\0') {
+			parse_datetime_qualifier(state);
 			return;
 		}
 
@@ -3065,8 +3361,15 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		return;
 
 	case 't':
-		if (strings_equal("imestamp", rem + 1l)) {
+		if (strings_equal("imestamp", rem + 1l))
 			parse_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atetime", rem + 1l)) {
+			parse_datetime_qualifier(state);
 			return;
 		}
 
