@@ -145,7 +145,7 @@ build_column_string_hash(void *arg)
 	thread_try_catch_close();
 }
 
-/* TODO: build_column_string_hash_group */
+
 void
 build_column_string_hash_group(void *arg)
 {
@@ -235,10 +235,8 @@ build_column_string_hash_group(void *arg)
 
 	/* direct call to put_hash_state function for inlining opportunity */
 	if (odd_nibble == 0lu) {
-
 		ptr = put_hash_state_even(group_string,
 					  &state);
-
 
 		while (1) {
 			if (contents_until > group_string_until) {

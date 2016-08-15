@@ -159,14 +159,11 @@ void
 build_column_string_unique_group(void *arg)
 {
 	char *restrict ptr;
-	char *restrict column_from;
 	char *restrict *restrict count_ptr;
 	char *restrict group_string;
 	size_t group_string_size;
 	size_t rem_cells;
 	size_t rem_group;
-	size_t cells_put;
-	size_t groups_put;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -213,12 +210,9 @@ build_column_string_unique_group(void *arg)
 
 	size_t *restrict group = (size_t *restrict) column->contents;
 
-
-	column_from = partition_groups(group,
-				       group_count,
-				       row_count);
-
-	ptr = column_from;
+	ptr = partition_groups(group,
+			       group_count,
+			       row_count);
 
 	group_string = ptr;
 
@@ -244,7 +238,7 @@ build_column_string_unique_group(void *arg)
 
 	while (1) {
 		if (rem_cells > rem_group) {
-			groups_put = rem_group;
+			rem_cells -= (rem_group + 1lu);
 
 			while (rem_group > 0lu) {
 				ptr = put_string_size(ptr,
@@ -267,11 +261,9 @@ build_column_string_unique_group(void *arg)
 
 			++group;
 
-			rem_group  = *group - 1lu;
-			rem_cells -= (groups_put + 1lu);
+			rem_group = *group - 1lu;
 		} else {
-
-			cells_put = rem_cells;
+			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
 				ptr = put_string_size(ptr,
@@ -292,14 +284,13 @@ build_column_string_unique_group(void *arg)
 
 			from->cell = ptr;
 
-			rem_cells  = from->parent->row_count;
-			rem_group -= cells_put;
+			rem_cells = from->parent->row_count;
 		}
 	}
 
 	/* increment table length */
 	length_lock_increment(&table->total,
-			      ptr - column_from,
+			      ptr - column->rowspans_from->cell,
 			      &column->fail_cl);
 
 	thread_try_catch_close();
