@@ -604,6 +604,8 @@ put_string_width(char *const restrict buffer,
 		 const unsigned int width)
 {
 	switch (width) {
+	case  0u: return buffer;
+
 	case  1u: *buffer = *string;
 		  return buffer + 1l;
 
@@ -740,6 +742,9 @@ put_string_width_stop(char *const restrict buffer,
 		      const unsigned int width)
 {
 	switch (width) {
+	case  0u: *buffer = '\0';
+		  return buffer + 1l;
+
 	case  1u:   *((CharBuffer2 *const restrict) buffer)
 		  = *((CharBuffer2 *const restrict) string);
 		  return buffer + 2l;
@@ -860,9 +865,14 @@ put_string_width_stop(char *const restrict buffer,
 		  = *((CharBuffer31 *const restrict) string);
 		  return buffer + 31l;
 
-	default:    *((CharBuffer32 *const restrict) buffer)
+	case 31u:   *((CharBuffer32 *const restrict) buffer)
 		  = *((CharBuffer32 *const restrict) string);
 		  return buffer + 32l;
+
+	default:    *((CharBuffer32 *const restrict) buffer)
+		  = *((CharBuffer32 *const restrict) string);
+		  buffer[32] = '\0';
+		  return buffer + 33l;
 	}
 }
 

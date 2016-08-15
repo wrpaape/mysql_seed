@@ -432,6 +432,9 @@ put_single_names(char *restrict ptr,
 		 size_t count);
 
 extern inline char *
+put_full_name(char *restrict ptr);
+
+extern inline char *
 put_full_names(char *restrict ptr,
 	       size_t count);
 
@@ -493,7 +496,6 @@ build_column_string_names_first(void *arg)
 	thread_try_catch_close();
 }
 
-/* TODO: build_column_string_names_first_group */
 void
 build_column_string_names_first_group(void *arg)
 {
@@ -663,6 +665,108 @@ build_column_string_names_last(void *arg)
 void
 build_column_string_names_last_group(void *arg)
 {
+	size_t rem_cells;
+	size_t rem_group;
+
+	char *restrict ptr;
+	size_t *restrict group;
+	const struct Stub *restrict group_name;
+
+	struct Column *const restrict column
+	= (struct Column *const restrict) arg;
+
+	struct Table *const restrict table
+	= column->parent;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
+
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
+
+	const size_t group_count = column->spec->grp_spec.count;
+
+	GroupPartitioner *const partition_groups
+	= column->spec->grp_spec.partition;
+
+	const size_t size_est = (sizeof(size_t) * group_count)
+			      + (FIRST_NAME_SIZE_MAX * row_count);
+
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
+
+	column->contents = malloc(size_est);
+
+	if (column->contents == NULL) {
+		handler_closure_call(&column->fail_cl,
+				     BCSN_FIRST_GROUP_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	struct Rowspan *restrict from = column->rowspans_from;
+
+	 group = (size_t *restrict) column->contents;
+
+	 ptr = partition_groups(group,
+				group_count,
+				row_count);
+
+	group_name = name_map_sample(&last_name_map);
+
+	rem_group = *group;
+
+	rem_cells = from->parent->row_count;
+
+	from->cell = ptr;
+
+	while (1) {
+		if (rem_cells > rem_group) {
+			rem_cells -= rem_group;
+
+			while (rem_group > 0lu) {
+				ptr = put_stub_stop(ptr,
+						    group_name);
+				--rem_group;
+			}
+
+			group_name = name_map_sample(&last_name_map);
+
+			++group;
+
+			rem_group = *group;
+
+		} else {
+			rem_group -= rem_cells;
+
+			while (rem_cells > 0lu) {
+				ptr = put_stub_stop(ptr,
+						    group_name);
+				--rem_cells;
+			}
+
+			/* increment row_block length */
+			length_lock_increment(&from->parent->total,
+					      ptr - from->cell,
+					      &column->fail_cl);
+
+			/* skip to rowspan in next row */
+			from += col_count;
+
+			if (from >= until)
+				break;
+
+			from->cell = ptr;
+
+			rem_cells = from->parent->row_count;
+		}
+	}
+
+	/* add length of column to table total */
+	length_lock_increment(&table->total,
+			      ptr - column->rowspans_from->cell,
+			      &column->fail_cl);
+
+	thread_try_catch_close();
 }
 
 void
@@ -725,4 +829,118 @@ build_column_string_names_full(void *arg)
 void
 build_column_string_names_full_group(void *arg)
 {
+	size_t rem_cells;
+	size_t rem_group;
+
+	char *restrict ptr;
+	char *restrict full_name;
+	size_t *restrict group;
+	size_t full_name_size;
+
+	struct Column *const restrict column
+	= (struct Column *const restrict) arg;
+
+	struct Table *const restrict table
+	= column->parent;
+
+	const struct Rowspan *const restrict until = table->rowspans_until;
+
+	const unsigned int col_count = table->col_count;
+
+	const size_t row_count = table->spec->row_count;
+
+	const size_t group_count = column->spec->grp_spec.count;
+
+	GroupPartitioner *const partition_groups
+	= column->spec->grp_spec.partition;
+
+	const size_t size_est = (sizeof(size_t) * group_count)
+			      + (FIRST_NAME_SIZE_MAX * row_count);
+
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &column->contents);
+
+	column->contents = malloc(size_est);
+
+	if (column->contents == NULL) {
+		handler_closure_call(&column->fail_cl,
+				     BCSN_FIRST_GROUP_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	struct Rowspan *restrict from = column->rowspans_from;
+
+	 group = (size_t *restrict) column->contents;
+
+	 ptr = partition_groups(group,
+				group_count,
+				row_count);
+
+	full_name = ptr;
+
+	ptr = put_full_name(ptr);
+
+	full_name_size = ptr - full_name;
+
+	from->cell = full_name;
+
+	rem_cells = from->parent->row_count - 1lu;
+
+	rem_group = *group - 1lu;
+
+
+	while (1) {
+		if (rem_cells > rem_group) {
+			rem_cells -= (rem_group + 1lu);
+
+			while (rem_group > 0lu) {
+				ptr = put_string_size(ptr,
+						      full_name,
+						      full_name_size);
+				--rem_group;
+			}
+
+			full_name = ptr;
+
+			ptr = put_full_name(ptr);
+
+			full_name_size = ptr - full_name;
+
+			++group;
+
+			rem_group = *group - 1lu;
+
+		} else {
+			rem_group -= rem_cells;
+
+			while (rem_cells > 0lu) {
+				ptr = put_string_size(ptr,
+						      full_name,
+						      full_name_size);
+				--rem_cells;
+			}
+
+			/* increment row_block length */
+			length_lock_increment(&from->parent->total,
+					      ptr - from->cell,
+					      &column->fail_cl);
+
+			/* skip to rowspan in next row */
+			from += col_count;
+
+			if (from >= until)
+				break;
+
+			from->cell = ptr;
+
+			rem_cells = from->parent->row_count;
+		}
+	}
+
+	/* add length of column to table total */
+	length_lock_increment(&table->total,
+			      ptr - column->rowspans_from->cell,
+			      &column->fail_cl);
+
+	thread_try_catch_close();
 }

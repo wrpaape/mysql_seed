@@ -126,7 +126,24 @@ put_full_names(char *restrict ptr,
 	       size_t count)
 {
 	do {
-		ptr = put_full_name(ptr);
+		ptr = put_stub(ptr,
+			       name_map_sample(&first_name_map));
+
+		*ptr = ' ';
+		++ptr;
+
+		if (coin_flip()) {
+			ptr = coin_flip()
+			      ? put_random_initial(ptr)
+			      : put_stub(ptr,
+					 name_map_sample(&first_name_map));
+
+			*ptr = ' ';
+			++ptr;
+		}
+
+		ptr = put_stub_stop(ptr,
+				    name_map_sample(&last_name_map));
 
 		--count;
 	} while (count > 0lu);
