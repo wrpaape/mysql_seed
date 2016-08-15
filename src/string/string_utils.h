@@ -663,9 +663,206 @@ put_string_width(char *const restrict buffer,
 		  = *((CharBuffer15 *const restrict) string);
 		  return buffer + 15l;
 
-	default:    *((CharBuffer16 *const restrict) buffer)
+	case 16u:   *((CharBuffer16 *const restrict) buffer)
 		  = *((CharBuffer16 *const restrict) string);
 		  return buffer + 16l;
+
+	case 17u:   *((CharBuffer17 *const restrict) buffer)
+		  = *((CharBuffer17 *const restrict) string);
+		  return buffer + 17l;
+
+	case 18u:   *((CharBuffer18 *const restrict) buffer)
+		  = *((CharBuffer18 *const restrict) string);
+		  return buffer + 18l;
+
+	case 19u:   *((CharBuffer19 *const restrict) buffer)
+		  = *((CharBuffer19 *const restrict) string);
+		  return buffer + 19l;
+
+	case 20u:   *((CharBuffer20 *const restrict) buffer)
+		  = *((CharBuffer20 *const restrict) string);
+		  return buffer + 20l;
+
+	case 21u:   *((CharBuffer21 *const restrict) buffer)
+		  = *((CharBuffer21 *const restrict) string);
+		  return buffer + 21l;
+
+	case 22u:   *((CharBuffer22 *const restrict) buffer)
+		  = *((CharBuffer22 *const restrict) string);
+		  return buffer + 22l;
+
+	case 23u:   *((CharBuffer23 *const restrict) buffer)
+		  = *((CharBuffer23 *const restrict) string);
+		  return buffer + 23l;
+
+	case 24u:   *((CharBuffer24 *const restrict) buffer)
+		  = *((CharBuffer24 *const restrict) string);
+		  return buffer + 24l;
+
+	case 25u:   *((CharBuffer25 *const restrict) buffer)
+		  = *((CharBuffer25 *const restrict) string);
+		  return buffer + 25l;
+
+	case 26u:   *((CharBuffer26 *const restrict) buffer)
+		  = *((CharBuffer26 *const restrict) string);
+		  return buffer + 26l;
+
+	case 27u:   *((CharBuffer27 *const restrict) buffer)
+		  = *((CharBuffer27 *const restrict) string);
+		  return buffer + 27l;
+
+	case 28u:   *((CharBuffer28 *const restrict) buffer)
+		  = *((CharBuffer28 *const restrict) string);
+		  return buffer + 28l;
+
+	case 29u:   *((CharBuffer29 *const restrict) buffer)
+		  = *((CharBuffer29 *const restrict) string);
+		  return buffer + 29l;
+
+	case 30u:   *((CharBuffer30 *const restrict) buffer)
+		  = *((CharBuffer30 *const restrict) string);
+		  return buffer + 30l;
+
+	case 31u:   *((CharBuffer31 *const restrict) buffer)
+		  = *((CharBuffer31 *const restrict) string);
+		  return buffer + 31l;
+
+	default:    *((CharBuffer32 *const restrict) buffer)
+		  = *((CharBuffer32 *const restrict) string);
+		  return buffer + 32l;
+	}
+}
+
+
+inline char *
+put_string_width_stop(char *const restrict buffer,
+		      const char *const restrict string,
+		      const unsigned int width)
+{
+	switch (width) {
+	case  1u:   *((CharBuffer2 *const restrict) buffer)
+		  = *((CharBuffer2 *const restrict) string);
+		  return buffer + 2l;
+
+	case  2u:   *((CharBuffer3 *const restrict) buffer)
+		  = *((CharBuffer3 *const restrict) string);
+		  return buffer + 3l;
+
+	case  3u:   *((CharBuffer4 *const restrict) buffer)
+		  = *((CharBuffer4 *const restrict) string);
+		  return buffer + 4l;
+
+	case  4u:   *((CharBuffer5 *const restrict) buffer)
+		  = *((CharBuffer5 *const restrict) string);
+		  return buffer + 5l;
+
+	case  5u:   *((CharBuffer6 *const restrict) buffer)
+		  = *((CharBuffer6 *const restrict) string);
+		  return buffer + 6l;
+
+	case  6u:   *((CharBuffer7 *const restrict) buffer)
+		  = *((CharBuffer7 *const restrict) string);
+		  return buffer + 7l;
+
+	case  7u:   *((CharBuffer8 *const restrict) buffer)
+		  = *((CharBuffer8 *const restrict) string);
+		  return buffer + 8l;
+
+	case  8u:   *((CharBuffer9 *const restrict) buffer)
+		  = *((CharBuffer9 *const restrict) string);
+		  return buffer + 9l;
+
+	case  9u:   *((CharBuffer10 *const restrict) buffer)
+		  = *((CharBuffer10 *const restrict) string);
+		  return buffer + 10l;
+
+	case 10u:   *((CharBuffer11 *const restrict) buffer)
+		  = *((CharBuffer11 *const restrict) string);
+		  return buffer + 11l;
+
+	case 11u:   *((CharBuffer12 *const restrict) buffer)
+		  = *((CharBuffer12 *const restrict) string);
+		  return buffer + 12l;
+
+	case 12u:   *((CharBuffer13 *const restrict) buffer)
+		  = *((CharBuffer13 *const restrict) string);
+		  return buffer + 13l;
+
+	case 13u:   *((CharBuffer14 *const restrict) buffer)
+		  = *((CharBuffer14 *const restrict) string);
+		  return buffer + 14l;
+
+	case 14u:   *((CharBuffer15 *const restrict) buffer)
+		  = *((CharBuffer15 *const restrict) string);
+		  return buffer + 15l;
+
+	case 15u:   *((CharBuffer16 *const restrict) buffer)
+		  = *((CharBuffer16 *const restrict) string);
+		  return buffer + 16l;
+
+	case 16u:   *((CharBuffer17 *const restrict) buffer)
+		  = *((CharBuffer17 *const restrict) string);
+		  return buffer + 17l;
+
+	case 17u:   *((CharBuffer18 *const restrict) buffer)
+		  = *((CharBuffer18 *const restrict) string);
+		  return buffer + 18l;
+
+	case 18u:   *((CharBuffer19 *const restrict) buffer)
+		  = *((CharBuffer19 *const restrict) string);
+		  return buffer + 19l;
+
+	case 19u:   *((CharBuffer20 *const restrict) buffer)
+		  = *((CharBuffer20 *const restrict) string);
+		  return buffer + 20l;
+
+	case 20u:   *((CharBuffer21 *const restrict) buffer)
+		  = *((CharBuffer21 *const restrict) string);
+		  return buffer + 21l;
+
+	case 21u:   *((CharBuffer22 *const restrict) buffer)
+		  = *((CharBuffer22 *const restrict) string);
+		  return buffer + 22l;
+
+	case 22u:   *((CharBuffer23 *const restrict) buffer)
+		  = *((CharBuffer23 *const restrict) string);
+		  return buffer + 23l;
+
+	case 23u:   *((CharBuffer24 *const restrict) buffer)
+		  = *((CharBuffer24 *const restrict) string);
+		  return buffer + 24l;
+
+	case 24u:   *((CharBuffer25 *const restrict) buffer)
+		  = *((CharBuffer25 *const restrict) string);
+		  return buffer + 25l;
+
+	case 25u:   *((CharBuffer26 *const restrict) buffer)
+		  = *((CharBuffer26 *const restrict) string);
+		  return buffer + 26l;
+
+	case 26u:   *((CharBuffer27 *const restrict) buffer)
+		  = *((CharBuffer27 *const restrict) string);
+		  return buffer + 27l;
+
+	case 27u:   *((CharBuffer28 *const restrict) buffer)
+		  = *((CharBuffer28 *const restrict) string);
+		  return buffer + 28l;
+
+	case 28u:   *((CharBuffer29 *const restrict) buffer)
+		  = *((CharBuffer29 *const restrict) string);
+		  return buffer + 29l;
+
+	case 29u:   *((CharBuffer30 *const restrict) buffer)
+		  = *((CharBuffer30 *const restrict) string);
+		  return buffer + 30l;
+
+	case 30u:   *((CharBuffer31 *const restrict) buffer)
+		  = *((CharBuffer31 *const restrict) string);
+		  return buffer + 31l;
+
+	default:    *((CharBuffer32 *const restrict) buffer)
+		  = *((CharBuffer32 *const restrict) string);
+		  return buffer + 32l;
 	}
 }
 
@@ -676,6 +873,15 @@ put_stub(char *const restrict buffer,
 	return put_string_width(buffer,
 				stub->bytes,
 				stub->width);
+}
+
+inline char *
+put_stub_stop(char *const restrict buffer,
+	      const struct Stub *const restrict stub)
+{
+	return put_string_width_stop(buffer,
+				     stub->bytes,
+				     stub->width);
 }
 
 inline char *

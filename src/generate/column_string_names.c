@@ -504,9 +504,6 @@ build_column_string_names_first_group(void *arg)
 	size_t *restrict group;
 	const struct Stub *restrict group_name;
 
-	const char *restrict group_string;
-	size_t group_string_width;
-
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
@@ -547,8 +544,6 @@ build_column_string_names_first_group(void *arg)
 				row_count);
 
 	group_name = name_map_sample(&first_name_map);
-	group_string	   = group_name->bytes;
-	group_string_width = group_name->width + 1lu;
 
 	rem_group = *group;
 
@@ -561,15 +556,12 @@ build_column_string_names_first_group(void *arg)
 			rem_cells -= rem_group;
 
 			while (rem_group > 0lu) {
-				ptr = put_string_width(ptr,
-						       group_string,
-						       group_string_width);
+				ptr = put_stub_stop(ptr,
+						    group_name);
 				--rem_group;
 			}
 
 			group_name = name_map_sample(&first_name_map);
-			group_string	   = group_name->bytes;
-			group_string_width = group_name->width + 1lu;
 
 			++group;
 
@@ -579,9 +571,8 @@ build_column_string_names_first_group(void *arg)
 			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
-				ptr = put_string_width(ptr,
-						       group_string,
-						       group_string_width);
+				ptr = put_stub_stop(ptr,
+						    group_name);
 				--rem_cells;
 			}
 

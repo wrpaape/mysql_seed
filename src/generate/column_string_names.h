@@ -89,10 +89,8 @@ put_single_names(char *restrict ptr,
 		 size_t count)
 {
 	do {
-		ptr = put_stub(ptr,
-			       name_map_sample(map));
-		*ptr = '\0';
-		++ptr;
+		ptr = put_stub_stop(ptr,
+				    name_map_sample(map));
 
 		--count;
 	} while (count > 0lu);
@@ -121,11 +119,8 @@ put_full_names(char *restrict ptr,
 			++ptr;
 		}
 
-		ptr = put_stub(ptr,
-			       name_map_sample(&last_name_map));
-
-		*ptr = '\0';
-		++ptr;
+		ptr = put_stub_stop(ptr,
+				    name_map_sample(&last_name_map));
 
 		--count;
 	} while (count > 0lu);
