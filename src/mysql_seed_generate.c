@@ -69,6 +69,10 @@ invalid_grp_count_large(const struct GenerateArgvState *const restrict argv);
 
 /* parsing COL_TYPE_Q */
 extern inline void
+invalid_integer_type_q(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_integer_type_q(struct GenerateParseState *const restrict state);
+extern inline void
 invalid_string_type_q(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_string_type_q(struct GenerateParseState *const restrict state);
@@ -249,6 +253,12 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 /* -c COL_NAME -i */
 extern inline void
 column_integer_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -i -f NUMBER */
+extern inline void
+column_integer_fixed(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -i -u */
+extern inline void
+column_integer_unique(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -s -u BASE_STRING */
 extern inline void
 column_string_unique(struct GenerateParseState *const restrict state);

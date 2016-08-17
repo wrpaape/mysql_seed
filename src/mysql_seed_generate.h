@@ -169,7 +169,11 @@ PARSE_ERROR_HEADER("invalid COL_TYPE")
 #define ERROR_INVALID_COL_TYPE_Q_HEADER					\
 PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 
-#define ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP			\
+#define ERROR_INVALID_I_TYPE_Q_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'integer', "	\
+		"ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP				\
 "\n" ERROR_WRAP("reason: not supported for COL_TYPE 'string', ignoring"	\
 		" DB_SPEC starting with:") "\n"
 
@@ -907,6 +911,37 @@ invalid_grp_count_large(const struct GenerateArgvState *const restrict argv)
 
 
 /* parsing COL_TYPE_Q */
+inline void
+invalid_integer_type_q(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_Q_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_I_TYPE_Q_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_I_TYPE_Q_REASON_NOTSUP)
+			      - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_integer_type_q(struct GenerateParseState *const restrict state)
+{
+	invalid_integer_type_q(&state->argv);
+	generate_parse_error(state);
+}
+
 inline void
 invalid_string_type_q(const struct GenerateArgvState *const restrict argv)
 {
@@ -1767,7 +1802,6 @@ type_set_varchar(struct Label *const restrict type,
 	SET_STRING_WIDTH(ptr, ")", 2);
 
 	type->width = ptr + 1l - &type->buffer[0];
-
 }
 
 inline void
@@ -2237,6 +2271,35 @@ column_integer_default(struct GenerateParseState *const restrict state)
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
+}
+
+/* -c COL_NAME -i -f NUMBER */
+inline void
+column_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	/* struct ColSpec *const restrict col_spec = state->specs.col; */
+
+	/* type_assign_upto(&col_spec->type, */
+	/* 		 row_count); */
+
+	/* col_spec->build = &build_column_integer_fixed; */
+}
+
+/* -c COL_NAME -i -u */
+inline void
+column_integer_unique(struct GenerateParseState *const restrict state)
+{
+	/* struct ColSpec *const restrict col_spec = state->specs.col; */
+	/* const size_t row_count			= state->specs.tbl->row_count; */
+	/* size_t *const restrict counter_upto	= &state->database.counter_upto; */
+
+	/* type_assign_upto(&col_spec->type, */
+	/* 		 row_count); */
+
+	/* col_spec->build = &build_column_integer_unique; */
+
+	/* if (row_count > *counter_upto) */
+	/* 	*counter_upto = row_count; */
 }
 
 /* -c COL_NAME -s -u BASE_STRING */
@@ -2819,6 +2882,74 @@ parse_integer_qualifier(struct GenerateParseState *const restrict state)
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
+
+	/* TODO */
+	/* const char *restrict arg = *(state->argv.arg.from); */
+
+	/* if (*arg != '-') { */
+	/* 	error_invalid_integer_type_q(state); */
+	/* 	return; */
+	/* } */
+
+	/* ++arg; */
+	/* const char *const restrict rem = arg + 1l; */
+
+	/* switch (*arg) { */
+	/* case '-': */
+	/* 	break;	/1* parse long integer qualifier *1/ */
+
+	/* case 'g': */
+	/* 	if (*rem == '\0') */
+	/* 		parse_integer_default_group(state); */
+	/* 	else */
+	/* 		error_invalid_integer_type_q(state); */
+	/* 	return; */
+
+	/* case 'u': */
+	/* 	if (*rem == '\0') */
+	/* 		parse_integer_unique(state); */
+	/* 	else */
+	/* 		error_invalid_integer_type_q(state); */
+	/* 	return; */
+
+	/* case 'f': */
+	/* 	if (*rem == '\0') */
+	/* 		parse_integer_fixed(state); */
+	/* 	else */
+	/* 		error_invalid_integer_type_q(state); */
+	/* 	return; */
+
+	/* case 'c': */
+	/* 	if (*rem == '\0') { */
+/* NEXT_COL_SPEC:		column_integer_default(state); */
+	/* 		parse_next_col_spec(state); */
+	/* 	} else { */
+	/* 		error_invalid_integer_type_q(state); */
+	/* 	} */
+	/* 	return; */
+
+	/* case 't': */
+	/* 	if (*rem == '\0') { */
+/* NEXT_TBL_SPEC:		column_integer_default(state); */
+	/* 		parse_table_complete(state); */
+	/* 		parse_next_tbl_spec(state); */
+	/* 	} else { */
+	/* 		error_invalid_integer_type_q(state); */
+	/* 	} */
+	/* 	return; */
+
+	/* case 'd': */
+	/* 	if (*rem == '\0') { */
+/* NEXT_DB_SPEC:		column_integer_default(state); */
+	/* 		parse_database_complete(state); */
+	/* 		parse_next_db_spec(state); */
+	/* 		return; */
+	/* 	} */
+
+	/* default: */
+	/* 	error_invalid_integer_type_q(state); */
+	/* 	return; */
+	/* } */
 }
 
 
@@ -3699,10 +3830,11 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 *						overhead
 	 * struct ColSpec {
 	 *	struct String name;			1 pointer + 1 size_t
-	 *	union TypeQualifier			2 ldbls + 1 uint (max)
+	 *	union TypeQualifier type_qualifier	2 ldbls + 1 uint (max)
+	 *	struct GrpSpec grp_spec;                1 pointer + 1 size_t
 	 *	Procedure *build;			1 pointer
 	 * };						────────────────
-	 *						2 pointer + 1 size_t
+	 *						3 pointer + 2 size_t
 	 *						+ 2 ldbls + 1 uint
 	 *
 	 * struct TblSpec {

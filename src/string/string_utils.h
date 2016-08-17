@@ -29,18 +29,37 @@ struct String {
 
 struct Stub {
 	const char *bytes;
-	unsigned int width; /* 1 - 16 bytes */
+	unsigned int width; /* 1 - 32 bytes */
 };
 
 struct Label {
-	char buffer[WIDTH_MAX_WIDTH];
-	unsigned int width; /* 1 - 16 bytes */
+	char buffer[32];
+	unsigned int width; /* 1 - 32 bytes */
 };
 
 struct StringInterval {
 	char *restrict from;
 	const char *restrict until;
 };
+
+typedef char *
+PutStringWidth(char *const restrict buffer,
+	       const char *const restrict bytes);
+
+struct PutStubClosure {
+	PutStringWidth *put;
+	const char *bytes;
+	unsigned int width;
+};
+
+struct PutStringClosure {
+	const word_t *restrict words;
+	const char *restrict rem;
+	PutStringWidth *put_rem;
+	size_t size;
+};
+
+
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -51,6 +70,8 @@ extern const uintmax_t ten_pow_map[DIGIT_COUNT_UINTMAX_MAX];
 #if HAVE_PTR_STRING_ATTRS
 extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
+
+extern PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
@@ -598,6 +619,38 @@ put_string_size_until(char *restrict buffer,
 			       (size > rem_size) ? rem_size : size);
 }
 
+inline void
+put_string_closure_init(struct PutStringClosure *const restrict closure,
+			const char *const restrict bytes,
+			const size_t size)
+{
+	const size_t length_words = DIV_WORD_SIZE(size);
+	const size_t rem_size     = REM_WORD_SIZE(size);
+
+	closure->words = (const word_t *restrict) bytes;
+	closure->rem
+	= (const char *restrict) (((const word_t *restrict) bytes)
+	+ length_words);
+	closure->put_rem = PUT_STRING_WIDTH_MAP[rem_size];
+	closure->size = size;
+}
+
+inline char *
+put_string_closure_call(struct PutStringClosure *const restrict closure,
+			char *restrict buffer)
+{
+	const word_t *restrict word = closure->words;
+
+	while (word < (const word_t *restrict) closure->rem) {
+		*((word_t *restrict) buffer) = *word;
+		buffer += WORD_SIZE;
+		++word;
+	}
+
+	return closure->put_rem(buffer,
+				closure->rem);
+}
+
 inline char *
 put_string_width(char *const restrict buffer,
 		 const char *const restrict string,
@@ -877,6 +930,44 @@ put_string_width_stop(char *const restrict buffer,
 }
 
 inline char *
+put_string_width0(char *const restrict buffer,
+		  const char *const restrict bytes)
+{
+	return 0;
+}
+
+#define DEFINE_PUT_STRING_WIDTH(WIDTH)					\
+inline char *								\
+put_string_width ## WIDTH (char *const restrict buffer,			\
+			   const char *const restrict bytes)		\
+{									\
+	*((CHAR_BUFFER_WIDTH(WIDTH) *const restrict) buffer)		\
+	= *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) bytes);	\
+	return buffer + WIDTH;						\
+}
+
+FOR_ALL_CHAR_BUFFER_WIDTHS(DEFINE_PUT_STRING_WIDTH)
+
+
+inline void
+put_stub_closure_init(struct PutStubClosure *const restrict closure,
+		      const char *const restrict bytes,
+		      const unsigned int width)
+{
+	closure->put   = PUT_STRING_WIDTH_MAP[width];
+	closure->bytes = bytes;
+	closure->width = width;
+}
+
+inline char *
+put_stub_closure_call(struct PutStubClosure *const restrict closure,
+		      char *const restrict buffer)
+{
+	return closure->put(buffer,
+			    closure->bytes);
+}
+
+inline char *
 put_stub(char *const restrict buffer,
 	 const struct Stub *const restrict stub)
 {
@@ -901,6 +992,15 @@ put_label(char *const restrict buffer,
 	return put_string_width(buffer,
 				&label->buffer[0],
 				label->width);
+}
+
+inline char *
+put_label_stop(char *const restrict buffer,
+	       const struct Label *const restrict label)
+{
+	return put_string_width_stop(buffer,
+				     &label->buffer[0],
+				     label->width);
 }
 
 inline char *
@@ -1097,23 +1197,24 @@ put_char_times_until(char *restrict buffer,
 inline char *
 put_string_inspect(char *restrict buffer,
 		   const char *restrict string,
-		   size_t length)
+		   const size_t length)
 {
-	while (1) {
-		if (*string == '\0')
-			return buffer;
+	const char *const restrict until = string + length;
 
-		if (length == 0lu) {
+	while (1) {
+		if (string == until) {
 			PUT_STRING_WIDTH(buffer,
 					 "...",
 					 3);
 			return buffer;
 		}
 
+		if (*string == '\0')
+			return buffer;
+
 		*buffer = *string;
 		++buffer;
 		++string;
-		--length;
 	}
 }
 
@@ -1847,7 +1948,7 @@ do_parse_uint(uintmax_t *const restrict n,
 		}
 	}
 
-	if ((*string > '9' ) || (*string < '0' ))
+	if ((*string > '9') || (*string < '0'))
 		return false;
 
 	const char *const restrict start_ptr = string;

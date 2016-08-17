@@ -65,6 +65,14 @@ const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID] = {
 #	endif /* if (LENGTH_MAX_POINTER_ID > 2u) */
 };
 
+#define PUT_STRING_WIDTH_FN_ADDRESS(WIDTH)				\
+, &put_string_width ## WIDTH
+
+PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
+	&put_string_width0
+	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_WIDTH_FN_ADDRESS)
+};
+
 extern inline unsigned int
 pointer_id_length(const uintptr_t ptr_n);
 
@@ -150,15 +158,44 @@ put_string_size_until(char *restrict buffer,
 		      const size_t size,
 		      char *const restrict until);
 
+extern inline void
+put_string_closure_init(struct PutStringClosure *const restrict closure,
+			const char *const restrict bytes,
+			const size_t size);
+
+extern inline char *
+put_string_closure_call(struct PutStringClosure *const restrict closure,
+			char *restrict buffer);
+
 extern inline char *
 put_string_width(char *const restrict buffer,
 		 const char *const restrict string,
 		 const unsigned int width);
 
 extern inline char *
+put_string_width0(char *const restrict buffer,
+		  const char *const restrict bytes);
+
+#define DECLARE_PUT_STRING_WIDTH(WIDTH)					\
+extern inline char *							\
+put_string_width ## WIDTH (char *const restrict buffer,			\
+			   const char *const restrict bytes);
+
+FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_WIDTH)
+
+extern inline char *
 put_string_width_stop(char *const restrict buffer,
 		      const char *const restrict string,
 		      const unsigned int width);
+
+extern inline void
+put_stub_closure_init(struct PutStubClosure *const restrict closure,
+		      const char *const restrict bytes,
+		      const unsigned int width);
+
+extern inline char *
+put_stub_closure_call(struct PutStubClosure *const restrict closure,
+		      char *const restrict buffer);
 
 extern inline char *
 put_stub(char *const restrict buffer,
@@ -171,6 +208,10 @@ put_stub_stop(char *const restrict buffer,
 extern inline char *
 put_label(char *const restrict buffer,
 	  const struct Label *const restrict label);
+
+extern inline char *
+put_label_stop(char *const restrict buffer,
+	       const struct Label *const restrict label);
 
 extern inline char *
 put_char_times(char *const restrict buffer,
@@ -192,7 +233,7 @@ put_char_times_until(char *restrict buffer,
 extern inline char *
 put_string_inspect(char *restrict buffer,
 		   const char *restrict string,
-		   size_t length);
+		   const size_t length);
 
 extern inline char *
 put_octet_hex_lower(char *const restrict buffer,

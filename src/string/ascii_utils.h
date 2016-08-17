@@ -200,6 +200,8 @@ _ASCII_SYMBOL_BLOCK_D
 
 /* ASCII code macros
  * ========================================================================== */
+#define IS_ASCII_DIGIT(DIGIT)	(((DIGIT) < ':') && ((DIGIT) > '/'))
+
 /* 0..9 → '0'..'9' */
 #define DIGIT_TO_ASCII(DIGIT)	(((unsigned int) (DIGIT)) | 48u)
 

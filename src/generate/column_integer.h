@@ -7,6 +7,8 @@
 
 /* worker thread entry points */
 void
+build_column_integer_fixed(void *arg);
+void
 build_column_integer_unique(void *arg);
 void
 build_column_integer_unique_group(void *arg);

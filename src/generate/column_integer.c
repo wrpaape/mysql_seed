@@ -1,13 +1,18 @@
 #include "generate/column_integer.h"
 
-/* worker thread entry point */
+/* worker thread entry points */
+void
+build_column_integer_fixed(void *arg)
+{
+}
+
 void
 build_column_integer_unique(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	struct Rowspan *restrict from		   = column->rowspans_from;
+	struct Rowspan *restrict from = column->rowspans_from;
 
 	struct Table *const restrict table
 	= column->parent;

@@ -125,9 +125,7 @@ PUT_STRING_WIDTH(PTR, LOADER_HEADER_1, 2)
 "\n#"									\
 "\n# seeds MySQL database " /* <db_name> */
 #define PUT_LOADER_HEADER_2(PTR)					\
-PTR = put_string_size(PTR,						\
-		      LOADER_HEADER_2,					\
-		      sizeof(LOADER_HEADER_2) - 1lu)
+PUT_STRING_WIDTH(PTR, LOADER_HEADER_2, 26)
 
 #define LOADER_HEADER_3							\
 " according to the tabular data files:"					\
@@ -143,9 +141,7 @@ PTR = put_string_size(PTR,						\
 "\n"									\
 "\nCREATE DATABASE " /* <db_name> */
 #define PUT_LOADER_HEADER_4(PTR)					\
-PTR = put_string_size(PTR,						\
-		      LOADER_HEADER_4,					\
-		      sizeof(LOADER_HEADER_4) - 1lu)
+PUT_STRING_WIDTH(PTR, LOADER_HEADER_4, 18)
 
 #define LOADER_HEADER_5							\
 				     ";"				\
@@ -193,16 +189,12 @@ PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_FIELD_DELIM, 3)
 "\n"									\
 "\nLOAD DATA INFILE '" ABSPATH_PFX /* <table_filepath n> */
 #define PUT_LOADER_LOAD_TABLE_1(PTR)					\
-PTR = put_string_size(PTR,						\
-		      LOADER_LOAD_TABLE_1,				\
-		      sizeof(LOADER_LOAD_TABLE_1) - 1lu)
+PUT_STRING_WIDTH(PTR, LOADER_LOAD_TABLE_1, 23)
 
 #define LOADER_LOAD_TABLE_2						\
 "'\n\tIGNORE INTO TABLE " /* <tbl_name> */
 #define PUT_LOADER_LOAD_TABLE_2(PTR)					\
-PTR = put_string_size(PTR,						\
-		      LOADER_LOAD_TABLE_2,				\
-		      sizeof(LOADER_LOAD_TABLE_2) - 1lu)
+PUT_STRING_WIDTH(PTR, LOADER_LOAD_TABLE_2, 21)
 
 #define LOADER_LOAD_TABLE_3						\
 "\n\tFIELDS TERMINATED BY '" FIELD_DELIM_STRING "'"			\
@@ -260,7 +252,11 @@ union IntegerUnsignedScale {
 	struct IntegerUnsignedRange range;
 	uintmax_t from;
 	uintmax_t upto;
-	uintmax_t fixed;
+};
+
+union IntegerUnsignedQualifier {
+	union IntegerUnsignedScale unsigned_scale;
+	struct PutStubClosure fixed;
 };
 
 /* -c temperature --integer --range -100 100		→ 45
@@ -276,13 +272,13 @@ union IntegerSignedScale {
 	struct IntegerSignedRange range;
 	intmax_t from;
 	intmax_t upto;
-	intmax_t fixed;
 };
 
-union IntegerQualifier {
-	union IntegerUnsignedScale unsigned_scale;
-	union IntegerSignedScale signed_scale;
+union IntegerSignedQualifier {
+	union IntegerSignedScale scale;
+	struct PutStubClosure fixed;
 };
+
 
 /* -c temperature --float --range 1 500.25		→ 300.2334
  *							  1.0000000
@@ -297,17 +293,18 @@ union FloatScale {
 	struct FloatRange range;
 	long double from;
 	long double upto;
-	long double fixed;
 };
 
 struct FloatQualifier {
 	union FloatScale scale;
 	unsigned int precision;
+	struct PutStringClosure fixed;
 };
 
 union TypeQualifier {
 	union StringQualifier string;
-	union IntegerQualifier integer;
+	union IntegerSignedQualifier integer_signed;
+	union IntegerUnsignedQualifier integer_unsigned;
 	struct FloatQualifier flt_pt;
 };
 
