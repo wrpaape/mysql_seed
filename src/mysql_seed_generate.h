@@ -201,6 +201,22 @@ PARSE_ERROR_HEADER("invalid column base string")
 		BASE_STRING_LENGTH_MAX_STRING " non-null UTF-8 "	\
 		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
+#define ERROR_NO_FIXED_STRING						\
+PARSE_ERROR_HEADER("no column fixed string provided, ignoring DB_SPEC "	\
+		   "starting with")
+
+#define ERROR_INVALID_FIXED_STRING_HEADER				\
+PARSE_ERROR_HEADER("invalid column fixed string")
+
+#define ERROR_INVALID_FIXED_STRING_REASON_INVALID			\
+"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
+		", ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_FIXED_STRING_REASON_LONG				\
+"\n" ERROR_WRAP("reason: exceeded maximum of "				\
+		FIXED_STRING_LENGTH_MAX_STRING " non-null UTF-8 "	\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
+
 #define ERROR_NO_HASH_LENGTH						\
 PARSE_ERROR_HEADER("no HASH_LENGTH provided, ignoring DB_SPEC starting"	\
 		   " with")
@@ -1120,6 +1136,89 @@ invalid_base_string_long(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
+no_fixed_string(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_FIXED_STRING,
+			  sizeof(ERROR_NO_FIXED_STRING) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_fixed_string(struct GenerateParseState *const restrict state)
+{
+	no_fixed_string(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
+invalid_fixed_string_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_STRING_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_STRING_REASON_INVALID,
+			      sizeof(ERROR_INVALID_FIXED_STRING_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+invalid_fixed_string_long(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_STRING_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_STRING_REASON_LONG,
+			      sizeof(ERROR_INVALID_FIXED_STRING_REASON_LONG)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
 no_hash_length(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
@@ -1631,11 +1730,13 @@ parse_col_name(struct String *const restrict col_name,
 
 
 inline bool
-parse_base_string(struct String *const restrict base,
+parse_base_string(struct StringBuilder *const restrict base,
 		  struct GenerateArgvState *const restrict argv)
 {
+	const char *const restrict base_bytes = *(argv->arg.from);
+
 	const octet_t *restrict octets
-	= (const octet_t *restrict) *(argv->arg.from);
+	= (const octet_t *restrict) base_bytes;
 
 	unsigned int width;
 
@@ -1643,10 +1744,10 @@ parse_base_string(struct String *const restrict base,
 
 	while (1) {
 		if (*octets == '\0') {
-			base->bytes  = *(argv->arg.from);
-			base->length = octets
-					- ((const octet_t *const restrict)
-					   base->bytes);
+			string_builder_init(base,
+					    base_bytes,
+					    ((const char *const restrict)
+					     octets) - base_bytes);
 			return true;
 		}
 
@@ -1663,6 +1764,46 @@ parse_base_string(struct String *const restrict base,
 
 		if (rem_code_points == 0lu) {
 			invalid_base_string_long(argv);
+			return false;
+		}
+	}
+}
+
+inline bool
+parse_fixed_string(struct StringBuilder *const restrict fixed,
+		   struct GenerateArgvState *const restrict argv)
+{
+	const char *const restrict fixed_bytes = *(argv->arg.from);
+
+	const octet_t *restrict octets
+	= (const octet_t *restrict) fixed_bytes;
+
+	unsigned int width;
+
+	size_t rem_code_points = BASE_STRING_LENGTH_MAX;
+
+	while (1) {
+		if (*octets == '\0') {
+			string_builder_init(fixed,
+					    fixed_bytes,
+					    (((const char *const restrict)
+					     octets) + 1l) - fixed_bytes);
+			return true;
+		}
+
+		width = utf8_width(octets);
+
+		if (width == 0u) {
+			invalid_fixed_string_invalid(argv);
+			return false;
+		}
+
+		octets += width;
+
+		--rem_code_points;
+
+		if (rem_code_points == 0lu) {
+			invalid_fixed_string_long(argv);
 			return false;
 		}
 	}
@@ -2312,7 +2453,7 @@ column_string_unique(struct GenerateParseState *const restrict state)
 
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
-			 (col_spec->type_qualifier.string.base.length
+			 (col_spec->type_q.string.base.length
 			  + uint_digit_count(row_count)));
 
 	col_spec->build = &build_column_string_unique;
@@ -2331,7 +2472,7 @@ column_string_unique_group(struct GenerateParseState *const restrict state)
 
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
-			 (col_spec->type_qualifier.string.base.length
+			 (col_spec->type_q.string.base.length
 			  + uint_digit_count(grp_count)));
 
 	col_spec->build = &build_column_string_unique_group;
@@ -2348,7 +2489,7 @@ column_string_fixed(struct GenerateParseState *const restrict state)
 
 	type_set_char(&col_spec->type,
 		      (uintmax_t)
-		      col_spec->type_qualifier.string.base.length);
+		      col_spec->type_q.string.base.length);
 
 	col_spec->build = &build_column_string_fixed;
 }
@@ -2504,11 +2645,13 @@ column_string_default(struct GenerateParseState *const restrict state)
 	const size_t row_count			= state->specs.tbl->row_count;
 	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
-	col_spec->type_qualifier.string.base = col_spec->name;
+	string_builder_init(&col_spec->type_q.string.base,
+			    col_spec->name.bytes,
+			    col_spec->name.length);
 
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
-			 (col_spec->type_qualifier.string.base.length
+			 (col_spec->type_q.string.base.length
 			  + uint_digit_count(row_count)));
 
 	col_spec->build = &build_column_string_unique;
@@ -2525,11 +2668,13 @@ column_string_default_group(struct GenerateParseState *const restrict state)
 	const size_t grp_count			= col_spec->grp_spec.count;
 	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
-	col_spec->type_qualifier.string.base = col_spec->name;
+	string_builder_init(&col_spec->type_q.string.base,
+			    col_spec->name.bytes,
+			    col_spec->name.length);
 
 	type_set_varchar(&col_spec->type,
 			 (uintmax_t)
-			 (col_spec->type_qualifier.string.base.length
+			 (col_spec->type_q.string.base.length
 			  + uint_digit_count(grp_count)));
 
 	col_spec->build = &build_column_string_unique_group;
@@ -2673,7 +2818,7 @@ parse_string_unique(struct GenerateParseState *const restrict state)
 		return;
 	}
 
-	if (parse_base_string(&state->specs.col->type_qualifier.string.base,
+	if (parse_base_string(&state->specs.col->type_q.string.base,
 			      &state->argv))
 		parse_column_complete(state,
 				      &column_string_unique,
@@ -2688,12 +2833,12 @@ parse_string_fixed(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_base_string(state);
+		error_no_fixed_string(state);
 		return;
 	}
 
-	if (parse_base_string(&state->specs.col->type_qualifier.string.base,
-			      &state->argv))
+	if (parse_fixed_string(&state->specs.col->type_q.string.fixed,
+			       &state->argv))
 		parse_column_complete(state,
 				      &column_string_fixed,
 				      &error_grp_spec_for_fixed_data);
@@ -2734,9 +2879,7 @@ parse_string_hash(struct GenerateParseState *const restrict state)
 		return;
 	}
 
-	if (parse_hash_length(&state->specs.col->type_qualifier.string
-							       .length_scale
-							       .fixed,
+	if (parse_hash_length(&state->specs.col->type_q.string.scale.fixed,
 			      &state->argv)) {
 
 		state->argv.cache = *(state->argv.arg.from);
@@ -3830,7 +3973,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	 *						overhead
 	 * struct ColSpec {
 	 *	struct String name;			1 pointer + 1 size_t
-	 *	union TypeQualifier type_qualifier	2 ldbls + 1 uint (max)
+	 *	union TypeQualifier type_q	        2 ldbls + 1 uint (max)
 	 *	struct GrpSpec grp_spec;                1 pointer + 1 size_t
 	 *	Procedure *build;			1 pointer
 	 * };						────────────────

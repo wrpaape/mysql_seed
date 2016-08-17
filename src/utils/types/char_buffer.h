@@ -43,6 +43,7 @@ typedef struct CharBuffer29 { char chars[29]; } CharBuffer29;
 typedef struct CharBuffer30 { char chars[30]; } CharBuffer30;
 typedef struct CharBuffer31 { char chars[31]; } CharBuffer31;
 typedef struct CharBuffer32 { char chars[32]; } CharBuffer32;
+typedef struct CharBuffer33 { char chars[33]; } CharBuffer33;
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TYPEDEFS, ENUM AND STRUCT DEFINITIONS
@@ -93,6 +94,40 @@ MACRO(29)								\
 MACRO(30)								\
 MACRO(31)								\
 MACRO(32)
+
+#define FOR_ALL_CHAR_BUFFER_WIDTHS_STOP(MACRO)				\
+MACRO(1,   2)								\
+MACRO(2,   3)								\
+MACRO(3,   4)								\
+MACRO(4,   5)								\
+MACRO(5,   6)								\
+MACRO(6,   7)								\
+MACRO(7,   8)								\
+MACRO(8,   9)								\
+MACRO(9,  10)								\
+MACRO(10, 11)								\
+MACRO(11, 12)								\
+MACRO(12, 13)								\
+MACRO(13, 14)								\
+MACRO(14, 15)								\
+MACRO(15, 16)								\
+MACRO(16, 17)								\
+MACRO(17, 18)								\
+MACRO(18, 19)								\
+MACRO(19, 20)								\
+MACRO(20, 21)								\
+MACRO(21, 22)								\
+MACRO(22, 23)								\
+MACRO(23, 24)								\
+MACRO(24, 25)								\
+MACRO(25, 26)								\
+MACRO(26, 27)								\
+MACRO(27, 28)								\
+MACRO(28, 29)								\
+MACRO(29, 30)								\
+MACRO(30, 31)								\
+MACRO(31, 32)								\
+MACRO(32, 33)
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * HELPER MACROS */

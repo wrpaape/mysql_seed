@@ -505,6 +505,7 @@ build_column_string_names_first_group(void *arg)
 	char *restrict ptr;
 	size_t *restrict group;
 	const struct Stub *restrict group_name;
+	PutStringWidth *put_group_name;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -545,7 +546,8 @@ build_column_string_names_first_group(void *arg)
 				group_count,
 				row_count);
 
-	group_name = name_map_sample(&first_name_map);
+	group_name     = name_map_sample(&first_name_map);
+	put_group_name = PUT_STRING_WIDTH_STOP_MAP[group_name->width];
 
 	rem_group = *group;
 
@@ -558,12 +560,14 @@ build_column_string_names_first_group(void *arg)
 			rem_cells -= rem_group;
 
 			while (rem_group > 0lu) {
-				ptr = put_stub_stop(ptr,
-						    group_name);
+				ptr = put_group_name(ptr,
+						     group_name->bytes);
 				--rem_group;
 			}
 
 			group_name = name_map_sample(&first_name_map);
+			put_group_name
+			= PUT_STRING_WIDTH_STOP_MAP[group_name->width];
 
 			++group;
 
@@ -573,8 +577,8 @@ build_column_string_names_first_group(void *arg)
 			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
-				ptr = put_stub_stop(ptr,
-						    group_name);
+				ptr = put_group_name(ptr,
+						     group_name->bytes);
 				--rem_cells;
 			}
 
@@ -670,6 +674,7 @@ build_column_string_names_last_group(void *arg)
 	char *restrict ptr;
 	size_t *restrict group;
 	const struct Stub *restrict group_name;
+	PutStringWidth *put_group_name;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -710,7 +715,8 @@ build_column_string_names_last_group(void *arg)
 				group_count,
 				row_count);
 
-	group_name = name_map_sample(&last_name_map);
+	group_name     = name_map_sample(&last_name_map);
+	put_group_name = PUT_STRING_WIDTH_STOP_MAP[group_name->width];
 
 	rem_group = *group;
 
@@ -723,12 +729,14 @@ build_column_string_names_last_group(void *arg)
 			rem_cells -= rem_group;
 
 			while (rem_group > 0lu) {
-				ptr = put_stub_stop(ptr,
-						    group_name);
+				ptr = put_group_name(ptr,
+						     group_name->bytes);
 				--rem_group;
 			}
 
 			group_name = name_map_sample(&last_name_map);
+			put_group_name
+			= PUT_STRING_WIDTH_STOP_MAP[group_name->width];
 
 			++group;
 
@@ -738,8 +746,8 @@ build_column_string_names_last_group(void *arg)
 			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
-				ptr = put_stub_stop(ptr,
-						    group_name);
+				ptr = put_group_name(ptr,
+						     group_name->bytes);
 				--rem_cells;
 			}
 
@@ -833,7 +841,8 @@ build_column_string_names_full_group(void *arg)
 	char *restrict ptr;
 	char *restrict full_name;
 	size_t *restrict group;
-	size_t full_name_size;
+
+	struct PutStringClosure put_closure;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -878,7 +887,9 @@ build_column_string_names_full_group(void *arg)
 
 	ptr = put_full_name(ptr);
 
-	full_name_size = ptr - full_name;
+	put_string_closure_init(&put_closure,
+				full_name,
+				ptr - full_name);
 
 	from->cell = full_name;
 
@@ -892,9 +903,8 @@ build_column_string_names_full_group(void *arg)
 			rem_cells -= (rem_group + 1lu);
 
 			while (rem_group > 0lu) {
-				ptr = put_string_size(ptr,
-						      full_name,
-						      full_name_size);
+				ptr = put_string_closure_call(&put_closure,
+							      ptr);
 				--rem_group;
 			}
 
@@ -902,7 +912,9 @@ build_column_string_names_full_group(void *arg)
 
 			ptr = put_full_name(ptr);
 
-			full_name_size = ptr - full_name;
+			put_string_closure_init(&put_closure,
+						full_name,
+						ptr - full_name);
 
 			++group;
 
@@ -912,9 +924,8 @@ build_column_string_names_full_group(void *arg)
 			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
-				ptr = put_string_size(ptr,
-						      full_name,
-						      full_name_size);
+				ptr = put_string_closure_call(&put_closure,
+							      ptr);
 				--rem_cells;
 			}
 

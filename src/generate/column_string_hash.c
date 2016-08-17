@@ -45,7 +45,7 @@ build_column_string_hash(void *arg)
 
 	/* length of hex character string */
 	const size_t length_hash
-	= column->spec->type_qualifier.string.length_scale.fixed;
+	= column->spec->type_q.string.scale.fixed;
 
 	/* 1/0 -> odd/even number of hex charaters */
 	const size_t odd_nibble = length_hash & 1lu;
@@ -165,7 +165,7 @@ build_column_string_hash_group(void *arg)
 
 	/* length of hex character string */
 	const size_t length_hash
-	= column->spec->type_qualifier.string.length_scale.fixed;
+	= column->spec->type_q.string.scale.fixed;
 
 	/* 1/0 -> odd/even number of hex charaters */
 	const size_t odd_nibble = length_hash & 1lu;

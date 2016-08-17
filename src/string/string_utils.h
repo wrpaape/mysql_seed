@@ -49,6 +49,10 @@ PutStringWidth(char *const restrict buffer,
 struct PutStubClosure {
 	PutStringWidth *put;
 	const char *bytes;
+};
+
+struct StubBuilder {
+	struct PutStubClosure put_cl;
 	unsigned int width;
 };
 
@@ -56,7 +60,11 @@ struct PutStringClosure {
 	const word_t *restrict words;
 	const char *restrict rem;
 	PutStringWidth *put_rem;
-	size_t size;
+};
+
+struct StringBuilder {
+	struct PutStringClosure put_cl;
+	size_t length;
 };
 
 
@@ -72,6 +80,7 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
 
 extern PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
+extern PutStringWidth *const PUT_STRING_WIDTH_STOP_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
@@ -632,11 +641,10 @@ put_string_closure_init(struct PutStringClosure *const restrict closure,
 	= (const char *restrict) (((const word_t *restrict) bytes)
 	+ length_words);
 	closure->put_rem = PUT_STRING_WIDTH_MAP[rem_size];
-	closure->size = size;
 }
 
 inline char *
-put_string_closure_call(struct PutStringClosure *const restrict closure,
+put_string_closure_call(const struct PutStringClosure *const restrict closure,
 			char *restrict buffer)
 {
 	const word_t *restrict word = closure->words;
@@ -650,6 +658,18 @@ put_string_closure_call(struct PutStringClosure *const restrict closure,
 	return closure->put_rem(buffer,
 				closure->rem);
 }
+
+inline void
+string_builder_init(struct StringBuilder *const restrict builder,
+		    const char *const restrict bytes,
+		    const size_t length)
+{
+	put_string_closure_init(&builder->put_cl,
+				bytes,
+				length);
+	builder->length = length;
+}
+
 
 inline char *
 put_string_width(char *const restrict buffer,
@@ -922,9 +942,8 @@ put_string_width_stop(char *const restrict buffer,
 		  = *((CharBuffer32 *const restrict) string);
 		  return buffer + 32l;
 
-	default:    *((CharBuffer32 *const restrict) buffer)
-		  = *((CharBuffer32 *const restrict) string);
-		  buffer[32] = '\0';
+	default:    *((CharBuffer33 *const restrict) buffer)
+		  = *((CharBuffer33 *const restrict) string);
 		  return buffer + 33l;
 	}
 }
@@ -933,7 +952,7 @@ inline char *
 put_string_width0(char *const restrict buffer,
 		  const char *const restrict bytes)
 {
-	return 0;
+	return buffer;
 }
 
 #define DEFINE_PUT_STRING_WIDTH(WIDTH)					\
@@ -945,8 +964,27 @@ put_string_width ## WIDTH (char *const restrict buffer,			\
 	= *((const CHAR_BUFFER_WIDTH(WIDTH) *const restrict) bytes);	\
 	return buffer + WIDTH;						\
 }
-
 FOR_ALL_CHAR_BUFFER_WIDTHS(DEFINE_PUT_STRING_WIDTH)
+
+inline char *
+put_string_width_stop0(char *const restrict buffer,
+		       const char *const restrict bytes)
+{
+	*buffer = '\0';
+	return buffer + 1l;
+}
+
+#define DEFINE_PUT_STRING_WIDTH_STOP(WIDTH, WIDTH_STOP)			\
+inline char *								\
+put_string_width_stop ## WIDTH (char *const restrict buffer,		\
+				const char *const restrict bytes)	\
+{									\
+	*((CHAR_BUFFER_WIDTH(WIDTH_STOP) *const restrict) buffer)	\
+	= *((const CHAR_BUFFER_WIDTH(WIDTH_STOP) *const restrict)	\
+	    bytes);							\
+	return buffer + WIDTH_STOP;					\
+}
+FOR_ALL_CHAR_BUFFER_WIDTHS_STOP(DEFINE_PUT_STRING_WIDTH_STOP)
 
 
 inline void
@@ -956,11 +994,19 @@ put_stub_closure_init(struct PutStubClosure *const restrict closure,
 {
 	closure->put   = PUT_STRING_WIDTH_MAP[width];
 	closure->bytes = bytes;
-	closure->width = width;
+}
+
+inline void
+put_stub_closure_stop_init(struct PutStubClosure *const restrict closure,
+			   const char *const restrict bytes,
+			   const unsigned int width)
+{
+	closure->put   = PUT_STRING_WIDTH_STOP_MAP[width];
+	closure->bytes = bytes;
 }
 
 inline char *
-put_stub_closure_call(struct PutStubClosure *const restrict closure,
+put_stub_closure_call(const struct PutStubClosure *const restrict closure,
 		      char *const restrict buffer)
 {
 	return closure->put(buffer,

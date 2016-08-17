@@ -93,6 +93,14 @@ invalid_base_string_invalid(const struct GenerateArgvState *const restrict argv)
 extern inline void
 invalid_base_string_long(const struct GenerateArgvState *const restrict argv);
 extern inline void
+no_fixed_string(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_no_fixed_string(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_string_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+invalid_fixed_string_long(const struct GenerateArgvState *const restrict argv);
+extern inline void
 no_hash_length(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_no_hash_length(struct GenerateParseState *const restrict state);
@@ -162,8 +170,12 @@ parse_col_name(struct String *const restrict col_name,
 	       struct GenerateArgvState *const restrict argv);
 
 extern inline bool
-parse_base_string(struct String *const restrict base,
+parse_base_string(struct StringBuilder *const restrict base,
 		  struct GenerateArgvState *const restrict argv);
+
+extern inline bool
+parse_fixed_string(struct StringBuilder *const restrict fixed,
+		   struct GenerateArgvState *const restrict argv);
 
 
 /* parse ASCII numbers from input

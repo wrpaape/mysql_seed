@@ -73,6 +73,14 @@ PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
 	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_WIDTH_FN_ADDRESS)
 };
 
+#define PUT_STRING_WIDTH_STOP_FN_ADDRESS(WIDTH)			\
+, &put_string_width_stop ## WIDTH
+
+PutStringWidth *const PUT_STRING_WIDTH_STOP_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
+	&put_string_width_stop0
+	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_WIDTH_STOP_FN_ADDRESS)
+};
+
 extern inline unsigned int
 pointer_id_length(const uintptr_t ptr_n);
 
@@ -164,8 +172,13 @@ put_string_closure_init(struct PutStringClosure *const restrict closure,
 			const size_t size);
 
 extern inline char *
-put_string_closure_call(struct PutStringClosure *const restrict closure,
+put_string_closure_call(const struct PutStringClosure *const restrict closure,
 			char *restrict buffer);
+
+extern inline void
+string_builder_init(struct StringBuilder *const restrict builder,
+		    const char *const restrict bytes,
+		    const size_t length);
 
 extern inline char *
 put_string_width(char *const restrict buffer,
@@ -180,8 +193,17 @@ put_string_width0(char *const restrict buffer,
 extern inline char *							\
 put_string_width ## WIDTH (char *const restrict buffer,			\
 			   const char *const restrict bytes);
-
 FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_WIDTH)
+
+extern inline char *
+put_string_width_stop0(char *const restrict buffer,
+		       const char *const restrict bytes);
+
+#define DECLARE_PUT_STRING_WIDTH_STOP(WIDTH)				\
+extern inline char *							\
+put_string_width_stop ## WIDTH (char *const restrict buffer,		\
+				const char *const restrict bytes);
+FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_WIDTH_STOP)
 
 extern inline char *
 put_string_width_stop(char *const restrict buffer,
@@ -194,7 +216,7 @@ put_stub_closure_init(struct PutStubClosure *const restrict closure,
 		      const unsigned int width);
 
 extern inline char *
-put_stub_closure_call(struct PutStubClosure *const restrict closure,
+put_stub_closure_call(const struct PutStubClosure *const restrict closure,
 		      char *const restrict buffer);
 
 extern inline char *

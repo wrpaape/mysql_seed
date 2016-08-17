@@ -15,17 +15,15 @@ build_column_string_fixed(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct String *const restrict base
-	= &column->spec->type_qualifier.string.base;
+	const struct StringBuilder *const restrict fixed
+	= &column->spec->type_q.string.fixed;
 
 	struct Table *const restrict table
 	= column->parent;
 
 	const unsigned int col_count = table->col_count;
 
-	const size_t base_size = base->length + 1lu;
-
-	const size_t length_contents = base_size * table->spec->row_count;
+	const size_t length_contents = fixed->length * table->spec->row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -55,7 +53,7 @@ build_column_string_fixed(void *arg)
 	do {
 		from->cell = ptr;
 
-		length_rowspan = base_size * from->parent->row_count;
+		length_rowspan = fixed->length * from->parent->row_count;
 
 		contents_until = ptr + length_rowspan;
 
@@ -64,9 +62,8 @@ build_column_string_fixed(void *arg)
 				      &column->fail_cl);
 
 		do {
-			ptr = put_string_size(ptr,
-					      base->bytes,
-					      base_size);
+			ptr = put_string_closure_call(&fixed->put_cl,
+						      ptr);
 		} while (ptr < contents_until);
 
 		/* skip to rowspan in next row */
@@ -83,8 +80,8 @@ build_column_string_unique(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct String *const restrict base
-	= &column->spec->type_qualifier.string.base;
+	const struct StringBuilder *const restrict base
+	= &column->spec->type_q.string.base;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -134,9 +131,8 @@ build_column_string_unique(void *arg)
 		count_until = count_ptr + from->parent->row_count;
 
 		do {
-			ptr = put_string_size(ptr,
-					      base->bytes,
-					      base->length);
+			ptr = put_string_closure_call(&base->put_cl,
+						      ptr);
 
 			ptr = put_string_stop(ptr,
 					      *count_ptr);
@@ -155,21 +151,22 @@ build_column_string_unique(void *arg)
 	thread_try_catch_close();
 }
 
+
 void
 build_column_string_unique_group(void *arg)
 {
+	struct PutStringClosure put_group_cl;
 	char *restrict ptr;
 	char *restrict *restrict count_ptr;
 	char *restrict group_string;
-	size_t group_string_size;
 	size_t rem_cells;
 	size_t rem_group;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct String *const restrict base
-	= &column->spec->type_qualifier.string.base;
+	const struct StringBuilder *const restrict base
+	= &column->spec->type_q.string.base;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -214,15 +211,16 @@ build_column_string_unique_group(void *arg)
 			       group_count,
 			       row_count);
 
+	put_string_closure_init(&put_group_cl,
+				ptr,
+				base->length + 2lu);
+
 	group_string = ptr;
 
-	ptr = put_string_size(ptr,
-			      base->bytes,
-			      base->length);
+	ptr = put_string_closure_call(&base->put_cl,
+				      ptr);
 
 	PUT_STRING_WIDTH(ptr, "1", 2);
-
-	group_string_size = base->length + 2lu;
 
 	from->cell = group_string;
 
@@ -241,23 +239,24 @@ build_column_string_unique_group(void *arg)
 			rem_cells -= (rem_group + 1lu);
 
 			while (rem_group > 0lu) {
-				ptr = put_string_size(ptr,
-						      group_string,
-						      group_string_size);
+				ptr = put_string_closure_call(&put_group_cl,
+							      ptr);
 				--rem_group;
 			}
 
 			group_string = ptr;
 
-			ptr = put_string_size(ptr,
-					      base->bytes,
-					      base->length);
+			ptr = put_string_closure_call(&base->put_cl,
+						      ptr);
+
 			++count_ptr;
 
 			ptr = put_string_stop(ptr,
 					      *count_ptr);
 
-			group_string_size = ptr - group_string;
+			put_string_closure_init(&put_group_cl,
+						group_string,
+						ptr - group_string);
 
 			++group;
 
@@ -266,9 +265,8 @@ build_column_string_unique_group(void *arg)
 			rem_group -= rem_cells;
 
 			while (rem_cells > 0lu) {
-				ptr = put_string_size(ptr,
-						      group_string,
-						      group_string_size);
+				ptr = put_string_closure_call(&put_group_cl,
+							      ptr);
 				--rem_cells;
 			}
 

@@ -26,24 +26,28 @@
  *─────────────────────────────────────────────────────────────────────────── */
 /* Counter limits */
 #if (SIZE_MAX < UINT32_MAX)
-#	define UPTO_MAX			9999lu
-#	define UPTO_MAX_STRING		"9999"
-#	define MAG_UPTO_MAX		3u
-#	define SIZE_UPTO_MAX_STR	5u
-#	define  LARGE_UPTO_MAX		0
+#	define UPTO_MAX				9999lu
+#	define UPTO_MAX_STRING			"9999"
+#	define MAG_UPTO_MAX			3u
+#	define SIZE_UPTO_MAX_STR		5u
+#	define  LARGE_UPTO_MAX			0
+#	define BASE_STRING_LENGTH_MAX		236lu
+#	define BASE_STRING_LENGTH_MAX_STRING	"236"
 #else
-#	define UPTO_MAX			99999999lu
-#	define UPTO_MAX_STRING		"99999999"
-#	define MAG_UPTO_MAX		7u
-#	define SIZE_UPTO_MAX_STR	9u
-#	define LARGE_UPTO_MAX		1
+#	define UPTO_MAX				99999999lu
+#	define UPTO_MAX_STRING			"99999999"
+#	define MAG_UPTO_MAX			7u
+#	define SIZE_UPTO_MAX_STR		9u
+#	define LARGE_UPTO_MAX			1
+#	define BASE_STRING_LENGTH_MAX		232lu
+#	define BASE_STRING_LENGTH_MAX_STRING	"232"
 #endif /* if (SIZE_MAX < UINT32_MAX) */
 
 #define FLOAT_PRECISION_DEFAULT	6u
 #define FLOAT_PRECISION_MAX	15u
 
-#define BASE_STRING_LENGTH_MAX		240lu
-#define BASE_STRING_LENGTH_MAX_STRING	"240"
+#define FIXED_STRING_LENGTH_MAX		240lu
+#define FIXED_STRING_LENGTH_MAX_STRING	"240"
 
 #define COUNT_WORKERS 4lu
 
@@ -235,8 +239,9 @@ union StringLengthScale {
 };
 
 union StringQualifier {
-	union StringLengthScale length_scale;
-	struct String base;
+	union StringLengthScale scale;
+	struct StringBuilder fixed;
+	struct StringBuilder base;
 };
 
 /* -c temperature --integer-unsigned --range 500 200000	→ 580
@@ -256,7 +261,7 @@ union IntegerUnsignedScale {
 
 union IntegerUnsignedQualifier {
 	union IntegerUnsignedScale unsigned_scale;
-	struct PutStubClosure fixed;
+	struct StubBuilder fixed;
 };
 
 /* -c temperature --integer --range -100 100		→ 45
@@ -276,7 +281,7 @@ union IntegerSignedScale {
 
 union IntegerSignedQualifier {
 	union IntegerSignedScale scale;
-	struct PutStubClosure fixed;
+	struct StubBuilder fixed;
 };
 
 
@@ -298,7 +303,7 @@ union FloatScale {
 struct FloatQualifier {
 	union FloatScale scale;
 	unsigned int precision;
-	struct PutStringClosure fixed;
+	struct StubBuilder fixed;
 };
 
 union TypeQualifier {
@@ -316,7 +321,7 @@ struct GrpSpec {
 struct ColSpec {
 	struct String name;
 	struct Label type;
-	union TypeQualifier type_qualifier;
+	union TypeQualifier type_q;
 	struct GrpSpec grp_spec;
 	Procedure *build;
 };
