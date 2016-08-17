@@ -310,7 +310,7 @@ union TypeQualifier {
 	union StringQualifier string;
 	union IntegerSignedQualifier integer_signed;
 	union IntegerUnsignedQualifier integer_unsigned;
-	struct FloatQualifier flt_pt;
+	struct FloatQualifier float_pt;
 };
 
 struct GrpSpec {

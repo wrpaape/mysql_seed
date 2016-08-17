@@ -152,10 +152,10 @@ build_column_string_hash_group(void *arg)
 	size_t length_rowspan;
 	char *restrict ptr;
 	size_t *restrict group;
-	char *restrict group_string;
 	const char *restrict contents_until;
 	const char *restrict group_string_until;
 	struct HashState state;
+	struct MobilePutStringClosure put_cl;
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
@@ -218,11 +218,11 @@ build_column_string_hash_group(void *arg)
 			column->contents,
 			group);
 
-	group_string = partition_groups(group,
-					group_count,
-					row_count);
+	ptr = partition_groups(group,
+			       group_count,
+			       row_count);
 
-	from->cell = group_string;
+	from->cell = ptr;
 
 	length_rowspan = size_hash * from->parent->row_count;
 
@@ -230,34 +230,37 @@ build_column_string_hash_group(void *arg)
 			      length_rowspan,
 			      &column->fail_cl);
 
-	contents_until	   = group_string + length_rowspan;
-	group_string_until = group_string + (size_hash * (*group));
+	contents_until	   = ptr + length_rowspan;
+	group_string_until = ptr + (size_hash * (*group));
+
+	mobile_put_string_closure_init(&put_cl,
+				       ptr,
+				       size_hash);
 
 	/* direct call to put_hash_state function for inlining opportunity */
 	if (odd_nibble == 0lu) {
-		ptr = put_hash_state_even(group_string,
+		ptr = put_hash_state_even(ptr,
 					  &state);
 
 		while (1) {
 			if (contents_until > group_string_until) {
 				while (ptr < group_string_until)
-					ptr = put_string_size(ptr,
-							      group_string,
-							      size_hash);
-				group_string = ptr;
+					ptr = mobile_put_string_closure_call(&put_cl,
+									     ptr);
+
+				mobile_put_string_closure_move(&put_cl,
+							       ptr);
+				++group;
+
+				group_string_until = ptr
+						   + (size_hash * (*group));
 
 				ptr = put_hash_state_even(ptr,
 							  &state);
-
-				++group;
-
-				group_string_until = group_string
-						   + (size_hash * (*group));
 			} else {
 				while (ptr < contents_until)
-					ptr = put_string_size(ptr,
-							      group_string,
-							      size_hash);
+					ptr = mobile_put_string_closure_call(&put_cl,
+									     ptr);
 				from += col_count;
 
 				if (from >= until)
@@ -276,29 +279,28 @@ build_column_string_hash_group(void *arg)
 			}
 		}
 	} else {
-		ptr = put_hash_state_odd(group_string,
+		ptr = put_hash_state_odd(ptr,
 					 &state);
 
 		while (1) {
 			if (contents_until > group_string_until) {
 				while (ptr < group_string_until)
-					ptr = put_string_size(ptr,
-							      group_string,
-							      size_hash);
-				group_string = ptr;
+					ptr = mobile_put_string_closure_call(&put_cl,
+									     ptr);
+
+				mobile_put_string_closure_move(&put_cl,
+							       ptr);
+				++group;
+
+				group_string_until = ptr
+						   + (size_hash * (*group));
 
 				ptr = put_hash_state_odd(ptr,
 							 &state);
-
-				++group;
-
-				group_string_until = group_string
-						   + (size_hash * (*group));
 			} else {
 				while (ptr < contents_until)
-					ptr = put_string_size(ptr,
-							      group_string,
-							      size_hash);
+					ptr = mobile_put_string_closure_call(&put_cl,
+									     ptr);
 				from += col_count;
 
 				if (from >= until)

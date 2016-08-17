@@ -176,6 +176,19 @@ put_string_closure_call(const struct PutStringClosure *const restrict closure,
 			char *restrict buffer);
 
 extern inline void
+mobile_put_string_closure_init(struct MobilePutStringClosure *const restrict closure,
+			       const char *const restrict bytes,
+			       const size_t size);
+
+extern inline void
+mobile_put_string_closure_move(struct MobilePutStringClosure *const restrict closure,
+			       const char *const restrict new_bytes);
+
+extern inline char *
+mobile_put_string_closure_call(const struct MobilePutStringClosure *const restrict closure,
+			       char *restrict buffer);
+
+extern inline void
 string_builder_init(struct StringBuilder *const restrict builder,
 		    const char *const restrict bytes,
 		    const size_t length);

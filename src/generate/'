@@ -62,18 +62,15 @@ struct PutStringClosure {
 	PutStringWidth *put_rem;
 };
 
-struct MobilePutStringClosure {
-	const word_t *restrict words;
-	const char *restrict rem;
-	PutStringWidth *put_rem;
-	size_t length_words;
-};
-
 struct StringBuilder {
 	struct PutStringClosure put_cl;
 	size_t length;
 };
 
+struct MobileStringBuilder {
+	struct PutStringClosure put_cl;
+	size_t length_words;
+};
 
 
 
@@ -637,65 +634,32 @@ put_string_size_until(char *restrict buffer,
 }
 
 inline void
-put_string_closure_init(struct PutStringClosure *const restrict closure,
-			const char *const restrict bytes,
-			const size_t size)
+put_string_closure_init_from(struct PutStringClosure *const restrict closure,
+			     const char *const restrict bytes,
+			     const size_t length_words,
+			     const size_t rem_size)
 {
-	const size_t length_words = DIV_WORD_SIZE(size);
-	const size_t rem_size     = REM_WORD_SIZE(size);
-
 	closure->words = (const word_t *restrict) bytes;
 	closure->rem
 	= (const char *restrict) (((const word_t *restrict) bytes)
 	+ length_words);
 	closure->put_rem = PUT_STRING_WIDTH_MAP[rem_size];
+}
+
+inline void
+put_string_closure_init(struct PutStringClosure *const restrict closure,
+			const char *const restrict bytes,
+			const size_t size)
+{
+	put_string_closure_init_from(closure,
+				     bytes,
+				     DIV_WORD_SIZE(size),
+				     REM_WORD_SIZE(size));
 }
 
 inline char *
 put_string_closure_call(const struct PutStringClosure *const restrict closure,
 			char *restrict buffer)
-{
-	const word_t *restrict word = closure->words;
-
-	while (word < (const word_t *restrict) closure->rem) {
-		*((word_t *restrict) buffer) = *word;
-		buffer += WORD_SIZE;
-		++word;
-	}
-
-	return closure->put_rem(buffer,
-				closure->rem);
-}
-
-inline void
-mobile_put_string_closure_init(struct MobilePutStringClosure *const restrict closure,
-			       const char *const restrict bytes,
-			       const size_t size)
-{
-	const size_t length_words = DIV_WORD_SIZE(size);
-	const size_t rem_size     = REM_WORD_SIZE(size);
-
-	closure->words = (const word_t *restrict) bytes;
-	closure->rem
-	= (const char *restrict) (((const word_t *restrict) bytes)
-	+ length_words);
-	closure->put_rem = PUT_STRING_WIDTH_MAP[rem_size];
-	closure->length_words = length_words;
-}
-
-inline void
-mobile_put_string_closure_move(struct MobilePutStringClosure *const restrict closure,
-			       const char *const restrict new_bytes)
-{
-	closure->words = (const word_t *restrict) new_bytes;
-	closure->rem
-	= (const char *restrict) (((const word_t *restrict) new_bytes)
-	+ closure->length_words);
-}
-
-inline char *
-mobile_put_string_closure_call(const struct MobilePutStringClosure *const restrict closure,
-			       char *restrict buffer)
 {
 	const word_t *restrict word = closure->words;
 
@@ -718,6 +682,22 @@ string_builder_init(struct StringBuilder *const restrict builder,
 				bytes,
 				length);
 	builder->length = length;
+}
+
+inline void
+mobile_string_builder_init(struct MobileStringBuilder *const restrict builder,
+			   const char *const restrict bytes,
+			   const size_t length)
+{
+
+	const size_t builder->length_words = DIV_WORD_SIZE(size);
+
+	put_string_closure_init_from(&builder->put_cl,
+				     bytes,
+				     builder->length_words,
+				     REM_WORD_SIZE(length));
+
+	builder->length_words = length_words;
 }
 
 
