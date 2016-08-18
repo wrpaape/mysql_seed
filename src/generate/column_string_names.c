@@ -547,7 +547,7 @@ build_column_string_names_first_group(void *arg)
 				row_count);
 
 	group_name     = name_map_sample(&first_name_map);
-	put_group_name = PUT_STRING_WIDTH_STOP_MAP[group_name->width];
+	put_group_name = PUT_STRING_STOP_WIDTH_MAP[group_name->width];
 
 	rem_group = *group;
 
@@ -567,7 +567,7 @@ build_column_string_names_first_group(void *arg)
 
 			group_name = name_map_sample(&first_name_map);
 			put_group_name
-			= PUT_STRING_WIDTH_STOP_MAP[group_name->width];
+			= PUT_STRING_STOP_WIDTH_MAP[group_name->width];
 
 			++group;
 
@@ -716,7 +716,7 @@ build_column_string_names_last_group(void *arg)
 				row_count);
 
 	group_name     = name_map_sample(&last_name_map);
-	put_group_name = PUT_STRING_WIDTH_STOP_MAP[group_name->width];
+	put_group_name = PUT_STRING_STOP_WIDTH_MAP[group_name->width];
 
 	rem_group = *group;
 
@@ -736,7 +736,7 @@ build_column_string_names_last_group(void *arg)
 
 			group_name = name_map_sample(&last_name_map);
 			put_group_name
-			= PUT_STRING_WIDTH_STOP_MAP[group_name->width];
+			= PUT_STRING_STOP_WIDTH_MAP[group_name->width];
 
 			++group;
 

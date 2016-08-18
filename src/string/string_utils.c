@@ -73,12 +73,12 @@ PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
 	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_WIDTH_FN_ADDRESS)
 };
 
-#define PUT_STRING_WIDTH_STOP_FN_ADDRESS(WIDTH)			\
-, &put_string_width_stop ## WIDTH
+#define PUT_STRING_STOP_WIDTH_FN_ADDRESS(WIDTH)			\
+, &put_string_stop_width ## WIDTH
 
-PutStringWidth *const PUT_STRING_WIDTH_STOP_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
-	&put_string_width_stop0
-	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_WIDTH_STOP_FN_ADDRESS)
+PutStringWidth *const PUT_STRING_STOP_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1] = {
+	&put_string_stop_width0
+	FOR_ALL_CHAR_BUFFER_WIDTHS(PUT_STRING_STOP_WIDTH_FN_ADDRESS)
 };
 
 extern inline unsigned int
@@ -209,17 +209,17 @@ put_string_width ## WIDTH (char *const restrict buffer,			\
 FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_WIDTH)
 
 extern inline char *
-put_string_width_stop0(char *const restrict buffer,
+put_string_stop_width0(char *const restrict buffer,
 		       const char *const restrict bytes);
 
-#define DECLARE_PUT_STRING_WIDTH_STOP(WIDTH)				\
+#define DECLARE_PUT_STRING_STOP_WIDTH(WIDTH)				\
 extern inline char *							\
-put_string_width_stop ## WIDTH (char *const restrict buffer,		\
+put_string_stop_width ## WIDTH (char *const restrict buffer,		\
 				const char *const restrict bytes);
-FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_WIDTH_STOP)
+FOR_ALL_CHAR_BUFFER_WIDTHS(DECLARE_PUT_STRING_STOP_WIDTH)
 
 extern inline char *
-put_string_width_stop(char *const restrict buffer,
+put_string_stop_width(char *const restrict buffer,
 		      const char *const restrict string,
 		      const unsigned int width);
 

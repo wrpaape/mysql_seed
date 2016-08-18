@@ -88,7 +88,7 @@ extern const uintptr_t ninety_five_pow_map[LENGTH_MAX_POINTER_ID];
 #endif
 
 extern PutStringWidth *const PUT_STRING_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
-extern PutStringWidth *const PUT_STRING_WIDTH_STOP_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
+extern PutStringWidth *const PUT_STRING_STOP_WIDTH_MAP[CHAR_BUFFER_WIDTH_MAX + 1];
 
 /* helper macros
  *─────────────────────────────────────────────────────────────────────────── */
@@ -860,7 +860,7 @@ put_string_width(char *const restrict buffer,
 
 
 inline char *
-put_string_width_stop(char *const restrict buffer,
+put_string_stop_width(char *const restrict buffer,
 		      const char *const restrict string,
 		      const unsigned int width)
 {
@@ -1017,16 +1017,16 @@ put_string_width ## WIDTH (char *const restrict buffer,			\
 FOR_ALL_CHAR_BUFFER_WIDTHS(DEFINE_PUT_STRING_WIDTH)
 
 inline char *
-put_string_width_stop0(char *const restrict buffer,
+put_string_stop_width0(char *const restrict buffer,
 		       const char *const restrict bytes)
 {
 	*buffer = '\0';
 	return buffer + 1l;
 }
 
-#define DEFINE_PUT_STRING_WIDTH_STOP(WIDTH, WIDTH_STOP)			\
+#define DEFINE_PUT_STRING_STOP_WIDTH(WIDTH, WIDTH_STOP)			\
 inline char *								\
-put_string_width_stop ## WIDTH (char *const restrict buffer,		\
+put_string_stop_width ## WIDTH (char *const restrict buffer,		\
 				const char *const restrict bytes)	\
 {									\
 	*((CHAR_BUFFER_WIDTH(WIDTH_STOP) *const restrict) buffer)	\
@@ -1034,7 +1034,7 @@ put_string_width_stop ## WIDTH (char *const restrict buffer,		\
 	    bytes);							\
 	return buffer + WIDTH_STOP;					\
 }
-FOR_ALL_CHAR_BUFFER_WIDTHS_STOP(DEFINE_PUT_STRING_WIDTH_STOP)
+FOR_ALL_CHAR_BUFFER_WIDTHS_STOP(DEFINE_PUT_STRING_STOP_WIDTH)
 
 
 inline void
@@ -1051,7 +1051,7 @@ put_stub_closure_stop_init(struct PutStubClosure *const restrict closure,
 			   const char *const restrict bytes,
 			   const unsigned int width)
 {
-	closure->put   = PUT_STRING_WIDTH_STOP_MAP[width];
+	closure->put   = PUT_STRING_STOP_WIDTH_MAP[width];
 	closure->bytes = bytes;
 }
 
@@ -1076,7 +1076,7 @@ inline char *
 put_stub_stop(char *const restrict buffer,
 	      const struct Stub *const restrict stub)
 {
-	return put_string_width_stop(buffer,
+	return put_string_stop_width(buffer,
 				     stub->bytes,
 				     stub->width);
 }
@@ -1094,7 +1094,7 @@ inline char *
 put_label_stop(char *const restrict buffer,
 	       const struct Label *const restrict label)
 {
-	return put_string_width_stop(buffer,
+	return put_string_stop_width(buffer,
 				     &label->buffer[0],
 				     label->width);
 }

@@ -180,17 +180,17 @@ build_column_string_unique_group(void *arg)
 	GroupPartitioner *const partition_groups
 	= column->spec->grp_spec.partition;
 
-	const size_t length_column = (base->length
-				      + counter_size_mag_upto(group_count))
-				   * row_count;
+	const size_t column_alloc = (base->length
+				     + counter_size_mag_upto(group_count))
+				  * row_count;
 
-	const size_t length_contents = (sizeof(size_t) * group_count)
-				     + length_column;
+	const size_t contents_alloc = (sizeof(size_t) * group_count)
+				    + column_alloc;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
 
-	column->contents = malloc(length_contents);
+	column->contents = malloc(contents_alloc);
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
@@ -215,18 +215,17 @@ build_column_string_unique_group(void *arg)
 				ptr,
 				base->length + 2lu);
 
-	group_string = ptr;
+	from->cell = ptr;
+
+	rem_cells = from->parent->row_count - 1lu;
+
+	rem_group = *group - 1lu;
 
 	ptr = put_string_closure_call(&base->put_cl,
 				      ptr);
 
 	PUT_STRING_WIDTH(ptr, "1", 2);
 
-	from->cell = group_string;
-
-	rem_cells = from->parent->row_count - 1lu;
-
-	rem_group = *group - 1lu;
 
 	/* wait for counter to be built */
 	counter_await(counter,
