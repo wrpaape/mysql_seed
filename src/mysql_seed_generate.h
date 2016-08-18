@@ -1974,12 +1974,30 @@ type_set_tinyint(struct Label *const restrict type)
 }
 
 inline void
+type_set_tinyint_unsigned(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "TINYINT UNSIGNED",
+			 17);
+	type->width = 16u;
+}
+
+inline void
 type_set_smallint(struct Label *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "SMALLINT",
 			 9);
 	type->width = 8u;
+}
+
+inline void
+type_set_smallint_unsigned(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "SMALLINT UNSIGNED",
+			 18);
+	type->width = 17u;
 }
 
 inline void
@@ -1992,12 +2010,30 @@ type_set_mediumint(struct Label *const restrict type)
 }
 
 inline void
+type_set_mediumint_unsigned(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "MEDIUMINT UNSIGNED",
+			 19);
+	type->width = 18u;
+}
+
+inline void
 type_set_int(struct Label *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "INT",
 			 4);
 	type->width = 3u;
+}
+
+inline void
+type_set_int_unsigned(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "INT UNSIGNED",
+			 13);
+	type->width = 12u;
 }
 
 inline void
@@ -2010,8 +2046,17 @@ type_set_bigint(struct Label *const restrict type)
 }
 
 inline void
-type_assign_integer_unsigned(struct Label *const restrict type,
-			     const uintmax_t upto)
+type_set_bigint_unsigned(struct Label *const restrict type)
+{
+	SET_STRING_WIDTH(&type->buffer[0],
+			 "BIGINT UNSIGNED",
+			 16);
+	type->width = 15u;
+}
+
+inline void
+type_assign_u_integer(struct Label *const restrict type,
+		      const uintmax_t upto)
 {
 	if (upto > SMALLINT_UNSIGNED_MAX) {
 		if (upto > MEDIUMINT_UNSIGNED_MAX) {
@@ -2033,8 +2078,8 @@ type_assign_integer_unsigned(struct Label *const restrict type,
 }
 
 inline void
-type_assign_upto(struct Label *const restrict type,
-		 const size_t upto)
+type_assign_integer_upto(struct Label *const restrict type,
+			 const size_t upto)
 {
 #if LARGE_UPTO_MAX
 	if (upto > SMALLINT_UNSIGNED_MAX) {
@@ -2405,13 +2450,30 @@ column_integer_default(struct GenerateParseState *const restrict state)
 	const size_t row_count			= state->specs.tbl->row_count;
 	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
-	type_assign_upto(&col_spec->type,
-			 row_count);
+	type_assign_integer_upto(&col_spec->type,
+				 row_count);
 
 	col_spec->build = &build_column_integer_unique;
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
+}
+
+/* -c COL_NAME -i -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+	const size_t grp_count			= col_spec->grp_spec.count;
+	size_t *const restrict counter_upto	= &state->database.counter_upto;
+
+	type_assign_integer_upto(&col_spec->type,
+				 grp_count);
+
+	col_spec->build = &build_column_string_unique_group;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
 }
 
 /* -c COL_NAME -i -f NUMBER */
@@ -2420,7 +2482,7 @@ column_integer_fixed(struct GenerateParseState *const restrict state)
 {
 	/* struct ColSpec *const restrict col_spec = state->specs.col; */
 
-	/* type_assign_upto(&col_spec->type, */
+	/* type_assign_integer_upto(&col_spec->type, */
 	/* 		 row_count); */
 
 	/* col_spec->build = &build_column_integer_fixed; */
@@ -2430,17 +2492,17 @@ column_integer_fixed(struct GenerateParseState *const restrict state)
 inline void
 column_integer_unique(struct GenerateParseState *const restrict state)
 {
-	/* struct ColSpec *const restrict col_spec = state->specs.col; */
-	/* const size_t row_count			= state->specs.tbl->row_count; */
-	/* size_t *const restrict counter_upto	= &state->database.counter_upto; */
+	struct ColSpec *const restrict col_spec = state->specs.col;
+	const size_t row_count			= state->specs.tbl->row_count;
+	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
-	/* type_assign_upto(&col_spec->type, */
-	/* 		 row_count); */
+	type_assign_integer_upto(&col_spec->type,
+				 row_count);
 
-	/* col_spec->build = &build_column_integer_unique; */
+	col_spec->build = &build_column_integer_unique;
 
-	/* if (row_count > *counter_upto) */
-	/* 	*counter_upto = row_count; */
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
 }
 
 /* -c COL_NAME -s -u BASE_STRING */
@@ -3026,73 +3088,72 @@ parse_integer_qualifier(struct GenerateParseState *const restrict state)
 		return;
 	}
 
-	/* TODO */
-	/* const char *restrict arg = *(state->argv.arg.from); */
+	const char *restrict arg = *(state->argv.arg.from);
 
-	/* if (*arg != '-') { */
-	/* 	error_invalid_integer_type_q(state); */
-	/* 	return; */
-	/* } */
+	if (*arg != '-') {
+		error_invalid_integer_type_q(state);
+		return;
+	}
 
-	/* ++arg; */
-	/* const char *const restrict rem = arg + 1l; */
+	++arg;
+	const char *const restrict rem = arg + 1l;
 
-	/* switch (*arg) { */
-	/* case '-': */
-	/* 	break;	/1* parse long integer qualifier *1/ */
+	switch (*arg) {
+	case '-':
+		break;	/* parse long integer qualifier */
 
-	/* case 'g': */
-	/* 	if (*rem == '\0') */
-	/* 		parse_integer_default_group(state); */
-	/* 	else */
-	/* 		error_invalid_integer_type_q(state); */
-	/* 	return; */
+	case 'g':
+		if (*rem == '\0')
+			parse_integer_default_group(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
 
-	/* case 'u': */
-	/* 	if (*rem == '\0') */
-	/* 		parse_integer_unique(state); */
-	/* 	else */
-	/* 		error_invalid_integer_type_q(state); */
-	/* 	return; */
+	case 'u':
+		if (*rem == '\0')
+			parse_integer_unique(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
 
-	/* case 'f': */
-	/* 	if (*rem == '\0') */
-	/* 		parse_integer_fixed(state); */
-	/* 	else */
-	/* 		error_invalid_integer_type_q(state); */
-	/* 	return; */
+	case 'f':
+		if (*rem == '\0')
+			parse_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
 
-	/* case 'c': */
-	/* 	if (*rem == '\0') { */
-/* NEXT_COL_SPEC:		column_integer_default(state); */
-	/* 		parse_next_col_spec(state); */
-	/* 	} else { */
-	/* 		error_invalid_integer_type_q(state); */
-	/* 	} */
-	/* 	return; */
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		column_integer_default(state);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_integer_type_q(state);
+		}
+		return;
 
-	/* case 't': */
-	/* 	if (*rem == '\0') { */
-/* NEXT_TBL_SPEC:		column_integer_default(state); */
-	/* 		parse_table_complete(state); */
-	/* 		parse_next_tbl_spec(state); */
-	/* 	} else { */
-	/* 		error_invalid_integer_type_q(state); */
-	/* 	} */
-	/* 	return; */
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_integer_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_integer_type_q(state);
+		}
+		return;
 
-	/* case 'd': */
-	/* 	if (*rem == '\0') { */
-/* NEXT_DB_SPEC:		column_integer_default(state); */
-	/* 		parse_database_complete(state); */
-	/* 		parse_next_db_spec(state); */
-	/* 		return; */
-	/* 	} */
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		column_integer_default(state);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
 
-	/* default: */
-	/* 	error_invalid_integer_type_q(state); */
-	/* 	return; */
-	/* } */
+	default:
+		error_invalid_integer_type_q(state);
+		return;
+	}
 }
 
 

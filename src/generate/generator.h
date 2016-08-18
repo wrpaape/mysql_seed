@@ -248,19 +248,19 @@ union StringQualifier {
  *							  100000
  *							  (random in 500..200000)
  *			   				  ...  */
-struct IntegerUnsignedRange {
+struct UIntegerRange {
 	uintmax_t min;
 	uintmax_t max;
 };
 
-union IntegerUnsignedScale {
-	struct IntegerUnsignedRange range;
+union UIntegerScale {
+	struct UIntegerRange range;
 	uintmax_t from;
 	uintmax_t upto;
 };
 
-union IntegerUnsignedQualifier {
-	union IntegerUnsignedScale unsigned_scale;
+union UIntegerQualifier {
+	union UIntegerScale unsigned_scale;
 	struct StubBuilder fixed;
 };
 
@@ -268,19 +268,19 @@ union IntegerUnsignedQualifier {
  *							  100
  *							  (random in -100..100)
  *			   				  ...  */
-struct IntegerSignedRange {
+struct IntegerRange {
 	intmax_t min;
 	intmax_t max;
 };
 
-union IntegerSignedScale {
-	struct IntegerSignedRange range;
+union IntegerScale {
+	struct IntegerRange range;
 	intmax_t from;
 	intmax_t upto;
 };
 
-union IntegerSignedQualifier {
-	union IntegerSignedScale scale;
+union IntegerQualifier {
+	union IntegerScale scale;
 	struct StubBuilder fixed;
 };
 
@@ -308,8 +308,8 @@ struct FloatQualifier {
 
 union TypeQualifier {
 	union StringQualifier string;
-	union IntegerSignedQualifier integer_signed;
-	union IntegerUnsignedQualifier integer_unsigned;
+	union IntegerQualifier integer;
+	union UIntegerQualifier u_integer;
 	struct FloatQualifier float_pt;
 };
 

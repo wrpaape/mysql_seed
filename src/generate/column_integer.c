@@ -33,7 +33,7 @@ build_column_integer_unique(void *arg)
 
 	/* hook up rowspans */
 
-	char *restrict *restrict count_ptr = counter->pointers;
+	const char *restrict *const restrict count_ptr = counter->pointers;
 
 	do {
 		from->cell = *count_ptr;
@@ -56,14 +56,13 @@ build_column_integer_unique(void *arg)
 }
 
 
-/* TODO: build_column_integer_unique_group */
 void
 build_column_integer_unique_group(void *arg)
 {
 	size_t *restrict group;
 	char *restrict ptr;
 	PutStringWidth *put_digits;
-	char *restrict *restrict count_ptr;
+	const char *restrict *const restrict count_ptr;
 	char *restrict group_string;
 	size_t rem_cells;
 	size_t rem_group;
@@ -143,7 +142,6 @@ build_column_integer_unique_group(void *arg)
 						 group_string);
 				--rem_group;
 			}
-
 
 			++count_ptr;
 

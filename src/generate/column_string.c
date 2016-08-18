@@ -121,7 +121,7 @@ build_column_string_unique(void *arg)
 	counter_await(counter,
 		      &column->fail_cl);
 
-	char *restrict *restrict count_ptr = counter->pointers;
+	const char *restrict *const restrict count_ptr = counter->pointers;
 
 	char *restrict *restrict count_until;
 
@@ -157,7 +157,7 @@ build_column_string_unique_group(void *arg)
 {
 	struct PutStringClosure put_group_cl;
 	char *restrict ptr;
-	char *restrict *restrict count_ptr;
+	const char *restrict *const restrict count_ptr;
 	char *restrict group_string;
 	size_t rem_cells;
 	size_t rem_group;

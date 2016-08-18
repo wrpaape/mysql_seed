@@ -232,19 +232,29 @@ type_set_datetime(struct Label *const restrict type);
 extern inline void
 type_set_tinyint(struct Label *const restrict type);
 extern inline void
+type_set_tinyint_unsigned(struct Label *const restrict type);
+extern inline void
 type_set_smallint(struct Label *const restrict type);
+extern inline void
+type_set_smallint_unsigned(struct Label *const restrict type);
 extern inline void
 type_set_mediumint(struct Label *const restrict type);
 extern inline void
+type_set_mediumint_unsigned(struct Label *const restrict type);
+extern inline void
 type_set_int(struct Label *const restrict type);
+extern inline void
+type_set_int_unsigned(struct Label *const restrict type);
 extern inline void
 type_set_bigint(struct Label *const restrict type);
 extern inline void
-type_assign_integer_unsigned(struct Label *const restrict type,
-			     const uintmax_t upto);
+type_set_bigint_unsigned(struct Label *const restrict type);
 extern inline void
-type_assign_upto(struct Label *const restrict type,
-		 const size_t upto);
+type_assign_u_integer(struct Label *const restrict type,
+		      const uintmax_t upto);
+extern inline void
+type_assign_integer_upto(struct Label *const restrict type,
+			 const size_t upto);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
