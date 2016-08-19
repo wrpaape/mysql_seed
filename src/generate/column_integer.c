@@ -1,6 +1,6 @@
 #include "generate/column_integer.h"
 
-#define BCIU_GROUP_MALLOC_FAILURE						\
+#define BCIU_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_integer_unique_group")
 
 /* worker thread entry points */
@@ -33,7 +33,7 @@ build_column_integer_unique(void *arg)
 
 	/* hook up rowspans */
 
-	const char *restrict *const restrict count_ptr = counter->pointers;
+	const char *restrict *restrict count_ptr = counter->pointers;
 
 	do {
 		from->cell = *count_ptr;
@@ -62,7 +62,7 @@ build_column_integer_unique_group(void *arg)
 	size_t *restrict group;
 	char *restrict ptr;
 	PutStringWidth *put_digits;
-	const char *restrict *const restrict count_ptr;
+	const char *restrict *restrict count_ptr;
 	char *restrict group_string;
 	size_t rem_cells;
 	size_t rem_group;

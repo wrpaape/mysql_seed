@@ -320,7 +320,7 @@ struct GrpSpec {
 
 struct ColSpec {
 	struct String name;
-	struct Label type;
+	struct PutLabelClosure type;
 	union TypeQualifier type_q;
 	struct GrpSpec grp_spec;
 	Procedure *build;

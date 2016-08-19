@@ -7,25 +7,40 @@
 
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
-#define TINYINT_SIGNED_MIN	-128ll
-#define TINYINT_SIGNED_MAX	127ll
-#define TINYINT_UNSIGNED_MAX	255llu
+#define TINYINT_SIGNED_MIN		-128ll
+#define TINYINT_SIGNED_MIN_STRING	"-128"
+#define TINYINT_SIGNED_MAX		127ll
+#define TINYINT_SIGNED_MAX_STRING	"127"
+#define TINYINT_UNSIGNED_MAX		255llu
+#define TINYINT_UNSIGNED_MAX_STRING	"255"
 
-#define SMALLINT_SIGNED_MIN	-32768ll
-#define SMALLINT_SIGNED_MAX	32767ll
-#define SMALLINT_UNSIGNED_MAX	65535llu
+#define SMALLINT_SIGNED_MIN		-32768ll
+#define SMALLINT_SIGNED_MIN_STRING	"-32768"
+#define SMALLINT_SIGNED_MAX		32767ll
+#define SMALLINT_SIGNED_MAX_STRING	"32767"
+#define SMALLINT_UNSIGNED_MAX		65535llu
+#define SMALLINT_UNSIGNED_MAX_STRING	"65535"
 
-#define MEDIUMINT_SIGNED_MIN	-8388608ll
-#define MEDIUMINT_SIGNED_MAX	8388607ll
-#define MEDIUMINT_UNSIGNED_MAX	16777215llu
+#define MEDIUMINT_SIGNED_MIN		-8388608ll
+#define MEDIUMINT_SIGNED_MIN_STRING	"-8388608"
+#define MEDIUMINT_SIGNED_MAX		8388607ll
+#define MEDIUMINT_SIGNED_MAX_STRING	"8388607"
+#define MEDIUMINT_UNSIGNED_MAX		16777215llu
+#define MEDIUMINT_UNSIGNED_MAX_STRING	"16777215"
 
-#define INT_SIGNED_MIN		-2147483648ll
-#define INT_SIGNED_MAX		2147483647ll
-#define INT_UNSIGNED_MAX	4294967295llu
+#define INT_SIGNED_MIN			-2147483648ll
+#define INT_SIGNED_MIN_STRING		"-2147483648"
+#define INT_SIGNED_MAX			2147483647ll
+#define INT_SIGNED_MAX_STRING		"2147483647"
+#define INT_UNSIGNED_MAX		4294967295llu
+#define INT_UNSIGNED_MAX_STRING		"4294967295"
 
-#define BIGINT_SIGNED_MIN	-9223372036854775808ll
-#define BIGINT_SIGNED_MAX	9223372036854775807ll
-#define BIGINT_UNSIGNED_MAX	18446744073709551615llu
+#define BIGINT_SIGNED_MIN		-9223372036854775808ll
+#define BIGINT_SIGNED_MIN_STRING	"-9223372036854775808"
+#define BIGINT_SIGNED_MAX		9223372036854775807ll
+#define BIGINT_SIGNED_MAX_STRING	"9223372036854775807"
+#define BIGINT_UNSIGNED_MAX		18446744073709551615llu
+#define BIGINT_UNSIGNED_MAX_STRING	"18446744073709551615"
 
 
 /* error messages
@@ -184,6 +199,43 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 #define ERROR_INVALID_DT_TYPE_Q_REASON_NOTSUP				\
 "\n" ERROR_WRAP("reason: not supported for COL_TYPE 'datetime', "	\
 		"ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_NO_FIXED_INTEGER						\
+PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
+		   "with")
+
+#define ERROR_INVALID_FIXED_INTEGER_HEADER				\
+PARSE_ERROR_HEADER("invalid FIXED_INT")
+
+#define ERROR_INVALID_FIXED_INTEGER_REASON_INVALID			\
+"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+		"defined intmax_t, ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_FIXED_INTEGER_REASON_SMALL			\
+"\n" ERROR_WRAP("reason: FIXED_INT exceeds MySQL lower limit "		\
+		"BIGINT_SIGNED_MIN (" BIGINT_SIGNED_MIN_STRING "), "	\
+		"ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_FIXED_INTEGER_REASON_LARGE			\
+"\n" ERROR_WRAP("reason: FIXED_INT exceeds MySQL upper limit "		\
+		"BIGINT_SIGNED_MAX (" BIGINT_SIGNED_MAX_STRING "), "	\
+		"ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_NO_FIXED_U_INTEGER					\
+PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
+		   "with")
+
+#define ERROR_INVALID_FIXED_U_INTEGER_HEADER				\
+PARSE_ERROR_HEADER("invalid FIXED_UINT")
+
+#define ERROR_INVALID_FIXED_U_INTEGER_REASON_INVALID			\
+"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_FIXED_U_INTEGER_REASON_LARGE			\
+"\n" ERROR_WRAP("reason: FIXED_UINT exceeds MySQL upper limit "		\
+		"BIGINT_UNSIGNED_MAX (" BIGINT_UNSIGNED_MAX_STRING ")"	\
+		", ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_NO_BASE_STRING						\
 PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
@@ -1051,6 +1103,236 @@ error_invalid_datetime_type_q(struct GenerateParseState *const restrict state)
 	generate_parse_error(state);
 }
 
+
+inline void
+no_fixed_integer(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_FIXED_INTEGER,
+			  sizeof(ERROR_NO_FIXED_INTEGER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_fixed_integer(struct GenerateParseState *const restrict state)
+{
+	no_fixed_integer(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
+invalid_fixed_integer_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_INTEGER_REASON_INVALID,
+			      sizeof(ERROR_INVALID_FIXED_INTEGER_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_fixed_integer_invalid(struct GenerateParseState *const restrict state)
+{
+	invalid_fixed_integer_invalid(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_fixed_integer_small(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_INTEGER_REASON_SMALL,
+			      sizeof(ERROR_INVALID_FIXED_INTEGER_REASON_SMALL)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_fixed_integer_small(struct GenerateParseState *const restrict state)
+{
+	invalid_fixed_integer_small(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_fixed_integer_large(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_INTEGER_REASON_LARGE,
+			      sizeof(ERROR_INVALID_FIXED_INTEGER_REASON_LARGE)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_fixed_integer_large(struct GenerateParseState *const restrict state)
+{
+	invalid_fixed_integer_large(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+no_fixed_u_integer(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_FIXED_U_INTEGER,
+			  sizeof(ERROR_NO_FIXED_U_INTEGER) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_fixed_u_integer(struct GenerateParseState *const restrict state)
+{
+	no_fixed_u_integer(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
+invalid_fixed_u_integer_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_U_INTEGER_REASON_INVALID,
+			      sizeof(ERROR_INVALID_FIXED_U_INTEGER_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_fixed_u_integer_invalid(struct GenerateParseState *const restrict state)
+{
+	invalid_fixed_u_integer_invalid(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_fixed_u_integer_large(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_FIXED_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_FIXED_U_INTEGER_REASON_LARGE,
+			      sizeof(ERROR_INVALID_FIXED_U_INTEGER_REASON_LARGE)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_fixed_u_integer_large(struct GenerateParseState *const restrict state)
+{
+	invalid_fixed_u_integer_large(&state->argv);
+	generate_parse_error(state);
+}
+
 inline void
 no_base_string(const struct GenerateArgvState *const restrict argv)
 {
@@ -1895,7 +2177,7 @@ parse_grp_count(size_t *const restrict grp_count,
 /* assign type according to MySQL data types, limits
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-type_set_char(struct Label *const restrict type,
+type_set_char(struct PutLabelClosure *const restrict type,
 	      const uintmax_t length)
 {
 	char *restrict ptr = &type->buffer[0];
@@ -1907,11 +2189,11 @@ type_set_char(struct Label *const restrict type,
 
 	SET_STRING_WIDTH(ptr, ")", 2);
 
-	type->width = ptr + 1l - &type->buffer[0];
+	type->put = PUT_STRING_WIDTH_MAP[ptr + 1l - &type->buffer[0]];
 }
 
 inline void
-type_set_char_parsed_length(struct Label *const restrict type,
+type_set_char_parsed_length(struct PutLabelClosure *const restrict type,
 			    const char *restrict length)
 {
 	char *restrict ptr = &type->buffer[0];
@@ -1926,11 +2208,11 @@ type_set_char_parsed_length(struct Label *const restrict type,
 
 	SET_STRING_WIDTH(ptr, ")", 2);
 
-	type->width = ptr + 1l - &type->buffer[0];
+	type->put = PUT_STRING_WIDTH_MAP[ptr + 1l - &type->buffer[0]];
 }
 
 inline void
-type_set_varchar(struct Label *const restrict type,
+type_set_varchar(struct PutLabelClosure *const restrict type,
 		 const uintmax_t length)
 {
 	char *restrict ptr = &type->buffer[0];
@@ -1942,125 +2224,125 @@ type_set_varchar(struct Label *const restrict type,
 
 	SET_STRING_WIDTH(ptr, ")", 2);
 
-	type->width = ptr + 1l - &type->buffer[0];
+	type->put = PUT_STRING_WIDTH_MAP[ptr + 1l - &type->buffer[0]];
 }
 
 inline void
-type_set_timestamp(struct Label *const restrict type)
+type_set_timestamp(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "TIMESTAMP",
 			 10);
-	type->width = 9u;
+	type->put = &put_string_width9;
 }
 
 inline void
-type_set_datetime(struct Label *const restrict type)
+type_set_datetime(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "DATETIME",
 			 9);
-	type->width = 8u;
+	type->put = &put_string_width8;
 }
 
 
 inline void
-type_set_tinyint(struct Label *const restrict type)
+type_set_tinyint(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "TINYINT",
 			 8);
-	type->width = 7u;
+	type->put = &put_string_width7;
 }
 
 inline void
-type_set_tinyint_unsigned(struct Label *const restrict type)
+type_set_tinyint_unsigned(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "TINYINT UNSIGNED",
 			 17);
-	type->width = 16u;
+	type->put = &put_string_width16;
 }
 
 inline void
-type_set_smallint(struct Label *const restrict type)
+type_set_smallint(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "SMALLINT",
 			 9);
-	type->width = 8u;
+	type->put = &put_string_width8;
 }
 
 inline void
-type_set_smallint_unsigned(struct Label *const restrict type)
+type_set_smallint_unsigned(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "SMALLINT UNSIGNED",
 			 18);
-	type->width = 17u;
+	type->put = &put_string_width17;
 }
 
 inline void
-type_set_mediumint(struct Label *const restrict type)
+type_set_mediumint(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "MEDIUMINT",
 			 10);
-	type->width = 9u;
+	type->put = &put_string_width9;
 }
 
 inline void
-type_set_mediumint_unsigned(struct Label *const restrict type)
+type_set_mediumint_unsigned(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "MEDIUMINT UNSIGNED",
 			 19);
-	type->width = 18u;
+	type->put = &put_string_width18;
 }
 
 inline void
-type_set_int(struct Label *const restrict type)
+type_set_int(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "INT",
 			 4);
-	type->width = 3u;
+	type->put = &put_string_width3;
 }
 
 inline void
-type_set_int_unsigned(struct Label *const restrict type)
+type_set_int_unsigned(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "INT UNSIGNED",
 			 13);
-	type->width = 12u;
+	type->put = &put_string_width12;
 }
 
 inline void
-type_set_bigint(struct Label *const restrict type)
+type_set_bigint(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "BIGINT",
 			 7);
-	type->width = 6u;
+	type->put = &put_string_width6;
 }
 
 inline void
-type_set_bigint_unsigned(struct Label *const restrict type)
+type_set_bigint_unsigned(struct PutLabelClosure *const restrict type)
 {
 	SET_STRING_WIDTH(&type->buffer[0],
 			 "BIGINT UNSIGNED",
 			 16);
-	type->width = 15u;
+	type->put = &put_string_width15;
 }
 
 inline void
-type_assign_u_integer(struct Label *const restrict type,
-		      const uintmax_t upto)
+type_assign_integer_min(struct PutLabelClosure *const restrict type,
+			const intmax_t min)
 {
-	if (upto > SMALLINT_UNSIGNED_MAX) {
-		if (upto > MEDIUMINT_UNSIGNED_MAX) {
-			if (upto > INT_UNSIGNED_MAX) {
+	if (min < SMALLINT_SIGNED_MIN) {
+		if (min < MEDIUMINT_SIGNED_MIN) {
+			if (min < INT_SIGNED_MIN) {
 				type_set_bigint(type);
 			} else {
 				type_set_int(type);
@@ -2069,7 +2351,7 @@ type_assign_u_integer(struct Label *const restrict type,
 			type_set_mediumint(type);
 		}
 	} else {
-		if (upto > TINYINT_UNSIGNED_MAX) {
+		if (min < TINYINT_SIGNED_MIN) {
 			type_set_smallint(type);
 		} else {
 			type_set_tinyint(type);
@@ -2078,19 +2360,94 @@ type_assign_u_integer(struct Label *const restrict type,
 }
 
 inline void
-type_assign_integer_upto(struct Label *const restrict type,
+type_assign_integer_max(struct PutLabelClosure *const restrict type,
+			const intmax_t max)
+{
+	if (max > SMALLINT_SIGNED_MAX) {
+		if (max > MEDIUMINT_SIGNED_MAX) {
+			if (max > INT_SIGNED_MAX) {
+				type_set_bigint(type);
+			} else {
+				type_set_int(type);
+			}
+		} else {
+			type_set_mediumint(type);
+		}
+	} else {
+		if (max > TINYINT_SIGNED_MAX) {
+			type_set_smallint(type);
+		} else {
+			type_set_tinyint(type);
+		}
+	}
+}
+
+inline void
+type_assign_u_integer_max(struct PutLabelClosure *const restrict type,
+			  const uintmax_t max)
+{
+	if (max > SMALLINT_UNSIGNED_MAX) {
+		if (max > MEDIUMINT_UNSIGNED_MAX) {
+			if (max > INT_UNSIGNED_MAX) {
+				type_set_bigint_unsigned(type);
+			} else {
+				type_set_int_unsigned(type);
+			}
+		} else {
+			type_set_mediumint_unsigned(type);
+		}
+	} else {
+		if (max > TINYINT_UNSIGNED_MAX) {
+			type_set_smallint_unsigned(type);
+		} else {
+			type_set_tinyint_unsigned(type);
+		}
+	}
+}
+
+inline void
+type_assign_integer_upto(struct PutLabelClosure *const restrict type,
 			 const size_t upto)
 {
 #if LARGE_UPTO_MAX
+	if (upto > SMALLINT_SIGNED_MAX) {
+		if (upto > MEDIUMINT_SIGNED_MAX) {
+			type_set_int(type);
+		} else {
+			type_set_mediumint(type);
+		}
+	} else {
+#endif /* if LARGE_UPTO_MAX */
+
+		if (upto > TINYINT_SIGNED_MAX) {
+			type_set_smallint(type);
+		} else {
+			type_set_tinyint(type);
+		}
+
+#if LARGE_UPTO_MAX
+	}
+#endif /* if LARGE_UPTO_MAX */
+}
+
+inline void
+type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
+			   const size_t upto)
+{
+#if LARGE_UPTO_MAX
 	if (upto > SMALLINT_UNSIGNED_MAX) {
-		type_set_mediumint(type);
+		if (upto > MEDIUMINT_UNSIGNED_MAX) {
+			type_set_int_unsigned(type);
+		} else {
+			type_set_mediumint_unsigned(type);
+		}
 	} else {
 #endif /* if LARGE_UPTO_MAX */
 
 		if (upto > TINYINT_UNSIGNED_MAX) {
-			type_set_smallint(type);
+			type_set_smallint_unsigned(type);
 		} else {
-			type_set_tinyint(type);
+			type_set_tinyint_unsigned(type);
 		}
 
 #if LARGE_UPTO_MAX
@@ -2476,18 +2833,6 @@ column_integer_default_group(struct GenerateParseState *const restrict state)
 		*counter_upto = grp_count;
 }
 
-/* -c COL_NAME -i -f NUMBER */
-inline void
-column_integer_fixed(struct GenerateParseState *const restrict state)
-{
-	/* struct ColSpec *const restrict col_spec = state->specs.col; */
-
-	/* type_assign_integer_upto(&col_spec->type, */
-	/* 		 row_count); */
-
-	/* col_spec->build = &build_column_integer_fixed; */
-}
-
 /* -c COL_NAME -i -u */
 inline void
 column_integer_unique(struct GenerateParseState *const restrict state)
@@ -2503,6 +2848,30 @@ column_integer_unique(struct GenerateParseState *const restrict state)
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
+}
+
+/* -c COL_NAME -i -u -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+	const size_t grp_count			= col_spec->grp_spec.count;
+	size_t *const restrict counter_upto	= &state->database.counter_upto;
+
+	type_assign_integer_upto(&col_spec->type,
+				 grp_count);
+
+	col_spec->build = &build_column_integer_unique;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
+}
+
+/* -c COL_NAME -i -f FIXED_INT */
+inline void
+column_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	state->specs.col->build = &build_column_integer_fixed;
 }
 
 /* -c COL_NAME -s -u BASE_STRING */
@@ -2564,7 +2933,7 @@ column_string_uuid(struct GenerateParseState *const restrict state)
 
 	SET_UUID_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = UUID_TYPE_NN_WIDTH;
+	col_spec->type.put = UUID_TYPE_PUT;
 
 	col_spec->build = &build_column_string_uuid;
 
@@ -2579,7 +2948,7 @@ column_string_uuid_group(struct GenerateParseState *const restrict state)
 
 	SET_UUID_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = UUID_TYPE_NN_WIDTH;
+	col_spec->type.put = UUID_TYPE_PUT;
 
 	col_spec->build = &build_column_string_uuid_group;
 
@@ -2618,7 +2987,7 @@ column_string_names_first(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_FIRST_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_first;
 
@@ -2633,7 +3002,7 @@ column_string_names_first_group(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_FIRST_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_FIRST_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_FIRST_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_first_group;
 
@@ -2648,7 +3017,7 @@ column_string_names_last(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_LAST_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_last;
 
@@ -2662,7 +3031,7 @@ column_string_names_last_group(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_LAST_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_LAST_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_LAST_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_last_group;
 
@@ -2677,7 +3046,7 @@ column_string_names_full(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_FULL_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_full;
 
@@ -2692,7 +3061,7 @@ column_string_names_full_group(struct GenerateParseState *const restrict state)
 
 	SET_NAMES_FULL_TYPE(&col_spec->type.buffer[0]);
 
-	col_spec->type.width = NAMES_FULL_TYPE_NN_WIDTH;
+	col_spec->type.put = NAMES_FULL_TYPE_PUT;
 
 	col_spec->build = &build_column_string_names_full_group;
 
@@ -2848,6 +3217,77 @@ column_datetime_default_group(struct GenerateParseState *const restrict state)
 
 /* parse COL_TYPE_Q
  *─────────────────────────────────────────────────────────────────────────── */
+inline void
+parse_integer_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_integer_default_group);
+}
+
+inline void
+parse_integer_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_integer_default,
+			      &parse_integer_default_group);
+}
+
+inline void
+parse_integer_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_integer_unique_group);
+}
+
+inline void
+parse_integer_unique(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_integer_unique,
+			      &parse_integer_unique_group);
+}
+
+inline void
+parse_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed;
+	/* parse_column_complete(state, */
+	/* 		      &column_integer_unique, */
+	/* 		      &parse_integer_unique_group); */
+
+	if (!parse_int(&parsed,
+		       *(state->argv.arg.from))) {
+		error_invalid_fixed_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed < BIGINT_SIGNED_MIN) {
+		error_invalid_fixed_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed > BIGINT_SIGNED_MAX) {
+		error_invalid_fixed_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	struct Colspec *const restrict col_spec = state->specs.col;
+
+	if (parsed < 0ll) {
+		type_assign_integer_min(&col_spec->type,
+					parsed);
+	} else {
+		type_assign_integer_max(&col_spec->type,
+					parsed);
+
+	}
+
+}
+
+
 inline void
 parse_string_default_group(struct GenerateParseState *const restrict state)
 {

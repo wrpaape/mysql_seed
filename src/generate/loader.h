@@ -15,7 +15,7 @@ loader_estimate_size(const unsigned int tbl_count,
 			     + LOADER_CREATE_TABLE_BASE_SIZE
 			     + LOADER_LOAD_TABLE_BASE_SIZE
 			     + TBL_NAME_NN_SIZE_MAX))
-	     + ((col_count - tbl_count) * (WIDTH_MAX_SIZE + 3lu));
+	     + ((col_count - tbl_count) * (CHAR_BUFFER_WIDTH_MAX + 3lu));
 }
 
 inline char *
@@ -103,8 +103,8 @@ loader_put_body(char *restrict ptr,
 			*ptr = ' ';
 			++ptr;
 
-			ptr = put_label(ptr,
-					&col_spec_from->type);
+			ptr = put_label_closure_call(&col_spec_from->type,
+						     ptr);
 
 			++col_spec_from;
 

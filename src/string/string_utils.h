@@ -33,7 +33,7 @@ struct Stub {
 };
 
 struct Label {
-	char buffer[32];
+	char buffer[CHAR_BUFFER_WIDTH_MAX];
 	unsigned int width; /* 1 - 32 bytes */
 };
 
@@ -47,8 +47,13 @@ PutStringWidth(char *const restrict buffer,
 	       const char *const restrict bytes);
 
 struct PutStubClosure {
-	PutStringWidth *put;
 	const char *bytes;
+	PutStringWidth *put;
+};
+
+struct PutLabelClosure {
+	char buffer[CHAR_BUFFER_WIDTH_MAX];
+	PutStringWidth *put;
 };
 
 struct StubBuilder {
@@ -1042,8 +1047,8 @@ put_stub_closure_init(struct PutStubClosure *const restrict closure,
 		      const char *const restrict bytes,
 		      const unsigned int width)
 {
-	closure->put   = PUT_STRING_WIDTH_MAP[width];
 	closure->bytes = bytes;
+	closure->put   = PUT_STRING_WIDTH_MAP[width];
 }
 
 inline void
@@ -1051,8 +1056,8 @@ put_stub_closure_stop_init(struct PutStubClosure *const restrict closure,
 			   const char *const restrict bytes,
 			   const unsigned int width)
 {
-	closure->put   = PUT_STRING_STOP_WIDTH_MAP[width];
 	closure->bytes = bytes;
+	closure->put   = PUT_STRING_STOP_WIDTH_MAP[width];
 }
 
 inline char *
@@ -1097,6 +1102,14 @@ put_label_stop(char *const restrict buffer,
 	return put_string_stop_width(buffer,
 				     &label->buffer[0],
 				     label->width);
+}
+
+inline char *
+put_label_closure_call(const struct PutLabelClosure *const restrict closure,
+		       char *const restrict buffer)
+{
+	return closure->put(buffer,
+			    &closure->buffer[0]);
 }
 
 inline char *

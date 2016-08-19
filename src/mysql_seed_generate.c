@@ -85,6 +85,34 @@ invalid_datetime_type_q(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_datetime_type_q(struct GenerateParseState *const restrict state);
 extern inline void
+no_fixed_integer(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_no_fixed_integer(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_integer_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_fixed_integer_invalid(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_integer_small(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_fixed_integer_small(struct GenerateParseState *const restrict state);
+extern inline void
+error_invalid_fixed_integer_large(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_integer_large(const struct GenerateArgvState *const restrict argv);
+extern inline void
+no_fixed_u_integer(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_no_fixed_u_integer(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_u_integer_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_fixed_u_integer_invalid(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_fixed_u_integer_large(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_fixed_u_integer_large(struct GenerateParseState *const restrict state);
+extern inline void
 no_base_string(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_no_base_string(struct GenerateParseState *const restrict state);
@@ -217,44 +245,50 @@ parse_column_complete(struct GenerateParseState *const restrict state,
 /* assign type according to MySQL data types, limits
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-type_set_char(struct Label *const restrict type,
+type_set_char(struct PutLabelClosure *const restrict type,
 	      const uintmax_t length);
 extern inline void
-type_set_char_parsed_length(struct Label *const restrict type,
+type_set_char_parsed_length(struct PutLabelClosure *const restrict type,
 			    const char *restrict length);
 extern inline void
-type_set_varchar(struct Label *const restrict type,
+type_set_varchar(struct PutLabelClosure *const restrict type,
 		 const uintmax_t length);
 extern inline void
-type_set_timestamp(struct Label *const restrict type);
+type_set_timestamp(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_datetime(struct Label *const restrict type);
+type_set_datetime(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_tinyint(struct Label *const restrict type);
+type_set_tinyint(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_tinyint_unsigned(struct Label *const restrict type);
+type_set_tinyint_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_smallint(struct Label *const restrict type);
+type_set_smallint(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_smallint_unsigned(struct Label *const restrict type);
+type_set_smallint_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_mediumint(struct Label *const restrict type);
+type_set_mediumint(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_mediumint_unsigned(struct Label *const restrict type);
+type_set_mediumint_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_int(struct Label *const restrict type);
+type_set_int(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_int_unsigned(struct Label *const restrict type);
+type_set_int_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_bigint(struct Label *const restrict type);
+type_set_bigint(struct PutLabelClosure *const restrict type);
 extern inline void
-type_set_bigint_unsigned(struct Label *const restrict type);
+type_set_bigint_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
-type_assign_u_integer(struct Label *const restrict type,
-		      const uintmax_t upto);
+type_assign_integer_max(struct PutLabelClosure *const restrict type,
+			const intmax_t max);
 extern inline void
-type_assign_integer_upto(struct Label *const restrict type,
+type_assign_u_integer_max(struct PutLabelClosure *const restrict type,
+			  const uintmax_t max);
+extern inline void
+type_assign_integer_upto(struct PutLabelClosure *const restrict type,
 			 const size_t upto);
+extern inline void
+type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
+			   const size_t upto);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -275,12 +309,16 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 /* -c COL_NAME -i */
 extern inline void
 column_integer_default(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -f NUMBER */
-extern inline void
-column_integer_fixed(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -i -u */
 extern inline void
 column_integer_unique(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -i -u -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_integer_unique_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -i -f FIXED_INT */
+extern inline void
+column_integer_fixed(struct GenerateParseState *const restrict state);
+
 /* -c COL_NAME -s -u BASE_STRING */
 extern inline void
 column_string_unique(struct GenerateParseState *const restrict state);
@@ -361,6 +399,16 @@ column_datetime_default_group(struct GenerateParseState *const restrict state);
 
 /* parse COL_TYPE_Q
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_integer_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_unique(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_fixed(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_default_group(struct GenerateParseState *const restrict state);
 extern inline void

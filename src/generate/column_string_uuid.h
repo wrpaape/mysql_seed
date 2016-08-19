@@ -8,9 +8,9 @@
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
-#define UUID_TYPE_STRING   "CHAR(36)"
-#define UUID_TYPE_NN_WIDTH 8
-#define UUID_TYPE_WIDTH	   9
+#define UUID_TYPE_STRING "CHAR(36)"
+#define UUID_TYPE_PUT	 put_string_width8
+#define UUID_TYPE_WIDTH	 9
 #define SET_UUID_TYPE(PTR)						\
 SET_STRING_WIDTH(PTR, UUID_TYPE_STRING, UUID_TYPE_WIDTH)
 

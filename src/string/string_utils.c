@@ -249,6 +249,10 @@ put_label_stop(char *const restrict buffer,
 	       const struct Label *const restrict label);
 
 extern inline char *
+put_label_closure_call(const struct PutLabelClosure *const restrict closure,
+		       char *const restrict buffer);
+
+extern inline char *
 put_char_times(char *const restrict buffer,
 	       const char byte,
 	       const size_t times);
