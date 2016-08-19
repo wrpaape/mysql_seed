@@ -278,6 +278,9 @@ type_set_bigint(struct PutLabelClosure *const restrict type);
 extern inline void
 type_set_bigint_unsigned(struct PutLabelClosure *const restrict type);
 extern inline void
+type_assign_integer_min(struct PutLabelClosure *const restrict type,
+			const intmax_t min);
+extern inline void
 type_assign_integer_max(struct PutLabelClosure *const restrict type,
 			const intmax_t max);
 extern inline void
@@ -309,6 +312,9 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 /* -c COL_NAME -i */
 extern inline void
 column_integer_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -i -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_integer_default_group(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -i -u */
 extern inline void
 column_integer_unique(struct GenerateParseState *const restrict state);

@@ -232,6 +232,11 @@ extern inline char *
 put_stub_closure_call(const struct PutStubClosure *const restrict closure,
 		      char *const restrict buffer);
 
+extern inline void
+stub_builder_init(struct StubBuilder *const restrict builder,
+		  const char *const restrict bytes,
+		  const unsigned int width);
+
 extern inline char *
 put_stub(char *const restrict buffer,
 	 const struct Stub *const restrict stub);
@@ -317,7 +322,7 @@ string_size_limit(const char *const restrict string,
 		  size_t limit);
 
 #if HAVE_INT_STRING_ATTRS
-extern inline bool
+extern inline char *
 do_parse_uint(uintmax_t *const restrict n,
 	      const char *restrict string,
 	      const unsigned int digit_count_max,
@@ -330,11 +335,11 @@ do_parse_uint_stop(uintmax_t *const restrict n,
 		   const char *const restrict max_string);
 #endif /* if HAVE_INT_STRING_ATTRS  */
 
-extern inline bool
+extern inline char *
 parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string);
 
-extern inline bool
+extern inline char *
 parse_int(intmax_t *const restrict n,
 	  const char *restrict string);
 

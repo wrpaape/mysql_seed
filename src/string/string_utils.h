@@ -1068,6 +1068,17 @@ put_stub_closure_call(const struct PutStubClosure *const restrict closure,
 			    closure->bytes);
 }
 
+inline void
+stub_builder_init(struct StubBuilder *const restrict builder,
+		  const char *const restrict bytes,
+		  const unsigned int width)
+{
+	put_stub_closure_init(&builder->put_cl,
+			      bytes,
+			      width);
+	builder->width = width;
+}
+
 inline char *
 put_stub(char *const restrict buffer,
 	 const struct Stub *const restrict stub)
@@ -2042,7 +2053,7 @@ string_size_limit(const char *const restrict string,
 }
 
 #if HAVE_INT_STRING_ATTRS
-inline bool
+inline char *
 do_parse_uint(uintmax_t *const restrict n,
 	      const char *restrict string,
 	      const unsigned int digit_count_max,
@@ -2053,12 +2064,12 @@ do_parse_uint(uintmax_t *const restrict n,
 
 		if (*string == '\0') {
 			*n = 0llu;
-			return true;
+			return (char *) string;
 		}
 	}
 
 	if ((*string > '9') || (*string < '0'))
-		return false;
+		return NULL;
 
 	const char *const restrict start_ptr = string;
 
@@ -2071,7 +2082,7 @@ do_parse_uint(uintmax_t *const restrict n,
 			break;
 
 		if ((*string > '9') || (*string < '0'))
-			return false;
+			return NULL;
 
 		++count_digits;
 
@@ -2079,16 +2090,18 @@ do_parse_uint(uintmax_t *const restrict n,
 
 			if (string_compare(start_ptr,
 					   max_string) > 0)
-				return false;
+				return NULL;
 
 			++string;
 
 			if (*string != '\0')
-				return false;
+				return NULL;
 
 			break;
 		}
 	}
+
+	char *const restrict end_ptr = (char *const restrict) string;
 
 	--string;
 
@@ -2108,7 +2121,7 @@ do_parse_uint(uintmax_t *const restrict n,
 		++power;
 	}
 
-	return true;
+	return end_ptr;
 }
 
 inline char *
@@ -2184,7 +2197,7 @@ do_parse_uint_stop(uintmax_t *const restrict n,
 }
 #endif /* if HAVE_INT_STRING_ATTRS  */
 
-inline bool
+inline char *
 parse_uint(uintmax_t *const restrict n,
 	   const char *restrict string)
 {
@@ -2195,15 +2208,19 @@ parse_uint(uintmax_t *const restrict n,
 			     DIGIT_COUNT_UINTMAX_MAX,
 			     DIGIT_STRING_UINTMAX_MAX);
 #else
-	*n = strtoumax(string,
-		       NULL,
+	char *const restrict end_ptr;
+
+	*n = strtoimax(string,
+		       &end_ptr,
 		       10);
 
-	return (*n != 0llu) || (errno != 0);
+	return ((*n != 0llu) || (errno != 0))
+	     ? end_ptr
+	     : NULL;
 #endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
-inline bool
+inline char *
 parse_int(intmax_t *const restrict n,
 	  const char *restrict string)
 {
@@ -2211,15 +2228,16 @@ parse_int(intmax_t *const restrict n,
 	if (*string == '-') {
 		++string;
 
-		if (do_parse_uint((uintmax_t *const restrict) n,
-				  string,
-				  DIGIT_COUNT_INTMAX_MIN,
-				  DIGIT_STRING_INTMAX_MIN)) {
-			*n = -(*n);
-			return true;
-		}
+		char *const restrict end_ptr
+		= do_parse_uint((uintmax_t *const restrict) n,
+				string,
+				DIGIT_COUNT_INTMAX_MIN,
+				DIGIT_STRING_INTMAX_MIN);
 
-		return false;
+		if (end_ptr != NULL)
+			*n = -(*n);
+
+		return end_ptr;
 	}
 
 	return do_parse_uint((uintmax_t *const restrict) n,
@@ -2227,11 +2245,15 @@ parse_int(intmax_t *const restrict n,
 			     DIGIT_COUNT_INTMAX_MAX,
 			     DIGIT_STRING_INTMAX_MAX);
 #else
+	char *const restrict end_ptr;
+
 	*n = strtoimax(string,
-		       NULL,
+		       &end_ptr,
 		       10);
 
-	return (*n != 0ll) || (errno != 0);
+	return ((*n != 0ll) || (errno != 0))
+	     ? end_ptr
+	     : NULL;
 #endif /* if HAVE_INT_STRING_ATTRS  */
 }
 
@@ -2275,10 +2297,9 @@ parse_int_stop(intmax_t *const restrict n,
 					      DIGIT_COUNT_INTMAX_MIN,
 					      DIGIT_STRING_INTMAX_MIN);
 
-		if (stop_ptr == NULL)
-			return NULL;
+		if (stop_ptr != NULL)
+			*n = -(*n);
 
-		*n = -(*n);
 		return stop_ptr;
 	}
 

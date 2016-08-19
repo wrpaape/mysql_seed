@@ -35,7 +35,7 @@
 #define INT_UNSIGNED_MAX		4294967295llu
 #define INT_UNSIGNED_MAX_STRING		"4294967295"
 
-#define BIGINT_SIGNED_MIN		-9223372036854775808ll
+#define BIGINT_SIGNED_MIN		(-9223372036854775807ll - 1ll)
 #define BIGINT_SIGNED_MIN_STRING	"-9223372036854775808"
 #define BIGINT_SIGNED_MAX		9223372036854775807ll
 #define BIGINT_SIGNED_MAX_STRING	"9223372036854775807"
@@ -2100,8 +2100,8 @@ parse_row_count(size_t *const restrict row_count,
 {
 	uintmax_t parsed;
 
-	if (!parse_uint(&parsed,
-			*(argv->arg.from))) {
+	if (parse_uint(&parsed,
+		       *(argv->arg.from)) == NULL) {
 		invalid_row_count_invalid(argv);
 		return false;
 	}
@@ -2126,8 +2126,8 @@ parse_hash_length(size_t *const restrict hash_length,
 {
 	uintmax_t parsed;
 
-	if (!parse_uint(&parsed,
-			*(argv->arg.from))) {
+	if (parse_uint(&parsed,
+		       *(argv->arg.from)) == NULL) {
 		invalid_hash_length_invalid(argv);
 		return false;
 	}
@@ -2153,8 +2153,8 @@ parse_grp_count(size_t *const restrict grp_count,
 {
 	uintmax_t parsed;
 
-	if (!parse_uint(&parsed,
-			*(argv->arg.from))) {
+	if (parse_uint(&parsed,
+		       *(argv->arg.from)) == NULL) {
 		invalid_grp_count_invalid(argv);
 		return false;
 	}
@@ -3251,12 +3251,14 @@ inline void
 parse_integer_fixed(struct GenerateParseState *const restrict state)
 {
 	intmax_t parsed;
-	/* parse_column_complete(state, */
-	/* 		      &column_integer_unique, */
-	/* 		      &parse_integer_unique_group); */
+	char *restrict from;
 
-	if (!parse_int(&parsed,
-		       *(state->argv.arg.from))) {
+	from = *(state->argv.arg.from);
+
+	const char *const restrict until = parse_int(&parsed,
+						     from);
+
+	if (until == NULL) {
 		error_invalid_fixed_integer_invalid(state);
 		return;
 	}
@@ -3274,17 +3276,47 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 	}
 #endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
 
-	struct Colspec *const restrict col_spec = state->specs.col;
+	struct ColSpec *const restrict col_spec = state->specs.col;
 
 	if (parsed < 0ll) {
 		type_assign_integer_min(&col_spec->type,
 					parsed);
-	} else {
+
+		do {
+			++from;
+		} while (*from == '0');
+
+		--from;
+		*from = '-';
+
+		stub_builder_init(&col_spec->type_q.integer.fixed,
+				  from,
+				  until - from);
+
+	} else if (parsed > 0ll) {
 		type_assign_integer_max(&col_spec->type,
 					parsed);
 
+		while (*from == '0')
+			++from;
+
+		stub_builder_init(&col_spec->type_q.integer.fixed,
+				  from,
+				  until - from);
+	} else {
+		type_set_tinyint(&col_spec->type);
+
+		struct StubBuilder *const restrict fixed_int
+		= &col_spec->type_q.integer.fixed;
+
+		fixed_int->put_cl.bytes = "0";
+		fixed_int->put_cl.put	= put_string_width1;
+		fixed_int->width	= 2u;
 	}
 
+	parse_column_complete(state,
+			      &column_integer_fixed,
+			      &error_grp_spec_for_fixed_data);
 }
 
 
