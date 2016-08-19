@@ -353,7 +353,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	generator.build.counter_columns_loaders.head = task_nodes;
 
 	/* ensure Counter gets assigned first task if needed */
-	if (count->counter_upto > 0) {
+	if (count->counter_upto > 0lu) {
 		/* initialize counter */
 		counter_init(&generator.counter,
 			     &generator,
@@ -368,7 +368,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		prev_node->prev	= NULL;
 		next_node = prev_node + 1l;
 		prev_node->next = next_node;
-
 
 	} else {
 		/* nullify so no-op on free */
@@ -587,6 +586,7 @@ LIVE_POOL_FAILURE_A:
 		thread_pool_await_exit_failure(&generator.pool);
 
 	default:		/* thread died for reasons already reported */
+DEAD_POOL_FAILURE_A:
 		/* free table files */
 		free_table_files(tables,
 				 (const struct Table *const restrict) columns);
@@ -599,7 +599,7 @@ LIVE_POOL_FAILURE_A:
 		counter_free_internals(&generator.counter);
 
 		/* delete database directories and loaders */
-		check_remove_loaders_dirs(generator_alloc,
+		remove_loaders_dirs(generator_alloc,
 					  database);
 
 		/* free initial allocation */
@@ -651,7 +651,7 @@ LIVE_POOL_FAILURE_A:
 	/* wait for second set of tasks to complete */
 	if (!thread_pool_await(&generator.pool,
 			       &failure))
-		goto LIVE_POOL_FAILURE_B;
+		goto LIVE_POOL_FAILURE_A;
 
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
@@ -659,44 +659,17 @@ LIVE_POOL_FAILURE_A:
 		break;
 
 	case THREAD_ERROR:	/* pool may still be alive */
-LIVE_POOL_FAILURE_B:
-		thread_pool_exit_on_failure(&generator.pool,
-					    failure);
-
-		thread_pool_await_exit_failure(&generator.pool);
+		goto LIVE_POOL_FAILURE_A;
 
 	default:		/* thread died for reasons already reported */
-DEAD_POOL_FAILURE_B:
-		/* free table files */
-		free_table_files(tables,
-				 (const struct Table *const restrict) columns);
-
-		/* free columns */
-		free_columns(columns,
-			     (const struct Column *const restrict) rowspans);
-
-		/* free counter */
-		counter_free_internals(&generator.counter);
-
-		/* delete database directories and loaders */
-		remove_loaders_dirs(generator_alloc,
-				    database);
-
-		/* free initial allocation */
-		free(generator_alloc);
-
-		/* call generate destructors */
-		mysql_seed_generate_destructors_muffle();
-
-		*exit_status = EXIT_FAILURE;
-		return;
+		goto DEAD_POOL_FAILURE_A;
 	}
 
 	/* assign third set of tasks */
 	if (!thread_pool_reload(&generator.pool,
 				&generator.build.table_contents,
 				&failure))
-		goto LIVE_POOL_FAILURE_B;
+		goto LIVE_POOL_FAILURE_A;
 
 	/* build fourth and final set of tasks */
 	++next_node;
@@ -730,7 +703,7 @@ DEAD_POOL_FAILURE_B:
 	/* wait for third set of tasks to complete */
 	if (!thread_pool_await(&generator.pool,
 			       &failure))
-		goto LIVE_POOL_FAILURE_B;
+		goto LIVE_POOL_FAILURE_A;
 
 
 	switch (thread_pool_alive(&generator.pool,
@@ -739,17 +712,17 @@ DEAD_POOL_FAILURE_B:
 		break;
 
 	case THREAD_ERROR:
-		goto LIVE_POOL_FAILURE_B;
+		goto LIVE_POOL_FAILURE_A;
 
 	default:
-		goto DEAD_POOL_FAILURE_B;
+		goto DEAD_POOL_FAILURE_A;
 	}
 
 	/* assign fourth and final set of tasks */
 	if (!thread_pool_reload(&generator.pool,
 				&generator.build.table_files,
 				&failure))
-		goto LIVE_POOL_FAILURE_B;
+		goto LIVE_POOL_FAILURE_A;
 
 	/* free columns */
 	free_columns(columns,
@@ -767,13 +740,13 @@ DEAD_POOL_FAILURE_B:
 			    == EXIT_SUCCESS)
 				mysql_seed_generate_destructors(exit_status);
 			else
-				goto DEAD_POOL_FAILURE_C;
+				goto DEAD_POOL_FAILURE_B;
 		} else {
 			generate_failure_thread_pool(failure);
 
 			thread_pool_cancel(&generator.pool);
 
-			goto DEAD_POOL_FAILURE_C;
+			goto DEAD_POOL_FAILURE_B;
 		}
 	} else {
 		thread_pool_exit_on_failure(&generator.pool,
@@ -781,7 +754,7 @@ DEAD_POOL_FAILURE_B:
 
 		thread_pool_await_exit_failure(&generator.pool);
 
-DEAD_POOL_FAILURE_C:
+DEAD_POOL_FAILURE_B:
 		/* remove those that were created, free contents of files not
 		 * yet created */
 		remove_free_table_files(tables,

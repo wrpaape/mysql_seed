@@ -162,25 +162,25 @@ void test_parse_uint(void)
 {
 	uintmax_t n;
 
-	TEST_ASSERT_FALSE(parse_uint(&n, ""));
+	TEST_ASSERT_NULL(parse_uint(&n, ""));
 
-	TEST_ASSERT_FALSE(parse_uint(&n, "12oogabooga34"));
+	TEST_ASSERT_NULL(parse_uint(&n, "12oogabooga34"));
 
-	TEST_ASSERT_TRUE(parse_uint(&n, "12345"));
+	TEST_ASSERT_NOT_NULL(parse_uint(&n, "12345"));
 
 	TEST_ASSERT_EQUAL_UINT(12345llu, n);
 
-	TEST_ASSERT_TRUE(parse_uint(&n, "00012"));
+	TEST_ASSERT_NOT_NULL(parse_uint(&n, "00012"));
 
 	TEST_ASSERT_EQUAL_UINT(12llu, n);
 
 #if HAVE_INT_STRING_ATTRS
 
-	TEST_ASSERT_TRUE(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX));
+	TEST_ASSERT_NOT_NULL(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX));
 
 	TEST_ASSERT_EQUAL_UINT(UINTMAX_MAX, n);
 
-	TEST_ASSERT_FALSE(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX "1"));
+	TEST_ASSERT_NULL(parse_uint(&n, DIGIT_STRING_UINTMAX_MAX "1"));
 
 #endif /* if HAVE_INT_STRING_ATTRS */
 }
@@ -190,31 +190,31 @@ void test_parse_int(void)
 {
 	intmax_t n;
 
-	TEST_ASSERT_FALSE(parse_int(&n, ""));
+	TEST_ASSERT_NULL(parse_int(&n, ""));
 
-	TEST_ASSERT_FALSE(parse_int(&n, "12oogabooga34"));
+	TEST_ASSERT_NULL(parse_int(&n, "12oogabooga34"));
 
-	TEST_ASSERT_TRUE(parse_int(&n, "12345"));
+	TEST_ASSERT_NOT_NULL(parse_int(&n, "12345"));
 
 	TEST_ASSERT_EQUAL_INT(12345ll, n);
 
-	TEST_ASSERT_TRUE(parse_int(&n, "-12345"));
+	TEST_ASSERT_NOT_NULL(parse_int(&n, "-12345"));
 
 	TEST_ASSERT_EQUAL_INT(-12345ll, n);
 
-	TEST_ASSERT_TRUE(parse_int(&n, "-00012"));
+	TEST_ASSERT_NOT_NULL(parse_int(&n, "-00012"));
 
 	TEST_ASSERT_EQUAL_INT(-12ll, n);
 
 #if HAVE_INT_STRING_ATTRS
 
-	TEST_ASSERT_TRUE(parse_int(&n, DIGIT_STRING_INTMAX_MAX));
+	TEST_ASSERT_NOT_NULL(parse_int(&n, DIGIT_STRING_INTMAX_MAX));
 
 	TEST_ASSERT_EQUAL_INT(INTMAX_MAX, n);
 
-	TEST_ASSERT_FALSE(parse_int(&n, DIGIT_STRING_INTMAX_MIN));
+	TEST_ASSERT_NULL(parse_int(&n, DIGIT_STRING_INTMAX_MIN));
 
-	TEST_ASSERT_TRUE(parse_int(&n, "-" DIGIT_STRING_INTMAX_MIN));
+	TEST_ASSERT_NOT_NULL(parse_int(&n, "-" DIGIT_STRING_INTMAX_MIN));
 
 	TEST_ASSERT_EQUAL_INT(INTMAX_MIN, n);
 

@@ -156,7 +156,7 @@ PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC "	\
 PARSE_ERROR_HEADER("invalid ROW_COUNT")
 
 #define ERROR_INVALID_ROW_COUNT_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_ROW_COUNT_REASON_ZERO				\
@@ -208,7 +208,7 @@ PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
 PARSE_ERROR_HEADER("invalid FIXED_INT")
 
 #define ERROR_INVALID_FIXED_INTEGER_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
 		"defined intmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_INTEGER_REASON_SMALL			\
@@ -229,7 +229,7 @@ PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
 PARSE_ERROR_HEADER("invalid FIXED_UINT")
 
 #define ERROR_INVALID_FIXED_U_INTEGER_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_U_INTEGER_REASON_LARGE			\
@@ -277,7 +277,7 @@ PARSE_ERROR_HEADER("no HASH_LENGTH provided, ignoring DB_SPEC starting"	\
 PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 
 #define ERROR_INVALID_HASH_LENGTH_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_HASH_LENGTH_REASON_ZERO				\
@@ -294,7 +294,7 @@ PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 PARSE_ERROR_HEADER("invalid GRP_COUNT")
 
 #define ERROR_INVALID_GRP_COUNT_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: not a number or overflows implementation-"	\
+"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_GRP_COUNT_REASON_ZERO				\
@@ -2861,7 +2861,7 @@ column_integer_unique_group(struct GenerateParseState *const restrict state)
 	type_assign_integer_upto(&col_spec->type,
 				 grp_count);
 
-	col_spec->build = &build_column_integer_unique;
+	col_spec->build = &build_column_integer_unique_group;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
@@ -3253,6 +3253,13 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 	intmax_t parsed;
 	char *restrict from;
 
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_fixed_integer(state);
+		return;
+	}
+
 	from = *(state->argv.arg.from);
 
 	const char *const restrict until = parse_int(&parsed,
@@ -3625,6 +3632,51 @@ NEXT_DB_SPEC:		column_integer_default(state);
 	default:
 		error_invalid_integer_type_q(state);
 		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_integer_default_group(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_integer_unique(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_integer_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_integer_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_integer_type_q(state);
 	}
 }
 
@@ -4582,43 +4634,47 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
+#if 0
+	for (struct DbSpec *db_spec = state.valid.head;
+	     db_spec != NULL;
+	     db_spec = db_spec->next) {
 
-	/* for (struct DbSpec *db_spec = state.valid.head; */
-	/*      db_spec != NULL; */
-	/*      db_spec = db_spec->next) { */
+		printf("db_name: %s\n", db_spec->name.bytes);
 
-	/* 	printf("db_name: %s\n", db_spec->name.bytes); */
+		for (struct TblSpec *tbl_spec = db_spec->tbl_specs;
+		     tbl_spec != NULL;
+		     tbl_spec = tbl_spec->next) {
+			printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes);
+			printf("\trow_count: %zu\n", tbl_spec->row_count);
 
-	/* 	for (struct TblSpec *tbl_spec = db_spec->tbl_specs; */
-	/* 	     tbl_spec != NULL; */
-	/* 	     tbl_spec = tbl_spec->next) { */
-	/* 		printf("\ttbl_name:  %s\n",  tbl_spec->name.bytes); */
-	/* 		printf("\trow_count: %zu\n", tbl_spec->row_count); */
+			for (struct ColSpec *col_spec = tbl_spec->col_specs.from;
+			     col_spec < tbl_spec->col_specs.until;
+			     ++col_spec) {
+				printf("\t\tcol_name:  %s\n", col_spec->name.bytes);
+			}
+		}
+	}
 
-	/* 		for (struct ColSpec *col_spec = tbl_spec->col_specs.from; */
-	/* 		     col_spec < tbl_spec->col_specs.until; */
-	/* 		     ++col_spec) { */
-	/* 			printf("\t\tcol_name:  %s\n", col_spec->name.bytes); */
-	/* 		} */
-	/* 	} */
-	/* } */
+	printf("ctor_flags:    %u\n"
+	       "rows:          %lu\n"
+	       "row_count_max: %zu\n"
+	       "columns:       %u\n"
+	       "tables:        %u\n"
+	       "databases:     %u\n"
+	       "counter_upto:  %zu\n"
+	       "exit_status:   EXIT_%s\n",
+	       state.generator.ctor_flags,
+	       state.generator.rows,
+	       state.generator.row_count_max,
+	       state.generator.columns,
+	       state.generator.tables,
+	       state.generator.databases,
+	       state.generator.counter_upto,
+	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
 
-	/* printf("ctor_flags:    %u\n" */
-	/*        "rows:          %lu\n" */
-	/*        "row_count_max: %zu\n" */
-	/*        "columns:       %u\n" */
-	/*        "tables:        %u\n" */
-	/*        "databases:     %u\n" */
-	/*        "counter_upto:  %zu\n" */
-	/*        "exit_status:   EXIT_%s\n", */
-	/*        state.generator.ctor_flags, */
-	/*        state.generator.rows, */
-	/*        state.generator.row_count_max, */
-	/*        state.generator.columns, */
-	/*        state.generator.tables, */
-	/*        state.generator.databases, */
-	/*        state.generator.counter_upto, */
-	/*        state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE"); */
+	free(spec_alloc);
+	exit(0);
+#endif
 
 	mysql_seed_generate(&state.generator,
 			    state.valid.head,

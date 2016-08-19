@@ -33,7 +33,7 @@ build_column_integer_unique(void *arg)
 
 	/* hook up rowspans */
 
-	const char *restrict *restrict count_ptr = counter->pointers;
+	char *restrict *restrict count_ptr = counter->pointers;
 
 	do {
 		from->cell = *count_ptr;
@@ -62,7 +62,7 @@ build_column_integer_unique_group(void *arg)
 	size_t *restrict group;
 	char *restrict ptr;
 	PutStringWidth *put_digits;
-	const char *restrict *restrict count_ptr;
+	char *restrict *restrict count_ptr;
 	char *restrict group_string;
 	size_t rem_cells;
 	size_t rem_group;
@@ -112,6 +112,8 @@ build_column_integer_unique_group(void *arg)
 			       group_count,
 			       row_count);
 
+	group_string = ptr;
+
 	from->cell = ptr;
 
 	rem_cells = from->parent->row_count - 1lu;
@@ -127,11 +129,7 @@ build_column_integer_unique_group(void *arg)
 		      &column->fail_cl);
 
 	/* hook up rowspans */
-
 	count_ptr = counter->pointers;
-
-	group_string = *count_ptr;
-
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -143,12 +141,13 @@ build_column_integer_unique_group(void *arg)
 				--rem_group;
 			}
 
+
+			group_string = ptr;
+
 			++count_ptr;
 
-			group_string = *count_ptr;
-
 			ptr = put_string_stop(ptr,
-					      group_string);
+					      *count_ptr);
 
 			put_digits
 			= PUT_STRING_WIDTH_MAP[ptr - group_string];
