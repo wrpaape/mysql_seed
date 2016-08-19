@@ -3298,7 +3298,7 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 
 		stub_builder_init(&col_spec->type_q.integer.fixed,
 				  from,
-				  until - from);
+				  until + 1l - from);
 
 	} else if (parsed > 0ll) {
 		type_assign_integer_max(&col_spec->type,
@@ -3309,7 +3309,7 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 
 		stub_builder_init(&col_spec->type_q.integer.fixed,
 				  from,
-				  until - from);
+				  until + 1l - from);
 	} else {
 		type_set_tinyint(&col_spec->type);
 
