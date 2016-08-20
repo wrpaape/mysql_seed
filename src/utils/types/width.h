@@ -18,38 +18,44 @@
 #	error "Width<WIDTH> types are not defined - unsupported CHAR_BIT"
 #endif /* ifndef WORD_SIZE */
 
+#ifdef __SIZEOF_INT128__
+	#define bits128 __uint128_t
+#else
+	#define bits128 struct { uint64_t split[2]; }
+#endif /* ifdef __SIZEOF_INT128__ */
+
 /* byte buffers where sizeof(Width<WIDTH>) = WIDTH
  * ========================================================================== */
 #if   (OCTET_CHAR == 1)
-	typedef uint8_t	    Width1;
-	typedef uint16_t    Width2;
-	typedef uint32_t    Width4;
-	typedef uint64_t    Width8;
-	typedef __uint128_t Width16;
+	typedef uint8_t	 Width1;
+	typedef uint16_t Width2;
+	typedef uint32_t Width4;
+	typedef uint64_t Width8;
+	typedef bits128  Width16;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #	define WIDTH8_ZERO_INITIALIZER 0u
 #	define WIDTH16_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 2)
-	typedef uint16_t      Width1;
-	typedef uint32_t      Width2;
-	typedef uint64_t      Width4;
-	typedef __uint128_t   Width8;
+	typedef uint16_t Width1;
+	typedef uint32_t Width2;
+	typedef uint64_t Width4;
+	typedef bits128  Width8;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #	define WIDTH8_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 4)
-	typedef uint32_t      Width1;
-	typedef uint64_t      Width2;
-	typedef __uint128_t   Width4;
+	typedef uint32_t Width1;
+	typedef uint64_t Width2;
+	typedef bits128  Width4;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #	define WIDTH4_ZERO_INITIALIZER 0u
 #elif (OCTET_CHAR == 8)
-	typedef uint64_t      Width1;
-	typedef __uint128_t   Width2;
+	typedef uint64_t Width1;
+	typedef bits128	 Width2;
 #	define WIDTH1_ZERO_INITIALIZER 0u
 #	define WIDTH2_ZERO_INITIALIZER 0u
 #else	/* OCTET_CHAR = 3, 5, 6, or 7 */
