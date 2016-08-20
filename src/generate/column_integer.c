@@ -1,6 +1,6 @@
 #include "generate/column_integer.h"
 
-#define BCIF_MALLOC_FAILURE					\
+#define BCIF_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_integer_fixed")
 
 #define BCIU_GROUP_MALLOC_FAILURE					\

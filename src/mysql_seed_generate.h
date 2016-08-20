@@ -3317,7 +3317,7 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 		= &col_spec->type_q.integer.fixed;
 
 		fixed_int->put_cl.bytes = "0";
-		fixed_int->put_cl.put	= put_string_width1;
+		fixed_int->put_cl.put	= put_string_width2;
 		fixed_int->width	= 2u;
 	}
 
