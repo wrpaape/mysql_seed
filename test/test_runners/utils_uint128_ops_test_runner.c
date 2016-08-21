@@ -22,12 +22,12 @@
 #include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
-#include "random/pcg_basic.h"
+#include "utils/uint128_ops.h"
 
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_random_pcg_basic(void);
+extern void test_utils_uint128_ops(void);
 
 
 //=======Test Reset Option=====
@@ -42,8 +42,8 @@ void resetTest(void)
 //=======MAIN=====
 int main(void)
 {
-  UnityBegin("../test/random_pcg_basic_test.c");
-  RUN_TEST(test_random_pcg_basic, 12);
+  UnityBegin("../test/utils_uint128_ops_test.c");
+  RUN_TEST(test_utils_uint128_ops, 12);
 
   return (UnityEnd());
 }
