@@ -674,38 +674,42 @@ TARGETS			+= $(MEMORY_MEMORY_SWAP_OBJ)			\
 			   $(MEMORY_MEMORY_SWAP_TEST_OBJ)		\
 			   $(MEMORY_MEMORY_SWAP_TEST_BIN)
 
-# random/pcg_basic
+# random/pcg_random
 # ──────────────────────────────────────────────────────────────────────────────
-RANDOM_PCG_BASIC_SRC 		:= $(call HELPER_SOURCE_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_HDR		:= $(call HELPER_HEADER_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_OBJ 		:= $(call HELPER_OBJECT_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,random pcg_basic)
-RANDOM_PCG_BASIC_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,random pcg_basic)
+RANDOM_PCG_RANDOM_SRC 		:= $(call HELPER_SOURCE_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_HDR		:= $(call HELPER_HEADER_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_OBJ 		:= $(call HELPER_OBJECT_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,random pcg_random)
+RANDOM_PCG_RANDOM_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,random pcg_random)
 # ─────────────── target prequisites ───────────────────────────────────────────
-RANDOM_PCG_BASIC_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_SRC) 		\
-			   	   $(RANDOM_PCG_BASIC_HDR)
-RANDOM_PCG_BASIC_OBJ_GROUP	:= $(RANDOM_PCG_BASIC_OBJ)
-RANDOM_PCG_BASIC_TRNR_SRC_PREQS	:= $(RANDOM_PCG_BASIC_TEST_SRC)		\
-				   $(TEST_RUNNER_SOURCE_DIR)
-RANDOM_PCG_BASIC_TEST_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_TEST_SRC)		\
-			   	   $(RANDOM_PCG_BASIC_OBJ_PREQS) 	\
-			   	   $(UNITY_OBJ_PREQS)
-RANDOM_PCG_BASIC_TRNR_OBJ_PREQS	:= $(RANDOM_PCG_BASIC_TRNR_SRC)		\
-			   	   $(RANDOM_PCG_BASIC_TEST_OBJ_PREQS)
-RANDOM_PCG_BASIC_TEST_BIN_PREQS	:= $(RANDOM_PCG_BASIC_TRNR_OBJ)		\
-				   $(RANDOM_PCG_BASIC_TEST_OBJ)		\
-			   	   $(RANDOM_PCG_BASIC_OBJ_GROUP)	\
-			   	   $(UNITY_OBJ)
+RANDOM_PCG_RANDOM_OBJ_PREQS		:= $(RANDOM_PCG_RANDOM_SRC) 		\
+			   		   $(RANDOM_PCG_RANDOM_HDR)		\
+			   		   $(BITWISE_BITWISE_UTILS_HDR)		\
+			   		   $(UTILS_UINT128_OPS_HDR)
+RANDOM_PCG_RANDOM_OBJ_GROUP		:= $(RANDOM_PCG_RANDOM_OBJ)		\
+			   		   $(BITWISE_BITWISE_UTILS_OBJ_GROUP)	\
+			   		   $(UTILS_UINT128_OPS_OBJ_GROUP)
+RANDOM_PCG_RANDOM_TRNR_SRC_PREQS	:= $(RANDOM_PCG_RANDOM_TEST_SRC)	\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+RANDOM_PCG_RANDOM_TEST_OBJ_PREQS	:= $(RANDOM_PCG_RANDOM_TEST_SRC)	\
+			   	   	   $(RANDOM_PCG_RANDOM_OBJ_PREQS) 	\
+			   	   	   $(UNITY_OBJ_PREQS)
+RANDOM_PCG_RANDOM_TRNR_OBJ_PREQS	:= $(RANDOM_PCG_RANDOM_TRNR_SRC)	\
+			   	   	   $(RANDOM_PCG_RANDOM_TEST_OBJ_PREQS)
+RANDOM_PCG_RANDOM_TEST_BIN_PREQS	:= $(RANDOM_PCG_RANDOM_TRNR_OBJ)	\
+				   	   $(RANDOM_PCG_RANDOM_TEST_OBJ)	\
+			   	   	   $(RANDOM_PCG_RANDOM_OBJ_GROUP)	\
+			   	   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(RANDOM_PCG_BASIC_TEST_BIN)
-TARGETS			+= $(RANDOM_PCG_BASIC_OBJ)			\
-			   $(RANDOM_PCG_BASIC_TRNR_SRC)			\
-			   $(RANDOM_PCG_BASIC_TRNR_OBJ)			\
-			   $(RANDOM_PCG_BASIC_TEST_OBJ)			\
-			   $(RANDOM_PCG_BASIC_TEST_BIN)
+TEST_BINARIES		+= $(RANDOM_PCG_RANDOM_TEST_BIN)
+TARGETS			+= $(RANDOM_PCG_RANDOM_OBJ)			\
+			   $(RANDOM_PCG_RANDOM_TRNR_SRC)			\
+			   $(RANDOM_PCG_RANDOM_TRNR_OBJ)			\
+			   $(RANDOM_PCG_RANDOM_TEST_OBJ)			\
+			   $(RANDOM_PCG_RANDOM_TEST_BIN)
 
 
 # random/random
@@ -726,7 +730,7 @@ RANDOM_RANDOM_OBJ_PREQS		:= $(RANDOM_RANDOM_SRC) 		\
 			   	   $(MEMORY_MEMORY_SWAP_HDR)		\
 			   	   $(TIME_TIME_UTILS_HDR)
 RANDOM_RANDOM_OBJ_GROUP		:= $(RANDOM_RANDOM_OBJ)			\
-			   	   $(RANDOM_PCG_BASIC_OBJ)		\
+			   	   $(RANDOM_PCG_RANDOM_OBJ_GROUP)	\
 			   	   $(MEMORY_MEMORY_SWAP_OBJ_GROUP)	\
 			   	   $(TIME_TIME_UTILS_OBJ_GROUP)
 RANDOM_RANDOM_TRNR_SRC_PREQS	:= $(RANDOM_RANDOM_TEST_SRC)		\
@@ -2161,9 +2165,9 @@ $(STRING_UTF8_UTILS_OBJ): $(STRING_UTF8_UTILS_OBJ_PREQS)
 $(RANDOM_RANDOM_OBJ): $(RANDOM_RANDOM_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-# make random/pcg_basic object
+# make random/pcg_random object
 # ──────────────────────────────────────────────────────────────────────────────
-$(RANDOM_PCG_BASIC_OBJ): $(RANDOM_PCG_BASIC_OBJ_PREQS)
+$(RANDOM_PCG_RANDOM_OBJ): $(RANDOM_PCG_RANDOM_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make memory/memory_put_array object
@@ -2873,23 +2877,23 @@ $(RANDOM_RANDOM_TRNR_SRC): $(RANDOM_RANDOM_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
-# for random/pcg_basic
+# for random/pcg_random
 # make:
-# 	random_pcg_basic_test		binary,
-# 	random_pcg_basic_test_runner 	object,
-# 	random_pcg_basic_test		object, and
-# 	random_pcg_basic_test_runner	source
+# 	random_pcg_random_test		binary,
+# 	random_pcg_random_test_runner 	object,
+# 	random_pcg_random_test		object, and
+# 	random_pcg_random_test_runner	source
 # ──────────────────────────────────────────────────────────────────────────────
-$(RANDOM_PCG_BASIC_TEST_BIN): $(RANDOM_PCG_BASIC_TEST_BIN_PREQS)
+$(RANDOM_PCG_RANDOM_TEST_BIN): $(RANDOM_PCG_RANDOM_TEST_BIN_PREQS)
 	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
 
-$(RANDOM_PCG_BASIC_TRNR_OBJ): $(RANDOM_PCG_BASIC_TRNR_OBJ_PREQS)
+$(RANDOM_PCG_RANDOM_TRNR_OBJ): $(RANDOM_PCG_RANDOM_TRNR_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(RANDOM_PCG_BASIC_TEST_OBJ): $(RANDOM_PCG_BASIC_TEST_OBJ_PREQS)
+$(RANDOM_PCG_RANDOM_TEST_OBJ): $(RANDOM_PCG_RANDOM_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
-$(RANDOM_PCG_BASIC_TRNR_SRC): $(RANDOM_PCG_BASIC_TRNR_SRC_PREQS)
+$(RANDOM_PCG_RANDOM_TRNR_SRC): $(RANDOM_PCG_RANDOM_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

@@ -22,14 +22,15 @@ inline bool
 random_constructor(const char *restrict *const restrict failure)
 {
 	time_t now;
-
 	const bool success = time_report(&now,
 					 failure);
 
-	if (success)
+	if (success) {
+		const uint64_t seed = (const uint64_t) time;
+
 		pcg32_srandom_r(&glob_rng,
-				now,
-				(intptr_t) &glob_rng);
+				&seed);
+	}
 
 	return success;
 }

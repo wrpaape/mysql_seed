@@ -8,7 +8,6 @@
 #include "utils/uint128_ops.h"		/* uint128_t, uint128_X */
 
 
-
 /* typedefs, struct declarations
  * ────────────────────────────────────────────────────────────────────────── */
 struct pcg_state_setseq_64 {
@@ -36,11 +35,11 @@ extern const uint128_t PCG_DEFAULT_MULTIPLIER_128;
 /* helper functions
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
-pcg32_random_t_init(pcg32_random_t *const restrict rng
-		    const uint64_t *const restrict init_seq)
+pcg32_random_t_init(pcg32_random_t *const restrict rng,
+		    const uint64_t init_seq)
 {
 	rng->state     = 0llu;
-	rng->increment = ((*init_seq) << 1u) | 1llu;
+	rng->increment = (init_seq << 1u) | 1llu;
 }
 
 inline void
@@ -51,7 +50,7 @@ pcg_setseq_64_step_r(struct pcg_state_setseq_64 *const restrict rng)
 
 
 inline void
-pcg64_random_t_init(pcg64_random_t *const restrict rng
+pcg64_random_t_init(pcg64_random_t *const restrict rng,
 		    const uint128_t *const restrict init_seq)
 {
 #if HAVE_128_BIT_OPERATIONS
@@ -94,15 +93,15 @@ pcg_output_xsl_rr_128_64(const uint128_t *const restrict state)
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
 pcg32_srandom_r(pcg32_random_t *const restrict rng,
-		const uint64_t *const restrict init_state,
-		const uint64_t *const restrict init_seq)
+		const uint64_t *const restrict seed)
 {
 	pcg32_random_t_init(rng,
-			    init_seq);
+			    (uint64_t)
+			    (((uintptr_t) rng) | ((uintptr_t) seed)));
 
 	pcg_setseq_64_step_r(rng);
 
-	rng->state += *init_state;
+	rng->state += *seed;
 
 	pcg_setseq_64_step_r(rng);
 }
@@ -121,16 +120,17 @@ pcg32_random_r(pcg32_random_t *const restrict rng)
 
 inline void
 pcg64_srandom_r(pcg64_random_t *const restrict rng,
-		const uint128_t *const restrict init_state,
-		const uint128_t *const restrict init_seq)
+		const uint128_t *const restrict seed)
 {
+	const uint128_t init_seq = UINT128_INITIALIZER((const uintptr_t) rng,
+						       (const uintptr_t) seed);
 	pcg64_random_t_init(rng,
-			    init_seq);
+			    &init_seq);
 
 	pcg_setseq_128_step_r(rng);
 
 	uint128_add(&rng->state,
-		    init_state);
+		    seed);
 
 	pcg_setseq_128_step_r(rng);
 }
@@ -144,4 +144,4 @@ pcg64_random_r(pcg64_random_t *const restrict rng)
 }
 
 
-#endif /* ifndef MYSQL_SEED_RANDOM_PCG_RANDOM_H_
+#endif /* ifndef MYSQL_SEED_RANDOM_PCG_RANDOM_H_ */
