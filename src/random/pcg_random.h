@@ -61,7 +61,7 @@ pcg64_random_t_init(pcg64_random_t *const restrict rng,
 	rng->state.high = 0llu;
 	rng->increment.low  = (init_seq->low << 1u) | 1llu;
 	rng->increment.high = (init_seq->low >> 63u)
-			    | (init_seq->high << 1u)
+			    | (init_seq->high << 1u);
 #endif /* if HAVE_128_BIT_OPERATIONS */
 }
 
@@ -77,12 +77,12 @@ inline uint64_t
 pcg_output_xsl_rr_128_64(const uint128_t *const restrict state)
 {
 #if HAVE_128_BIT_OPERATIONS
-	const uint64_t value  = ((const uint64_t) *state)
-			      ^ ((const uint64_t) ((*state) >> 64u));
-	const uint64_t rotate = (const uint64_t) ((*state) >> 122u);
+	const uint64_t value	  = ((const uint64_t) *state)
+				  ^ ((const uint64_t) ((*state) >> 64u));
+	const unsigned int rotate = (const unsigned int) ((*state) >> 122u);
 #else
-	const uint64_t value  = state->low ^ state->high;
-	const uint64_t rotate = state->high >> 58u;
+	const uint64_t value	  = state->low ^ state->high;
+	const unsigned int rotate = state->high >> 58u;
 #endif /* if HAVE_128_BIT_OPERATIONS */
 	return uint64_rotate_right(value,
 				   rotate);
@@ -114,7 +114,7 @@ pcg32_random_r(pcg32_random_t *const restrict rng)
 	pcg_setseq_64_step_r(rng);
 
 	return uint32_rotate_right((uint32_t) (((state >> 18u) ^ state) >> 27u),
-				   (uint32_t) (state >> 59u));
+				   (unsigned int) (state >> 59u));
 }
 
 

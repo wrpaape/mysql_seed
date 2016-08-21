@@ -2,7 +2,8 @@
 
 /* global variables
  * ────────────────────────────────────────────────────────────────────────── */
-extern rng_t glob_rng; /* global random number generator state */
+rng32_t glob_rng32; /* global random number generator state */
+rng64_t glob_rng64; /* global random number generator state */
 
 
 /* constructors, destructors
@@ -10,90 +11,59 @@ extern rng_t glob_rng; /* global random number generator state */
 extern inline bool
 random_constructor(const char *restrict *const restrict failure);
 
-/* void */
-/* glob_rng_ctor(void) */
-/* { */
-/* 	pcg32_srandom_r(&glob_rng, */
-/* 			time(NULL), */
-/* 			(intptr_t) &glob_rng); */
-/* } */
+extern inline uint32_t
+random_uint32(void);
+extern inline uint64_t
+random_uint64(void);
 
-extern inline void
-glob_rng_init(void);
-extern inline urint_t
-random_uint(void);
 extern inline bool
 coin_flip(void);
-extern inline urint_t
-random_uint_upto(const urint_t rbound);
-extern inline rint_t
-random_int_in_range(const rint_t lbound,
-		    const rint_t rbound);
+
+extern inline uint32_t
+do_random_uint32_upto(const uint32_t valid_limit,
+		      const uint32_t range_length);
+extern inline uint32_t
+random_uint32_upto(const uint32_t rbound);
+
+extern inline int32_t
+random_int32_scaled(const uint32_t delta,
+		    const int32_t offset);
+extern inline int32_t
+random_int32_in_range(const int32_t lbound,
+		      const int32_t rbound);
+
 extern inline double
 random_dbl_upto(const double rbound);
+extern inline double
+random_dbl_scaled(const double delta,
+		  const double offset);
 extern inline double
 random_dbl_in_range(const double lbound,
 		    const double rbound);
 extern inline void
-init_random_int_array(rint_t *const restrict array,
-		      const size_t length);
-extern inline rint_t *
-create_random_int_array(const size_t length);
+shuffle_array_by_width(void *const restrict array,
+		       const uint32_t length,
+		       const size_t width);
 extern inline void
-init_random_int_array_in_range(rint_t *const restrict array,
-			       const size_t length,
-			       const rint_t lbound,
-			       const rint_t rbound);
-extern inline rint_t *
-create_random_int_array_in_range(const size_t length,
-				 const rint_t lbound,
-				 const rint_t rbound);
+shuffle_array_by_swap(void *const restrict array,
+		      const uint32_t length,
+		      const size_t width,
+		      MemorySwap *swap);
 extern inline void
 shuffle_array(void *const restrict array,
-	      const urint_t length,
+	      const uint32_t length,
 	      const size_t width);
-void
-shuffle_array_by_width(void *const restrict array,
-		       const urint_t length,
-		       const size_t width)
-{
-	Width1 buffer[width];
-	urint_t i_old, i_new;
-	size_t o_old, o_new;
-
-
-	Width1 *const bytes = (Width1 *) array;
-	const urint_t i_last	= length - 1u;
-
-	for (i_old = 0u, o_old = 0l; i_old < i_last; ++i_old, o_old += width) {
-
-		i_new = random_uint_upto(i_last - i_old);
-		o_new = (i_old + i_new) * width;
-
-		memory_swap_buffer(&bytes[o_old],
-				   &bytes[o_new],
-				   &buffer[0l],
-				   width);
-	}
-}
-void
-shuffle_array_by_swap(void *const restrict array,
-		      const urint_t length,
-		      const size_t width,
-		      MemorySwap *swap)
-{
-	urint_t i_old, i_new;
-	size_t o_old, o_new;
-
-	Width1 *const bytes = (Width1 *) array;
-	const urint_t i_last	= length - 1u;
-
-	for (i_old = 0u, o_old = 0l; i_old < i_last; ++i_old, o_old += width) {
-
-		i_new = random_uint_upto(i_last - i_old);
-		o_new = (i_old + i_new) * width;
-
-		swap(&bytes[o_old],
-		     &bytes[o_new]);
-	}
-}
+extern inline void
+init_random_int32_array(int32_t *const restrict array,
+			const size_t length);
+extern inline int32_t *
+create_random_int32_array(const size_t length);
+extern inline void
+init_random_int32_array_in_range(int32_t *const restrict array,
+				 const size_t length,
+				 const int32_t lbound,
+				 const int32_t rbound);
+extern inline int32_t *
+create_random_int32_array_in_range(const size_t length,
+				   const int32_t lbound,
+				   const int32_t rbound);

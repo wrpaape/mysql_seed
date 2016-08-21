@@ -27,7 +27,7 @@ uint128_add(uint128_t *const restrict acc,
 	    const uint128_t *const restrict add)
 {
 #if HAVE_128_BIT_OPERATIONS
-	*acc += (*add);
+	*acc += *add;
 #else
 	const uint64_t sum_low = acc->low + add->low;
 
@@ -87,13 +87,15 @@ uint128_mult(uint128_t *const restrict acc,
 #endif /* if HAVE_128_BIT_OPERATIONS */
 }
 
+#include <stdio.h>
+
 inline void
 uint128_fma(uint128_t *const restrict acc,
 	    const uint128_t *const restrict mult,
 	    const uint128_t *const restrict add)
 {
 #if HAVE_128_BIT_OPERATIONS
-	*acc = (*acc) * (*mult) + (*add);
+	*acc = ((*acc) * (*mult)) + (*add);
 #else
 	uint128_mult(acc,
 		     mult);

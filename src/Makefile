@@ -716,7 +716,6 @@ TARGETS			+= $(RANDOM_PCG_RANDOM_OBJ)			\
 # ──────────────────────────────────────────────────────────────────────────────
 RANDOM_RANDOM_SRC 		:= $(call HELPER_SOURCE_PATH,random random)
 RANDOM_RANDOM_HDR		:= $(call HELPER_HEADER_PATH,random random)
-RANDOM_RANDOM_TYPES_HDR		:= $(call HELPER_HEADER_PATH,random random_types)
 RANDOM_RANDOM_OBJ 		:= $(call HELPER_OBJECT_PATH,random random)
 RANDOM_RANDOM_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,random random)
 RANDOM_RANDOM_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random random)
@@ -726,7 +725,7 @@ RANDOM_RANDOM_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,random random)
 # ─────────────── target prequisites ───────────────────────────────────────────
 RANDOM_RANDOM_OBJ_PREQS		:= $(RANDOM_RANDOM_SRC) 		\
 			   	   $(RANDOM_RANDOM_HDR)			\
-			   	   $(RANDOM_RANDOM_TYPES_HDR)		\
+			   	   $(RANDOM_PCG_RANDOM_HDR)		\
 			   	   $(MEMORY_MEMORY_SWAP_HDR)		\
 			   	   $(TIME_TIME_UTILS_HDR)
 RANDOM_RANDOM_OBJ_GROUP		:= $(RANDOM_RANDOM_OBJ)			\

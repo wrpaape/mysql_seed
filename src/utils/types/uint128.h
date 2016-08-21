@@ -5,7 +5,8 @@
  * ────────────────────────────────────────────────────────────────────────── */
 #include <stdint.h>	/* uint64_t, UINT64_MAX */
 
-#ifdef __SIZEOF_INT128__
+/* #ifdef __SIZEOF_INT128__ */
+#if 0
 #	define HAVE_128_BIT_OPERATIONS 1
 #else
 #	define HAVE_128_BIT_OPERATIONS 0

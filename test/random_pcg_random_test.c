@@ -77,6 +77,7 @@ void test_random_pcg64_random_r(void)
 	pcg64_srandom_r(&rng,
 			&seed);
 
+
 	uint64_t random;
 
 	unsigned int count_q0 = 0u;
@@ -84,7 +85,13 @@ void test_random_pcg64_random_r(void)
 	unsigned int count_q2 = 0u;
 	unsigned int count_q3 = 0u;
 
+	/* printf("rng: %llu, %llu\n", (uint64_t) PCG_DEFAULT_MULTIPLIER_128, (uint64_t) (PCG_DEFAULT_MULTIPLIER_128 >> 64)); */
 	for (unsigned int i = 0u; i < RAND_TRIALS; ++i) {
+/* #if HAVE_128_BIT_OPERATIONS */
+/* 		printf("rng: %llu, %llu\n", (uint64_t) rng.state, (uint64_t) (rng.state >> 64u)); */
+/* #else */
+/* 		printf("rng: %llu, %llu\n", rng.state.low, rng.state.high); */
+/* #endif */
 
 		random = pcg64_random_r(&rng);
 
