@@ -73,8 +73,8 @@ extern const struct NameMap last_name_map;
 inline char *
 put_random_initial(char *const restrict string)
 {
-	*string = (char) random_int32_in_range((const int32_t) 'A',
-					       (const int32_t) 'Z');
+	*string = (char) random_int32_scaled((const uint32_t) ('Z' - 'A'),
+					     (const int32_t) 'A');
 	return string + 1l;
 }
 
