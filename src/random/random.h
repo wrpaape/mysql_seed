@@ -24,6 +24,12 @@ typedef pcg64_random_t rng64_t;
 extern rng32_t glob_rng32; /* global random number generator state */
 extern rng64_t glob_rng64; /* global random number generator state */
 
+/* helper macro
+ * ────────────────────────────────────────────────────────────────────────── */
+#define RANDOM_UINT32_VALID_LIMIT(LENGTH) (UINT32_MAX - (UINT32_MAX % LENGTH))
+#define RANDOM_UINT64_VALID_LIMIT(LENGTH) (UINT64_MAX - (UINT64_MAX % LENGTH))
+
+
 /* constructors, destructors
  * ────────────────────────────────────────────────────────────────────────── */
 inline bool
@@ -34,11 +40,13 @@ random_constructor(const char *restrict *const restrict failure)
 					 failure);
 
 	if (success) {
-		const uint64_t seed64 = (const uint64_t) time;
-		const uint32_t seed32 = (const uint32_t) seed64;
+		const uint64_t seed32 = (const uint64_t) time;
 
 		pcg32_srandom_r(&glob_rng32,
 				&seed32);
+
+		const uint128_t seed64 = UINT128_INITIALIZER(seed32,
+							     seed32);
 
 		pcg64_srandom_r(&glob_rng64,
 				&seed64);
@@ -67,7 +75,7 @@ coin_flip(void)
 }
 
 inline uint32_t
-do_random_uint32_upto(const uint32_t valid_limit,
+random_uint32_limited(const uint32_t valid_limit,
 		      const uint32_t range_length)
 {
 	uint32_t random;
@@ -84,7 +92,7 @@ random_uint32_upto(const uint32_t rbound)
 {
 	const uint32_t range_length = rbound + 1u;
 
-	return do_random_uint32_upto(UINT32_MAX - (UINT32_MAX % range_length),
+	return random_uint32_limited(RANDOM_UINT32_VALID_LIMIT(range_length),
 				     range_length);
 }
 
@@ -139,7 +147,7 @@ shuffle_array_by_width(void *const restrict array,
 
 	for (i_old = 0u, o_old = 0l; i_old < i_last; ++i_old, o_old += width) {
 
-		i_new = random_uint_upto(i_last - i_old);
+		i_new = random_uint32_upto(i_last - i_old);
 		o_new = (i_old + i_new) * width;
 
 		memory_swap_buffer(&bytes[o_old],
@@ -149,11 +157,11 @@ shuffle_array_by_width(void *const restrict array,
 	}
 }
 
-void
+inline void
 shuffle_array_by_swap(void *const restrict array,
 		      const uint32_t length,
 		      const size_t width,
-		      MemorySwap *swap)
+		      MemorySwap *const swap)
 {
 	uint32_t i_old, i_new;
 	size_t o_old, o_new;
@@ -163,7 +171,7 @@ shuffle_array_by_swap(void *const restrict array,
 
 	for (i_old = 0u, o_old = 0l; i_old < i_last; ++i_old, o_old += width) {
 
-		i_new = random_uint_upto(i_last - i_old);
+		i_new = random_uint32_upto(i_last - i_old);
 		o_new = (i_old + i_new) * width;
 
 		swap(&bytes[o_old],
@@ -179,7 +187,7 @@ shuffle_array(void *const restrict array,
 	if (length == 0u)
 		return;
 
-	MemorySwap *swap = assign_memory_swap(width);
+	MemorySwap *const swap = assign_memory_swap(width);
 
 	if (swap == NULL)
 		shuffle_array_by_width(array,
@@ -206,8 +214,8 @@ create_random_int32_array(const size_t length)
 	int32_t *const restrict array = malloc(sizeof(int32_t) * length);
 
 	if (array != NULL)
-		init_random_int_array(array,
-				      length);
+		init_random_int32_array(array,
+					length);
 
 	return array;
 }

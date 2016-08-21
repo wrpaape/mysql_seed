@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdint.h>			/* SIZE_MAX, UINT32_MAX */
-#include "random/random.h"		/* urint_t, random_uint_upto */
+#include "random/random.h"		/* random_uint_upto */
 #include "generate/generator.h"		/* string/parallelization utils */
 
 /* macro constants
@@ -57,8 +57,9 @@ MALLOC_FAILURE_MESSAGE("build_column_string_names_full_group")
 /* enum, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct NameMap {
-	const struct Stub *names;
-	const urint_t i_last;
+	const struct Stub *const restrict names;
+	const uint32_t limit;
+	const uint32_t length;
 };
 
 /* global variables
@@ -72,15 +73,16 @@ extern const struct NameMap last_name_map;
 inline char *
 put_random_initial(char *const restrict string)
 {
-	*string = (char) random_int_in_range((rint_t) 'A',
-					     (rint_t) 'Z');
+	*string = (char) random_int32_in_range((const int32_t) 'A',
+					       (const int32_t) 'Z');
 	return string + 1l;
 }
 
 inline const struct Stub *
 name_map_sample(const struct NameMap *const restrict map)
 {
-	return &map->names[ random_uint_upto(map->i_last) ];
+	return map->names + random_uint32_limited(map->limit,
+						  map->length);
 }
 
 inline char *

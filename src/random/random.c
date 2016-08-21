@@ -20,7 +20,7 @@ extern inline bool
 coin_flip(void);
 
 extern inline uint32_t
-do_random_uint32_upto(const uint32_t valid_limit,
+random_uint32_limited(const uint32_t valid_limit,
 		      const uint32_t range_length);
 extern inline uint32_t
 random_uint32_upto(const uint32_t rbound);
@@ -48,7 +48,7 @@ extern inline void
 shuffle_array_by_swap(void *const restrict array,
 		      const uint32_t length,
 		      const size_t width,
-		      MemorySwap *swap);
+		      MemorySwap *const swap);
 extern inline void
 shuffle_array(void *const restrict array,
 	      const uint32_t length,

@@ -102,8 +102,7 @@ inline void
 uuid_state_init_clk_seq_node(char *restrict clk_seq_node,
 			     const uint8_t *restrict node)
 {
-
-	const urint_t random = random_uint();
+	const unsigned int random = (const unsigned int) random_uint32();
 
 	*clk_seq_node = '-';
 	++clk_seq_node;
