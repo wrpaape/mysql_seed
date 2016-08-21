@@ -35,7 +35,7 @@
 
 struct pcg_state_setseq_64 {    // Internals are *Private*.
     uint64_t state;             // RNG state.  All values are possible.
-    uint64_t inc;               // Controls which RNG sequence (stream) is
+    uint64_t increment;               // Controls which RNG sequence (stream) is
                                 // selected. Must *always* be odd.
 };
 typedef struct pcg_state_setseq_64 pcg32_random_t;

@@ -290,6 +290,7 @@ TARGETS			+= $(UNITY_OBJ)					\
 # ──────────────────────────────────────────────────────────────────────────────
 UTILS_TYPES_WORD_HDR		:= $(call HELPER_HEADER_PATH,utils types word)
 UTILS_TYPES_OCTET_HDR		:= $(call HELPER_HEADER_PATH,utils types octet)
+UTILS_TYPES_UINT128_HDR		:= $(call HELPER_HEADER_PATH,utils types uint128)
 UTILS_TYPES_WIDTH_HDR		:= $(call HELPER_HEADER_PATH,utils types width)
 UTILS_TYPES_ROUTINE_HDR		:= $(call HELPER_HEADER_PATH,utils types routine)
 UTILS_TYPES_PROCEDURE_HDR	:= $(call HELPER_HEADER_PATH,utils types procedure)
@@ -381,6 +382,41 @@ TARGETS			+= $(UTILS_CLOSURE_OBJ)				\
 			   $(UTILS_CLOSURE_TRNR_OBJ)			\
 			   $(UTILS_CLOSURE_TEST_OBJ)			\
 			   $(UTILS_CLOSURE_TEST_BIN)
+
+
+# utils/uint128_ops
+# ──────────────────────────────────────────────────────────────────────────────
+UTILS_UINT128_OPS_SRC 		:= $(call HELPER_SOURCE_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_HDR		:= $(call HELPER_HEADER_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_OBJ 		:= $(call HELPER_OBJECT_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,utils uint128_ops)
+UTILS_UINT128_OPS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,utils uint128_ops)
+# ─────────────── target prequisites ───────────────────────────────────────────
+UTILS_UINT128_OPS_OBJ_PREQS		:= $(UTILS_UINT128_OPS_SRC) 		\
+			   		   $(UTILS_UINT128_OPS_HDR)		\
+			   		   $(UTILS_TYPES_UINT128_HDR)
+UTILS_UINT128_OPS_OBJ_GROUP		:= $(UTILS_UINT128_OPS_OBJ)
+UTILS_UINT128_OPS_TRNR_SRC_PREQS	:= $(UTILS_UINT128_OPS_TEST_SRC)	\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+UTILS_UINT128_OPS_TEST_OBJ_PREQS	:= $(UTILS_UINT128_OPS_TEST_SRC)	\
+			   	   	   $(UTILS_UINT128_OPS_OBJ_PREQS) 	\
+			   	   	   $(UNITY_OBJ_PREQS)
+UTILS_UINT128_OPS_TRNR_OBJ_PREQS	:= $(UTILS_UINT128_OPS_TRNR_SRC)	\
+			   	   	   $(UTILS_UINT128_OPS_TEST_OBJ_PREQS)
+UTILS_UINT128_OPS_TEST_BIN_PREQS	:= $(UTILS_UINT128_OPS_TRNR_OBJ)	\
+				   	   $(UTILS_UINT128_OPS_TEST_OBJ)	\
+			   	   	   $(UTILS_UINT128_OPS_OBJ_GROUP)	\
+			   	   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(UTILS_UINT128_OPS_TEST_BIN)
+TARGETS			+= $(UTILS_UINT128_OPS_OBJ)				\
+			   $(UTILS_UINT128_OPS_TRNR_SRC)			\
+			   $(UTILS_UINT128_OPS_TRNR_OBJ)			\
+			   $(UTILS_UINT128_OPS_TEST_OBJ)			\
+			   $(UTILS_UINT128_OPS_TEST_BIN)
 
 # time/time_utils
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2165,6 +2201,11 @@ $(BITWISE_BITWISE_UTILS_OBJ): $(BITWISE_BITWISE_UTILS_OBJ_PREQS)
 $(TIME_TIME_UTILS_OBJ): $(TIME_TIME_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make utils/uint128_ops object
+# ──────────────────────────────────────────────────────────────────────────────
+$(UTILS_UINT128_OPS_OBJ): $(UTILS_UINT128_OPS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make utils/closure object
 # ──────────────────────────────────────────────────────────────────────────────
 $(UTILS_CLOSURE_OBJ): $(UTILS_CLOSURE_OBJ_PREQS)
@@ -2989,6 +3030,26 @@ $(TIME_TIME_UTILS_TEST_OBJ): $(TIME_TIME_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(TIME_TIME_UTILS_TRNR_SRC): $(TIME_TIME_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for utils/uint128_ops
+# make:
+# 	utils_uint128_ops_test		binary,
+# 	utils_uint128_ops_test_runner 	object,
+# 	utils_uint128_ops_test		object, and
+# 	utils_uint128_ops_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(UTILS_UINT128_OPS_TEST_BIN): $(UTILS_UINT128_OPS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(UTILS_UINT128_OPS_TRNR_OBJ): $(UTILS_UINT128_OPS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UTILS_UINT128_OPS_TEST_OBJ): $(UTILS_UINT128_OPS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(UTILS_UINT128_OPS_TRNR_SRC): $(UTILS_UINT128_OPS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
