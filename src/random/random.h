@@ -89,6 +89,19 @@ random_uint32_bound(const uint32_t valid_limit,
 	return (uint32_t) (random % range_length);
 }
 
+inline uint64_t
+random_uint64_bound(const uint64_t valid_limit,
+		    const uint64_t range_length)
+{
+	uint64_t random;
+
+	do {
+		random = random_uint64();
+	} while (random > valid_limit);
+
+	return (uint64_t) (random % range_length);
+}
+
 inline uint32_t
 random_uint32_upto(const uint32_t rbound)
 {

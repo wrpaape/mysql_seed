@@ -22,6 +22,9 @@ coin_flip(void);
 extern inline uint32_t
 random_uint32_bound(const uint32_t valid_limit,
 		    const uint32_t range_length);
+extern inline uint64_t
+random_uint64_bound(const uint64_t valid_limit,
+		    const uint64_t range_length);
 extern inline uint32_t
 random_uint32_upto(const uint32_t rbound);
 
