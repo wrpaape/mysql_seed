@@ -1,16 +1,14 @@
 #ifndef MYSQL_SEED_RANDOM_RANDOM_H_
 #define MYSQL_SEED_RANDOM_RANDOM_H_
 
-/* EXTERNAL DEPENDENCIES ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
-
+/* external dependencies
+ * ────────────────────────────────────────────────────────────────────────── */
 #include <time.h>			/* unique seed */
 #include <stdbool.h>			/* true, false */
 #include "random/pcg_random.h"		/* psuedorandom number generator */
 #include "memory/memory_swap.h"		/* memory swap utils, utils/utils.h */
 #include "time/time_utils.h"		/* time_report */
 
-
-/* EXTERNAL DEPENDENCIES ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
 /* typedefs, struct declarations
  * ────────────────────────────────────────────────────────────────────────── */
@@ -19,12 +17,16 @@ typedef pcg64_random_t rng64_t;
 
 
 
+
+
 /* global variables
  * ────────────────────────────────────────────────────────────────────────── */
 extern rng32_t glob_rng32; /* global random number generator state */
 extern rng64_t glob_rng64; /* global random number generator state */
 
-/* helper macro
+
+
+/* helper macros
  * ────────────────────────────────────────────────────────────────────────── */
 #define RANDOM_UINT32_VALID_LIMIT(LENGTH) (UINT32_MAX - (UINT32_MAX % LENGTH))
 #define RANDOM_UINT64_VALID_LIMIT(LENGTH) (UINT64_MAX - (UINT64_MAX % LENGTH))
@@ -75,8 +77,8 @@ coin_flip(void)
 }
 
 inline uint32_t
-random_uint32_limited(const uint32_t valid_limit,
-		      const uint32_t range_length)
+random_uint32_bound(const uint32_t valid_limit,
+		    const uint32_t range_length)
 {
 	uint32_t random;
 
@@ -92,23 +94,28 @@ random_uint32_upto(const uint32_t rbound)
 {
 	const uint32_t range_length = rbound + 1u;
 
-	return random_uint32_limited(RANDOM_UINT32_VALID_LIMIT(range_length),
-				     range_length);
+	return random_uint32_bound(RANDOM_UINT32_VALID_LIMIT(range_length),
+				   range_length);
 }
 
 inline int32_t
-random_int32_scaled(const uint32_t delta,
-		    const int32_t offset)
+random_int32_bound_offset(const uint32_t valid_limit,
+			  const uint32_t range_length,
+			  const int32_t offset)
 {
-	return ((int32_t) random_uint32_upto(delta)) + offset;
+	return ((int32_t) random_uint32_bound(valid_limit,
+					      range_length)) + offset;
 }
 
 inline int32_t
 random_int32_in_range(const int32_t lbound,
 		      const int32_t rbound)
 {
-	return random_int32_scaled((const uint32_t) (rbound - lbound),
-				   lbound);
+	const uint32_t length = rbound - lbound + 1u;
+
+	return random_int32_bound_offset(RANDOM_UINT32_VALID_LIMIT(length),
+					 length,
+					 lbound);
 }
 
 inline double
@@ -118,8 +125,8 @@ random_dbl_upto(const double rbound)
 }
 
 inline double
-random_dbl_scaled(const double delta,
-		  const double offset)
+random_dbl_bound_offset(const double delta,
+			const double offset)
 {
 	return random_dbl_upto(delta) + offset;
 }
@@ -128,8 +135,8 @@ inline double
 random_dbl_in_range(const double lbound,
 		    const double rbound)
 {
-	return random_dbl_scaled(rbound - lbound,
-				 lbound);
+	return random_dbl_bound_offset(rbound - lbound,
+				       lbound);
 }
 
 inline void

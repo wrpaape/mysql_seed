@@ -73,16 +73,17 @@ extern const struct NameMap last_name_map;
 inline char *
 put_random_initial(char *const restrict string)
 {
-	*string = (char) random_int32_scaled((const uint32_t) ('Z' - 'A'),
-					     (const int32_t) 'A');
+	*string = (char) random_int32_bound_offset(RANDOM_UINT32_VALID_LIMIT(26u),
+						   26u,
+						   (const int32_t) 'A');
 	return string + 1l;
 }
 
 inline const struct Stub *
 name_map_sample(const struct NameMap *const restrict map)
 {
-	return map->names + random_uint32_limited(map->limit,
-						  map->length);
+	return map->names + random_uint32_bound(map->limit,
+						map->length);
 }
 
 inline char *

@@ -20,14 +20,15 @@ extern inline bool
 coin_flip(void);
 
 extern inline uint32_t
-random_uint32_limited(const uint32_t valid_limit,
-		      const uint32_t range_length);
+random_uint32_bound(const uint32_t valid_limit,
+		    const uint32_t range_length);
 extern inline uint32_t
 random_uint32_upto(const uint32_t rbound);
 
 extern inline int32_t
-random_int32_scaled(const uint32_t delta,
-		    const int32_t offset);
+random_int32_bound_offset(const uint32_t valid_limit,
+			  const uint32_t range_length,
+			  const int32_t offset);
 extern inline int32_t
 random_int32_in_range(const int32_t lbound,
 		      const int32_t rbound);
@@ -35,8 +36,8 @@ random_int32_in_range(const int32_t lbound,
 extern inline double
 random_dbl_upto(const double rbound);
 extern inline double
-random_dbl_scaled(const double delta,
-		  const double offset);
+random_dbl_bound_offset(const double delta,
+			const double offset);
 extern inline double
 random_dbl_in_range(const double lbound,
 		    const double rbound);
