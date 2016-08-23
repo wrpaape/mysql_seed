@@ -752,6 +752,42 @@ TARGETS			+= $(RANDOM_RANDOM_OBJ)				\
 			   $(RANDOM_RANDOM_TEST_BIN)
 
 
+# random/random_generator
+# ──────────────────────────────────────────────────────────────────────────────
+RANDOM_RANDOM_GENERATOR_SRC 		:= $(call HELPER_SOURCE_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_HDR		:= $(call HELPER_HEADER_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_OBJ 		:= $(call HELPER_OBJECT_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,random random_generator)
+RANDOM_RANDOM_GENERATOR_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,random random_generator)
+# ─────────────── target prequisites ───────────────────────────────────────────
+RANDOM_RANDOM_GENERATOR_OBJ_PREQS	:= $(RANDOM_RANDOM_GENERATOR_SRC) 		\
+			   	   	   $(RANDOM_RANDOM_GENERATOR_HDR)		\
+			   	   	   $(RANDOM_RANDOM_HDR)
+RANDOM_RANDOM_GENERATOR_OBJ_GROUP	:= $(RANDOM_RANDOM_GENERATOR_OBJ)		\
+			   	   	   $(RANDOM_RANDOM_OBJ_GROUP)
+RANDOM_RANDOM_GENERATOR_TRNR_SRC_PREQS	:= $(RANDOM_RANDOM_GENERATOR_TEST_SRC)		\
+				   	   $(TEST_RUNNER_SOURCE_DIR)
+RANDOM_RANDOM_GENERATOR_TEST_OBJ_PREQS	:= $(RANDOM_RANDOM_GENERATOR_TEST_SRC)		\
+			   	   	   $(RANDOM_RANDOM_GENERATOR_OBJ_PREQS) 	\
+			   	   	   $(UNITY_OBJ_PREQS)
+RANDOM_RANDOM_GENERATOR_TRNR_OBJ_PREQS	:= $(RANDOM_RANDOM_GENERATOR_TRNR_SRC)		\
+			   	   	   $(RANDOM_RANDOM_GENERATOR_TEST_OBJ_PREQS)
+RANDOM_RANDOM_GENERATOR_TEST_BIN_PREQS	:= $(RANDOM_RANDOM_GENERATOR_TRNR_OBJ)		\
+					   $(RANDOM_RANDOM_GENERATOR_TEST_OBJ)		\
+					   $(RANDOM_RANDOM_GENERATOR_OBJ_GROUP)		\
+					   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(RANDOM_RANDOM_GENERATOR_TEST_BIN)
+TARGETS			+= $(RANDOM_RANDOM_GENERATOR_OBJ)			\
+			   $(RANDOM_RANDOM_GENERATOR_TRNR_SRC)			\
+			   $(RANDOM_RANDOM_GENERATOR_TRNR_OBJ)			\
+			   $(RANDOM_RANDOM_GENERATOR_TEST_OBJ)			\
+			   $(RANDOM_RANDOM_GENERATOR_TEST_BIN)
+
+
 # string/ascii_utils
 # ──────────────────────────────────────────────────────────────────────────────
 STRING_ASCII_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,string ascii_utils)
@@ -1527,6 +1563,42 @@ TARGETS			+= $(GENERATE_COLUMN_STRING_OBJ)		\
 			   $(GENERATE_COLUMN_STRING_TEST_BIN)
 
 
+# generate/column_integer_random
+# ──────────────────────────────────────────────────────────────────────────────
+GENERATE_COLUMN_INTEGER_RANDOM_SRC 	:= $(call HELPER_SOURCE_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_HDR	:= $(call HELPER_HEADER_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_OBJ 	:= $(call HELPER_OBJECT_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,generate column_integer_random)
+GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate column_integer_random)
+# ─────────────── target prequisites ───────────────────────────────────────────
+GENERATE_COLUMN_INTEGER_RANDOM_OBJ_PREQS	:= $(GENERATE_COLUMN_INTEGER_RANDOM_SRC) 		\
+			     	   	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_HDR)		\
+			      	   	   	   $(GENERATE_COUNTER_HDR)
+GENERATE_COLUMN_INTEGER_RANDOM_OBJ_GROUP	:= $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ) 		\
+				   	   	   $(GENERATE_COUNTER_OBJ_GROUP)
+GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_SRC)		\
+				   	   	   $(TEST_RUNNER_SOURCE_DIR)
+GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ_PREQS)		\
+			   	   	   	   $(UNITY_OBJ_PREQS)
+GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ_PREQS	:= $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC)		\
+			   	   	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ_PREQS)
+GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN_PREQS	:= $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ)		\
+				   	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ)		\
+			   	   	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ_GROUP)		\
+						   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN)
+TARGETS			+= $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ)	\
+			   $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC)	\
+			   $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ)	\
+			   $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ)	\
+			   $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN)
+
+
 # generate/column_integer
 # ──────────────────────────────────────────────────────────────────────────────
 GENERATE_COLUMN_INTEGER_SRC 		:= $(call HELPER_SOURCE_PATH,generate column_integer)
@@ -2099,6 +2171,11 @@ $(GENERATE_COLUMN_DATETIME_OBJ): $(GENERATE_COLUMN_DATETIME_OBJ_PREQS)
 $(GENERATE_COLUMN_INTEGER_OBJ): $(GENERATE_COLUMN_INTEGER_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make generate/column_integer_random object
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_INTEGER_RANDOM_OBJ): $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make generate/column_string object
 # ──────────────────────────────────────────────────────────────────────────────
 $(GENERATE_COLUMN_STRING_OBJ): $(GENERATE_COLUMN_STRING_OBJ_PREQS)
@@ -2157,6 +2234,11 @@ $(STRING_ASCII_UTILS_OBJ): $(STRING_ASCII_UTILS_OBJ_PREQS)
 # make string/utf8_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(STRING_UTF8_UTILS_OBJ): $(STRING_UTF8_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make random/random_generator object
+# ──────────────────────────────────────────────────────────────────────────────
+$(RANDOM_RANDOM_GENERATOR_OBJ): $(RANDOM_RANDOM_GENERATOR_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make random/random object
@@ -2737,6 +2819,26 @@ $(GENERATE_COLUMN_INTEGER_TRNR_SRC): $(GENERATE_COLUMN_INTEGER_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
+# for generate/column_integer_random
+# make:
+# 	generate_column_integer_random_test		binary,
+# 	generate_column_integer_random_test_runner 	object,
+# 	generate_column_integer_random_test		object, and
+# 	generate_column_integer_random_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN): $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ): $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ): $(GENERATE_COLUMN_INTEGER_RANDOM_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC): $(GENERATE_COLUMN_INTEGER_RANDOM_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
 # for generate/column_string
 # make:
 # 	generate_column_string_test		binary,
@@ -2853,6 +2955,26 @@ $(GENERATE_GENERATE_TEST_OBJ): $(GENERATE_GENERATE_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(GENERATE_GENERATE_TRNR_SRC): $(GENERATE_GENERATE_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for random/random_generator
+# make:
+# 	random_random_generator_test		binary,
+# 	random_random_generator_test_runner 	object,
+# 	random_random_generator_test		object, and
+# 	random_random_generator_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(RANDOM_RANDOM_GENERATOR_TEST_BIN): $(RANDOM_RANDOM_GENERATOR_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(RANDOM_RANDOM_GENERATOR_TRNR_OBJ): $(RANDOM_RANDOM_GENERATOR_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(RANDOM_RANDOM_GENERATOR_TEST_OBJ): $(RANDOM_RANDOM_GENERATOR_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(RANDOM_RANDOM_GENERATOR_TRNR_SRC): $(RANDOM_RANDOM_GENERATOR_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

@@ -77,19 +77,19 @@ PARSE_ERROR_HEADER("expected DATABASE flag instead of")
 PARSE_ERROR_HEADER("incomplete DB_SPEC")
 
 #define ERROR_INC_DB_SPEC_COL_NAME					\
-"\n" ERROR_WRAP("reason: expected COL_NAME to follow COLUMN flag, "	\
+"\n" ERROR_WRAP("reason - expected COL_NAME to follow COLUMN flag, "	\
 		"ignoring above DB_SPEC") "\n"
 
 #define ERROR_INC_DB_SPEC_TBL_NAME					\
-"\n" ERROR_WRAP("reason: expected TBL_NAME to follow TABLE flag, "	\
+"\n" ERROR_WRAP("reason - expected TBL_NAME to follow TABLE flag, "	\
 		"ignoring above DB_SPEC") "\n"
 
 #define ERROR_INC_DB_SPEC_ROW_COUNT					\
-"\n" ERROR_WRAP("reason: expected ROW_COUNT to follow TBL_NAME, "	\
+"\n" ERROR_WRAP("reason - expected ROW_COUNT to follow TBL_NAME, "	\
 		"ignoring above DB_SPEC") "\n"
 
 #define ERROR_INC_DB_SPEC_COL_FLAG					\
-"\n" ERROR_WRAP("reason: expected COLUMN flag to follow ROW_COUNT, "	\
+"\n" ERROR_WRAP("reason - expected COLUMN flag to follow ROW_COUNT, "	\
 		"ignoring above DB_SPEC") "\n"
 
 /* parsing DB_NAME */
@@ -101,13 +101,13 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC starting"	\
 		   " with")
 
 #define ERROR_INVALID_DB_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
 		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"	\
 		" ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_DB_NAME_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - includes one or more invalid UTF-8 "		\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
 /* parsing TBL_SPEC */
 #define ERROR_EXPECTED_TBL_FLAG_HEADER					\
@@ -122,13 +122,13 @@ PARSE_ERROR_HEADER("invalid TBL_NAME (empty), ignoring DB_SPEC "	\
 		   "starting with")
 
 #define ERROR_INVALID_TBL_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
 		TBL_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints"	\
 		", ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_TBL_NAME_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - includes one or more invalid UTF-8 "		\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
 /* parsing COL_SPEC */
 #define ERROR_EXPECTED_COL_FLAG_HEADER					\
@@ -143,28 +143,28 @@ PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC "	\
 		   "starting with")
 
 #define ERROR_INVALID_COL_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
 		COL_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints"	\
 		", ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_COL_NAME_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - includes one or more invalid UTF-8 "		\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
 /* parsing ROW_COUNT */
 #define ERROR_INVALID_ROW_COUNT_HEADER					\
 PARSE_ERROR_HEADER("invalid ROW_COUNT")
 
 #define ERROR_INVALID_ROW_COUNT_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_ROW_COUNT_REASON_ZERO				\
-"\n" ERROR_WRAP("reason: ROW_COUNT must be ≥ 1, ignoring DB_SPEC "	\
+"\n" ERROR_WRAP("reason - ROW_COUNT must be ≥ 1, ignoring DB_SPEC "	\
 		"starting with:") "\n"
 
 #define ERROR_INVALID_ROW_COUNT_REASON_LARGE				\
-"\n" ERROR_WRAP("reason: ROW_COUNT exceeds the system-Dependent "	\
+"\n" ERROR_WRAP("reason - ROW_COUNT exceeds the system-Dependent "	\
 		"constant UPTO_MAX (" UPTO_MAX_STRING "), ignoring "	\
 		"DB_SPEC starting with:") "\n"
 
@@ -177,7 +177,7 @@ PARSE_ERROR_HEADER("no COL_TYPE provided, ignoring DB_SPEC starting "	\
 PARSE_ERROR_HEADER("invalid COL_TYPE")
 
 #define ERROR_INVALID_COL_TYPE_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC starting "	\
+"\n" ERROR_WRAP("reason - not supported, ignoring DB_SPEC starting "	\
 		"with:") "\n"
 
 /* parsing COL_TYPE_Q */
@@ -185,19 +185,19 @@ PARSE_ERROR_HEADER("invalid COL_TYPE")
 PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 
 #define ERROR_INVALID_I_TYPE_Q_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'integer', "	\
+"\n" ERROR_WRAP("reason - not supported for COL_TYPE 'integer', "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'string', ignoring"	\
-		" DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - not supported for COL_TYPE 'string', "	\
+		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_TS_TYPE_Q_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'timestamp', "	\
+"\n" ERROR_WRAP("reason - not supported for COL_TYPE 'timestamp', "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_DT_TYPE_Q_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported for COL_TYPE 'datetime', "	\
+"\n" ERROR_WRAP("reason - not supported for COL_TYPE 'datetime', "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_NO_FIXED_INTEGER						\
@@ -208,16 +208,16 @@ PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
 PARSE_ERROR_HEADER("invalid FIXED_INT")
 
 #define ERROR_INVALID_FIXED_INTEGER_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
 		"defined intmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_INTEGER_REASON_SMALL			\
-"\n" ERROR_WRAP("reason: FIXED_INT exceeds MySQL lower limit "		\
+"\n" ERROR_WRAP("reason - FIXED_INT exceeds MySQL lower limit "		\
 		"BIGINT_SIGNED_MIN (" BIGINT_SIGNED_MIN_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_INTEGER_REASON_LARGE			\
-"\n" ERROR_WRAP("reason: FIXED_INT exceeds MySQL upper limit "		\
+"\n" ERROR_WRAP("reason - FIXED_INT exceeds MySQL upper limit "		\
 		"BIGINT_SIGNED_MAX (" BIGINT_SIGNED_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
@@ -229,11 +229,11 @@ PARSE_ERROR_HEADER("no FIXED_INT provided, ignoring DB_SPEC starting "	\
 PARSE_ERROR_HEADER("invalid FIXED_UINT")
 
 #define ERROR_INVALID_FIXED_U_INTEGER_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_U_INTEGER_REASON_LARGE			\
-"\n" ERROR_WRAP("reason: FIXED_UINT exceeds MySQL upper limit "		\
+"\n" ERROR_WRAP("reason - FIXED_UINT exceeds MySQL upper limit "	\
 		"BIGINT_UNSIGNED_MAX (" BIGINT_UNSIGNED_MAX_STRING ")"	\
 		", ignoring DB_SPEC starting with:") "\n"
 
@@ -245,11 +245,11 @@ PARSE_ERROR_HEADER("no column base string provided, ignoring DB_SPEC "	\
 PARSE_ERROR_HEADER("invalid column base string")
 
 #define ERROR_INVALID_BASE_STRING_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - includes one or more invalid UTF-8 "		\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_BASE_STRING_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded maximum of "				\
+"\n" ERROR_WRAP("reason - exceeded maximum of "				\
 		BASE_STRING_LENGTH_MAX_STRING " non-null UTF-8 "	\
 		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
@@ -261,11 +261,11 @@ PARSE_ERROR_HEADER("no column fixed string provided, ignoring DB_SPEC "	\
 PARSE_ERROR_HEADER("invalid column fixed string")
 
 #define ERROR_INVALID_FIXED_STRING_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: includes one or more invalid UTF-8 codepoints"	\
-		", ignoring DB_SPEC starting with:") "\n"
+"\n" ERROR_WRAP("reason - includes one or more invalid UTF-8 "		\
+		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_FIXED_STRING_REASON_LONG				\
-"\n" ERROR_WRAP("reason: exceeded maximum of "				\
+"\n" ERROR_WRAP("reason - exceeded maximum of "				\
 		FIXED_STRING_LENGTH_MAX_STRING " non-null UTF-8 "	\
 		"codepoints, ignoring DB_SPEC starting with:") "\n"
 
@@ -277,40 +277,61 @@ PARSE_ERROR_HEADER("no HASH_LENGTH provided, ignoring DB_SPEC starting"	\
 PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 
 #define ERROR_INVALID_HASH_LENGTH_REASON_INVALID			\
-"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_HASH_LENGTH_REASON_ZERO				\
-"\n" ERROR_WRAP("reason: HASH_LENGTH must be ≥ 1, ignoring DB_SPEC "	\
+"\n" ERROR_WRAP("reason - HASH_LENGTH must be ≥ 1, ignoring DB_SPEC "	\
 		"starting with:") "\n"
 
 #define ERROR_INVALID_HASH_LENGTH_REASON_LARGE				\
-"\n" ERROR_WRAP("reason: HASH_LENGTH exceeds upper limit "		\
+"\n" ERROR_WRAP("reason - HASH_LENGTH exceeds upper limit "		\
 		"HASH_LENGTH_MAX (" HASH_LENGTH_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
 /* parsing RAND_SPEC */
 #define ERROR_INVALID_RAND_SPEC_HEADER					\
-PARSE_ERROR_HEADER("invalid RAND_SPEC")
+PARSE_ERROR_HEADER("invalid RAND_SPEC component")
 
 #define ERROR_INVALID_RAND_SPEC_REASON_NOTSUP				\
-"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC starting "	\
+"\n" ERROR_WRAP("reason - not supported, ignoring DB_SPEC starting "	\
 		"with:") "\n"
+
+#define ERROR_NO_RANDOM_FROM_MIN					\
+PARSE_ERROR_HEADER("no MIN_<TYPE> value provided for RAND_SPEC 'from' "	\
+		   "component, ignoring DB_SPEC starting with")
+
+#define ERROR_INVALID_MIN_INTEGER_HEADER				\
+PARSE_ERROR_HEADER("invalid MIN_INT")
+
+#define ERROR_INVALID_MIN_INTEGER_REASON_INVALID			\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
+		"defined intmax_t, ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_MIN_INTEGER_REASON_SMALL				\
+"\n" ERROR_WRAP("reason - MIN_INT exceeds MySQL lower limit "		\
+		"BIGINT_SIGNED_MIN (" BIGINT_SIGNED_MIN_STRING "), "	\
+		"ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_MIN_INTEGER_REASON_LARGE				\
+"\n" ERROR_WRAP("reason - MIN_INT exceeds MySQL upper limit "		\
+		"BIGINT_SIGNED_MAX (" BIGINT_SIGNED_MAX_STRING "), "	\
+		"ignoring DB_SPEC starting with:") "\n"
 
 /* parsing GRP_SPEC */
 #define ERROR_INVALID_GRP_COUNT_HEADER					\
 PARSE_ERROR_HEADER("invalid GRP_COUNT")
 
 #define ERROR_INVALID_GRP_COUNT_REASON_INVALID				\
-"\n" ERROR_WRAP("reason: not an integer or overflows implementation-"	\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
 		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
 
 #define ERROR_INVALID_GRP_COUNT_REASON_ZERO				\
-"\n" ERROR_WRAP("reason: GRP_COUNT must be ≥ 1, ignoring DB_SPEC "	\
+"\n" ERROR_WRAP("reason - GRP_COUNT must be ≥ 1, ignoring DB_SPEC "	\
 		"starting with:") "\n"
 
 #define ERROR_INVALID_GRP_COUNT_REASON_LARGE				\
-"\n" ERROR_WRAP("reason: GRP_COUNT exceeds table ROW_COUNT, ignoring "	\
+"\n" ERROR_WRAP("reason - GRP_COUNT exceeds table ROW_COUNT, ignoring "	\
 		"DB_SPEC starting with:") "\n"
 
 #define ERROR_NO_GRP_COUNT						\
@@ -928,6 +949,138 @@ inline void
 error_invalid_rand_spec(struct GenerateParseState *const restrict state)
 {
 	invalid_rand_spec(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+no_random_from_min(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_RANDOM_FROM_MIN,
+			  sizeof(ERROR_NO_RANDOM_FROM_MIN) - 1);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_random_from_min(struct GenerateParseState *const restrict state)
+{
+	no_random_from_min(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+inline void
+invalid_min_integer_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MIN_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MIN_INTEGER_REASON_INVALID,
+			      sizeof(ERROR_INVALID_MIN_INTEGER_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_min_integer_invalid(struct GenerateParseState *const restrict state)
+{
+	invalid_min_integer_invalid(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_min_integer_small(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MIN_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MIN_INTEGER_REASON_SMALL,
+			      sizeof(ERROR_INVALID_MIN_INTEGER_REASON_SMALL)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_min_integer_small(struct GenerateParseState *const restrict state)
+{
+	invalid_min_integer_small(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_min_integer_large(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MIN_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MIN_INTEGER_REASON_LARGE,
+			      sizeof(ERROR_INVALID_MIN_INTEGER_REASON_LARGE)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_min_integer_large(struct GenerateParseState *const restrict state)
+{
+	invalid_min_integer_large(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -2916,6 +3069,82 @@ column_integer_fixed(struct GenerateParseState *const restrict state)
 	state->specs.col->build = &build_column_integer_fixed;
 }
 
+/* -c COL_NAME -i -r */
+inline void
+column_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_int(&col_spec->type);
+
+	col_spec->build = &build_column_integer_random;
+}
+
+/* -c COL_NAME -i -r -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	type_set_int(&col_spec->type);
+
+	col_spec->build = &build_column_integer_random_group;
+}
+
+/* -c COL_NAME -i -r -f MIN_INT */
+inline void
+column_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	const intmax_t from = col_spec->type_q.integer.scale.from;
+
+	/* TODO: assign type and generator */
+
+	col_spec->build = &build_column_integer_random_from;
+}
+
+/* -c COL_NAME -i -r -f MIN_INT -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_from_group;
+}
+
+/* -c COL_NAME -i -r -u MAX */
+inline void
+column_integer_random_upto(struct GenerateParseState *const restrict state)
+{
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_upto;
+}
+
+/* -c COL_NAME -i -r -u MAX -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_random_upto_group(struct GenerateParseState *const restrict state)
+{
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_upto_group;
+}
+
+/* -c COL_NAME -i -r -r MIN_INT MAX */
+inline void
+column_integer_random_range(struct GenerateParseState *const restrict state)
+{
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_range;
+}
+
+/* -c COL_NAME -i -r -r MIN_INT MAX -g GRP_COUNT [PART_TYPE] */
+inline void
+column_integer_random_range_group(struct GenerateParseState *const restrict state)
+{
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_range_group;
+}
+
+
 /* -c COL_NAME -s -u BASE_STRING */
 inline void
 column_string_unique(struct GenerateParseState *const restrict state)
@@ -3367,6 +3596,67 @@ parse_integer_fixed(struct GenerateParseState *const restrict state)
 			      &column_integer_fixed,
 			      &error_grp_spec_for_fixed_data);
 }
+
+inline void
+parse_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_integer_random_default_group);
+}
+
+inline void
+parse_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_integer_random_default,
+			      &parse_integer_random_default_group);
+}
+
+inline void
+parse_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_integer_random_from_group);
+}
+
+inline void
+parse_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_from_min(state);
+		return;
+	}
+
+	if (parse_int(&parsed,
+		      *(state->argv.arg.from)) == NULL) {
+		error_invalid_min_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed < BIGINT_SIGNED_MIN) {
+		error_invalid_min_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed > BIGINT_SIGNED_MAX) {
+		error_invalid_min_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	state->specs.col->type_q.integer.scale.from = parsed;
+
+	parse_column_complete(state,
+			      &column_integer_random_from,
+			      &parse_integer_random_from_group);
+}
+
 
 
 inline void

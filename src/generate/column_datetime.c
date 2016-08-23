@@ -9,6 +9,7 @@ MALLOC_FAILURE_MESSAGE("build_column_datetime_unique")
 MALLOC_FAILURE_MESSAGE("build_column_datetime_unique_group")
 
 
+/* worker thread entry points */
 void
 build_column_datetime_fixed(void *arg)
 {

@@ -4,7 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include <stdint.h>			/* SIZE_MAX, UINT32_MAX */
-#include "random/random.h"		/* random_uint_upto */
+#include "random/random.h"		/* random API */
 #include "generate/generator.h"		/* string/parallelization utils */
 
 /* macro constants

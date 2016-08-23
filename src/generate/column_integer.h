@@ -3,7 +3,8 @@
 
 /* external dependencies
  * ────────────────────────────────────────────────────────────────────────── */
-#include "generate/counter.h"	/* string/thread utils, Counter */
+#include "generate/counter.h"		    /* string/thread utils, Counter */
+#include "generate/column_integer_random.h" /* build_column_integer_randomX */
 
 /* worker thread entry points */
 void
