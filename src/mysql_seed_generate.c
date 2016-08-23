@@ -24,6 +24,7 @@ invalid_db_name_invalid(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_db_name_long(const struct GenerateArgvState *const restrict argv);
 
+
 /* TBL_SPEC */
 extern inline void
 expected_tbl_flag(const struct GenerateArgvState *const restrict argv);
@@ -58,6 +59,14 @@ extern inline void
 invalid_col_type(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_col_type(struct GenerateParseState *const restrict state);
+
+
+/* RAND_SPEC */
+extern inline void
+invalid_rand_spec(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_rand_spec(struct GenerateParseState *const restrict state);
+
 
 /* GRP_SPEC */
 extern inline void
@@ -468,6 +477,8 @@ parse_datetime_unique(struct GenerateParseState *const restrict state);
 
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_integer_random(struct GenerateParseState *const restrict state);
 extern inline void
 parse_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void

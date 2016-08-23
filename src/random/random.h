@@ -86,7 +86,7 @@ random_uint32_bound(const uint32_t valid_limit,
 		random = random_uint32();
 	} while (random > valid_limit);
 
-	return (uint32_t) (random % range_length);
+	return random % range_length;
 }
 
 inline uint64_t
@@ -99,7 +99,7 @@ random_uint64_bound(const uint64_t valid_limit,
 		random = random_uint64();
 	} while (random > valid_limit);
 
-	return (uint64_t) (random % range_length);
+	return random % range_length;
 }
 
 inline uint32_t
@@ -109,6 +109,35 @@ random_uint32_upto(const uint32_t rbound)
 
 	return random_uint32_bound(RANDOM_UINT32_VALID_LIMIT(range_length),
 				   range_length);
+}
+
+inline uint64_t
+random_uint64_upto(const uint64_t rbound)
+{
+	const uint64_t range_length = rbound + 1u;
+
+	return random_uint64_bound(RANDOM_UINT64_VALID_LIMIT(range_length),
+				   range_length);
+}
+
+inline int32_t
+random_int32_upto(const int32_t rbound)
+{
+	const uint32_t range_length = rbound + 1u - INT32_MIN;
+
+	return random_uint32_bound(RANDOM_UINT32_VALID_LIMIT(range_length),
+				   range_length)
+	     + INT32_MIN;
+}
+
+inline int64_t
+random_int64_upto(const int64_t rbound)
+{
+	const uint64_t range_length = rbound + 1u - INT64_MIN;
+
+	return random_uint64_bound(RANDOM_UINT64_VALID_LIMIT(range_length),
+				   range_length);
+	     + INT64_MIN;
 }
 
 inline int32_t

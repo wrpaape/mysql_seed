@@ -289,6 +289,14 @@ PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 		"HASH_LENGTH_MAX (" HASH_LENGTH_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
+/* parsing RAND_SPEC */
+#define ERROR_INVALID_RAND_SPEC_HEADER					\
+PARSE_ERROR_HEADER("invalid RAND_SPEC")
+
+#define ERROR_INVALID_RAND_SPEC_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason: not supported, ignoring DB_SPEC starting "	\
+		"with:") "\n"
+
 /* parsing GRP_SPEC */
 #define ERROR_INVALID_GRP_COUNT_HEADER					\
 PARSE_ERROR_HEADER("invalid GRP_COUNT")
@@ -889,6 +897,40 @@ error_invalid_col_type(struct GenerateParseState *const restrict state)
 	invalid_col_type(&state->argv);
 	generate_parse_error(state);
 }
+
+
+/* RAND_SPEC */
+inline void
+invalid_rand_spec(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_RAND_SPEC_HEADER,
+			  sizeof(ERROR_INVALID_RAND_SPEC_HEADER) - 1);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_RAND_SPEC_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_RAND_SPEC_REASON_NOTSUP)
+			      - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_rand_spec(struct GenerateParseState *const restrict state)
+{
+	invalid_rand_spec(&state->argv);
+	generate_parse_error(state);
+}
+
 
 /* GRP_SPEC */
 inline void
@@ -3557,6 +3599,143 @@ parse_datetime_unique(struct GenerateParseState *const restrict state)
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
+parse_integer_random(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		column_integer_random_default(state);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		error_invalid_rand_spec(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long integer qualifier */
+
+	case 'g':
+		if (*rem == '\0')
+			parse_integer_random_default_group(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_integer_random_from(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'r':
+		if (*rem == '\0')
+			parse_integer_random_range(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		column_integer_random_default(state);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_integer_random_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		column_integer_random_default(state);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_rand_spec(state);
+		return;
+	}
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_integer_random_default_group(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'f':
+		if (strings_equal("rom", rem + 1l))
+			parse_integer_random_from(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'r':
+		if (strings_equal("ange", rem + 1l))
+			parse_integer_random_range(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_rand_spec(state);
+	}
+}
+
+inline void
 parse_integer_qualifier(struct GenerateParseState *const restrict state)
 {
 	++(state->argv.arg.from);
@@ -3598,6 +3777,13 @@ parse_integer_qualifier(struct GenerateParseState *const restrict state)
 	case 'f':
 		if (*rem == '\0')
 			parse_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (*rem == '\0')
+			parse_integer_random(state);
 		else
 			error_invalid_integer_type_q(state);
 		return;
@@ -3653,6 +3839,13 @@ NEXT_DB_SPEC:		column_integer_default(state);
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
 			parse_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (strings_equal("andom", rem + 1l))
+			parse_integer_random(state);
 		else
 			error_invalid_integer_type_q(state);
 		return;

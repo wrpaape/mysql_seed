@@ -1,13 +1,15 @@
 #include "mysql_seed.h"
 
-int main(int argc, char *argv[])
+int
+main(int argc,
+     char **argv)
 {
 	if (argc < 2) {
 		print_no_mode_flag();
 		return EXIT_FAILURE;
 	}
 
-	return mode_dispatch(&argv[1],
+	return mode_dispatch(argv + 1l,
 			     argc - 2);
 }
 
@@ -88,7 +90,6 @@ mode_dispatch(char *const *const restrict from,
 
 INVALID_MODE_FLAG:
 	print_invalid_mode_flag(flag);
-
 	return EXIT_FAILURE;
 }
 

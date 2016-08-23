@@ -27,11 +27,13 @@ random_uint64_bound(const uint64_t valid_limit,
 		    const uint64_t range_length);
 extern inline uint32_t
 random_uint32_upto(const uint32_t rbound);
-
+inline uint64_t
+random_uint64_upto(const uint64_t rbound);
 extern inline int32_t
-random_int32_bound_offset(const uint32_t valid_limit,
-			  const uint32_t range_length,
-			  const int32_t offset);
+random_int32_upto(const int32_t rbound);
+extern inline int64_t
+random_int64_upto(const int64_t rbound);
+
 extern inline int32_t
 random_int32_in_range(const int32_t lbound,
 		      const int32_t rbound);

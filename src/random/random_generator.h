@@ -45,50 +45,45 @@ struct BoundOffsetI {
 };
 
 
-/* 0 ... U|INT32|64_MAX */
+/* 0 ... UINT32|64_MAX */
 typedef uintmax_t
 UGenerator(void);
+/* INT32|64_MIN ... INT32|64_MAX */
 typedef intmax_t
 IGenerator(void);
 
 /* 0 ... upto */
 typedef uintmax_t
 BoundUGenerator(const union Bound *const restrict params);
-typedef intmax_t
-BoundIGenerator(const union Bound *const restrict params);
-
 struct BoundUGeneratorClosure {
 	union Bound params;
 	BoundUGenerator *generate;
 };
 
+/* INT32|64_MIN ... upto */
+typedef intmax_t
+BoundIGenerator(const union Bound *const restrict params);
 struct BoundIGeneratorClosure {
 	union Bound params;
 	BoundIGenerator *generate;
 };
 
-/* from ... U|INT32|64_MAX, min ... max */
+/* from ... UINT32|64_MAX, min ... max */
 typedef uintmax_t
-UIntBoundOffsetGenerator(const struct BoundOffsetU *const restrict params);
-
-struct UIntBoundOffsetClosure {
+BoundOffsetUGenerator(const struct BoundOffsetU *const restrict params);
+struct BoundOffsetUGeneratorClosure {
 	struct BoundOffsetU params;
-	UIntBoundOffsetGenerator *generate;
+	BoundOffsetUGenerator *generate;
 };
 
 
-/* signed integers */
-union IntOffset {
-	int32_t int32;
-	int64_t int64;
+/* from ... INT32|64_MAX, min ... max */
+typedef intmax_t
+BoundOffsetIGenerator(const struct BoundOffsetI *const restrict params);
+struct BoundOffsetIGeneratorClosure {
+	struct BoundOffsetI params;
+	BoundOffsetIGenerator *generate;
 };
-
-struct IntBoundOffset {
-	union Bound bound;
-	union IntOffset offset;
-};
-
-
 
 
 /* generators
@@ -115,14 +110,22 @@ generate_i_bound_32(const union Bound *const restrict params);
 intmax_t
 generate_i_bound_64(const union Bound *const restrict params);
 
-/* UIntBoundOffsetGenerator */
+/* BoundOffsetUGenerators */
 uintmax_t
-uint_bound_uint32_offset_uint32(const struct BoundOffsetU *const restrict params);
+generate_u_bound_32_offset_32(const struct BoundOffsetU *const restrict params);
 uintmax_t
-uint_bound_uint32_offset_uint64(const struct BoundOffsetU *const restrict params);
+generate_u_bound_32_offset_64(const struct BoundOffsetU *const restrict params);
 uintmax_t
-uint_bound_uint64_offset_uint32(const struct BoundOffsetU *const restrict params);
+generate_u_bound_64_offset_32(const struct BoundOffsetU *const restrict params);
 uintmax_t
-uint_bound_uint64_offset_uint64(const struct BoundOffsetU *const restrict params);
+generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params);
 
-
+/* BoundOffsetIGenerators */
+intmax_t
+generate_i_bound_32_offset_32(const struct BoundOffsetI *const restrict params);
+intmax_t
+generate_i_bound_32_offset_64(const struct BoundOffsetI *const restrict params);
+intmax_t
+generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params);
+intmax_t
+generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params);
