@@ -129,3 +129,4 @@ intmax_t
 generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params);
 intmax_t
 generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params);
+#endif /* ifndef MYSQL_SEED_RANDOM_RANDOM_GENERATOR_H_ */

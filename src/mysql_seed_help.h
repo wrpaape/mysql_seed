@@ -124,10 +124,10 @@ help_usage(void)
 {
 	const char *restrict failure;
 
-	if (write_report(STDOUT_FILENO,
-			 HELP_USAGE_MESSAGE,
-			 sizeof(HELP_USAGE_MESSAGE),
-			 &failure))
+	if (LIKELY(write_report(STDOUT_FILENO,
+				HELP_USAGE_MESSAGE,
+				sizeof(HELP_USAGE_MESSAGE) - 1lu,
+				&failure)))
 		return EXIT_SUCCESS;
 
 	write_muffle(STDERR_FILENO,
@@ -142,10 +142,10 @@ help_generate(void)
 {
 	const char *restrict failure;
 
-	if (write_report(STDOUT_FILENO,
-			 HELP_GENERATE_MESSAGE,
-			 sizeof(HELP_GENERATE_MESSAGE) - 1lu,
-			 &failure))
+	if (LIKELY(write_report(STDOUT_FILENO,
+				HELP_GENERATE_MESSAGE,
+				sizeof(HELP_GENERATE_MESSAGE) - 1lu,
+				&failure)))
 		return EXIT_SUCCESS;
 
 	write_muffle(STDERR_FILENO,
@@ -160,10 +160,10 @@ help_load(void)
 {
 	const char *restrict failure;
 
-	if (write_report(STDOUT_FILENO,
-			 HELP_LOAD_MESSAGE,
-			 sizeof(HELP_LOAD_MESSAGE) - 1lu,
-			 &failure))
+	if (LIKELY(write_report(STDOUT_FILENO,
+				HELP_LOAD_MESSAGE,
+				sizeof(HELP_LOAD_MESSAGE) - 1lu,
+				&failure)))
 		return EXIT_SUCCESS;
 
 	write_muffle(STDERR_FILENO,
@@ -179,19 +179,20 @@ help_load(void)
 inline void
 invalid_mode(char *const restrict mode)
 {
-	char buffer[ARG_INSPECT_BUFFER_SIZE] = {
-		FAILURE_INVALID_MODE_HEADER
-	};
+	char buffer[ARG_INSPECT_BUFFER_SIZE];
 
 	char *restrict
-	ptr = put_string_inspect(&buffer[0]
-				 + sizeof(FAILURE_INVALID_MODE_HEADER) - 1ul,
+	ptr = put_string_size(&buffer[0],
+			      FAILURE_INVALID_MODE_HEADER,
+			      sizeof(FAILURE_INVALID_MODE_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
 				 mode,
 				 LENGTH_INSPECT_MAX);
 
 	ptr = put_string_size(ptr,
 			      MORE_INFO_MESSAGE,
-			      sizeof(MORE_INFO_MESSAGE));
+			      sizeof(MORE_INFO_MESSAGE) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -213,32 +214,25 @@ help_dispatch(char *const restrict *const restrict arg,
 
 	switch (*mode) {
 	case 'g':
-		if ((*rem == '\0') || strings_equal("enerate", rem))
+		if (LIKELY(((*rem == '\0') || strings_equal("enerate", rem))))
 			return help_generate();
-
 		break;
-
 
 	case 'h':
-		if ((*rem == '\0') || strings_equal("elp", rem))
+		if (LIKELY(((*rem == '\0') || strings_equal("elp", rem))))
 			return help_usage();
-
 		break;
-
 
 	case 'l':
-		if ((*rem == '\0') || strings_equal("oad", rem))
+		if (LIKELY(((*rem == '\0') || strings_equal("oad", rem))))
 			return help_load();
-
 		break;
-
 
 	default:
 		break;
 	}
 
        invalid_mode(mode);
-
        return EXIT_FAILURE;
 }
 

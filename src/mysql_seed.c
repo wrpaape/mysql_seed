@@ -33,27 +33,27 @@ mode_dispatch(char *const *const restrict from,
 		break;	/* parse long mode flag */
 
 	case 'g':
-		if (*rem == '\0')
-			return generate_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(*rem == '\0'))
+			return generate_dispatch(from + 1l,
+						 rem_argc);
 		goto INVALID_MODE_FLAG;
 
 
 	case 'h':
-		if (*rem == '\0')
-			return help_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(*rem == '\0'))
+			return help_dispatch(from + 1l,
+					     rem_argc);
 		goto INVALID_MODE_FLAG;
 
 
 	case 'l':
-		if (*rem == '\0')
-			return load_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(*rem == '\0'))
+			return load_dispatch(from + 1l,
+					     rem_argc);
 		goto INVALID_MODE_FLAG;
 
 	case 'r':
-		if (*rem == '\0')
+		if (LIKELY(*rem == '\0'))
 			return remove_dispatch(from + 1l);
 
 	default:
@@ -63,25 +63,25 @@ mode_dispatch(char *const *const restrict from,
 	/* parse long mode flag */
 	switch (*rem) {
 	case 'g':
-		if (strings_equal("enerate", rem + 1l))
-			return generate_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(strings_equal("enerate", rem + 1l)))
+			return generate_dispatch(from + 1l,
+						 rem_argc);
 		break;
 
 	case 'h':
-		if (strings_equal("elp", rem + 1l))
-			return help_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(strings_equal("elp", rem + 1l)))
+			return help_dispatch(from + 1l,
+					     rem_argc);
 		break;
 
 	case 'l':
-		if (strings_equal("oad", rem + 1l))
-			return load_dispatch(from + 1l, rem_argc);
-
+		if (LIKELY(strings_equal("oad", rem + 1l)))
+			return load_dispatch(from + 1l,
+					     rem_argc);
 		break;
 
 	case 'r':
-		if (strings_equal("emove", rem + 1l))
+		if (LIKELY(strings_equal("emove", rem + 1l)))
 			return remove_dispatch(from + 1l);
 
 	default:

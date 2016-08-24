@@ -37,6 +37,7 @@ mysql_seed_remove_all(void)
 
 	exit_status = EXIT_SUCCESS;
 #ifdef WIN32
+	/* TODO: windows directory walk */
 
 #else
 	FTS *restrict tree;

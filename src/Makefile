@@ -225,7 +225,7 @@ CC_BASE_FLAGS	:= -std=c99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREAD
 ifeq (T,$(DEVELOPMENT_MODE))
 CC_FLAGS	:= -g -Wall $(CC_BASE_FLAGS)
 else
-CC_FLAGS	:= -O2 -funroll-loops $(CC_BASE_FLAGS)
+CC_FLAGS	:= -O2 -funroll-loops -freorder-blocks $(CC_BASE_FLAGS)
 endif
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1612,9 +1612,11 @@ GENERATE_COLUMN_INTEGER_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,generate colu
 # ─────────────── target prequisites ───────────────────────────────────────────
 GENERATE_COLUMN_INTEGER_OBJ_PREQS	:= $(GENERATE_COLUMN_INTEGER_SRC) 		\
 			     	   	   $(GENERATE_COLUMN_INTEGER_HDR)		\
-			      	   	   $(GENERATE_COUNTER_HDR)
+			      	   	   $(GENERATE_COUNTER_HDR)			\
+			      	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_HDR)
 GENERATE_COLUMN_INTEGER_OBJ_GROUP	:= $(GENERATE_COLUMN_INTEGER_OBJ) 		\
-				   	   $(GENERATE_COUNTER_OBJ_GROUP)
+				   	   $(GENERATE_COUNTER_OBJ_GROUP)		\
+			      	   	   $(GENERATE_COLUMN_INTEGER_RANDOM_OBJ_GROUP)
 GENERATE_COLUMN_INTEGER_TRNR_SRC_PREQS	:= $(GENERATE_COLUMN_INTEGER_TEST_SRC)		\
 				   	   $(TEST_RUNNER_SOURCE_DIR)
 GENERATE_COLUMN_INTEGER_TEST_OBJ_PREQS	:= $(GENERATE_COLUMN_INTEGER_TEST_SRC)		\

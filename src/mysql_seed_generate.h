@@ -3097,7 +3097,7 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
-	const intmax_t from = col_spec->type_q.integer.scale.from;
+	/* const intmax_t from = col_spec->type_q.integer.scale.from; */
 
 	/* TODO: assign type and generator */
 
@@ -3927,19 +3927,19 @@ parse_integer_random(struct GenerateParseState *const restrict state)
 			error_invalid_rand_spec(state);
 		return;
 
-	case 'u':
-		if (*rem == '\0')
-			parse_integer_random_upto(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
+	/* case 'u': */
+	/* 	if (*rem == '\0') */
+	/* 		parse_integer_random_upto(state); */
+	/* 	else */
+	/* 		error_invalid_rand_spec(state); */
+	/* 	return; */
 
-	case 'r':
-		if (*rem == '\0')
-			parse_integer_random_range(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
+	/* case 'r': */
+	/* 	if (*rem == '\0') */
+	/* 		parse_integer_random_range(state); */
+	/* 	else */
+	/* 		error_invalid_rand_spec(state); */
+	/* 	return; */
 
 	case 'c':
 		if (*rem == '\0') {
@@ -3988,19 +3988,19 @@ NEXT_DB_SPEC:		column_integer_random_default(state);
 			error_invalid_rand_spec(state);
 		return;
 
-	case 'u':
-		if (strings_equal("nique", rem + 1l))
-			parse_integer_random_upto(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
+	/* case 'u': */
+	/* 	if (strings_equal("nique", rem + 1l)) */
+	/* 		parse_integer_random_upto(state); */
+	/* 	else */
+	/* 		error_invalid_rand_spec(state); */
+	/* 	return; */
 
-	case 'r':
-		if (strings_equal("ange", rem + 1l))
-			parse_integer_random_range(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
+	/* case 'r': */
+	/* 	if (strings_equal("ange", rem + 1l)) */
+	/* 		parse_integer_random_range(state); */
+	/* 	else */
+	/* 		error_invalid_rand_spec(state); */
+	/* 	return; */
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))

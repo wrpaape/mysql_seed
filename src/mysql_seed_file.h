@@ -609,7 +609,6 @@ flag_match_next(char *const restrict *restrict from,
 		const char *const restrict long_flag)
 {
 	while (from < until) {
-
 		if (flag_match(*from,
 			       short_flag,
 			       long_flag))
@@ -662,10 +661,10 @@ mysql_seed_chdir_root_failure(const char *const restrict failure)
 {
 	char buffer[ERROR_BUFFER_SIZE];
 
-	char *restrict ptr = put_string_size(&buffer[0],
-					     CHDIR_ROOT_FAILURE_HEADER,
-					     sizeof(CHDIR_ROOT_FAILURE_HEADER)
-					     - 1lu);
+	char *restrict
+	ptr = put_string_size(&buffer[0],
+			      CHDIR_ROOT_FAILURE_HEADER,
+			      sizeof(CHDIR_ROOT_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
 			 failure);
@@ -680,8 +679,8 @@ mysql_seed_chdir_root(void)
 {
 	const char *restrict failure;
 
-	if (chdir_report(ROOT_ABSPATH,
-			 &failure))
+	if (LIKELY(chdir_report(ROOT_ABSPATH,
+				&failure)))
 		return true;
 
 	mysql_seed_chdir_root_failure(failure);

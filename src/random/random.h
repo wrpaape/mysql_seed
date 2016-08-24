@@ -136,7 +136,7 @@ random_int64_upto(const int64_t rbound)
 	const uint64_t range_length = rbound + 1u - INT64_MIN;
 
 	return random_uint64_bound(RANDOM_UINT64_VALID_LIMIT(range_length),
-				   range_length);
+				   range_length)
 	     + INT64_MIN;
 }
 

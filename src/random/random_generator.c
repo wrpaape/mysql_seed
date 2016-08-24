@@ -99,7 +99,7 @@ generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params)
 
 /* BoundOffsetIGenerators */
 intmax_t
-generate_i_bound_32_offset_32(const struct BoundOffsetU *const restrict params)
+generate_i_bound_32_offset_32(const struct BoundOffsetI *const restrict params)
 {
 	return (intmax_t) (random_uint32_bound(params->bound.uint32.limit,
 					       params->bound.uint32.length)
@@ -107,7 +107,7 @@ generate_i_bound_32_offset_32(const struct BoundOffsetU *const restrict params)
 }
 
 intmax_t
-generate_i_bound_32_offset_64(const struct BoundOffsetU *const restrict params)
+generate_i_bound_32_offset_64(const struct BoundOffsetI *const restrict params)
 {
 	return (intmax_t) (random_uint32_bound(params->bound.uint32.limit,
 					       params->bound.uint32.length)
@@ -115,7 +115,7 @@ generate_i_bound_32_offset_64(const struct BoundOffsetU *const restrict params)
 }
 
 intmax_t
-generate_i_bound_64_offset_32(const struct BoundOffsetU *const restrict params)
+generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params)
 {
 	return (intmax_t) (random_uint64_bound(params->bound.uint64.limit,
 					       params->bound.uint64.length)
@@ -123,7 +123,7 @@ generate_i_bound_64_offset_32(const struct BoundOffsetU *const restrict params)
 }
 
 intmax_t
-generate_i_bound_64_offset_64(const struct BoundOffsetU *const restrict params)
+generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params)
 {
 	return (intmax_t) (random_uint64_bound(params->bound.uint64.limit,
 					       params->bound.uint64.length)

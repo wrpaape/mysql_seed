@@ -33,8 +33,8 @@ do {									\
 
 #define MACRO_EXPAND_ARGS(MACRO, ...) MACRO(__VA_ARGS__)
 
-#define LIKELY(EXPRRESSION) __builtin_expect(!!(EXPRRESSION), 0)
-#define UNLIKELY(EXPRRESSION) __builtin_expect(!!(EXPRRESSION), 1)
+#define LIKELY(BOOL)   __builtin_expect(BOOL, 1)
+#define UNLIKELY(BOOL) __builtin_expect(BOOL, 0)
 
 
 /* returns 'THIS' or 'THAT' according to the predicate 'THIS CMP THAT',
