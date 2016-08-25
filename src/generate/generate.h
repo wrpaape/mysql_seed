@@ -247,7 +247,7 @@ mysql_seed_generate_destructors(int *const restrict exit_status)
 {
 	const char *restrict failure;
 
-	if (thread_utils_destructor(&failure))
+	if (LIKELY(thread_utils_destructor(&failure)))
 		return;
 
 	generate_failure_destructor(failure);
@@ -316,7 +316,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		 + (sizeof(struct RowBlock) * count_row_blocks_max)
 		 + (sizeof(struct TaskNode) * count_tasks_max));
 
-	if (generator_alloc == NULL) {
+	if (UNLIKELY(generator_alloc == NULL)) {
 		generate_failure_malloc();
 		mysql_seed_generate_destructors_muffle();
 		*exit_status = EXIT_FAILURE;

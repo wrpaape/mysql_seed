@@ -5070,7 +5070,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 							   + 1l
 							   - DB_SPEC_LENGTH_MIN;
 
-	if (arg >= db_spec_until) {
+	if (UNLIKELY(arg >= db_spec_until)) {
 		generate_failure_short_db_spec(arg,
 					       arg_until);
 		return EXIT_FAILURE;
@@ -5082,7 +5082,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 			    + (sizeof(struct ColSpec)
 			       * ((rem_argc - 5) / 3)));
 
-	if (spec_alloc == NULL) {
+	if (UNLIKELY(spec_alloc == NULL)) {
 		generate_failure_malloc();
 		return EXIT_FAILURE;
 	}
@@ -5112,7 +5112,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	/* populate specs according to argv */
 	parse_db_specs(&state);
 
-	if (state.generator.databases == 0u) {
+	if (UNLIKELY(state.generator.databases == 0u)) {
 		generate_failure_no_valid_db_spec();
 		free(spec_alloc);
 		return EXIT_FAILURE;
