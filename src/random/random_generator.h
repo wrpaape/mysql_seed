@@ -6,6 +6,11 @@
 #include "random/random.h"	/* random number generator */
 
 
+/* macros
+ * ────────────────────────────────────────────────────────────────────────── */
+#define RAND_GEN_CL_CALL(GEN_CL) GEN_CL->generate(&GEN_CL->params)
+
+
 /* typedefs, struct declarations
  * ────────────────────────────────────────────────────────────────────────── */
 /* unsigned integers */

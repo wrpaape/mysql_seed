@@ -3170,6 +3170,8 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 				   col_spec->type_q.integer.scale.from);
 
 	col_spec->build = &build_column_integer_random_from;
+
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -i -r -f MIN_INT -g GRP_COUNT [PART_TYPE] */
@@ -3183,6 +3185,8 @@ column_integer_random_from_group(struct GenerateParseState *const restrict state
 				   col_spec->type_q.integer.scale.from);
 
 	state->specs.col->build = &build_column_integer_random_from_group;
+
+	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -i -r -u MAX */

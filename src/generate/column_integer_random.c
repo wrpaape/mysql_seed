@@ -23,20 +23,27 @@ build_column_integer_random_from(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct StubBuilder *const restrict fixed
-	= &column->spec->type_q.integer.fixed;
+	const struct IntegerRandSpec *const restrict rand_spec
+	= &column->spec->type_q.integer.rand_spec;
+
+	const struct BoundOffsetIGeneratorClosure *const restrict from_cl
+	= &rand_spec->gen_cl.from;
 
 	struct Table *const restrict table
 	= column->parent;
 
+	const struct Rowspan *const restrict until = table->rowspans_until;
+
 	const unsigned int col_count = table->col_count;
 
-	const size_t length_contents = fixed->width * table->spec->row_count;
+	const size_t row_count = table->spec->row_count;
+
+	const size_t size_est = rand_spec->width_max * row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
 
-	column->contents = malloc(length_contents);
+	column->contents = malloc(size_est);
 
 	if (column->contents == NULL) {
 		handler_closure_call(&column->fail_cl,
@@ -44,39 +51,41 @@ build_column_integer_random_from(void *arg)
 		__builtin_unreachable();
 	}
 
-	/* increment table length */
-	length_lock_increment(&table->total,
-			      length_contents,
-			      &column->fail_cl);
-
-	const struct Rowspan *const restrict until = table->rowspans_until;
-	struct Rowspan *restrict from		   = column->rowspans_from;
+	struct Rowspan *restrict from = column->rowspans_from;
 
 	char *restrict ptr = column->contents;
 
-	const char *restrict contents_until;
-
-	size_t length_rowspan;
+	size_t rem_cells;
 
 	do {
 		from->cell = ptr;
 
-		length_rowspan = fixed->width * from->parent->row_count;
-
-		contents_until = ptr + length_rowspan;
-
-		length_lock_increment(&from->parent->total,
-				      length_rowspan,
-				      &column->fail_cl);
+		rem_cells = from->parent->row_count;
 
 		do {
-			ptr = put_stub_closure_call(&fixed->put_cl,
-						    ptr);
-		} while (ptr < contents_until);
+			ptr = put_int(ptr,
+				      from_cl->generate(&from_cl->params));
+
+			*ptr = '\0';
+			++ptr;
+
+			--rem_cells;
+
+		} while (rem_cells > 0lu);
+
+		/* add length of rowspan to row_block total */
+		length_lock_increment(&from->parent->total,
+				      ptr - from->cell,
+				      &column->fail_cl);
 
 		/* skip to rowspan in next row */
 		from += col_count;
 	} while (from < until);
+
+	/* increment table length */
+	length_lock_increment(&table->total,
+			      ptr - column->rowspans_from->cell,
+			      &column->fail_cl);
 
 	thread_try_catch_close();
 }
