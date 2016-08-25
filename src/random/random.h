@@ -28,8 +28,8 @@ extern rng64_t glob_rng64; /* global random number generator state */
 
 /* helper macros
  * ────────────────────────────────────────────────────────────────────────── */
-#define RANDOM_UINT32_VALID_LIMIT(LENGTH) (UINT32_MAX - (UINT32_MAX % LENGTH))
-#define RANDOM_UINT64_VALID_LIMIT(LENGTH) (UINT64_MAX - (UINT64_MAX % LENGTH))
+#define RANDOM_UINT32_VALID_LIMIT(LENGTH) (UINT32_MAX - (UINT32_MAX % (LENGTH)))
+#define RANDOM_UINT64_VALID_LIMIT(LENGTH) (UINT64_MAX - (UINT64_MAX % (LENGTH)))
 
 
 /* constructors, destructors

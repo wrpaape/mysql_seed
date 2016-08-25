@@ -20,42 +20,28 @@ struct Bound64 {
 };
 
 union Bound {
-	struct Bound32 small;
-	struct Bound64 large;
+	struct Bound32 uint32;
+	struct Bound64 uint64;
 };
 
-struct BoundOffsetU32 {
-	uint32_t limit;
-	uint32_t length;
-	uint32_t offset;
+union OffsetU {
+	uint32_t uint32;
+	uint64_t uint64;
 };
 
-struct BoundOffsetU64 {
-	uint64_t limit;
-	uint64_t length;
-	uint64_t offset;
+union OffsetI {
+	int32_t int32;
+	int64_t int64;
 };
 
-union BoundOffsetU {
-	struct BoundOffsetU32 small;
-	struct BoundOffsetU64 large;
+struct BoundOffsetU {
+	union Bound bound;
+	union OffsetU offset;
 };
 
-struct BoundOffsetI32 {
-	uint32_t limit;
-	uint32_t length;
-	int32_t offset;
-};
-
-struct BoundOffsetI64 {
-	uint64_t limit;
-	uint64_t length;
-	int64_t offset;
-};
-
-union BoundOffsetI {
-	struct BoundOffsetI32 small;
-	struct BoundOffsetI64 large;
+struct BoundOffsetI {
+	union Bound bound;
+	union OffsetI offset;
 };
 
 
@@ -84,18 +70,18 @@ struct BoundIGeneratorClosure {
 
 /* from ... UINT32|64_MAX, min ... max */
 typedef uintmax_t
-BoundOffsetUGenerator(const union BoundOffsetU *const restrict params);
+BoundOffsetUGenerator(const struct BoundOffsetU *const restrict params);
 struct BoundOffsetUGeneratorClosure {
-	union BoundOffsetU params;
+	struct BoundOffsetU params;
 	BoundOffsetUGenerator *generate;
 };
 
 
 /* from ... INT32|64_MAX, min ... max */
 typedef intmax_t
-BoundOffsetIGenerator(const union BoundOffsetI *const restrict params);
+BoundOffsetIGenerator(const struct BoundOffsetI *const restrict params);
 struct BoundOffsetIGeneratorClosure {
-	union BoundOffsetI params;
+	struct BoundOffsetI params;
 	BoundOffsetIGenerator *generate;
 };
 
@@ -104,35 +90,43 @@ struct BoundOffsetIGeneratorClosure {
  * ────────────────────────────────────────────────────────────────────────── */
 /* UGenerators */
 uintmax_t
-generate_u_small(void);
+generate_u_32(void);
 uintmax_t
-generate_u_large(void);
+generate_u_64(void);
 /* IGenerators */
 intmax_t
-generate_i_small(void);
+generate_i_32(void);
 intmax_t
-generate_i_large(void);
+generate_i_64(void);
 
 /* BoundUGenerators */
 uintmax_t
-generate_u_bound_small(const union Bound *const restrict params);
+generate_u_bound_32(const union Bound *const restrict params);
 uintmax_t
-generate_u_bound_large(const union Bound *const restrict params);
+generate_u_bound_64(const union Bound *const restrict params);
 /* BoundIGenerators */
 intmax_t
-generate_i_bound_small(const union Bound *const restrict params);
+generate_i_bound_32(const union Bound *const restrict params);
 intmax_t
-generate_i_bound_large(const union Bound *const restrict params);
+generate_i_bound_64(const union Bound *const restrict params);
 
 /* BoundOffsetUGenerators */
 uintmax_t
-generate_u_bound_offset_small(const union BoundOffsetU *const restrict params);
+generate_u_bound_32_offset_32(const struct BoundOffsetU *const restrict params);
 uintmax_t
-generate_u_bound_offset_large(const union BoundOffsetU *const restrict params);
+generate_u_bound_32_offset_64(const struct BoundOffsetU *const restrict params);
+uintmax_t
+generate_u_bound_64_offset_32(const struct BoundOffsetU *const restrict params);
+uintmax_t
+generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params);
 
 /* BoundOffsetIGenerators */
 intmax_t
-generate_i_bound_offset_small(const union BoundOffsetI *const restrict params);
+generate_i_bound_32_offset_32(const struct BoundOffsetI *const restrict params);
 intmax_t
-generate_i_bound_offset_large(const union BoundOffsetI *const restrict params);
+generate_i_bound_32_offset_64(const struct BoundOffsetI *const restrict params);
+intmax_t
+generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params);
+intmax_t
+generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params);
 #endif /* ifndef MYSQL_SEED_RANDOM_RANDOM_GENERATOR_H_ */

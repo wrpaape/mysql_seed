@@ -2648,36 +2648,68 @@ type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 
 
 inline void
-type_gen_cl_assign_integer_from(struct PutLabelClosure *const restrict type,
-				struct BoundOffsetIGeneratorClosure *const restrict gen_cl,
-				const intmax_t from)
+assign_integer_random_from(struct PutLabelClosure *const restrict type,
+			   struct BoundOffsetIGeneratorClosure *const restrict gen_cl,
+			   const intmax_t from)
 {
+	if (from < INT32_MIN) {
+
+		type_set_bigint(type);
+
+		const uint64_t length = INT64_MAX - from + 1u;
+
+		gen_cl->params.bound.uint64.limit
+		= RANDOM_UINT64_VALID_LIMIT(length);
+
+		gen_cl->params.bound.uint64.length = length;
+
+		gen_cl->params.offset.int64 = from - INT64_MIN;
+
+		gen_cl->generate = &generate_i_bound_64_offset_64;
 
 
-	/* if (from < INT32_MIN) { */
+	} else if (from > INT32_MAX) {
 
-	/* 	const uint64_t length = INT64_MAX - from + 1u; */
-	/* 	const int64_t offset  = from - INT64_MIN; */
+		type_set_bigint(type);
 
-	/* 	gen_cl->params.bound.uint64.limit */
-	/* 	= RANDOM_UINT64_VALID_LIMIT(length); */
+		const uint64_t offset = from - INT64_MIN;
+		const uint64_t length = INT64_MAX - from + 1u;
 
-	/* 	gen_cl->params.bound.uint64.length = length; */
+		if (length > UINT32_MAX) {
+			gen_cl->params.bound.uint64.limit
+			= RANDOM_UINT64_VALID_LIMIT(length);
 
-	/* 	if (from < (INT)) { */
+			gen_cl->params.bound.uint64.length = length;
+
+			gen_cl->params.offset.int64 = offset;
+
+			gen_cl->generate = &generate_i_bound_64_offset_64;
 
 
-	/* 	} else { */
+		} else {
+			gen_cl->params.bound.uint32.limit
+			= RANDOM_UINT32_VALID_LIMIT((uint32_t) length);
 
-	/* 	} */
+			gen_cl->params.bound.uint32.length = (uint32_t) length;
 
-	/* } else if (from > INT32_Mkkkkk) { */
+			gen_cl->params.offset.int64 = offset;
 
-	/* } else { */
+			gen_cl->generate = &generate_i_bound_32_offset_64;
+		}
+	} else {
+		type_set_int(type);
 
-	/* 	if (from ) */
+		const uint32_t length = INT32_MAX - from + 1u;
 
-	/* } */
+		gen_cl->params.bound.uint32.limit
+		= RANDOM_UINT32_VALID_LIMIT(length);
+
+		gen_cl->params.bound.uint32.length = length;
+
+		gen_cl->params.offset.int32 = from - INT32_MIN;
+
+		gen_cl->generate = &generate_i_bound_32_offset_32;
+	}
 }
 
 

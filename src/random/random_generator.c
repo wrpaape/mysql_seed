@@ -5,26 +5,26 @@
  * ────────────────────────────────────────────────────────────────────────── */
 /* UGenerators */
 uintmax_t
-generate_u_small(void)
+generate_u_32(void)
 {
 	return (uintmax_t) random_uint32();
 }
 
 uintmax_t
-generate_u_large(void)
+generate_u_64(void)
 {
 	return (uintmax_t) random_uint64();
 }
 
 /* IGenerators */
 intmax_t
-generate_i_small(void)
+generate_i_32(void)
 {
 	return (intmax_t) random_uint32();
 }
 
 intmax_t
-generate_i_large(void)
+generate_i_64(void)
 {
 	return (intmax_t) random_uint64();
 }
@@ -32,69 +32,100 @@ generate_i_large(void)
 
 /* BoundUGenerators */
 uintmax_t
-generate_u_bound_small(const union Bound *const restrict params)
+generate_u_bound_32(const union Bound *const restrict params)
 {
-	return (uintmax_t) random_uint32_bound(params->small.limit,
-					       params->small.length);
+	return (uintmax_t) random_uint32_bound(params->uint32.limit,
+					       params->uint32.length);
 }
 
 uintmax_t
-generate_u_bound_large(const union Bound *const restrict params)
+generate_u_bound_64(const union Bound *const restrict params)
 {
-	return (uintmax_t) random_uint64_bound(params->large.limit,
-					       params->large.length);
+	return (uintmax_t) random_uint64_bound(params->uint64.limit,
+					       params->uint64.length);
 }
 
 intmax_t
-generate_i_bound_small(const union Bound *const restrict params)
+generate_i_bound_32(const union Bound *const restrict params)
 {
-	return (intmax_t) (random_uint32_bound(params->small.limit,
-					       params->small.length)
+	return (intmax_t) (random_uint32_bound(params->uint32.limit,
+					       params->uint32.length)
 			   + INT32_MIN);
 }
 
 intmax_t
-generate_i_bound_large(const union Bound *const restrict params)
+generate_i_bound_64(const union Bound *const restrict params)
 {
-	return (intmax_t) (random_uint64_bound(params->large.limit,
-					       params->large.length)
+	return (intmax_t) (random_uint64_bound(params->uint64.limit,
+					       params->uint64.length)
 			   + INT64_MIN);
 }
 
 
+
 /* BoundOffsetUGenerators */
 uintmax_t
-generate_u_bound_offset_small(const union BoundOffsetU *const restrict params)
+generate_u_bound_32_offset_32(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint32_bound(params->small.limit,
-						params->small.length)
-			    + params->small.offset);
+	return (uintmax_t) (random_uint32_bound(params->bound.uint32.limit,
+						params->bound.uint32.length)
+			    + params->offset.uint32);
 }
 
+uintmax_t
+generate_u_bound_32_offset_64(const struct BoundOffsetU *const restrict params)
+{
+	return (uintmax_t) (random_uint32_bound(params->bound.uint32.limit,
+						params->bound.uint32.length)
+			    + params->offset.uint64);
+}
 
 uintmax_t
-generate_u_bound_offset_large(const union BoundOffsetU *const restrict params)
+generate_u_bound_64_offset_32(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint64_bound(params->large.limit,
-						params->large.length)
-			    + params->large.offset);
+	return (uintmax_t) (random_uint64_bound(params->bound.uint64.limit,
+						params->bound.uint64.length)
+			    + params->offset.uint32);
+}
+
+uintmax_t
+generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params)
+{
+	return (uintmax_t) (random_uint64_bound(params->bound.uint64.limit,
+						params->bound.uint64.length)
+			    + params->offset.uint64);
 }
 
 
 /* BoundOffsetIGenerators */
 intmax_t
-generate_i_bound_offset_small(const union BoundOffsetI *const restrict params)
+generate_i_bound_32_offset_32(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint32_bound(params->small.limit,
-					       params->small.length)
-			   + params->small.offset);
+	return (intmax_t) (random_uint32_bound(params->bound.uint32.limit,
+					       params->bound.uint32.length)
+			   + params->offset.int32);
 }
 
+intmax_t
+generate_i_bound_32_offset_64(const struct BoundOffsetI *const restrict params)
+{
+	return (intmax_t) (random_uint32_bound(params->bound.uint32.limit,
+					       params->bound.uint32.length)
+			   + params->offset.int64);
+}
 
 intmax_t
-generate_i_bound_offset_large(const union BoundOffsetI *const restrict params)
+generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint64_bound(params->large.limit,
-					       params->large.length)
-			   + params->large.offset);
+	return (intmax_t) (random_uint64_bound(params->bound.uint64.limit,
+					       params->bound.uint64.length)
+			   + params->offset.int32);
+}
+
+intmax_t
+generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params)
+{
+	return (intmax_t) (random_uint64_bound(params->bound.uint64.limit,
+					       params->bound.uint64.length)
+			   + params->offset.int64);
 }
