@@ -2654,30 +2654,25 @@ type_gen_cl_assign_integer_from(struct PutLabelClosure *const restrict type,
 {
 
 
-	/* if (from < INT32_MIN) { */
+	if (from < INT32_MIN) {
 
-	/* 	const uint64_t length = INT64_MAX - from + 1u; */
-	/* 	const int64_t offset  = from - INT64_MIN; */
+		const int64_t length = INT64_MAX - from + 1u;
 
-	/* 	gen_cl->params.bound.uint64.limit */
-	/* 	= RANDOM_UINT64_VALID_LIMIT(length); */
+		if () {
 
-	/* 	gen_cl->params.bound.uint64.length = length; */
+			gen_cl->params.bound.uint32.limit =
 
-	/* 	if (from < (INT)) { */
+		} else {
 
+		}
 
-	/* 	} else { */
+	} else if (from > INT32_Mkkkkk) {
 
-	/* 	} */
+	} else {
 
-	/* } else if (from > INT32_Mkkkkk) { */
+		if (from )
 
-	/* } else { */
-
-	/* 	if (from ) */
-
-	/* } */
+	}
 }
 
 

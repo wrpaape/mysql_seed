@@ -6,6 +6,7 @@
 #include "mysql_seed_file.h"		/* file/exit/string/thread utils */
 #include "thread/thread_pool.h"		/* ThreadPool */
 #include "memory/memory_copy_array.h"	/* memory_copy */
+#include "random/random_generator.h"	/* number generator closures */
 #include "generate/group.h"		/* group partitioner */
 
 /* minimum valid spec lengths
@@ -259,8 +260,15 @@ union UIntegerScale {
 	uintmax_t upto;
 };
 
+union UIntegerGeneratorClosure {
+	struct BoundOffsetUGeneratorClosure range;
+	struct BoundOffsetUGeneratorClosure from;
+	struct BoundUGeneratorClosure upto;
+};
+
 union UIntegerQualifier {
 	union UIntegerScale unsigned_scale;
+	union UIntegerGeneratorClosure gen_cl;
 	struct StubBuilder fixed;
 };
 
@@ -279,8 +287,15 @@ union IntegerScale {
 	intmax_t upto;
 };
 
+union IntegerGeneratorClosure {
+	struct BoundOffsetIGeneratorClosure range;
+	struct BoundOffsetIGeneratorClosure from;
+	struct BoundIGeneratorClosure upto;
+};
+
 union IntegerQualifier {
 	union IntegerScale scale;
+	union IntegerGeneratorClosure gen_cl;
 	struct StubBuilder fixed;
 };
 

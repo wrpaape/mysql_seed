@@ -317,6 +317,10 @@ type_assign_integer_upto(struct PutLabelClosure *const restrict type,
 extern inline void
 type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 			   const size_t upto);
+extern inline void
+type_gen_cl_assign_integer_from(struct PutLabelClosure *const restrict type,
+				struct BoundOffsetIGeneratorClosure *const restrict gen_cl,
+				const intmax_t from);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
