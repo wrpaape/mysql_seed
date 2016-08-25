@@ -2649,66 +2649,72 @@ type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 
 inline void
 assign_integer_random_from(struct PutLabelClosure *const restrict type,
-			   struct BoundOffsetIGeneratorClosure *const restrict gen_cl,
+			   struct IntegerRandSpec *const restrict rand_spec,
 			   const intmax_t from)
 {
-	if (from < INT32_MIN) {
+	struct BoundOffsetIGeneratorClosure *const restrict from_cl
+	= &rand_spec->gen_cl.from;
 
+	if (from < INT32_MIN) {
 		type_set_bigint(type);
 
 		const uint64_t length = INT64_MAX - from + 1u;
 
-		gen_cl->params.bound.uint64.limit
+		from_cl->params.bound.uint64.limit
 		= RANDOM_UINT64_VALID_LIMIT(length);
 
-		gen_cl->params.bound.uint64.length = length;
+		from_cl->params.bound.uint64.length = length;
 
-		gen_cl->params.offset.int64 = from - INT64_MIN;
+		from_cl->params.offset.int64 = from - INT64_MIN;
 
-		gen_cl->generate = &generate_i_bound_64_offset_64;
+		from_cl->generate = &generate_i_bound_64_offset_64;
 
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
 
 	} else if (from > INT32_MAX) {
-
 		type_set_bigint(type);
 
 		const uint64_t offset = from - INT64_MIN;
 		const uint64_t length = INT64_MAX - from + 1u;
 
 		if (length > UINT32_MAX) {
-			gen_cl->params.bound.uint64.limit
+			from_cl->params.bound.uint64.limit
 			= RANDOM_UINT64_VALID_LIMIT(length);
 
-			gen_cl->params.bound.uint64.length = length;
+			from_cl->params.bound.uint64.length = length;
 
-			gen_cl->params.offset.int64 = offset;
+			from_cl->params.offset.int64 = offset;
 
-			gen_cl->generate = &generate_i_bound_64_offset_64;
-
+			from_cl->generate = &generate_i_bound_64_offset_64;
 
 		} else {
-			gen_cl->params.bound.uint32.limit
+			from_cl->params.bound.uint32.limit
 			= RANDOM_UINT32_VALID_LIMIT((uint32_t) length);
 
-			gen_cl->params.bound.uint32.length = (uint32_t) length;
+			from_cl->params.bound.uint32.length = (uint32_t) length;
 
-			gen_cl->params.offset.int64 = offset;
+			from_cl->params.offset.int64 = offset;
 
-			gen_cl->generate = &generate_i_bound_32_offset_64;
+			from_cl->generate = &generate_i_bound_32_offset_64;
 		}
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
+
 	} else {
 		type_set_int(type);
 
 		const uint32_t length = INT32_MAX - from + 1u;
 
-		gen_cl->params.bound.uint32.limit
+		from_cl->params.bound.uint32.limit
 		= RANDOM_UINT32_VALID_LIMIT(length);
 
-		gen_cl->params.bound.uint32.length = length;
+		from_cl->params.bound.uint32.length = length;
 
-		gen_cl->params.offset.int32 = from - INT32_MIN;
+		from_cl->params.offset.int32 = from - INT32_MIN;
 
-		gen_cl->generate = &generate_i_bound_32_offset_32;
+		from_cl->generate = &generate_i_bound_32_offset_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
 	}
 }
 
@@ -3159,9 +3165,9 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
-	/* const intmax_t from = col_spec->type_q.integer.scale.from; */
-
-	/* TODO: assign type and generator */
+	assign_integer_random_from(&col_spec->type,
+				   &col_spec->type_q.integer.rand_spec,
+				   col_spec->type_q.integer.scale.from);
 
 	col_spec->build = &build_column_integer_random_from;
 }
@@ -3170,7 +3176,12 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 inline void
 column_integer_random_from_group(struct GenerateParseState *const restrict state)
 {
-	/* TODO: assign type and generator */
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	assign_integer_random_from(&col_spec->type,
+				   &col_spec->type_q.integer.rand_spec,
+				   col_spec->type_q.integer.scale.from);
+
 	state->specs.col->build = &build_column_integer_random_from_group;
 }
 

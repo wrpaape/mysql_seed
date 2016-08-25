@@ -319,7 +319,7 @@ type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 			   const size_t upto);
 extern inline void
 assign_integer_random_from(struct PutLabelClosure *const restrict type,
-			   struct BoundOffsetIGeneratorClosure *const restrict gen_cl,
+			   struct IntegerRandSpec *const restrict spec,
 			   const intmax_t from);
 
 /* parse GRP_SPEC

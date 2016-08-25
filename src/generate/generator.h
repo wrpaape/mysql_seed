@@ -266,9 +266,14 @@ union UIntegerGeneratorClosure {
 	struct BoundUGeneratorClosure upto;
 };
 
-union UIntegerQualifier {
-	union UIntegerScale unsigned_scale;
+struct UIntegerRandSpec {
 	union UIntegerGeneratorClosure gen_cl;
+	unsigned int width_max;
+};
+
+union UIntegerQualifier {
+	union UIntegerScale scale;
+	struct UIntegerRandSpec rand_spec;
 	struct StubBuilder fixed;
 };
 
@@ -293,9 +298,14 @@ union IntegerGeneratorClosure {
 	struct BoundIGeneratorClosure upto;
 };
 
+struct IntegerRandSpec {
+	union IntegerGeneratorClosure gen_cl;
+	unsigned int width_max;
+};
+
 union IntegerQualifier {
 	union IntegerScale scale;
-	union IntegerGeneratorClosure gen_cl;
+	struct IntegerRandSpec rand_spec;
 	struct StubBuilder fixed;
 };
 
