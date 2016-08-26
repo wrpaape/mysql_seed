@@ -73,9 +73,9 @@ extern const struct NameMap last_name_map;
 inline char *
 put_random_initial(char *const restrict string)
 {
-	*string = (char) random_int32_bound_offset(RANDOM_THRESHOLD(26u),
-						   26u,
-						   (const int32_t) 'A');
+	*string = (char) random_int32_bound_32_offset_32(RANDOM_THRESHOLD(26u),
+							 26u,
+							 (const int32_t) 'A');
 	return string + 1l;
 }
 

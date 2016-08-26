@@ -2666,7 +2666,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 		from_cl->params.bound.uint64.span = span;
 
-		from_cl->params.offset.int64 = from;
+		from_cl->params.offset.int64 = (int64_t) from;
 
 		from_cl->generate = &generate_i_bound_64_offset_64;
 
@@ -2685,7 +2685,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 			from_cl->params.bound.uint64.span = span;
 
-			from_cl->params.offset.int64 = from;
+			from_cl->params.offset.int64 = (int64_t) from;
 
 			from_cl->generate = &generate_i_bound_64_offset_64;
 
@@ -2697,7 +2697,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 			from_cl->params.bound.uint32.span = (uint32_t) span;
 
-			from_cl->params.offset.int64 = from;
+			from_cl->params.offset.int64 = (int64_t) from;
 
 			from_cl->generate = &generate_i_bound_32_offset_64;
 
@@ -2716,7 +2716,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 		from_cl->params.bound.uint32.span = span;
 
-		from_cl->params.offset.int32 = from;
+		from_cl->params.offset.int32 = (int32_t) from;
 
 		from_cl->generate = &generate_i_bound_32_offset_32;
 

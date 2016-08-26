@@ -67,33 +67,37 @@ generate_i_bound_64(const union Bound *const restrict params)
 uintmax_t
 generate_u_bound_32_offset_32(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint32_bound(params->bound.uint32.threshold,
-						params->bound.uint32.span)
-			    + params->offset.uint32);
+	return (uintmax_t)
+	       random_uint32_bound_32_offset_32(params->bound.uint32.threshold,
+						params->bound.uint32.span,
+						params->offset.uint32);
 }
 
 uintmax_t
 generate_u_bound_32_offset_64(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint32_bound(params->bound.uint32.threshold,
-						params->bound.uint32.span)
-			    + params->offset.uint64);
+	return (uintmax_t)
+	       random_uint64_bound_32_offset_64(params->bound.uint32.threshold,
+						params->bound.uint32.span,
+						params->offset.uint64);
 }
 
 uintmax_t
 generate_u_bound_64_offset_32(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint64_bound(params->bound.uint64.threshold,
-						params->bound.uint64.span)
-			    + params->offset.uint32);
+	return (uintmax_t)
+	       random_uint64_bound_64_offset_32(params->bound.uint64.threshold,
+						params->bound.uint64.span,
+						params->offset.uint32);
 }
 
 uintmax_t
 generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params)
 {
-	return (uintmax_t) (random_uint64_bound(params->bound.uint64.threshold,
-						params->bound.uint64.span)
-			    + params->offset.uint64);
+	return (uintmax_t)
+	       random_uint64_bound_64_offset_64(params->bound.uint64.threshold,
+						params->bound.uint64.span,
+						params->offset.uint64);
 }
 
 
@@ -101,31 +105,35 @@ generate_u_bound_64_offset_64(const struct BoundOffsetU *const restrict params)
 intmax_t
 generate_i_bound_32_offset_32(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint32_bound(params->bound.uint32.threshold,
-					       params->bound.uint32.span)
-			   + params->offset.int32);
+	return (intmax_t)
+	       random_int32_bound_32_offset_32(params->bound.uint32.threshold,
+					       params->bound.uint32.span,
+					       params->offset.int32);
 }
 
 intmax_t
 generate_i_bound_32_offset_64(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint32_bound(params->bound.uint32.threshold,
-					       params->bound.uint32.span)
-			   + params->offset.int64);
+	return (intmax_t)
+	       random_int64_bound_32_offset_64(params->bound.uint32.threshold,
+					       params->bound.uint32.span,
+					       params->offset.int64);
 }
 
 intmax_t
 generate_i_bound_64_offset_32(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint64_bound(params->bound.uint64.threshold,
-					       params->bound.uint64.span)
-			   + params->offset.int32);
+	return (intmax_t)
+	       random_int64_bound_64_offset_32(params->bound.uint64.threshold,
+					       params->bound.uint64.span,
+					       params->offset.int32);
 }
 
 intmax_t
 generate_i_bound_64_offset_64(const struct BoundOffsetI *const restrict params)
 {
-	return (intmax_t) (random_uint64_bound(params->bound.uint64.threshold,
-					       params->bound.uint64.span)
-			   + params->offset.int64);
+	return (intmax_t)
+	       random_int64_bound_64_offset_64(params->bound.uint64.threshold,
+					       params->bound.uint64.span,
+					       params->offset.int64);
 }
