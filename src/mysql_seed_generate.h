@@ -2659,12 +2659,12 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 	if (from < INT32_MIN) {
 		type_set_bigint(type);
 
-		const uint64_t length = INT64_MAX - from + 1u;
+		const uint64_t span = INT64_MAX - from + 1u;
 
-		from_cl->params.bound.uint64.limit
-		= RANDOM_UINT64_VALID_LIMIT(length);
+		from_cl->params.bound.uint64.threshold
+		= RANDOM_THRESHOLD(span);
 
-		from_cl->params.bound.uint64.length = length;
+		from_cl->params.bound.uint64.span = span;
 
 		from_cl->params.offset.int64 = from;
 
@@ -2677,13 +2677,13 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 	} else if (from > INT32_MAX) {
 		type_set_bigint(type);
 
-		const uint64_t length = INT64_MAX - from + 1u;
+		const uint64_t span = INT64_MAX - from + 1u;
 
-		if (length > UINT32_MAX) {
-			from_cl->params.bound.uint64.limit
-			= RANDOM_UINT64_VALID_LIMIT(length);
+		if (span > UINT32_MAX) {
+			from_cl->params.bound.uint64.threshold
+			= RANDOM_THRESHOLD(span);
 
-			from_cl->params.bound.uint64.length = length;
+			from_cl->params.bound.uint64.span = span;
 
 			from_cl->params.offset.int64 = from;
 
@@ -2692,10 +2692,10 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			*ctor_flags |= RAND_64_CTOR_FLAG;
 
 		} else {
-			from_cl->params.bound.uint32.limit
-			= RANDOM_UINT32_VALID_LIMIT((uint32_t) length);
+			from_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
 
-			from_cl->params.bound.uint32.length = (uint32_t) length;
+			from_cl->params.bound.uint32.span = (uint32_t) span;
 
 			from_cl->params.offset.int64 = from;
 
@@ -2709,12 +2709,12 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 	} else {
 		type_set_int(type);
 
-		const uint32_t length = INT32_MAX - from + 1u;
+		const uint32_t span = INT32_MAX - from + 1u;
 
-		from_cl->params.bound.uint32.limit
-		= RANDOM_UINT32_VALID_LIMIT(length);
+		from_cl->params.bound.uint32.threshold
+		= RANDOM_THRESHOLD(span);
 
-		from_cl->params.bound.uint32.length = length;
+		from_cl->params.bound.uint32.span = span;
 
 		from_cl->params.offset.int32 = from;
 

@@ -411,15 +411,15 @@ const struct Stub last_names[LAST_NAMES_COUNT] = {
 
 
 const struct NameMap first_name_map = {
-	.names  = &first_names[0],
-	.limit	= RANDOM_UINT32_VALID_LIMIT(FIRST_NAMES_COUNT),
-	.length	= FIRST_NAMES_COUNT
+	.names	   = &first_names[0],
+	.threshold = RANDOM_THRESHOLD(FIRST_NAMES_COUNT),
+	.span	   = FIRST_NAMES_COUNT
 };
 
 const struct NameMap last_name_map = {
-	.names  = &last_names[0],
-	.limit	= RANDOM_UINT32_VALID_LIMIT(LAST_NAMES_COUNT),
-	.length = LAST_NAMES_COUNT
+	.names	   = &last_names[0],
+	.threshold = RANDOM_THRESHOLD(LAST_NAMES_COUNT),
+	.span	   = LAST_NAMES_COUNT
 };
 
 extern inline char *

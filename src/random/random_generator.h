@@ -15,13 +15,13 @@
  * ────────────────────────────────────────────────────────────────────────── */
 /* unsigned integers */
 struct Bound32 {
-	uint32_t limit;
-	uint32_t length;
+	uint32_t threshold;
+	uint32_t span;
 };
 
 struct Bound64 {
-	uint64_t limit;
-	uint64_t length;
+	uint64_t threshold;
+	uint64_t span;
 };
 
 union Bound {

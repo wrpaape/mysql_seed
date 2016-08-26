@@ -24,11 +24,15 @@ extern inline bool
 coin_flip(void);
 
 extern inline uint32_t
-random_uint32_bound(const uint32_t valid_limit,
-		    const uint32_t range_length);
+random_uint32_threshold(const uint32_t span);
+extern inline uint32_t
+random_uint32_bound(const uint32_t threshold,
+		    const uint32_t span);
 extern inline uint64_t
-random_uint64_bound(const uint64_t valid_limit,
-		    const uint64_t range_length);
+random_uint64_threshold(const uint64_t span);
+extern inline uint64_t
+random_uint64_bound(const uint64_t threshold,
+		    const uint64_t span);
 extern inline uint32_t
 random_uint32_upto(const uint32_t rbound);
 inline uint64_t
@@ -39,8 +43,8 @@ extern inline int64_t
 random_int64_upto(const int64_t rbound);
 
 extern inline int32_t
-random_int32_bound_offset(const uint32_t valid_limit,
-			  const uint32_t range_length,
+random_int32_bound_offset(const uint32_t threshold,
+			  const uint32_t span,
 			  const int32_t offset);
 extern inline int32_t
 random_int32_in_range(const int32_t lbound,

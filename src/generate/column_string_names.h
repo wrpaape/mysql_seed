@@ -58,8 +58,8 @@ MALLOC_FAILURE_MESSAGE("build_column_string_names_full_group")
  *─────────────────────────────────────────────────────────────────────────── */
 struct NameMap {
 	const struct Stub *const restrict names;
-	const uint32_t limit;
-	const uint32_t length;
+	const uint32_t threshold;
+	const uint32_t span;
 };
 
 /* global variables
@@ -73,7 +73,7 @@ extern const struct NameMap last_name_map;
 inline char *
 put_random_initial(char *const restrict string)
 {
-	*string = (char) random_int32_bound_offset(RANDOM_UINT32_VALID_LIMIT(26u),
+	*string = (char) random_int32_bound_offset(RANDOM_THRESHOLD(26u),
 						   26u,
 						   (const int32_t) 'A');
 	return string + 1l;
@@ -82,8 +82,8 @@ put_random_initial(char *const restrict string)
 inline const struct Stub *
 name_map_sample(const struct NameMap *const restrict map)
 {
-	return map->names + random_uint32_bound(map->limit,
-						map->length);
+	return map->names + random_uint32_bound(map->threshold,
+						map->span);
 }
 
 inline char *

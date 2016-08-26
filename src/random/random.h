@@ -24,8 +24,13 @@ extern rng64_t glob_rng64; /* global random number generator state */
 
 /* helper macros
  * ────────────────────────────────────────────────────────────────────────── */
-#define RANDOM_UINT32_VALID_LIMIT(LENGTH) (UINT32_MAX - (UINT32_MAX % (LENGTH)))
-#define RANDOM_UINT64_VALID_LIMIT(LENGTH) (UINT64_MAX - (UINT64_MAX % (LENGTH)))
+#define RANDOM_THRESHOLD(SPAN) (-(SPAN) % (SPAN))
+
+#define RANDOM_UINT32_THRESHOLD(SPAN)					\
+((uint32_t) (-((uint32_t) (SPAN))) % ((uint32_t) (SPAN)))
+
+#define RANDOM_UINT64_THRESHOLD(SPAN)					\
+((uint64_t) (-((uint64_t) (SPAN))) % ((uint64_t) (SPAN)))
 
 
 /* constructors, destructors
@@ -106,86 +111,98 @@ coin_flip(void)
 }
 
 inline uint32_t
-random_uint32_bound(const uint32_t valid_limit,
-		    const uint32_t range_length)
+random_uint32_threshold(const uint32_t span)
+{
+	return -span % span;
+}
+
+inline uint32_t
+random_uint32_bound(const uint32_t threshold,
+		    const uint32_t span)
 {
 	uint32_t random;
 
 	do {
 		random = random_uint32();
-	} while (random > valid_limit);
+	} while (random < threshold);
 
-	return random % range_length;
+	return random % span;
 }
 
 inline uint64_t
-random_uint64_bound(const uint64_t valid_limit,
-		    const uint64_t range_length)
+random_uint64_threshold(const uint64_t span)
+{
+	return -span % span;
+}
+
+inline uint64_t
+random_uint64_bound(const uint64_t threshold,
+		    const uint64_t span)
 {
 	uint64_t random;
 
 	do {
 		random = random_uint64();
-	} while (random > valid_limit);
+	} while (random < threshold);
 
-	return random % range_length;
+	return random % span;
 }
 
 inline uint32_t
 random_uint32_upto(const uint32_t rbound)
 {
-	const uint32_t range_length = rbound + 1u;
+	const uint32_t span = rbound + 1u;
 
-	return random_uint32_bound(RANDOM_UINT32_VALID_LIMIT(range_length),
-				   range_length);
+	return random_uint32_bound(RANDOM_THRESHOLD(span),
+				   span);
 }
 
 inline uint64_t
 random_uint64_upto(const uint64_t rbound)
 {
-	const uint64_t range_length = rbound + 1u;
+	const uint64_t span = rbound + 1u;
 
-	return random_uint64_bound(RANDOM_UINT64_VALID_LIMIT(range_length),
-				   range_length);
+	return random_uint64_bound(RANDOM_THRESHOLD(span),
+				   span);
 }
 
 inline int32_t
 random_int32_upto(const int32_t rbound)
 {
-	const uint32_t range_length = rbound + 1u - INT32_MIN;
+	const uint32_t span = rbound + 1u - INT32_MIN;
 
-	return random_uint32_bound(RANDOM_UINT32_VALID_LIMIT(range_length),
-				   range_length)
+	return random_uint32_bound(RANDOM_THRESHOLD(span),
+				   span)
 	     + INT32_MIN;
 }
 
 inline int64_t
 random_int64_upto(const int64_t rbound)
 {
-	const uint64_t range_length = rbound + 1u - INT64_MIN;
+	const uint64_t span = rbound + 1u - INT64_MIN;
 
-	return random_uint64_bound(RANDOM_UINT64_VALID_LIMIT(range_length),
-				   range_length)
+	return random_uint64_bound(RANDOM_THRESHOLD(span),
+				   span)
 	     + INT64_MIN;
 }
 
 inline int32_t
-random_int32_bound_offset(const uint32_t valid_limit,
-			  const uint32_t range_length,
+random_int32_bound_offset(const uint32_t threshold,
+			  const uint32_t span,
 			  const int32_t offset)
 {
-	return ((int32_t) random_uint32_bound(valid_limit,
-					      range_length)) + offset;
+	return ((int32_t) random_uint32_bound(threshold,
+					      span)) + offset;
 }
 
 inline int32_t
 random_int32_in_range(const int32_t lbound,
 		      const int32_t rbound)
 {
-	const uint32_t length = rbound - lbound + 1u;
+	const uint32_t span = rbound - lbound + 1u;
 
-	return random_int32_bound_offset(RANDOM_UINT32_VALID_LIMIT(length),
-					 length,
+	return random_int32_bound_offset(RANDOM_THRESHOLD(span),
+					 span,
 					 lbound);
 }
 
