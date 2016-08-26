@@ -68,8 +68,8 @@ intmax_t
 generate_i_bound_64_offset_32_min(const union Bound *const restrict params)
 {
 	return (intmax_t)
-	       random_int64_bound_64_offset_32(params->uint32.threshold,
-					       params->uint32.span,
+	       random_int64_bound_64_offset_32(params->uint64.threshold,
+					       params->uint64.span,
 					       INT32_MIN);
 }
 
@@ -77,8 +77,8 @@ intmax_t
 generate_i_bound_64_offset_64_min(const union Bound *const restrict params)
 {
 	return (intmax_t)
-	       random_int64_bound_64_offset_64(params->uint32.threshold,
-					       params->uint32.span,
+	       random_int64_bound_64_offset_64(params->uint64.threshold,
+					       params->uint64.span,
 					       INT64_MIN);
 }
 
