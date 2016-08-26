@@ -4437,12 +4437,12 @@ parse_integer_random(struct GenerateParseState *const restrict state)
 			error_invalid_rand_spec(state);
 		return;
 
-	/* case 'u': */
-	/* 	if (*rem == '\0') */
-	/* 		parse_integer_random_upto(state); */
-	/* 	else */
-	/* 		error_invalid_rand_spec(state); */
-	/* 	return; */
+	case 'u':
+		if (*rem == '\0')
+			parse_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
 
 	/* case 'r': */
 	/* 	if (*rem == '\0') */
@@ -4498,12 +4498,12 @@ NEXT_DB_SPEC:		column_integer_random_default(state);
 			error_invalid_rand_spec(state);
 		return;
 
-	/* case 'u': */
-	/* 	if (strings_equal("nique", rem + 1l)) */
-	/* 		parse_integer_random_upto(state); */
-	/* 	else */
-	/* 		error_invalid_rand_spec(state); */
-	/* 	return; */
+	case 'u':
+		if (strings_equal("pto", rem + 1l))
+			parse_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
 
 	/* case 'r': */
 	/* 	if (strings_equal("ange", rem + 1l)) */
