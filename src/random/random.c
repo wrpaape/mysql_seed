@@ -33,14 +33,24 @@ random_uint64_threshold(const uint64_t span);
 extern inline uint64_t
 random_uint64_bound(const uint64_t threshold,
 		    const uint64_t span);
+
 extern inline uint32_t
-random_uint32_upto(const uint32_t rbound);
-inline uint64_t
-random_uint64_upto(const uint64_t rbound);
+random_uint32_from(const uint32_t from);
+extern inline uint64_t
+random_uint64_from(const uint64_t from);
 extern inline int32_t
-random_int32_upto(const int32_t rbound);
+random_int32_from(const int32_t from);
 extern inline int64_t
-random_int64_upto(const int64_t rbound);
+random_int64_from(const int64_t from);
+
+extern inline uint32_t
+random_uint32_upto(const uint32_t upto);
+extern inline uint64_t
+random_uint64_upto(const uint64_t upto);
+extern inline int32_t
+random_int32_upto(const int32_t upto);
+extern inline int64_t
+random_int64_upto(const int64_t upto);
 
 extern inline int32_t
 random_int32_bound_offset(const uint32_t threshold,

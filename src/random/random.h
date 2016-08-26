@@ -148,28 +148,66 @@ random_uint64_bound(const uint64_t threshold,
 	return random % span;
 }
 
+
 inline uint32_t
-random_uint32_upto(const uint32_t rbound)
+random_uint32_from(const uint32_t from)
 {
-	const uint32_t span = rbound + 1u;
+	const uint32_t span = UINT32_MAX - from + 1u;
+
+	return random_uint32_bound(RANDOM_THRESHOLD(span),
+				   span) + from;
+}
+
+inline uint64_t
+random_uint64_from(const uint64_t from)
+{
+	const uint64_t span = UINT64_MAX - from + 1u;
+
+	return random_uint64_bound(RANDOM_THRESHOLD(span),
+				   span) + from;
+}
+
+inline int32_t
+random_int32_from(const int32_t from)
+{
+	const uint32_t span = INT32_MAX - from + 1u;
+
+	return random_uint32_bound(RANDOM_THRESHOLD(span),
+				   span) + from;
+}
+
+inline int64_t
+random_int64_from(const int64_t from)
+{
+	const uint64_t span = INT64_MAX - from + 1u;
+
+	return random_uint64_bound(RANDOM_THRESHOLD(span),
+				   span) + from;
+}
+
+
+inline uint32_t
+random_uint32_upto(const uint32_t upto)
+{
+	const uint32_t span = upto + 1u;
 
 	return random_uint32_bound(RANDOM_THRESHOLD(span),
 				   span);
 }
 
 inline uint64_t
-random_uint64_upto(const uint64_t rbound)
+random_uint64_upto(const uint64_t upto)
 {
-	const uint64_t span = rbound + 1u;
+	const uint64_t span = upto + 1u;
 
 	return random_uint64_bound(RANDOM_THRESHOLD(span),
 				   span);
 }
 
 inline int32_t
-random_int32_upto(const int32_t rbound)
+random_int32_upto(const int32_t upto)
 {
-	const uint32_t span = rbound + 1u - INT32_MIN;
+	const uint32_t span = upto + 1u - INT32_MIN;
 
 	return random_uint32_bound(RANDOM_THRESHOLD(span),
 				   span)
@@ -177,9 +215,9 @@ random_int32_upto(const int32_t rbound)
 }
 
 inline int64_t
-random_int64_upto(const int64_t rbound)
+random_int64_upto(const int64_t upto)
 {
-	const uint64_t span = rbound + 1u - INT64_MIN;
+	const uint64_t span = upto + 1u - INT64_MIN;
 
 	return random_uint64_bound(RANDOM_THRESHOLD(span),
 				   span)

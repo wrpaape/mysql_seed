@@ -28,7 +28,14 @@
 //=======External Functions This Runner Calls=====
 extern void setUp(void);
 extern void tearDown(void);
-extern void test_glob_rng_ctor(void);
+extern void test_random_uint32_from(void);
+extern void test_random_int32_from(void);
+extern void test_random_uint64_from(void);
+extern void test_random_int64_from(void);
+extern void test_random_uint32_upto(void);
+extern void test_random_int32_upto(void);
+extern void test_random_uint64_upto(void);
+extern void test_random_int64_upto(void);
 
 
 //=======Test Reset Option=====
@@ -44,7 +51,14 @@ void resetTest(void)
 int main(void)
 {
   UnityBegin("../test/random_random_test.c");
-  RUN_TEST(test_glob_rng_ctor, 15);
+  RUN_TEST(test_random_uint32_from, 15);
+  RUN_TEST(test_random_int32_from, 50);
+  RUN_TEST(test_random_uint64_from, 85);
+  RUN_TEST(test_random_int64_from, 120);
+  RUN_TEST(test_random_uint32_upto, 156);
+  RUN_TEST(test_random_int32_upto, 191);
+  RUN_TEST(test_random_uint64_upto, 226);
+  RUN_TEST(test_random_int64_upto, 261);
 
   return (UnityEnd());
 }
