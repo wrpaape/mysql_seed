@@ -29,9 +29,15 @@ FAILURE_HEADER_WRAP("generate thread pool", ":") "\n"
 
 /* constructor flags
  *─────────────────────────────────────────────────────────────────────────── */
-#define NONE_CTOR_FLAG 0	/* 00000000 */
-#define RAND_CTOR_FLAG 1	/* 00000001 */
-#define UUID_CTOR_FLAG 3	/* 00000011 (depends on random ctor atm) */
+#define NONE_CTOR_FLAG            0	/* 00000000 */
+#define RAND_32_CTOR_FLAG         1	/* 00000001 */
+#define RAND_64_CTOR_FLAG         2	/* 00000010 */
+#define RAND_32_64_CTOR_FLAG      3	/* 00000011 */
+#define RAND_32_UUID_CTOR_FLAG    5	/* 00000101 (depends on glob_rng32) */
+#define RAND_32_64_UUID_CTOR_FLAG 7	/* 00000111 */
+
+#define GEN_CTOR_MAP_LENGTH (RAND_32_64_UUID_CTOR_FLAG + 1lu)
+
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -53,6 +59,14 @@ struct DatabaseCounter {
 	unsigned int tables;
 	size_t counter_upto;
 };
+
+typedef bool
+GenerateConstructor(const char *restrict *const restrict failure);
+
+/* global variables
+ *─────────────────────────────────────────────────────────────────────────── */
+extern GenerateConstructor *const GEN_CTOR_MAP[GEN_CTOR_MAP_LENGTH];
+
 
 /* destructors
  *─────────────────────────────────────────────────────────────────────────── */
@@ -216,30 +230,17 @@ mysql_seed_generate_constructors(const unsigned int ctor_flags)
 	const char *restrict failure;
 
 	/* ensure cwd at project root and trigger thread_utils constructor */
-	if (   chdir_report(ROOT_ABSPATH,
-			    &failure)
-	    && thread_utils_constructor(&failure)) {
-		switch (ctor_flags) {
-		case RAND_CTOR_FLAG:
-			if (random_constructor(&failure))
-				return true;
 
-			goto CONSTRUCTOR_FAILURE;
+	const bool success = chdir_report(ROOT_ABSPATH,
+					  &failure)
+			  && thread_utils_constructor(&failure)
+			  && (   (ctor_flags == NONE_CTOR_FLAG)
+			      || (GEN_CTOR_MAP[ctor_flags](&failure)));
 
-		case UUID_CTOR_FLAG:
-			if (uuid_utils_constructor(&failure))
-				return true;
-
-			goto CONSTRUCTOR_FAILURE;
-
-		default:
-			return true;
-		}
-	} else {
-CONSTRUCTOR_FAILURE:
+	if (!success)
 		generate_failure_constructor(failure);
-		return false;
-	}
+
+	return success;
 }
 
 inline void

@@ -2650,6 +2650,7 @@ type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 inline void
 assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			   struct IntegerRandSpec *const restrict rand_spec,
+			   unsigned int *const restrict ctor_flags,
 			   const intmax_t from)
 {
 	struct BoundOffsetIGeneratorClosure *const restrict from_cl
@@ -2665,16 +2666,17 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 		from_cl->params.bound.uint64.length = length;
 
-		from_cl->params.offset.int64 = from - INT64_MIN;
+		from_cl->params.offset.int64 = from;
 
 		from_cl->generate = &generate_i_bound_64_offset_64;
 
 		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
 
+		*ctor_flags |= RAND_64_CTOR_FLAG;
+
 	} else if (from > INT32_MAX) {
 		type_set_bigint(type);
 
-		const uint64_t offset = from - INT64_MIN;
 		const uint64_t length = INT64_MAX - from + 1u;
 
 		if (length > UINT32_MAX) {
@@ -2683,9 +2685,11 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 			from_cl->params.bound.uint64.length = length;
 
-			from_cl->params.offset.int64 = offset;
+			from_cl->params.offset.int64 = from;
 
 			from_cl->generate = &generate_i_bound_64_offset_64;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
 
 		} else {
 			from_cl->params.bound.uint32.limit
@@ -2693,9 +2697,11 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 			from_cl->params.bound.uint32.length = (uint32_t) length;
 
-			from_cl->params.offset.int64 = offset;
+			from_cl->params.offset.int64 = from;
 
 			from_cl->generate = &generate_i_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
 		}
 
 		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
@@ -2710,11 +2716,20 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 		from_cl->params.bound.uint32.length = length;
 
-		from_cl->params.offset.int32 = from - INT32_MIN;
+		from_cl->params.offset.int32 = from;
 
 		from_cl->generate = &generate_i_bound_32_offset_32;
 
 		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+
+		printf("length:   %u\n"
+		       "limit:    %u\n"
+		       "offset:   %d\n",
+		       length,
+		       RANDOM_UINT32_VALID_LIMIT(length),
+		       (int32_t) from);
 	}
 }
 
@@ -3167,11 +3182,10 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 
 	assign_integer_random_from(&col_spec->type,
 				   &col_spec->type_q.integer.rand_spec,
+				   &state->database.ctor_flags,
 				   col_spec->type_q.integer.scale.from);
 
 	col_spec->build = &build_column_integer_random_from;
-
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -i -r -f MIN_INT -g GRP_COUNT [PART_TYPE] */
@@ -3182,11 +3196,10 @@ column_integer_random_from_group(struct GenerateParseState *const restrict state
 
 	assign_integer_random_from(&col_spec->type,
 				   &col_spec->type_q.integer.rand_spec,
+				   &state->database.ctor_flags,
 				   col_spec->type_q.integer.scale.from);
 
 	state->specs.col->build = &build_column_integer_random_from_group;
-
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
 }
 
 /* -c COL_NAME -i -r -u MAX */
@@ -3285,7 +3298,7 @@ column_string_uuid(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_uuid;
 
-	state->database.ctor_flags |= UUID_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_UUID_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -uu -g GRP_COUNT [PART_TYPE] */
@@ -3300,7 +3313,7 @@ column_string_uuid_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_uuid_group;
 
-	state->database.ctor_flags |= UUID_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_UUID_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -h HASH_LENGTH */
@@ -3339,7 +3352,7 @@ column_string_names_first(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_first;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -n1 -g GRP_COUNT [PART_TYPE] */
@@ -3354,7 +3367,7 @@ column_string_names_first_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_first_group;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -nl */
@@ -3369,7 +3382,7 @@ column_string_names_last(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_last;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 /* -c COL_NAME -s -nl -g GRP_COUNT [PART_TYPE] */
 inline void
@@ -3383,7 +3396,7 @@ column_string_names_last_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_last_group;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -nf */
@@ -3398,7 +3411,7 @@ column_string_names_full(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_full;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s -nf -g GRP_COUNT [PART_TYPE] */
@@ -3413,7 +3426,7 @@ column_string_names_full_group(struct GenerateParseState *const restrict state)
 
 	col_spec->build = &build_column_string_names_full_group;
 
-	state->database.ctor_flags |= RAND_CTOR_FLAG;
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -s */

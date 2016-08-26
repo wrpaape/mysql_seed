@@ -16,14 +16,10 @@ typedef pcg32_random_t rng32_t;
 typedef pcg64_random_t rng64_t;
 
 
-
-
-
 /* global variables
  * ────────────────────────────────────────────────────────────────────────── */
 extern rng32_t glob_rng32; /* global random number generator state */
 extern rng64_t glob_rng64; /* global random number generator state */
-
 
 
 /* helper macros
@@ -35,21 +31,54 @@ extern rng64_t glob_rng64; /* global random number generator state */
 /* constructors, destructors
  * ────────────────────────────────────────────────────────────────────────── */
 inline bool
-random_constructor(const char *restrict *const restrict failure)
+random_32_constructor(const char *restrict *const restrict failure)
 {
 	time_t now;
 	const bool success = time_report(&now,
 					 failure);
 
 	if (success) {
-		const uint64_t seed32 = (const uint64_t) time;
+		const uint64_t seed32 = (const uint64_t) now;
+
+		pcg32_srandom_r(&glob_rng32,
+				&seed32);
+	}
+
+	return success;
+}
+
+inline bool
+random_64_constructor(const char *restrict *const restrict failure)
+{
+	time_t now;
+	const bool success = time_report(&now,
+					 failure);
+
+	if (success) {
+		const uint128_t seed64 = UINT128_INITIALIZER(now,
+							     now);
+		pcg64_srandom_r(&glob_rng64,
+				&seed64);
+	}
+
+	return success;
+}
+
+inline bool
+random_32_64_constructor(const char *restrict *const restrict failure)
+{
+	time_t now;
+	const bool success = time_report(&now,
+					 failure);
+
+	if (success) {
+		const uint64_t seed32 = (const uint64_t) now;
 
 		pcg32_srandom_r(&glob_rng32,
 				&seed32);
 
 		const uint128_t seed64 = UINT128_INITIALIZER(seed32,
 							     seed32);
-
 		pcg64_srandom_r(&glob_rng64,
 				&seed64);
 	}

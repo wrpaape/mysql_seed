@@ -320,6 +320,7 @@ type_assign_u_integer_upto(struct PutLabelClosure *const restrict type,
 extern inline void
 assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			   struct IntegerRandSpec *const restrict spec,
+			   unsigned int *const restrict ctor_flags,
 			   const intmax_t from);
 
 /* parse GRP_SPEC

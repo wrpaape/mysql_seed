@@ -36,4 +36,6 @@ uuid_string_init(char *restrict ptr,
 /* constructors, destructors
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-uuid_utils_constructor(const char *restrict *const restrict failure);
+random_32_uuid_constructor(const char *restrict *const restrict failure);
+extern inline bool
+random_32_64_uuid_constructor(const char *restrict *const restrict failure);

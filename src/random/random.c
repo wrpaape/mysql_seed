@@ -9,7 +9,11 @@ rng64_t glob_rng64; /* global random number generator state */
 /* constructors, destructors
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-random_constructor(const char *restrict *const restrict failure);
+random_32_constructor(const char *restrict *const restrict failure);
+extern inline bool
+random_64_constructor(const char *restrict *const restrict failure);
+extern inline bool
+random_32_64_constructor(const char *restrict *const restrict failure);
 
 extern inline uint32_t
 random_uint32(void);

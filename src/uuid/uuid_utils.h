@@ -237,7 +237,6 @@ inline bool
 uuid_mac_address(uint8_t *const restrict mac_address,
 		 const char *restrict *const restrict failure)
 {
-
 #ifdef WIN32
 	ULONG size_required;
 
@@ -345,7 +344,6 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 			LLADDR(address));
 
 	free(configuration.ifc_buf);
-
 	return true;
 #endif /* ifdef WIN32 */
 }
@@ -720,11 +718,33 @@ uuid_string_init(char *restrict ptr,
 /* constructors, destructors
  * ────────────────────────────────────────────────────────────────────────── */
 inline bool
-uuid_utils_constructor(const char *restrict *const restrict failure)
+random_32_uuid_constructor(const char *restrict *const restrict failure)
 {
 	uint8_t node[MAC_ADDRESS_LENGTH];
 
-	const bool success = random_constructor(failure)
+	const bool success = random_32_constructor(failure)
+			  && uuid_mac_address(&node[0],
+					      failure);
+
+	if (success) {
+		mutex_init(&uuid_state.lock);
+
+		uuid_state_init_clk_seq_node(&uuid_state.clk_seq_node[0],
+					     &node[0]);
+
+		uuid_state.clk_seq_last = &uuid_state.clk_seq_node[0]
+					+ CLK_SEQ_LAST_OFFSET;
+	}
+
+	return success;
+}
+
+inline bool
+random_32_64_uuid_constructor(const char *restrict *const restrict failure)
+{
+	uint8_t node[MAC_ADDRESS_LENGTH];
+
+	const bool success = random_32_64_constructor(failure)
 			  && uuid_mac_address(&node[0],
 					      failure);
 

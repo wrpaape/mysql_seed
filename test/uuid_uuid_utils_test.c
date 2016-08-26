@@ -23,9 +23,11 @@ void handle_uuid_mac_address_failure(void *arg,
 	exit(1);
 }
 
-void test_uuid_utils_start(void)
+void test_uuid_utils_constructor(void)
 {
-	puts(&uuid_state.clk_seq_node[0]);
+	const char *restrict failure;
+
+	TEST_ASSERT_TRUE(random_32_uuid_constructor(&failure));
 
 	TEST_ASSERT_EQUAL_PTR(&uuid_state.clk_seq_node[CLK_SEQ_LAST_OFFSET],
 			      uuid_state.clk_seq_last);

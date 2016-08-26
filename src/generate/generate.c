@@ -1,5 +1,15 @@
 #include "generate/generate.h"
 
+/* global variables
+ *─────────────────────────────────────────────────────────────────────────── */
+GenerateConstructor *const GEN_CTOR_MAP[GEN_CTOR_MAP_LENGTH] = {
+	[RAND_32_CTOR_FLAG]	    = &random_32_constructor,
+	[RAND_64_CTOR_FLAG]	    = &random_64_constructor,
+	[RAND_32_64_CTOR_FLAG]	    = &random_32_64_constructor,
+	[RAND_32_UUID_CTOR_FLAG]    = &random_32_uuid_constructor,
+	[RAND_32_64_UUID_CTOR_FLAG] = &random_32_64_uuid_constructor
+};
+
 /* Generator/DatbaseCounter operations
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
