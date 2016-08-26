@@ -2723,13 +2723,6 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
 
 		*ctor_flags |= RAND_32_CTOR_FLAG;
-
-		printf("length:   %u\n"
-		       "limit:    %u\n"
-		       "offset:   %d\n",
-		       length,
-		       RANDOM_UINT32_VALID_LIMIT(length),
-		       (int32_t) from);
 	}
 }
 
