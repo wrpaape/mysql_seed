@@ -20,13 +20,13 @@ generate_u_64(void)
 intmax_t
 generate_i_32(void)
 {
-	return (intmax_t) random_uint32();
+	return (intmax_t) (int32_t) random_uint32();
 }
 
 intmax_t
 generate_i_64(void)
 {
-	return (intmax_t) random_uint64();
+	return (intmax_t) (int64_t) random_uint64();
 }
 
 

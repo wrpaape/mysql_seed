@@ -260,14 +260,15 @@ union UIntegerScale {
 	uintmax_t upto;
 };
 
-union UIntegerGeneratorClosure {
+union UIntegerGenerator {
 	struct BoundOffsetUGeneratorClosure range;
 	struct BoundOffsetUGeneratorClosure from;
 	struct BoundUGeneratorClosure upto;
+	UGenerator *unbound;
 };
 
 struct UIntegerRandSpec {
-	union UIntegerGeneratorClosure gen_cl;
+	union UIntegerGenerator gen;
 	unsigned int width_max;
 };
 
@@ -292,14 +293,15 @@ union IntegerScale {
 	intmax_t upto;
 };
 
-union IntegerGeneratorClosure {
+union IntegerGenerator {
 	struct BoundOffsetIGeneratorClosure range;
 	struct BoundOffsetIGeneratorClosure from;
 	struct BoundIGeneratorClosure upto;
+	IGenerator *unbound;
 };
 
 struct IntegerRandSpec {
-	union IntegerGeneratorClosure gen_cl;
+	union IntegerGenerator gen;
 	unsigned int width_max;
 };
 

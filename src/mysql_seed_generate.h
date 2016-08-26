@@ -2654,7 +2654,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			   const intmax_t from)
 {
 	struct BoundOffsetIGeneratorClosure *const restrict from_cl
-	= &rand_spec->gen_cl.from;
+	= &rand_spec->gen.from;
 
 	if (from < INT32_MIN) {
 		type_set_bigint(type);
@@ -3151,9 +3151,19 @@ column_integer_random_default(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
 	type_set_int(&col_spec->type);
 
+	rand_spec->gen.unbound = &generate_i_32;
+
+	rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
 	col_spec->build = &build_column_integer_random;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+
 }
 
 /* -c COL_NAME -i -r -g GRP_COUNT [PART_TYPE] */
@@ -3162,9 +3172,18 @@ column_integer_random_default_group(struct GenerateParseState *const restrict st
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
 	type_set_int(&col_spec->type);
 
+	rand_spec->gen.unbound = &generate_i_32;
+
+	rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
 	col_spec->build = &build_column_integer_random_group;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 /* -c COL_NAME -i -r -f MIN_INT */
@@ -3173,12 +3192,44 @@ column_integer_random_from(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
-	assign_integer_random_from(&col_spec->type,
-				   &col_spec->type_q.integer.rand_spec,
-				   &state->database.ctor_flags,
-				   col_spec->type_q.integer.scale.from);
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
 
-	col_spec->build = &build_column_integer_random_from;
+	const intmax_t from = col_spec->type_q.integer.scale.from;
+
+	switch (from) {
+	case INT32_MIN:
+		type_set_int(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case INT64_MIN:
+		type_set_bigint(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_integer_random_from(&col_spec->type,
+					   rand_spec,
+					   &state->database.ctor_flags,
+					   from);
+
+		col_spec->build = &build_column_integer_random_from;
+	}
 }
 
 /* -c COL_NAME -i -r -f MIN_INT -g GRP_COUNT [PART_TYPE] */
@@ -3187,12 +3238,43 @@ column_integer_random_from_group(struct GenerateParseState *const restrict state
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
-	assign_integer_random_from(&col_spec->type,
-				   &col_spec->type_q.integer.rand_spec,
-				   &state->database.ctor_flags,
-				   col_spec->type_q.integer.scale.from);
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
 
-	state->specs.col->build = &build_column_integer_random_from_group;
+	const intmax_t from = col_spec->type_q.integer.scale.from;
+
+
+	switch (from) {
+	case INT32_MIN:
+		type_set_int(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+
+	case INT64_MIN:
+		type_set_bigint(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+
+	default:
+		assign_integer_random_from(&col_spec->type,
+					   rand_spec,
+					   &state->database.ctor_flags,
+					   from);
+
+		col_spec->build = &build_column_integer_random_from_group;
+	}
 }
 
 /* -c COL_NAME -i -r -u MAX */
