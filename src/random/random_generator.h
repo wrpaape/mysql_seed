@@ -109,11 +109,16 @@ uintmax_t
 generate_u_bound_32(const union Bound *const restrict params);
 uintmax_t
 generate_u_bound_64(const union Bound *const restrict params);
+
 /* BoundIGenerators */
 intmax_t
-generate_i_bound_32(const union Bound *const restrict params);
+generate_i_bound_32_offset_32_min(const union Bound *const restrict params);
 intmax_t
-generate_i_bound_64(const union Bound *const restrict params);
+generate_i_bound_32_offset_64_min(const union Bound *const restrict params);
+intmax_t
+generate_i_bound_64_offset_32_min(const union Bound *const restrict params);
+intmax_t
+generate_i_bound_64_offset_64_min(const union Bound *const restrict params);
 
 /* BoundOffsetUGenerators */
 uintmax_t

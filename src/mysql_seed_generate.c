@@ -71,6 +71,10 @@ no_random_from_min(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_no_random_from_min(struct GenerateParseState *const restrict state);
 extern inline void
+no_random_upto_max(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_no_random_upto_max(struct GenerateParseState *const restrict state);
+extern inline void
 invalid_min_integer_invalid(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_min_integer_invalid(struct GenerateParseState *const restrict state);
@@ -82,6 +86,18 @@ extern inline void
 invalid_min_integer_large(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_min_integer_large(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_max_integer_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_max_integer_invalid(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_max_integer_small(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_max_integer_small(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_max_integer_large(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_max_integer_large(struct GenerateParseState *const restrict state);
 
 
 /* GRP_SPEC */
@@ -322,6 +338,11 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			   struct IntegerRandSpec *const restrict spec,
 			   unsigned int *const restrict ctor_flags,
 			   const intmax_t from);
+extern inline void
+assign_integer_random_upto(struct PutLabelClosure *const restrict type,
+			   struct IntegerRandSpec *const restrict spec,
+			   unsigned int *const restrict ctor_flags,
+			   const intmax_t upto);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -477,6 +498,10 @@ extern inline void
 parse_integer_random_from_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_integer_random_from(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_random_upto_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_random_upto(struct GenerateParseState *const restrict state);
 
 
 extern inline void
