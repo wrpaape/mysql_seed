@@ -526,6 +526,8 @@ build_column_string_names_first_group(void *arg)
 	GroupPartitioner *const partition_groups
 	= column->spec->grp_spec.partition;
 
+	struct Rowspan *restrict from = column->rowspans_from;
+
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (FIRST_NAME_SIZE_MAX * row_count);
 
@@ -540,13 +542,11 @@ build_column_string_names_first_group(void *arg)
 		__builtin_unreachable();
 	}
 
-	struct Rowspan *restrict from = column->rowspans_from;
+	group = (size_t *restrict) column->contents;
 
-	 group = (size_t *restrict) column->contents;
-
-	 ptr = partition_groups(group,
-				group_count,
-				row_count);
+	ptr = partition_groups(group,
+			       group_count,
+			       row_count);
 
 	group_name     = name_map_sample(&first_name_map);
 	put_group_name = PUT_STRING_STOP_WIDTH_MAP[group_name->width];
@@ -711,11 +711,11 @@ build_column_string_names_last_group(void *arg)
 
 	struct Rowspan *restrict from = column->rowspans_from;
 
-	 group = (size_t *restrict) column->contents;
+	group = (size_t *restrict) column->contents;
 
-	 ptr = partition_groups(group,
-				group_count,
-				row_count);
+	ptr = partition_groups(group,
+			       group_count,
+			       row_count);
 
 	group_name     = name_map_sample(&last_name_map);
 	put_group_name = PUT_STRING_STOP_WIDTH_MAP[group_name->width];
@@ -879,11 +879,11 @@ build_column_string_names_full_group(void *arg)
 
 	struct Rowspan *restrict from = column->rowspans_from;
 
-	 group = (size_t *restrict) column->contents;
+	group = (size_t *restrict) column->contents;
 
-	 ptr = partition_groups(group,
-				group_count,
-				row_count);
+	ptr = partition_groups(group,
+			       group_count,
+			       row_count);
 
 	full_name = ptr;
 

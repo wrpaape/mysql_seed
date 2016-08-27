@@ -3790,11 +3790,11 @@ column_integer_random_range(struct GenerateParseState *const restrict state)
 	struct IntegerRange *const restrict range
 	= &col_spec->type_q.integer.scale.range;
 
-	const intmax_t min   = range->min;
-	const intmax_t max   = range->max;
-	const uintmax_t span = max - min;
+	const intmax_t min    = range->min;
+	const intmax_t max    = range->max;
+	const uintmax_t delta = max - min;
 
-	switch (span) {
+	switch (delta) {
 	case UINT32_MAX:
 		type_set_int(&col_spec->type);
 
@@ -3825,7 +3825,7 @@ column_integer_random_range(struct GenerateParseState *const restrict state)
 					    &state->database.ctor_flags,
 					    min,
 					    max,
-					    span);
+					    delta + 1llu);
 
 		col_spec->build = &build_column_integer_random_range;
 	}
@@ -3843,11 +3843,11 @@ column_integer_random_range_group(struct GenerateParseState *const restrict stat
 	struct IntegerRange *const restrict range
 	= &col_spec->type_q.integer.scale.range;
 
-	const intmax_t min   = range->min;
-	const intmax_t max   = range->max;
-	const uintmax_t span = max - min;
+	const intmax_t min    = range->min;
+	const intmax_t max    = range->max;
+	const uintmax_t delta = max - min;
 
-	switch (span) {
+	switch (delta) {
 	case UINT32_MAX:
 		type_set_int(&col_spec->type);
 
@@ -3878,7 +3878,7 @@ column_integer_random_range_group(struct GenerateParseState *const restrict stat
 					    &state->database.ctor_flags,
 					    min,
 					    max,
-					    span);
+					    delta + 1llu);
 
 		col_spec->build = &build_column_integer_random_range_group;
 	}
