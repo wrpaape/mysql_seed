@@ -2940,19 +2940,7 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 
 		const uint64_t span = INT64_MAX - from + 1u;
 
-		if (span < UINT32_MAX) {
-			from_cl->params.bound.uint32.threshold
-			= RANDOM_THRESHOLD((uint32_t) span);
-
-			from_cl->params.bound.uint32.span = (uint32_t) span;
-
-			from_cl->params.offset.int64 = (int64_t) from;
-
-			from_cl->generate = &generate_i_bound_32_offset_64;
-
-			*ctor_flags |= RAND_32_CTOR_FLAG;
-
-		} else {
+		if (span > UINT32_MAX) {
 			from_cl->params.bound.uint64.threshold
 			= RANDOM_THRESHOLD(span);
 
@@ -2963,6 +2951,18 @@ assign_integer_random_from(struct PutLabelClosure *const restrict type,
 			from_cl->generate = &generate_i_bound_64_offset_64;
 
 			*ctor_flags |= RAND_64_CTOR_FLAG;
+
+		} else {
+			from_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			from_cl->params.bound.uint32.span = (uint32_t) span;
+
+			from_cl->params.offset.int64 = (int64_t) from;
+
+			from_cl->generate = &generate_i_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
 		}
 
 		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
@@ -3069,54 +3069,7 @@ assign_integer_random_range(struct PutLabelClosure *const restrict type,
 	struct BoundOffsetIGeneratorClosure *const restrict range_cl
 	= &rand_spec->gen.range;
 
-	if (min < INT32_MIN) {
-		type_set_bigint(type);
-
-		range_cl->params.bound.uint64.threshold
-		= RANDOM_THRESHOLD((uint64_t) span);
-
-		range_cl->params.bound.uint64.span = (uint64_t) span;
-
-		range_cl->params.offset.int64 = (int64_t) min;
-
-		range_cl->generate = &generate_i_bound_64_offset_64;
-
-		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
-
-		*ctor_flags |= RAND_64_CTOR_FLAG;
-
-	} else if (max > INT32_MAX) {
-
-		type_set_bigint(type);
-
-		if (span < UINT32_MAX) {
-			range_cl->params.bound.uint32.threshold
-			= RANDOM_THRESHOLD((uint32_t) span);
-
-			range_cl->params.bound.uint32.span = (uint32_t) span;
-
-			range_cl->params.offset.int64 = (int64_t) min;
-
-			range_cl->generate = &generate_i_bound_32_offset_64;
-
-			*ctor_flags |= RAND_32_CTOR_FLAG;
-
-		} else {
-			range_cl->params.bound.uint64.threshold
-			= RANDOM_THRESHOLD((uint64_t) span);
-
-			range_cl->params.bound.uint64.span = (uint64_t) span;
-
-			range_cl->params.offset.int64 = (int64_t) min;
-
-			range_cl->generate = &generate_i_bound_64_offset_64;
-
-			*ctor_flags |= RAND_64_CTOR_FLAG;
-		}
-
-		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
-
-	} else {
+	if ((min > INT32_MIN) && (max < INT32_MAX)) {
 		type_set_int(type);
 
 		range_cl->params.bound.uint32.threshold
@@ -3131,7 +3084,24 @@ assign_integer_random_range(struct PutLabelClosure *const restrict type,
 		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
 
 		*ctor_flags |= RAND_32_CTOR_FLAG;
+
+	} else {
+		type_set_bigint(type);
+
+		range_cl->params.offset.int64 = (int64_t) min;
+
+		if (span < UINT32_MAX) {
+			range_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			range_cl->params.bound.uint32.span = (uint32_t) span;
+
+
+		} else {
+
+		}
 	}
+
 }
 
 
@@ -3835,53 +3805,8 @@ column_integer_random_range(struct GenerateParseState *const restrict state)
 inline void
 column_integer_random_range_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-
-	struct IntegerRandSpec *const restrict rand_spec
-	= &col_spec->type_q.integer.rand_spec;
-
-	struct IntegerRange *const restrict range
-	= &col_spec->type_q.integer.scale.range;
-
-	const intmax_t min   = range->min;
-	const intmax_t max   = range->max;
-	const uintmax_t span = max - min;
-
-	switch (span) {
-	case UINT32_MAX:
-		type_set_int(&col_spec->type);
-
-		rand_spec->gen.unbound = &generate_i_32;
-
-		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
-
-		col_spec->build = &build_column_integer_random_group;
-
-		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
-		return;
-
-	case UINT64_MAX:
-		type_set_bigint(&col_spec->type);
-
-		rand_spec->gen.unbound = &generate_i_64;
-
-		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
-
-		col_spec->build = &build_column_integer_random_group;
-
-		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
-		return;
-
-	default:
-		assign_integer_random_range(&col_spec->type,
-					    rand_spec,
-					    &state->database.ctor_flags,
-					    min,
-					    max,
-					    span);
-
-		col_spec->build = &build_column_integer_random_range_group;
-	}
+	/* TODO: assign type and generator */
+	state->specs.col->build = &build_column_integer_random_range_group;
 }
 
 
@@ -4440,13 +4365,6 @@ parse_integer_random_upto(struct GenerateParseState *const restrict state)
 	parse_column_complete(state,
 			      &column_integer_random_upto,
 			      &parse_integer_random_upto_group);
-}
-
-inline void
-parse_integer_random_range_group(struct GenerateParseState *const restrict state)
-{
-	parse_grp_spec(state,
-		       &column_integer_random_range_group);
 }
 
 
