@@ -352,8 +352,4 @@ togglecase_ascii_string(ascii_t *restrict string)
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */
 
-#ifdef _cplusplus /* close 'extern "C" {' */
-}
-#endif
-
 #endif /* ifndef MYSQL_SEED_STRING_ASCII_UTILS_H_ */

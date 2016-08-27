@@ -291,8 +291,4 @@ utf8_string_size_length_handle_cl(size_t *const restrict size,
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */
 
-#ifdef _cplusplus /* close 'extern "C" {' */
-}
-#endif
-
 #endif /* ifndef MYSQL_SEED_STRING_UTF8_UTILS_H_ */
