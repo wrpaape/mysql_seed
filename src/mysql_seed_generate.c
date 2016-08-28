@@ -113,6 +113,23 @@ invalid_max_integer_large(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_max_integer_large(struct GenerateParseState *const restrict state);
 
+extern inline void
+invalid_min_u_integer_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_min_u_integer_invalid(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_min_u_integer_large(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_min_u_integer_large(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_max_u_integer_invalid(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_max_u_integer_invalid(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_max_u_integer_large(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_max_u_integer_large(struct GenerateParseState *const restrict state);
+
 
 /* GRP_SPEC */
 extern inline void
@@ -127,6 +144,10 @@ extern inline void
 invalid_integer_type_q(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_invalid_integer_type_q(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_u_integer_type_q(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_u_integer_type_q(struct GenerateParseState *const restrict state);
 extern inline void
 invalid_string_type_q(const struct GenerateArgvState *const restrict argv);
 extern inline void
@@ -587,6 +608,34 @@ parse_integer_random_range(struct GenerateParseState *const restrict state);
 
 
 extern inline void
+parse_u_integer_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_unique(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_from_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_from(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_upto_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_upto(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_range_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random_range(struct GenerateParseState *const restrict state);
+
+
+extern inline void
 parse_string_default_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_string_default(struct GenerateParseState *const restrict state);
@@ -643,6 +692,8 @@ extern inline void
 parse_integer_random(struct GenerateParseState *const restrict state);
 extern inline void
 parse_integer_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random(struct GenerateParseState *const restrict state);
 extern inline void
 parse_u_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void

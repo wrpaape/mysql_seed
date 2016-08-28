@@ -31,7 +31,7 @@ build_column_u_integer_random(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	UGenerator *const gen_unbound = rand_spec->gen.unbound;
@@ -110,7 +110,7 @@ build_column_u_integer_random_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	UGenerator *const gen_unbound = rand_spec->gen.unbound;
@@ -228,7 +228,7 @@ build_column_u_integer_random_from(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundOffsetUGeneratorClosure *const restrict from_cl
@@ -308,7 +308,7 @@ build_column_u_integer_random_from_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundOffsetUGeneratorClosure *const restrict from_cl
@@ -427,7 +427,7 @@ build_column_u_integer_random_upto(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundUGeneratorClosure *const restrict upto_cl
@@ -507,7 +507,7 @@ build_column_u_integer_random_upto_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundUGeneratorClosure *const restrict upto_cl
@@ -626,7 +626,7 @@ build_column_u_integer_random_range(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundOffsetUGeneratorClosure *const restrict range_cl
@@ -706,7 +706,7 @@ build_column_u_integer_random_range_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	const struct IntegerRandSpec *const restrict rand_spec
+	const struct UIntegerRandSpec *const restrict rand_spec
 	= &column->spec->type_q.u_integer.rand_spec;
 
 	const struct BoundOffsetUGeneratorClosure *const restrict range_cl

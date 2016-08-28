@@ -188,6 +188,10 @@ PARSE_ERROR_HEADER("invalid COL_TYPE_Q")
 "\n" ERROR_WRAP("reason - not supported for COL_TYPE 'integer', "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
+#define ERROR_INVALID_U_TYPE_Q_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason - not supported for COL_TYPE 'unsigned integer"	\
+		"', ignoring DB_SPEC starting with:") "\n"
+
 #define ERROR_INVALID_S_TYPE_Q_REASON_NOTSUP				\
 "\n" ERROR_WRAP("reason - not supported for COL_TYPE 'string', "	\
 		"ignoring DB_SPEC starting with:") "\n"
@@ -351,6 +355,30 @@ PARSE_ERROR_HEADER("invalid MAX_INT")
 		"BIGINT_SIGNED_MAX (" BIGINT_SIGNED_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
+#define ERROR_INVALID_MIN_U_INTEGER_HEADER				\
+PARSE_ERROR_HEADER("invalid MIN_UINT")
+
+#define ERROR_INVALID_MIN_U_INTEGER_REASON_INVALID			\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
+		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_MIN_U_INTEGER_REASON_LARGE			\
+"\n" ERROR_WRAP("reason - MIN_UINT exceeds MySQL upper limit "		\
+		"BIGINT_UNSIGNED_MAX (" BIGINT_UNSIGNED_MAX_STRING "),"	\
+		" ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_MAX_U_INTEGER_HEADER				\
+PARSE_ERROR_HEADER("invalid MAX_UINT")
+
+#define ERROR_INVALID_MAX_U_INTEGER_REASON_INVALID			\
+"\n" ERROR_WRAP("reason - not an integer or overflows implementation-"	\
+		"defined uintmax_t, ignoring DB_SPEC starting with:") "\n"
+
+#define ERROR_INVALID_MAX_U_INTEGER_REASON_LARGE			\
+"\n" ERROR_WRAP("reason - MAX_UINT exceeds MySQL upper limit "		\
+		"BIGINT_UNSIGNED_MAX (" BIGINT_UNSIGNED_MAX_STRING "),"	\
+		" ignoring DB_SPEC starting with:") "\n"
+
 /* parsing GRP_SPEC */
 #define ERROR_INVALID_GRP_COUNT_HEADER					\
 PARSE_ERROR_HEADER("invalid GRP_COUNT")
@@ -453,7 +481,7 @@ generate_failure_short_db_spec(char *const restrict *const restrict from,
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  FAILURE_DB_SPEC_SHORT,
-			  sizeof(FAILURE_DB_SPEC_SHORT) - 1);
+			  sizeof(FAILURE_DB_SPEC_SHORT) - 1lu);
 
 
 	ptr = put_inspect_args(ptr,
@@ -486,7 +514,7 @@ short_db_spec(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_DB_SPEC_SHORT,
-			  sizeof(ERROR_DB_SPEC_SHORT) - 1);
+			  sizeof(ERROR_DB_SPEC_SHORT) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->arg.from,
@@ -505,7 +533,7 @@ expected_db_flag(char *const restrict invalid)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_EXPECTED_DB_FLAG_HEADER,
-			  sizeof(ERROR_EXPECTED_DB_FLAG_HEADER) - 1);
+			  sizeof(ERROR_EXPECTED_DB_FLAG_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 invalid,
@@ -529,7 +557,7 @@ invalid_db_name_empty(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_DB_NAME_EMPTY,
-			  sizeof(ERROR_INVALID_DB_NAME_EMPTY) - 1);
+			  sizeof(ERROR_INVALID_DB_NAME_EMPTY) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -549,7 +577,7 @@ invalid_db_name_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_DB_NAME_HEADER,
-			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -577,7 +605,7 @@ invalid_db_name_long(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_DB_NAME_HEADER,
-			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_DB_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -607,7 +635,7 @@ expected_tbl_flag(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_EXPECTED_TBL_FLAG_HEADER,
-			  sizeof(ERROR_EXPECTED_TBL_FLAG_HEADER) - 1);
+			  sizeof(ERROR_EXPECTED_TBL_FLAG_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -635,7 +663,7 @@ invalid_tbl_name_empty(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_TBL_NAME_EMPTY,
-			  sizeof(ERROR_INVALID_TBL_NAME_EMPTY) - 1);
+			  sizeof(ERROR_INVALID_TBL_NAME_EMPTY) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -654,7 +682,7 @@ invalid_tbl_name_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_TBL_NAME_HEADER,
-			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -682,7 +710,7 @@ invalid_tbl_name_long(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_TBL_NAME_HEADER,
-			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_TBL_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -711,7 +739,7 @@ expected_col_flag(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_EXPECTED_COL_FLAG_HEADER,
-			  sizeof(ERROR_EXPECTED_COL_FLAG_HEADER) - 1);
+			  sizeof(ERROR_EXPECTED_COL_FLAG_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -739,7 +767,7 @@ invalid_col_name_empty(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_NAME_EMPTY,
-			  sizeof(ERROR_INVALID_COL_NAME_EMPTY) - 1);
+			  sizeof(ERROR_INVALID_COL_NAME_EMPTY) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -758,7 +786,7 @@ invalid_col_name_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_NAME_HEADER,
-			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -786,7 +814,7 @@ invalid_col_name_long(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_NAME_HEADER,
-			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_NAME_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -815,7 +843,7 @@ invalid_row_count_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_ROW_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -844,7 +872,7 @@ invalid_row_count_zero(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_ROW_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -873,7 +901,7 @@ invalid_row_count_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_ROW_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_ROW_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -902,7 +930,7 @@ no_col_type(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_COL_TYPE,
-			  sizeof(ERROR_NO_COL_TYPE) - 1);
+			  sizeof(ERROR_NO_COL_TYPE) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -929,7 +957,7 @@ invalid_col_type(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_HEADER,
-			  sizeof(ERROR_INVALID_COL_TYPE_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_TYPE_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -966,7 +994,7 @@ invalid_rand_spec(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_RAND_SPEC_HEADER,
-			  sizeof(ERROR_INVALID_RAND_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INVALID_RAND_SPEC_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1001,7 +1029,7 @@ no_random_from_min(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_RANDOM_FROM_MIN,
-			  sizeof(ERROR_NO_RANDOM_FROM_MIN) - 1);
+			  sizeof(ERROR_NO_RANDOM_FROM_MIN) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1028,7 +1056,7 @@ no_random_upto_max(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_RANDOM_UPTO_MAX,
-			  sizeof(ERROR_NO_RANDOM_UPTO_MAX) - 1);
+			  sizeof(ERROR_NO_RANDOM_UPTO_MAX) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1055,7 +1083,7 @@ no_random_range_min(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_RANDOM_RANGE_MIN,
-			  sizeof(ERROR_NO_RANDOM_RANGE_MIN) - 1);
+			  sizeof(ERROR_NO_RANDOM_RANGE_MIN) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1082,7 +1110,7 @@ no_random_range_max(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_RANDOM_RANGE_MAX,
-			  sizeof(ERROR_NO_RANDOM_RANGE_MAX) - 1);
+			  sizeof(ERROR_NO_RANDOM_RANGE_MAX) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1109,14 +1137,14 @@ random_range_max_lt_min(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_RAND_SPEC_HEADER,
-			  sizeof(ERROR_INVALID_RAND_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INVALID_RAND_SPEC_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
 			 *(argv->arg.from));
 
 	ptr = put_string_size(ptr,
 			      ERROR_RANDOM_RANGE_MAX_LT_MIN,
-			      sizeof(ERROR_RANDOM_RANGE_MAX_LT_MIN) - 1);
+			      sizeof(ERROR_RANDOM_RANGE_MAX_LT_MIN) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1143,7 +1171,7 @@ invalid_min_integer_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MIN_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1178,7 +1206,7 @@ invalid_min_integer_small(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MIN_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1213,7 +1241,7 @@ invalid_min_integer_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MIN_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MIN_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1248,7 +1276,7 @@ invalid_max_integer_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MAX_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1283,7 +1311,7 @@ invalid_max_integer_small(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MAX_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1318,7 +1346,7 @@ invalid_max_integer_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_MAX_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_MAX_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1345,6 +1373,146 @@ error_invalid_max_integer_large(struct GenerateParseState *const restrict state)
 	generate_parse_error(state);
 }
 
+inline void
+invalid_min_u_integer_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MIN_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MIN_U_INTEGER_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MIN_U_INTEGER_REASON_INVALID,
+			      sizeof(ERROR_INVALID_MIN_U_INTEGER_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_min_u_integer_invalid(struct GenerateParseState *const restrict state)
+{
+	invalid_min_u_integer_invalid(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_min_u_integer_large(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MIN_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MIN_U_INTEGER_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MIN_U_INTEGER_REASON_LARGE,
+			      sizeof(ERROR_INVALID_MIN_U_INTEGER_REASON_LARGE)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_min_u_integer_large(struct GenerateParseState *const restrict state)
+{
+	invalid_min_u_integer_large(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_max_u_integer_invalid(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MAX_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MAX_U_INTEGER_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MAX_U_INTEGER_REASON_INVALID,
+			      sizeof(ERROR_INVALID_MAX_U_INTEGER_REASON_INVALID)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_max_u_integer_invalid(struct GenerateParseState *const restrict state)
+{
+	invalid_max_u_integer_invalid(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+invalid_max_u_integer_large(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_MAX_U_INTEGER_HEADER,
+			  sizeof(ERROR_INVALID_MAX_U_INTEGER_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_MAX_U_INTEGER_REASON_LARGE,
+			      sizeof(ERROR_INVALID_MAX_U_INTEGER_REASON_LARGE)
+			      - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_max_u_integer_large(struct GenerateParseState *const restrict state)
+{
+	invalid_max_u_integer_large(&state->argv);
+	generate_parse_error(state);
+}
+
 
 /* GRP_SPEC */
 inline void
@@ -1355,7 +1523,7 @@ invalid_grp_count_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_GRP_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1384,7 +1552,7 @@ invalid_grp_count_zero(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_GRP_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1413,7 +1581,7 @@ invalid_grp_count_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_GRP_COUNT_HEADER,
-			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1);
+			  sizeof(ERROR_INVALID_GRP_COUNT_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1443,7 +1611,7 @@ invalid_integer_type_q(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_Q_HEADER,
-			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1467,6 +1635,37 @@ error_invalid_integer_type_q(struct GenerateParseState *const restrict state)
 }
 
 inline void
+invalid_u_integer_type_q(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_COL_TYPE_Q_HEADER,
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_U_TYPE_Q_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_U_TYPE_Q_REASON_NOTSUP)
+			      - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_u_integer_type_q(struct GenerateParseState *const restrict state)
+{
+	invalid_u_integer_type_q(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
 invalid_string_type_q(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
@@ -1474,7 +1673,7 @@ invalid_string_type_q(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_Q_HEADER,
-			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1505,7 +1704,7 @@ invalid_timestamp_type_q(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_Q_HEADER,
-			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1536,7 +1735,7 @@ invalid_datetime_type_q(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_COL_TYPE_Q_HEADER,
-			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1);
+			  sizeof(ERROR_INVALID_COL_TYPE_Q_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1568,7 +1767,7 @@ no_fixed_integer(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_FIXED_INTEGER,
-			  sizeof(ERROR_NO_FIXED_INTEGER) - 1);
+			  sizeof(ERROR_NO_FIXED_INTEGER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1595,7 +1794,7 @@ invalid_fixed_integer_invalid(const struct GenerateArgvState *const restrict arg
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1630,7 +1829,7 @@ invalid_fixed_integer_small(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1665,7 +1864,7 @@ invalid_fixed_integer_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1700,7 +1899,7 @@ no_fixed_u_integer(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_FIXED_U_INTEGER,
-			  sizeof(ERROR_NO_FIXED_U_INTEGER) - 1);
+			  sizeof(ERROR_NO_FIXED_U_INTEGER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1727,7 +1926,7 @@ invalid_fixed_u_integer_invalid(const struct GenerateArgvState *const restrict a
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_U_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1762,7 +1961,7 @@ invalid_fixed_u_integer_large(const struct GenerateArgvState *const restrict arg
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_U_INTEGER_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_U_INTEGER_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1797,7 +1996,7 @@ no_base_string(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_BASE_STRING,
-			  sizeof(ERROR_NO_BASE_STRING) - 1);
+			  sizeof(ERROR_NO_BASE_STRING) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1825,7 +2024,7 @@ invalid_base_string_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_BASE_STRING_HEADER,
-			  sizeof(ERROR_INVALID_BASE_STRING_HEADER) - 1);
+			  sizeof(ERROR_INVALID_BASE_STRING_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1853,7 +2052,7 @@ invalid_base_string_long(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_BASE_STRING_HEADER,
-			  sizeof(ERROR_INVALID_BASE_STRING_HEADER) - 1);
+			  sizeof(ERROR_INVALID_BASE_STRING_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1881,7 +2080,7 @@ no_fixed_string(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_FIXED_STRING,
-			  sizeof(ERROR_NO_FIXED_STRING) - 1);
+			  sizeof(ERROR_NO_FIXED_STRING) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1908,7 +2107,7 @@ invalid_fixed_string_invalid(const struct GenerateArgvState *const restrict argv
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_STRING_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1936,7 +2135,7 @@ invalid_fixed_string_long(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_FIXED_STRING_HEADER,
-			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1);
+			  sizeof(ERROR_INVALID_FIXED_STRING_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -1964,7 +2163,7 @@ no_hash_length(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_HASH_LENGTH,
-			  sizeof(ERROR_NO_HASH_LENGTH) - 1);
+			  sizeof(ERROR_NO_HASH_LENGTH) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -1991,7 +2190,7 @@ invalid_hash_length_invalid(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_HASH_LENGTH_HEADER,
-			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1);
+			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2019,7 +2218,7 @@ invalid_hash_length_zero(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_HASH_LENGTH_HEADER,
-			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1);
+			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2047,7 +2246,7 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INVALID_HASH_LENGTH_HEADER,
-			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1);
+			  sizeof(ERROR_INVALID_HASH_LENGTH_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2075,7 +2274,7 @@ expected_col_spec_close(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER) - 1);
+			  sizeof(ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2109,7 +2308,7 @@ expected_grp_spec_close(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER) - 1);
+			  sizeof(ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2144,7 +2343,7 @@ grp_spec_for_fixed_data(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_GRP_SPEC_FOR_FIXED_DATA,
-			  sizeof(ERROR_GRP_SPEC_FOR_FIXED_DATA) - 1);
+			  sizeof(ERROR_GRP_SPEC_FOR_FIXED_DATA) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -2171,7 +2370,7 @@ inc_db_spec_col_name(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INC_DB_SPEC_HEADER,
-			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -2202,7 +2401,7 @@ inc_db_spec_tbl_name(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INC_DB_SPEC_HEADER,
-			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -2233,7 +2432,7 @@ inc_db_spec_row_count(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INC_DB_SPEC_HEADER,
-			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -2265,7 +2464,7 @@ inc_db_spec_col_flag(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_INC_DB_SPEC_HEADER,
-			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1);
+			  sizeof(ERROR_INC_DB_SPEC_HEADER) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -3202,66 +3401,38 @@ assign_u_integer_random_upto(struct PutLabelClosure *const restrict type,
 			     unsigned int *const restrict ctor_flags,
 			     const uintmax_t upto)
 {
-	struct BoundIGeneratorClosure *const restrict upto_cl
+	struct BoundUGeneratorClosure *const restrict upto_cl
 	= &rand_spec->gen.upto;
 
-	if (upto > INT32_MAX) {
-		type_set_bigint(type);
+	if (upto > UINT32_MAX) {
+		type_set_bigint_unsigned(type);
 
-		const uint64_t span = upto - INT64_MIN + 1u;
+		const uint64_t span = upto + 1u;
 
 		upto_cl->params.uint64.threshold
 		= RANDOM_THRESHOLD(span);
 
 		upto_cl->params.uint64.span = span;
 
-		upto_cl->generate = &generate_u_bound_64_offset_64_min;
+		upto_cl->generate = &generate_u_bound_64;
 
-		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
 
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
-	} else if (upto < INT32_MIN) {
-		type_set_bigint(type);
-
-		const uint64_t span = upto - INT64_MIN + 1u;
-
-		if (span > UINT32_MAX) {
-			upto_cl->params.uint64.threshold
-			= RANDOM_THRESHOLD(span);
-
-			upto_cl->params.uint64.span = span;
-
-			upto_cl->generate = &generate_u_bound_64_offset_64_min;
-
-			*ctor_flags |= RAND_64_CTOR_FLAG;
-
-		} else {
-			upto_cl->params.uint32.threshold
-			= RANDOM_THRESHOLD((uint32_t) span);
-
-			upto_cl->params.uint32.span = (uint32_t) span;
-
-			upto_cl->generate = &generate_u_bound_32_offset_64_min;
-
-			*ctor_flags |= RAND_32_CTOR_FLAG;
-		}
-
-		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
-
 	} else {
-		type_set_int(type);
+		type_set_int_unsigned(type);
 
-		const uint64_t span = upto - INT32_MIN + 1u;
+		const uint32_t span = upto + 1u;
 
 		upto_cl->params.uint32.threshold
 		= RANDOM_THRESHOLD(span);
 
 		upto_cl->params.uint32.span = span;
 
-		upto_cl->generate = &generate_u_bound_32_offset_32_min;
+		upto_cl->generate = &generate_u_bound_32;
 
-		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
 
 		*ctor_flags |= RAND_32_CTOR_FLAG;
 	}
@@ -3278,33 +3449,16 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 	struct BoundOffsetUGeneratorClosure *const restrict range_cl
 	= &rand_spec->gen.range;
 
-	if (min < INT32_MIN) {
-		type_set_bigint(type);
+	if (max > UINT32_MAX) {
+		type_set_bigint_unsigned(type);
 
-		range_cl->params.bound.uint64.threshold
-		= RANDOM_THRESHOLD((uint64_t) span);
-
-		range_cl->params.bound.uint64.span = (uint64_t) span;
-
-		range_cl->params.offset.int64 = (int64_t) min;
-
-		range_cl->generate = &generate_u_bound_64_offset_64;
-
-		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
-
-		*ctor_flags |= RAND_64_CTOR_FLAG;
-
-	} else if (max > INT32_MAX) {
-
-		type_set_bigint(type);
-
-		if (span < UINT32_MAX) {
+		if (span > UINT32_MAX) {
 			range_cl->params.bound.uint32.threshold
 			= RANDOM_THRESHOLD((uint32_t) span);
 
 			range_cl->params.bound.uint32.span = (uint32_t) span;
 
-			range_cl->params.offset.int64 = (int64_t) min;
+			range_cl->params.offset.uint64 = (uint64_t) min;
 
 			range_cl->generate = &generate_u_bound_32_offset_64;
 
@@ -3316,28 +3470,28 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 
 			range_cl->params.bound.uint64.span = (uint64_t) span;
 
-			range_cl->params.offset.int64 = (int64_t) min;
+			range_cl->params.offset.uint64 = (uint64_t) min;
 
 			range_cl->generate = &generate_u_bound_64_offset_64;
 
 			*ctor_flags |= RAND_64_CTOR_FLAG;
 		}
 
-		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
 
 	} else {
-		type_set_int(type);
+		type_set_int_unsigned(type);
 
 		range_cl->params.bound.uint32.threshold
 		= RANDOM_THRESHOLD((uint32_t) span);
 
 		range_cl->params.bound.uint32.span = (uint32_t) span;
 
-		range_cl->params.offset.int32 = (int32_t) min;
+		range_cl->params.offset.uint32 = (uint32_t) min;
 
 		range_cl->generate = &generate_u_bound_32_offset_32;
 
-		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
 
 		*ctor_flags |= RAND_32_CTOR_FLAG;
 	}
@@ -3485,7 +3639,7 @@ no_grp_count(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_NO_GRP_COUNT,
-			  sizeof(ERROR_NO_GRP_COUNT) - 1);
+			  sizeof(ERROR_NO_GRP_COUNT) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -3512,7 +3666,7 @@ multiple_grp_specs(const struct GenerateArgvState *const restrict argv)
 	char *restrict ptr
 	= put_string_size(&buffer[0],
 			  ERROR_MULTIPLE_GRP_SPECS,
-			  sizeof(ERROR_MULTIPLE_GRP_SPECS) - 1);
+			  sizeof(ERROR_MULTIPLE_GRP_SPECS) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -3715,7 +3869,7 @@ column_integer_default_group(struct GenerateParseState *const restrict state)
 	type_assign_integer_upto(&col_spec->type,
 				 grp_count);
 
-	col_spec->build = &build_column_string_unique_group;
+	col_spec->build = &build_column_integer_unique_group;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
@@ -4120,7 +4274,7 @@ column_u_integer_default_group(struct GenerateParseState *const restrict state)
 	type_assign_u_integer_upto(&col_spec->type,
 				   grp_count);
 
-	col_spec->build = &build_column_string_unique_group;
+	col_spec->build = &build_column_integer_unique_group;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
@@ -5106,6 +5260,260 @@ parse_integer_random_range(struct GenerateParseState *const restrict state)
 }
 
 
+inline void
+parse_u_integer_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_default_group);
+}
+
+inline void
+parse_u_integer_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_u_integer_default,
+			      &parse_u_integer_default_group);
+}
+
+inline void
+parse_u_integer_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_unique_group);
+}
+
+inline void
+parse_u_integer_unique(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_u_integer_unique,
+			      &parse_u_integer_unique_group);
+}
+
+inline void
+parse_u_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	uintmax_t parsed;
+	char *restrict from;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_fixed_u_integer(state);
+		return;
+	}
+
+	from = *(state->argv.arg.from);
+
+	const char *const restrict until = parse_uint(&parsed,
+						      from);
+
+	if (until == NULL) {
+		error_invalid_fixed_u_integer_invalid(state);
+		return;
+	}
+
+#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
+	if (parsed > BIGINT_UNSIGNED_MAX) {
+		error_invalid_fixed_u_integer_large(state);
+		return;
+	}
+#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	if (parsed > 0ll) {
+		type_assign_u_integer_max(&col_spec->type,
+					  parsed);
+
+		while (*from == '0')
+			++from;
+
+		stub_builder_init(&col_spec->type_q.u_integer.fixed,
+				  from,
+				  until + 1l - from);
+
+	} else {
+		type_set_tinyint(&col_spec->type);
+
+		struct StubBuilder *const restrict fixed_int
+		= &col_spec->type_q.u_integer.fixed;
+
+		fixed_int->put_cl.bytes = "0";
+		fixed_int->put_cl.put	= put_string_width2;
+		fixed_int->width	= 2u;
+	}
+
+	parse_column_complete(state,
+			      &column_u_integer_fixed,
+			      &error_grp_spec_for_fixed_data);
+}
+
+inline void
+parse_u_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_random_default_group);
+}
+
+inline void
+parse_u_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	parse_column_complete(state,
+			      &column_u_integer_random_default,
+			      &parse_u_integer_random_default_group);
+}
+
+inline void
+parse_u_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_random_from_group);
+}
+
+inline void
+parse_u_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	uintmax_t parsed;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_from_min(state);
+		return;
+	}
+
+	if (parse_uint(&parsed,
+		       *(state->argv.arg.from)) == NULL) {
+		error_invalid_min_u_integer_invalid(state);
+		return;
+	}
+
+#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
+	if (parsed > BIGINT_UNSIGNED_MAX) {
+		error_invalid_min_u_integer_large(state);
+		return;
+	}
+#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
+	state->specs.col->type_q.u_integer.scale.from = parsed;
+
+	parse_column_complete(state,
+			      &column_u_integer_random_from,
+			      &parse_u_integer_random_from_group);
+}
+
+inline void
+parse_u_integer_random_upto_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_random_upto_group);
+}
+
+inline void
+parse_u_integer_random_upto(struct GenerateParseState *const restrict state)
+{
+	uintmax_t parsed;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_upto_max(state);
+		return;
+	}
+
+	if (parse_uint(&parsed,
+		       *(state->argv.arg.from)) == NULL) {
+		error_invalid_max_u_integer_invalid(state);
+		return;
+	}
+
+#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
+	if (parsed > BIGINT_UNSIGNED_MAX) {
+		error_invalid_max_u_integer_large(state);
+		return;
+	}
+#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
+	state->specs.col->type_q.u_integer.scale.upto = parsed;
+
+	parse_column_complete(state,
+			      &column_u_integer_random_upto,
+			      &parse_u_integer_random_upto_group);
+}
+
+inline void
+parse_u_integer_random_range_group(struct GenerateParseState *const restrict state)
+{
+	parse_grp_spec(state,
+		       &column_u_integer_random_range_group);
+}
+
+
+inline void
+parse_u_integer_random_range(struct GenerateParseState *const restrict state)
+{
+	uintmax_t parsed_min;
+	uintmax_t parsed_max;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_range_min(state);
+		return;
+	}
+
+	if (parse_uint(&parsed_min,
+		       *(state->argv.arg.from)) == NULL) {
+		error_invalid_min_u_integer_invalid(state);
+		return;
+	}
+
+#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
+	if (parsed_min > BIGINT_UNSIGNED_MAX) {
+		error_invalid_min_u_integer_large(state);
+		return;
+	}
+#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_range_max(state);
+		return;
+	}
+
+	if (parse_uint(&parsed_max,
+		       *(state->argv.arg.from)) == NULL) {
+		error_invalid_max_u_integer_invalid(state);
+		return;
+	}
+
+	if (parsed_max < parsed_min) {
+		error_random_range_max_lt_min(state);
+		return;
+	}
+
+#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
+	if (parsed_max > BIGINT_UNSIGNED_MAX) {
+		error_invalid_max_u_integer_large(state);
+		return;
+	}
+#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
+
+	struct UIntegerRange *const restrict range
+	= &state->specs.col->type_q.u_integer.scale.range;
+
+	range->min = parsed_min;
+	range->max = parsed_max;
+
+	parse_column_complete(state,
+			      &column_u_integer_random_range,
+			      &parse_u_integer_random_range_group);
+}
+
+
 
 inline void
 parse_string_default_group(struct GenerateParseState *const restrict state)
@@ -5608,6 +6016,143 @@ NEXT_DB_SPEC:		column_integer_default(state);
 
 	default:
 		error_invalid_integer_type_q(state);
+	}
+}
+
+inline void
+parse_u_integer_random(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		column_u_integer_random_default(state);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		error_invalid_rand_spec(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long u_integer qualifier */
+
+	case 'g':
+		if (*rem == '\0')
+			parse_u_integer_random_default_group(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_u_integer_random_from(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_u_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'r':
+		if (*rem == '\0')
+			parse_u_integer_random_range(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		column_u_integer_random_default(state);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_u_integer_random_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		column_u_integer_random_default(state);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_rand_spec(state);
+		return;
+	}
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_u_integer_random_default_group(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'f':
+		if (strings_equal("rom", rem + 1l))
+			parse_u_integer_random_from(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'u':
+		if (strings_equal("pto", rem + 1l))
+			parse_u_integer_random_upto(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'r':
+		if (strings_equal("ange", rem + 1l))
+			parse_u_integer_random_range(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_rand_spec(state);
 	}
 }
 
