@@ -587,6 +587,8 @@ parse_integer_random(struct GenerateParseState *const restrict state);
 extern inline void
 parse_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
+parse_u_integer_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
 parse_string_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_timestamp_qualifier(struct GenerateParseState *const restrict state);

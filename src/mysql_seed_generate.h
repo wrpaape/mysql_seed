@@ -5025,6 +5025,144 @@ NEXT_DB_SPEC:		column_integer_default(state);
 	}
 }
 
+inline void
+parse_u_integer_qualifier(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		column_u_integer_default(state);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		error_invalid_u_integer_type_q(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long u_integer qualifier */
+
+	case 'g':
+		if (*rem == '\0')
+			parse_u_integer_default_group(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_u_integer_unique(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_u_integer_fixed(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (*rem == '\0')
+			parse_u_integer_random(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		column_u_integer_default(state);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_u_integer_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		column_u_integer_default(state);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_u_integer_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		column_u_integer_default(state);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_u_integer_type_q(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_u_integer_default_group(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_u_integer_unique(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_u_integer_fixed(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (strings_equal("andom", rem + 1l))
+			parse_u_integer_random(state);
+		else
+			error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_u_integer_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_u_integer_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_u_integer_type_q(state);
+	}
+}
+
 
 inline void
 parse_string_qualifier(struct GenerateParseState *const restrict state)
@@ -5523,6 +5661,13 @@ parse_col_type(struct GenerateParseState *const restrict state)
 			error_invalid_col_type(state);
 		return;
 
+	case 'u':
+		if (*rem == '\0')
+			parse_u_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
 	case 's':
 		if (*rem == '\0')
 			parse_string_qualifier(state);
@@ -5553,6 +5698,13 @@ parse_col_type(struct GenerateParseState *const restrict state)
 	case 'i':
 		if (strings_equal("nteger", rem + 1l))
 			parse_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nsigned-integer", rem + 1l))
+			parse_u_integer_qualifier(state);
 		else
 			error_invalid_col_type(state);
 		return;
