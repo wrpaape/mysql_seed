@@ -5,6 +5,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/loader.h"		/* build_loader */
 #include "generate/column_integer.h"	/* build_column_integer_X */
+#include "generate/column_u_integer.h"	/* build_column_u_integer_X */
 #include "generate/column_string.h"	/* build_column_string_X|uuid */
 #include "generate/column_timestamp.h"	/* build_column_timestamp_X */
 #include "generate/column_datetime.h"	/* build_column_datetime_X */

@@ -364,6 +364,23 @@ assign_integer_random_range(struct PutLabelClosure *const restrict type,
 			    const intmax_t min,
 			    const intmax_t max,
 			    const uintmax_t span);
+extern inline void
+assign_u_integer_random_from(struct PutLabelClosure *const restrict type,
+			     struct UIntegerRandSpec *const restrict rand_spec,
+			     unsigned int *const restrict ctor_flags,
+			     const uintmax_t from);
+extern inline void
+assign_u_integer_random_upto(struct PutLabelClosure *const restrict type,
+			     struct UIntegerRandSpec *const restrict rand_spec,
+			     unsigned int *const restrict ctor_flags,
+			     const uintmax_t upto);
+extern inline void
+assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
+			      struct UIntegerRandSpec *const restrict rand_spec,
+			      unsigned int *const restrict ctor_flags,
+			      const uintmax_t min,
+			      const uintmax_t max,
+			      const uintmax_t span);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -402,24 +419,64 @@ column_integer_random_default(struct GenerateParseState *const restrict state);
 /* -c COL_NAME -i -r -g GRP_COUNT [PART_TYPE] */
 extern inline void
 column_integer_random_default_group(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -f MIN */
+/* -c COL_NAME -i -r -f MIN_INT */
 extern inline void
 column_integer_random_from(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -f MIN -g GRP_COUNT [PART_TYPE] */
+/* -c COL_NAME -i -r -f MIN_INT -g GRP_COUNT [PART_TYPE] */
 extern inline void
 column_integer_random_from_group(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -u MAX */
+/* -c COL_NAME -i -r -u MAX_INT */
 extern inline void
 column_integer_random_upto(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -u MAX -g GRP_COUNT [PART_TYPE] */
+/* -c COL_NAME -i -r -u MAX_INT -g GRP_COUNT [PART_TYPE] */
 extern inline void
 column_integer_random_upto_group(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -r MIN MAX */
+/* -c COL_NAME -i -r -r MIN_INT MAX_INT */
 extern inline void
 column_integer_random_range(struct GenerateParseState *const restrict state);
-/* -c COL_NAME -i -r -r MIN MAX -g GRP_COUNT [PART_TYPE] */
+/* -c COL_NAME -i -r -r MIN_INT MAX_INT -g GRP_COUNT [PART_TYPE] */
 extern inline void
 column_integer_random_range_group(struct GenerateParseState *const restrict state);
+
+/* -c COL_NAME -u */
+extern inline void
+column_u_integer_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_default_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -u */
+extern inline void
+column_u_integer_unique(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -u -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_unique_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -f FIXED_INT */
+extern inline void
+column_u_integer_fixed(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r */
+extern inline void
+column_u_integer_random_default(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_random_default_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -f MIN_UINT */
+extern inline void
+column_u_integer_random_from(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -f MIN_UINT -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_random_from_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -u MAX_UINT */
+extern inline void
+column_u_integer_random_upto(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -u MAX_UINT -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_random_upto_group(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -r MIN_UINT MAX_UINT */
+extern inline void
+column_u_integer_random_range(struct GenerateParseState *const restrict state);
+/* -c COL_NAME -u -r -r MIN_UINT MAX_UINT -g GRP_COUNT [PART_TYPE] */
+extern inline void
+column_u_integer_random_range_group(struct GenerateParseState *const restrict state);
 
 /* -c COL_NAME -s -u BASE_STRING */
 extern inline void
