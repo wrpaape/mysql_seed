@@ -7,7 +7,7 @@ extern inline void
 exit_help_generate(void);
 
 extern inline void
-exit_help_load(void);
+exit_help_execute(void);
 
 /* print help message, return success status
  *─────────────────────────────────────────────────────────────────────────── */
@@ -18,7 +18,7 @@ extern inline int
 help_generate(void);
 
 extern inline int
-help_load(void);
+help_execute(void);
 
 /* print error messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */

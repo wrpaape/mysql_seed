@@ -27,8 +27,8 @@ _P2_("examples:")							\
 _P3_("mysql_seed --help")						\
 _P3_("mysql_seed -h generate")						\
 _P3_("mysql_seed --help l")						\
-_H2_("generate\t<-g, --generate> <DB_SPEC_1> [DB_SPEC_2] [DB_SPEC_3] "	\
-     "... [DB_SPEC_N]")							\
+_H2_("generate\t<-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... ["		\
+     "DB_SPEC_N]")							\
 _P2_("generates seed files for N databases according to their "		\
      "specification, 'DB_SPEC'")					\
 _P2_("examples:")							\
@@ -38,7 +38,7 @@ _P3_("mysql_seed --generate --database foo_forum --table users 500 "	\
      "--string --hash 128")						\
 _P3_("mysql_seed -g -d baz_shop -t products 100000 -c name -s "		\
      "-c price -f -m 0.10")						\
-_H2_("load    \t<-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
+_H2_("execute  \t<-e, --execute> <DB_NAME> [MYSQL_ARGS]")		\
 _P2_("creates database 'DB_NAME' and loads generated table files found"	\
      " under the directory 'database" PATH_DELIM_STRING	"DB_NAME' into"	\
      " MySQL")								\
@@ -48,8 +48,10 @@ _H2_("remove  \t<-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ..."	\
      " [DB_NAME_N]")							\
 "\n"									\
 _H1_("NOTATION")							\
-_H2_("<MANDATORY INPUT>")						\
-_H2_("[OPTIONAL INPUT]")
+_H2_("<MANDATORY>")							\
+_H2_("[OPTIONAL]")							\
+_H2_("THIS AND THAT | OR THESE")					\
+_H2_("HOMOGENOUS INPUT ... SEQUENCE")
 
 /* generate mode */
 #define HELP_GENERATE_MESSAGE						\
@@ -61,20 +63,24 @@ _P1_("generates seed files for N databases according to their "		\
 "\n"									\
 _H1_("SPECS")								\
 _H2_("DB_SPEC  \t<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] "	\
-     "[TBL_SPEC_3] ... [TBL_SPEC_N]")					\
+     "... [TBL_SPEC_N]")						\
 _P2_("indicates that the tables described by 'TBL_SPEC's 1 through N "	\
      "belong to the mysql database named 'DB_NAME'")			\
+"\n"									\
 _H2_("TBL_SPEC \t<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> "	\
      "[COL_SPEC_2] ... [COL_SPEC_N]")					\
 _P2_("specifies a database table with name 'TBL_NAME', 'ROW_COUNT' "	\
      "rows, and N columns populated according to their 'COL_SPEC's")	\
+"\n"									\
 _H2_("COL_SPEC \t<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q_1] "	\
      "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N] [RAND_SPEC] [GRP_SPEC]")	\
 _P2_("specifies a database column with name 'COL_NAME' and data type "	\
      "'COL_TYPE' - column type qualifiers 'COL_TYPE_Q' 1 through N may"	\
      " be provided to fine-tune data generation for a given type")	\
+"\n"									\
 _H2_("RAND_SPEC\t<-r, --random> [<-f, --from> <MIN_TYPE> | <-u, --upto"	\
      "> <MAX_(TYPE)> | <-r, --range> <MIN_(TYPE)> <MAX_(TYPE)>]")	\
+"\n"									\
 _H2_("GRP_SPEC \t<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, "	\
      "--linear>]")							\
 "\n"									\
@@ -87,12 +93,15 @@ _H2_("<-ts, --timestamp>")						\
 _P1_("TODO")								\
 "\n"									\
 _H1_("NOTATION")							\
-_H2_("<MANDATORY> [OPTIONAL]")
+_H2_("<MANDATORY>")							\
+_H2_("[OPTIONAL]")							\
+_H2_("THIS | OR THAT | OR THESE")					\
+_H2_("HOMOGENOUS INPUT ... SEQUENCE")
 
-/* load mode */
-#define HELP_LOAD_MESSAGE						\
-_H1_("LOAD MODE")							\
-_H2_("mysql_seed <-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
+/* execute mode */
+#define HELP_EXECUTE_MESSAGE						\
+_H1_("EXECUTE MODE")							\
+_H2_("mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]")		\
 "\n"									\
 _H1_("MYSQL_ARGS")							\
 _P1_("TODO")
@@ -118,7 +127,7 @@ inline void
 exit_help_usage(void)
 {
 	exit_success_dump_buffer(HELP_USAGE_MESSAGE,
-				 sizeof(HELP_USAGE_MESSAGE));
+				 sizeof(HELP_USAGE_MESSAGE) - 1lu);
 	__builtin_unreachable();
 }
 
@@ -126,15 +135,15 @@ inline void
 exit_help_generate(void)
 {
 	exit_success_dump_buffer(HELP_GENERATE_MESSAGE,
-				 sizeof(HELP_GENERATE_MESSAGE));
+				 sizeof(HELP_GENERATE_MESSAGE) - 1lu);
 	__builtin_unreachable();
 }
 
 inline void
-exit_help_load(void)
+exit_help_execute(void)
 {
-	exit_success_dump_buffer(HELP_LOAD_MESSAGE,
-				 sizeof(HELP_LOAD_MESSAGE));
+	exit_success_dump_buffer(HELP_EXECUTE_MESSAGE,
+				 sizeof(HELP_EXECUTE_MESSAGE) - 1lu);
 	__builtin_unreachable();
 }
 
@@ -177,13 +186,13 @@ help_generate(void)
 }
 
 inline int
-help_load(void)
+help_execute(void)
 {
 	const char *restrict failure;
 
 	if (LIKELY(write_report(STDOUT_FILENO,
-				HELP_LOAD_MESSAGE,
-				sizeof(HELP_LOAD_MESSAGE) - 1lu,
+				HELP_EXECUTE_MESSAGE,
+				sizeof(HELP_EXECUTE_MESSAGE) - 1lu,
 				&failure)))
 		return EXIT_SUCCESS;
 
@@ -244,9 +253,9 @@ help_dispatch(char *const restrict *const restrict arg,
 			return help_usage();
 		break;
 
-	case 'l':
-		if (LIKELY(((*rem == '\0') || strings_equal("oad", rem))))
-			return help_load();
+	case 'e':
+		if (LIKELY(((*rem == '\0') || strings_equal("xecute", rem))))
+			return help_execute();
 		break;
 
 	default:
