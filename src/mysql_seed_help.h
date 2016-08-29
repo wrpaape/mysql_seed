@@ -20,7 +20,7 @@ _H1_("USAGE")								\
 _H2_("mysql_seed <MODE> [SPECS]")					\
 "\n"									\
 _H1_("MODES")								\
-_H2_("help\t<-h, --help> [MODE]")					\
+_H2_("help    \t<-h, --help> [MODE]")					\
 _P2_("prints operation details for mode 'MODE' or this message if not "	\
      "specified")							\
 _P2_("examples:")							\
@@ -34,15 +34,18 @@ _P2_("generates seed files for N databases according to their "		\
 _P2_("examples:")							\
 _P3_("mysql_seed --generate --database foo_forum --table users 500 "	\
      "--column name --string --names-full --column age "		\
-     "--unsigned-integer --range 18 99 --column email --string "	\
-     "--emails")							\
+     "--unsigned-integer --random --range 18 99 --column password "	\
+     "--string --hash 128")						\
 _P3_("mysql_seed -g -d baz_shop -t products 100000 -c name -s "		\
      "-c price -f -m 0.10")						\
-_H2_("load\t<-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
-_P2_("loads seed files found in directory 'db" PATH_DELIM_STRING	\
-     "DB_NAME' into the mysql database 'DB_NAME'")			\
+_H2_("load    \t<-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
+_P2_("creates database 'DB_NAME' and loads generated table files found"	\
+     " under the directory 'database" PATH_DELIM_STRING	"DB_NAME' into"	\
+     " MySQL")								\
 _P2_("examples:")							\
 _P3_("TODO")								\
+_H2_("remove  \t<-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ..."	\
+     " [DB_NAME_N]")							\
 "\n"									\
 _H1_("NOTATION")							\
 _H2_("<MANDATORY INPUT>")						\
@@ -51,27 +54,36 @@ _H2_("[OPTIONAL INPUT]")
 /* generate mode */
 #define HELP_GENERATE_MESSAGE						\
 _H1_("GENERATE MODE")							\
-_H2_("mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] [DB_SPEC_3] "	\
-     "... DB_SPEC_N]")							\
+_H2_("mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... ["	\
+     "DB_SPEC_N]")							\
 _P1_("generates seed files for N databases according to their "		\
      "specification, 'DB_SPEC'")					\
 "\n"									\
 _H1_("SPECS")								\
-_H2_("DB_SPEC\t<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] "	\
+_H2_("DB_SPEC  \t<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] "	\
      "[TBL_SPEC_3] ... [TBL_SPEC_N]")					\
 _P2_("indicates that the tables described by 'TBL_SPEC's 1 through N "	\
      "belong to the mysql database named 'DB_NAME'")			\
-_H2_("TBL_SPEC\t<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> "	\
+_H2_("TBL_SPEC \t<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> "	\
      "[COL_SPEC_2] ... [COL_SPEC_N]")					\
 _P2_("specifies a database table with name 'TBL_NAME', 'ROW_COUNT' "	\
      "rows, and N columns populated according to their 'COL_SPEC's")	\
-_H2_("COL_SPEC\t<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q_1] "	\
-     "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N]")				\
+_H2_("COL_SPEC \t<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q_1] "	\
+     "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N] [RAND_SPEC] [GRP_SPEC]")	\
 _P2_("specifies a database column with name 'COL_NAME' and data type "	\
      "'COL_TYPE' - column type qualifiers 'COL_TYPE_Q' 1 through N may"	\
      " be provided to fine-tune data generation for a given type")	\
+_H2_("RAND_SPEC\t<-r, --random> [<-f, --from> <MIN_TYPE> | <-u, --upto"	\
+     "> <MAX_(TYPE)> | <-r, --range> <MIN_(TYPE)> <MAX_(TYPE)>]")	\
+_H2_("GRP_SPEC \t<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, "	\
+     "--linear>]")							\
 "\n"									\
 _H1_("SUPPORTED DATA TYPES")						\
+_H2_("<-s, --string>")							\
+_H2_("<-i, --integer>")							\
+_H2_("<-u, --unsigned-integer>")					\
+_H2_("<-dt, --datetime>")						\
+_H2_("<-ts, --timestamp>")						\
 _P1_("TODO")								\
 "\n"									\
 _H1_("NOTATION")							\
@@ -81,6 +93,15 @@ _H2_("<MANDATORY> [OPTIONAL]")
 #define HELP_LOAD_MESSAGE						\
 _H1_("LOAD MODE")							\
 _H2_("mysql_seed <-l, --load> <DB_NAME> [MYSQL_ARGS]")			\
+"\n"									\
+_H1_("MYSQL_ARGS")							\
+_P1_("TODO")
+
+/* remove mode */
+#define HELP_REMOVE_MESSAGE						\
+_H1_("REMOVE MODE")							\
+_H2_("mysql_seed <-r, --remove> <-a, -all | DB_NAME_1> [DB_NAME_2] ..."	\
+     " [DB_NAME_N]")							\
 "\n"									\
 _H1_("MYSQL_ARGS")							\
 _P1_("TODO")

@@ -302,23 +302,23 @@ PARSE_ERROR_HEADER("invalid RAND_SPEC component")
 		"with:") "\n"
 
 #define ERROR_NO_RANDOM_FROM_MIN					\
-PARSE_ERROR_HEADER("no MIN_<TYPE> value provided for RAND_SPEC 'from' "	\
+PARSE_ERROR_HEADER("no MIN_(TYPE) value provided for RAND_SPEC 'from' "	\
 		   "component, ignoring DB_SPEC starting with")
 
 #define ERROR_NO_RANDOM_UPTO_MAX					\
-PARSE_ERROR_HEADER("no MAX_<TYPE> value provided for RAND_SPEC 'from' "	\
+PARSE_ERROR_HEADER("no MAX_(TYPE) value provided for RAND_SPEC 'from' "	\
 		   "component, ignoring DB_SPEC starting with")
 
 #define ERROR_NO_RANDOM_RANGE_MIN					\
-PARSE_ERROR_HEADER("no MIN_<TYPE> value provided for RAND_SPEC 'range'"	\
+PARSE_ERROR_HEADER("no MIN_(TYPE) value provided for RAND_SPEC 'range'"	\
 		   " component, ignoring DB_SPEC starting with")
 
 #define ERROR_NO_RANDOM_RANGE_MAX					\
-PARSE_ERROR_HEADER("no MAX_<TYPE> value provided for RAND_SPEC 'range'"	\
+PARSE_ERROR_HEADER("no MAX_(TYPE) value provided for RAND_SPEC 'range'"	\
 		   " component, ignoring DB_SPEC starting with")
 
 #define ERROR_RANDOM_RANGE_MAX_LT_MIN					\
-"\n" ERROR_WRAP("MAX_<TYPE> is less than MIN_<TYPE> for RAND_SPEC '"	\
+"\n" ERROR_WRAP("MAX_(TYPE) is less than MIN_(TYPE) for RAND_SPEC '"	\
 		"range' component, ignoring DB_SPEC starting with") "\n"
 
 #define ERROR_INVALID_MIN_INTEGER_HEADER				\
