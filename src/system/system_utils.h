@@ -927,7 +927,7 @@ get_interface_index_handle_cl(struct ifreq *const restrict request,
 
 
 /* get_hardware_address */
-inline void
+inline bool
 get_hardware_address_status(struct ifreq *const restrict request,
 			    const int device_descriptor)
 {
@@ -935,7 +935,7 @@ get_hardware_address_status(struct ifreq *const restrict request,
 					device_descriptor) != -1;
 }
 
-inline bool
+inline void
 get_hardware_address_muffle(struct ifreq *const restrict request,
 			    const int device_descriptor)
 {
