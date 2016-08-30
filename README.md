@@ -18,38 +18,48 @@ Invoking `make` at the project root will create the main executable binary, `bin
 
 ####help
 - command
-  `mysql_seed <-h, --help> [MODE]`
+
+`mysql_seed <-h, --help> [MODE]`
+
+
 - description
-  prints operation details for mode `MODE` or general usage if not specified
+
+prints operation details for mode `MODE` or general usage if not specified
+
 - examples
-  `mysql_seed --help`
-  `mysql_seed -h generate`
-  `mysql_seed --help e`
+
+`mysql_seed --help`
+
+`mysql_seed -h generate`
+
+`mysql_seed --help e`
+
 
 
 ####generate
 - command
-  - `mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
+`mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
 - description
-  - generates seed files for N databases according to their `DB_SPEC` specification
+generates seed files for N databases according to their `DB_SPEC` specification
 - examples
 
 
 ####execute
 - command
-  - `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
+`mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
 
 
 ####remove
 - command
-  `mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`
+`mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`
 
 
 ###SPECS
 
 ####`DB_SPEC`
 - form
-  `<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] ... [TBL_SPEC_N]`
+
+`<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] ... [TBL_SPEC_N]`
 - description
   indicates that the tables described by `TBL_SPEC`s `1` through `N` belong to the MySQL database named `DB_NAME`
 
