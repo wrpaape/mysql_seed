@@ -98,46 +98,6 @@ get_adapters_addresses_handle_cl(ULONG family,
 				 PULONG size_pointer,
 				 const struct HandlerClosure *const restrict fail_cl);
 #else
-/* sysctl */
-extern inline bool
-sysctl_status(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data);
-extern inline void
-sysctl_muffle(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data);
-extern inline bool
-sysctl_report(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data,
-	      const char *restrict *const restrict failure);
-extern inline void
-sysctl_handle(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data,
-	      Handler *const handle,
-	      void *arg);
-extern inline void
-sysctl_handle_cl(int *const restrict mib_name,
-		 u_int length_name,
-		 void *const restrict old_data,
-		 size_t *const restrict size_old_data,
-		 void *const restrict new_data,
-		 const size_t size_new_data,
-		 const struct HandlerClosure *const restrict fail_cl);
 
 /* interface_name_to_index */
 extern inline bool
@@ -269,6 +229,49 @@ get_hardware_address_handle_cl(struct ifreq *const restrict request,
 			       const int device_descriptor,
 			       const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifdef LINUX */
+
+#ifdef OSX
+/* sysctl */
+extern inline bool
+sysctl_status(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data);
+extern inline void
+sysctl_muffle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data);
+extern inline bool
+sysctl_report(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      const char *restrict *const restrict failure);
+extern inline void
+sysctl_handle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      Handler *const handle,
+	      void *arg);
+extern inline void
+sysctl_handle_cl(int *const restrict mib_name,
+		 u_int length_name,
+		 void *const restrict old_data,
+		 size_t *const restrict size_old_data,
+		 void *const restrict new_data,
+		 const size_t size_new_data,
+		 const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifdef OSX */
 
 
 /* getaddrinfo */

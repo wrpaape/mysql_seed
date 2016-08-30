@@ -11,12 +11,15 @@
 #	include <lphlpapi.h>	/* GetAdaptersAddress */
 #	include <ws2tcpip.h>	/* getaddrinfo */
 #else
-#	include <sys/sysctl.h>	/* sysctl */
 #	include <sys/ioctl.h>	/* iotcl */
 #	include <sys/socket.h>	/* socket */
 #	include <net/if.h>	/* ifreq, ifconf */
 #	include <netdb.h>	/* getaddrinfo */
 #endif /* ifdef WIN32 */
+
+#ifdef OSX
+#	include <sys/sysctl.h>	/* sysctl */
+#endif /* ifdef OSX */
 
 #include <sys/uio.h>		/* read, write */
 #include <sys/types.h>		/* ssize_t, chmod API */
@@ -449,145 +452,7 @@ get_adapters_addresses_handle_cl(ULONG family,
 	__builtin_unreachable();
 }
 #else
-/* sysctl */
-inline bool
-sysctl_status(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data)
-{
-	return sysctl(mib_name,
-		      length_name,
-		      old_data,
-		      size_old_data,
-		      new_data,
-		      size_new_data) == 0;
-}
 
-inline void
-sysctl_muffle(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data)
-{
-	(void) sysctl(mib_name,
-		      length_name,
-		      old_data,
-		      size_old_data,
-		      new_data,
-		      size_new_data);
-}
-
-
-#undef  FAIL_SWITCH_ROUTINE
-#define FAIL_SWITCH_ROUTINE sysctl
-inline bool
-sysctl_report(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data,
-	      const char *restrict *const restrict failure)
-{
-	FAIL_SWITCH_ERRNO_OPEN(mib_name,
-			       length_name,
-			       old_data,
-			       size_old_data,
-			       new_data,
-			       size_new_data)
-	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
-				 "The buffer 'mib_name', 'old_data', 'new_data'"
-				 ", or length pointer 'size_old_data' contains "
-				 "an invalid address.")
-	FAIL_SWITCH_ERRNO_CASE_2(EINVAL,
-				 "The 'mib_name' array is less than two or "
-				 "greater than 'CTL_MAXNAME'.",
-				 "A non-null 'new_data' is given and its "
-				 "specified length in 'size_new_data' is too "
-				 "large or too small.")
-	FAIL_SWITCH_ERRNO_CASE_3(ENOMEM,
-				 "The length pointed to by 'size_old_data' is "
-				 "too short to hold the requested value.",
-				 "The smaller of either the length pointed to "
-				 "by 'size_old_data' or the estimated size of "
-				 "the returned data exceeds the system limit on"
-				 " locked memory.",
-				 "Locking the buffer 'old_data', or a portion "
-				 "of the buffer if the estimated size of the "
-				 "data to be returned is smaller, would cause "
-				 "the process to exceed its per-process locked "
-				 "memory limit.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
-				 "The 'mib_name' array specifies an "
-				 "intermediate rather than terminal name.")
-	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
-				 "The 'mib_name' array specifies a terminal "
-				 "name, but the actual name is not terminal.")
-	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
-				 "The 'mib_name' array specifies a value that "
-				 "is unknown.")
-	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
-				 "An attempt is made to set a read-only value.",
-				 "A process without appropriate privilege "
-				 "attempts to set a value.")
-	FAIL_SWITCH_ERRNO_CLOSE()
-}
-
-inline void
-sysctl_handle(int *const restrict mib_name,
-	      u_int length_name,
-	      void *const restrict old_data,
-	      size_t *const restrict size_old_data,
-	      void *const restrict new_data,
-	      const size_t size_new_data,
-	      Handler *const handle,
-	      void *arg)
-{
-	const char *restrict failure;
-
-	if (sysctl_report(mib_name,
-			  length_name,
-			  old_data,
-			  size_old_data,
-			  new_data,
-			  size_new_data,
-			  &failure))
-		return;
-
-	handle(arg,
-	       failure);
-	__builtin_unreachable();
-}
-
-inline void
-sysctl_handle_cl(int *const restrict mib_name,
-		 u_int length_name,
-		 void *const restrict old_data,
-		 size_t *const restrict size_old_data,
-		 void *const restrict new_data,
-		 const size_t size_new_data,
-		 const struct HandlerClosure *const restrict fail_cl)
-{
-	const char *restrict failure;
-
-	if (sysctl_report(mib_name,
-			  length_name,
-			  old_data,
-			  size_old_data,
-			  new_data,
-			  size_new_data,
-			  &failure))
-		return;
-
-	handler_closure_call(fail_cl,
-			     failure);
-	__builtin_unreachable();
-}
 
 /* interface_name_to_index */
 inline bool
@@ -1138,6 +1003,147 @@ get_hardware_address_handle_cl(struct ifreq *const restrict request,
 }
 #endif /* ifdef LINUX */
 
+#ifdef OSX
+/* sysctl */
+inline bool
+sysctl_status(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data)
+{
+	return sysctl(mib_name,
+		      length_name,
+		      old_data,
+		      size_old_data,
+		      new_data,
+		      size_new_data) == 0;
+}
+
+inline void
+sysctl_muffle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data)
+{
+	(void) sysctl(mib_name,
+		      length_name,
+		      old_data,
+		      size_old_data,
+		      new_data,
+		      size_new_data);
+}
+
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE sysctl
+inline bool
+sysctl_report(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(mib_name,
+			       length_name,
+			       old_data,
+			       size_old_data,
+			       new_data,
+			       size_new_data)
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "The buffer 'mib_name', 'old_data', 'new_data'"
+				 ", or length pointer 'size_old_data' contains "
+				 "an invalid address.")
+	FAIL_SWITCH_ERRNO_CASE_2(EINVAL,
+				 "The 'mib_name' array is less than two or "
+				 "greater than 'CTL_MAXNAME'.",
+				 "A non-null 'new_data' is given and its "
+				 "specified length in 'size_new_data' is too "
+				 "large or too small.")
+	FAIL_SWITCH_ERRNO_CASE_3(ENOMEM,
+				 "The length pointed to by 'size_old_data' is "
+				 "too short to hold the requested value.",
+				 "The smaller of either the length pointed to "
+				 "by 'size_old_data' or the estimated size of "
+				 "the returned data exceeds the system limit on"
+				 " locked memory.",
+				 "Locking the buffer 'old_data', or a portion "
+				 "of the buffer if the estimated size of the "
+				 "data to be returned is smaller, would cause "
+				 "the process to exceed its per-process locked "
+				 "memory limit.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTDIR,
+				 "The 'mib_name' array specifies an "
+				 "intermediate rather than terminal name.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "The 'mib_name' array specifies a terminal "
+				 "name, but the actual name is not terminal.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOENT,
+				 "The 'mib_name' array specifies a value that "
+				 "is unknown.")
+	FAIL_SWITCH_ERRNO_CASE_2(EPERM,
+				 "An attempt is made to set a read-only value.",
+				 "A process without appropriate privilege "
+				 "attempts to set a value.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+sysctl_handle(int *const restrict mib_name,
+	      u_int length_name,
+	      void *const restrict old_data,
+	      size_t *const restrict size_old_data,
+	      void *const restrict new_data,
+	      const size_t size_new_data,
+	      Handler *const handle,
+	      void *arg)
+{
+	const char *restrict failure;
+
+	if (sysctl_report(mib_name,
+			  length_name,
+			  old_data,
+			  size_old_data,
+			  new_data,
+			  size_new_data,
+			  &failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+sysctl_handle_cl(int *const restrict mib_name,
+		 u_int length_name,
+		 void *const restrict old_data,
+		 size_t *const restrict size_old_data,
+		 void *const restrict new_data,
+		 const size_t size_new_data,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (sysctl_report(mib_name,
+			  length_name,
+			  old_data,
+			  size_old_data,
+			  new_data,
+			  size_new_data,
+			  &failure))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+#endif /* ifdef OSX */
 
 
 /* getaddrinfo */
