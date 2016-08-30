@@ -14,19 +14,19 @@ Invoking `make` at the project root will create the main executable binary, `bin
 ###`mysql_seed <MODE> [SPECS]`
 
 
-###MODES
+###Modes
 
 ####help
-- command
+*command*
 
 `mysql_seed <-h, --help> [MODE]`
 
 
-- description
+*description*
 
 prints operation details for mode `MODE` or general usage if not specified
 
-- examples
+*examples*
 
 `mysql_seed --help`
 
