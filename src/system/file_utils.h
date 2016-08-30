@@ -115,6 +115,14 @@
 #	undef open_relative_mode_imp
 #	warning "open_relative_mode undefined"
 
+/* read a file */
+#	define read_imp(FILE_DESCRIPTOR,				\
+			BUFFER,						\
+			SIZE)						\
+	_read(FILE_DESCRIPTOR,						\
+	      BUFFER,							\
+	      (unsigned int) (SIZE))
+
 /* write to a file */
 #	define write_imp(FILE_DESCRIPTOR,				\
 			 BUFFER,					\
@@ -191,6 +199,14 @@
 	       RELATIVE_PATH,						\
 	       OPEN_FLAG,						\
 	       MODE)
+
+/* read a file */
+#	define read_imp(FILE_DESCRIPTOR,				\
+			BUFFER,						\
+			SIZE)						\
+	read(FILE_DESCRIPTOR,						\
+	     BUFFER,							\
+	     SIZE)
 
 /* write to a file */
 #	define write_imp(FILE_DESCRIPTOR,				\
@@ -1135,6 +1151,128 @@ open_relative_mode_handle_cl(int *const restrict file_descriptor,
 	__builtin_unreachable();
 }
 #endif /* ifndef WIN32 */
+
+
+/* read */
+inline bool
+read_status(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size)
+{
+	return read_imp(file_descriptor,
+			buffer,
+			size) == 0;
+}
+
+inline void
+read_muffle(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size)
+{
+	(void) read_imp(file_descriptor,
+			buffer,
+			size);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE read_imp
+inline bool
+read_report(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size,
+	    const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(file_descriptor,
+			       buffer,
+			       size)
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "The file was marked for non-blocking I/O, and"
+				 " no data were ready to be read.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'file_descriptor' is not a valid file or "
+				 "socket descriptor open for reading.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'buffer' points outside the allocated address"
+				 " space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "A read from a slow device was interrupted "
+				 "before any data arrived by the delivery of a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The pointer associated with 'file_descriptor'"
+				 " was negative.")
+	FAIL_SWITCH_ERRNO_CASE_3(EIO,
+				 "An I/O error occurred while reading from the "
+				 "file system.",
+				 "The process group is orphaned.",
+				 "The file is a regular file, 'size' is greater"
+				 " than 0, the starting position is before the "
+				 "end-of-file, and the starting position is "
+				 "greater than or equal to the offset maximum "
+				 "established for the open file descriptor "
+				 "associated with 'file_descriptor'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "An attempt was made to read a directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOBUFS,
+				 "An attempt to allocate a memory buffer failed"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+				 "Insufficient memory is available.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "An action was requested of a device that does"
+				 " not exist.",
+				 "A requested action cannot be performed by the"
+				 " device.")
+	FAIL_SWITCH_ERRNO_CASE_1(ECONNRESET,
+				 "The connection was closed by the peer during "
+				 "a read attempt on a socket.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTCONN,
+				 "A read was attempted on an unconnected socket"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_1(ETIMEDOUT,
+				 "A transmission timeout occurs during a read "
+				 "attempt on a socket.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+read_handle(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size,
+	    Handler *const handle,
+	    void *arg)
+{
+	const char *restrict failure;
+
+	if (read_report(file_descriptor,
+			buffer,
+			size,
+			&failure))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+read_handle_cl(const int file_descriptor,
+	       void *const restrict buffer,
+	       const size_t size,
+	       const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (read_report(file_descriptor,
+			buffer,
+			size,
+			&failure))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
 
 
 /* write */

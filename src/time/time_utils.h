@@ -5,13 +5,17 @@
 /* EXTERNAL DEPENDENCIES
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
-#include <time.h>		/* time */
-#include <sys/time.h>		/* timespec */
+#include <time.h>		/* time, time_t */
 #include <stdint.h>		/* uintX_t */
 #include "utils/fail_switch.h"	/* bool, error macros */
 #include "utils/closure.h"	/* Handler, HandlerClosure */
 
+#ifdef LINUX
+	#include <linux/time.h>	/* clock_gettime, CLOCK_REALTIME */
+#endif /* ifdef LINUX */
+
 #ifdef __MACH__
+#	include <sys/time.h>		/* timespec */
 #	include <mach/clock.h>
 #	include <mach/mach.h>
 

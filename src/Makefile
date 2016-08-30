@@ -132,7 +132,7 @@ ifeq (T,$(SYSTEM_WINDOWS))
         THREADS_INC_DIR		:= $(call PATH_JOIN,$(THREADS_DIR) include)
         THREADS_LIB_ROOT	:= $(call PATH_JOIN,$(THREADS_DIR) dll)
 
-        ifeq (T, ARCH_X86_64)
+        ifeq (T,$(ARCH_X86_64))
                         THREADS_LIB_DIR := $(call PATH_JOIN,$(THREADS_LIB_ROOT) x64)
         else
                         THREADS_LIB_DIR := $(call PATH_JOIN,$(THREADS_LIB_ROOT) x86)
@@ -146,7 +146,11 @@ else
         THREADS_LIB_FLAG	:= -lpthread
         THREADS_INC_FLAG	:= $(EMPTY)
 
-        SYSTEM_LIB_FLAGS	:= $(EMPTY)
+        ifeq (T,$(SYSTEM_LINUX))
+                        SYSTEM_LIB_FLAGS	:= -lrt -lm
+        else
+                        SYSTEM_LIB_FLAGS	:= $(EMPTY)
+        endif
 endif
 
 

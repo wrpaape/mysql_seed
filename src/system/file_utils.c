@@ -147,6 +147,33 @@ open_relative_mode_handle_cl(int *const restrict file_descriptor,
 			     const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifndef WIN32 */
 
+
+/* read */
+extern inline bool
+read_status(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size);
+extern inline void
+read_muffle(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size);
+extern inline bool
+read_report(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size,
+	    const char *restrict *const restrict failure);
+extern inline void
+read_handle(const int file_descriptor,
+	    void *const restrict buffer,
+	    const size_t size,
+	    Handler *const handle,
+	    void *arg);
+extern inline void
+read_handle_cl(const int file_descriptor,
+	       void *const restrict buffer,
+	       const size_t size,
+	       const struct HandlerClosure *const restrict fail_cl);
+
 /* write */
 extern inline bool
 write_status(const int file_descriptor,
