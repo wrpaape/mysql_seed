@@ -29,15 +29,15 @@ Invoking `make` at the project root will create the main executable binary, `bin
 
 ####generate
 - command
-  `mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
+  - `mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
 - description
-  generates seed files for N databases according to their `DB_SPEC` specification
+  - generates seed files for N databases according to their `DB_SPEC` specification
 - examples
 
 
 ####execute
 - command
-  `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
+  - `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
 
 
 ####remove
