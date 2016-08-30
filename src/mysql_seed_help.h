@@ -26,7 +26,7 @@ _P2_("prints operation details for mode 'MODE' or this message if not "	\
 _P2_("examples:")							\
 _P3_("mysql_seed --help")						\
 _P3_("mysql_seed -h generate")						\
-_P3_("mysql_seed --help l")						\
+_P3_("mysql_seed --help e")						\
 _H2_("generate\t<-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... ["		\
      "DB_SPEC_N]")							\
 _P2_("generates seed files for N databases according to their "		\
@@ -65,12 +65,13 @@ _H1_("SPECS")								\
 _H2_("DB_SPEC  \t<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] "	\
      "... [TBL_SPEC_N]")						\
 _P2_("indicates that the tables described by 'TBL_SPEC's 1 through N "	\
-     "belong to the mysql database named 'DB_NAME'")			\
+     "belong to the MySQL database named 'DB_NAME'")			\
 "\n"									\
 _H2_("TBL_SPEC \t<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> "	\
      "[COL_SPEC_2] ... [COL_SPEC_N]")					\
-_P2_("specifies a database table with name 'TBL_NAME', 'ROW_COUNT' "	\
-     "rows, and N columns populated according to their 'COL_SPEC's")	\
+_P2_("specifies a database table with name 'TBL_NAME' having '"		\
+     "ROW_COUNT' rows and N columns populated according to their '"	\
+     "respective COL_SPEC's")						\
 "\n"									\
 _H2_("COL_SPEC \t<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q_1] "	\
      "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N] [RAND_SPEC] [GRP_SPEC]")	\
