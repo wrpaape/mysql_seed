@@ -19,9 +19,9 @@
 }
 
 //=======Automagically Detected Files To Include=====
-#include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
+#include "unity.h"
 #include "memory/memory_zero.h"
 
 //=======External Functions This Runner Calls=====

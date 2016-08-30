@@ -19,9 +19,9 @@
 }
 
 //=======Automagically Detected Files To Include=====
-#include <unity/unity.h>
 #include <setjmp.h>
 #include <stdio.h>
+#include "unity.h"
 #include "generate/column_string_hash.h"
 
 //=======External Functions This Runner Calls=====

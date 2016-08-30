@@ -5,6 +5,7 @@
 
 #include <stdlib.h>	/* exit */
 #include <stddef.h>	/* ptrdiff_t */
+#include <stdint.h>	/* SIZE_MAX */
 #include <stdio.h>	/* printf, fprintf */
 #include <errno.h>	/* errno */
 #include <string.h>	/* strerror */

@@ -7,6 +7,7 @@
 
 #include <time.h>		/* time */
 #include <sys/time.h>		/* timespec */
+#include <stdint.h>		/* uintX_t */
 #include "utils/fail_switch.h"	/* bool, error macros */
 #include "utils/closure.h"	/* Handler, HandlerClosure */
 

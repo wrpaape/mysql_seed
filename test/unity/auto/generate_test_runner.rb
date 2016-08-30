@@ -161,11 +161,12 @@ class UnityTestRunnerGenerator
     output.puts("\n//=======Automagically Detected Files To Include=====")
     # output.puts("#include \"#{@options[:framework].to_s}.h\"")
     # output.puts('#include "cmock.h"') unless (mocks.empty?)
-    output.puts("#include <#{@options[:framework].to_s}/#{@options[:framework].to_s}.h>")
+    # output.puts("#include <#{@options[:framework].to_s}/#{@options[:framework].to_s}.h>")
     output.puts('#include <cmock/cmock.h>') unless (mocks.empty?)
     output.puts('#include <setjmp.h>')
     output.puts('#include <stdio.h>')
     output.puts('#include "CException.h"') if @options[:plugins].include?(:cexception)
+    output.puts("#include \"#{@options[:framework].to_s}.h\"")
     if (@options[:header_file] && !@options[:header_file].empty?)
       output.puts("#include \"#{File.basename(@options[:header_file])}\"")
     else
