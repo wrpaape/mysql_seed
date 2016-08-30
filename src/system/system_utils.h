@@ -15,7 +15,6 @@
 #	include <sys/ioctl.h>	/* iotcl */
 #	include <sys/socket.h>	/* socket */
 #	include <net/if.h>	/* ifreq, ifconf */
-#	include <net/if_dl.h>	/* sockaddr_dl, LLADDR */
 #	include <netdb.h>	/* getaddrinfo */
 #endif /* ifdef WIN32 */
 

@@ -233,13 +233,15 @@ CC_FLAGS	:= -O2 -funroll-loops -freorder-blocks $(CC_BASE_FLAGS)
 endif
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
-LD		:= ld
-LD_FLAGS	:= -no_pie $(SYS_ARCH_FLAG)
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
-
 ifeq (T,$(SYSTEM_OSX))
-LD_FLAGS	+= -macosx_version_min 10.11
+LD		:= ld
+LD_FLAGS	:= -macosx_version_min 10.11 -no_pie $(SYS_ARCH_FLAG)
+else
+LD		:= gcc
+LD_FLAGS	:= $(EMPTY)
 endif
+
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
 
 # Make Directory
 # ──────────────────────────────────────────────────────────────────────────────

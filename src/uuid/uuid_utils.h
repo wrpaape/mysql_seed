@@ -8,6 +8,12 @@
 #include "random/random.h"		/* psuedo-random number generator */
 #include "string/string_utils.h"	/* string utils */
 
+#ifdef OSX
+#	include <net/if_dl.h>	/* sockaddr_dl, LLADDR */
+#elif defined(LINUX)
+#	include <linux/if.h>	/* ifreq */
+#endif /* ifdef OSX */
+
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
@@ -40,8 +46,12 @@ MALLOC_FAILURE_MESSAGE("uuid_mac_address")
 
 #	define UUID_HEAP_FREE_FAILURE					\
 	FAILURE_REASON("uuid_mac_address", "HeapFree failure")
-#else
+
+#elif defined(OSX)
 #	define MAIN_INTERFACE_NAME "en0"
+
+#else
+#	define SET_MAIN_INTERFACE_NAME(PTR) SET_STRING_WIDTH(PTR, "eth0", 5)
 #endif /* ifdef WIN32 */
 
 
@@ -288,7 +298,7 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 
 	return free_success;
 
-#else
+#elif defined(OSX)
 	struct ifconf configuration;
 	size_t size_required;
 	int interface_index;
@@ -345,6 +355,35 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 
 	free(configuration.ifc_buf);
 	return true;
+
+#else
+	struct ifreq request;
+	int socket_descriptor;
+
+	if (!socket_report(&socket_descriptor,
+			   PF_INET,
+			   SOCK_DGRAM,
+			   IPPROTO_IP,
+			   failure))
+		return false;
+
+	SET_MAIN_INTERFACE_NAME(&request.ifr_name[0]);
+
+	if (!get_hardware_address_report(&request,
+					 socket_descriptor,
+					 failure)) {
+		close_muffle(socket_descriptor);
+		return false;
+	}
+
+	const bool success = close_report(socket_descriptor,
+					  failure);
+
+	if (success)
+		SET_MAC_ADDRESS(mac_address,
+				&request.ifr_addr.sa_data[0]);
+
+	return success;
 #endif /* ifdef WIN32 */
 }
 
