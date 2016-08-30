@@ -14,13 +14,11 @@ Invoking `make` at the project root will create the main executable binary, `bin
 ###`mysql_seed <MODE> [SPECS]`
 
 
-##Modes
+##MODES
 
 ###help
-**command**  
 `mysql_seed <-h, --help> [MODE]`
 
-**description**  
 prints operation details for mode `MODE` or general usage if not specified
 
 **examples**  
@@ -36,26 +34,20 @@ will print help concerning `execute` mode
 
 
 ###generate
-**command**  
 `mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
 
-**description**  
 generates seed files for `N` databases according to their `DB_SPEC` specification
 examples
 
 
 ###execute
-**command**  
 `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
 
-**description**  
 
 
 ###remove
-**command**  
 `mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`
 
-**description**  
 
 
 
@@ -65,7 +57,6 @@ examples
 **form**  
 `<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] ... [TBL_SPEC_N]`
 
-**description**  
 indicates that the tables described by `TBL_SPEC`s `1` through `N` belong to the MySQL database named `DB_NAME`
 
 
@@ -73,7 +64,6 @@ indicates that the tables described by `TBL_SPEC`s `1` through `N` belong to the
 **form**  
 `<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> [COL_SPEC_2] ... [COL_SPEC_N]`
 
-**description**  
 specifies a database table with name `TBL_NAME` having `ROW_COUNT` rows and `N` columns populated according to their respective `COL_SPEC`s"
 
 
@@ -81,7 +71,6 @@ specifies a database table with name `TBL_NAME` having `ROW_COUNT` rows and `N` 
 **form**  
 `<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q] [RAND_SPEC] [GRP_SPEC]`
 
-**description**  
 specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A column type qualifier, `COL_TYPE_Q`,  may be provided to fine-tune data generation for a given type. For some `COL_TYPE`-`COL_TYPE_Q` combinations a `RAND_SPEC` may be provided to define limits on random data generation.  For all non-fixed data types a group specification, `GRP_SPEC`, may be appended to partition a column into groups.
 
 
@@ -90,7 +79,6 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 **form**  
 `<-r, --random> [<-f, --from> <MIN_TYPE> | <-u, --upto> <MAX_(TYPE)> | <-r, --range> <MIN_(TYPE)> <MAX_(TYPE)>]`
 
-**description**  
 
 
 
@@ -98,7 +86,6 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 **form**  
 `<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, --linear>]`
 
-**description**  
 
 
 
