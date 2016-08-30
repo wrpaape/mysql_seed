@@ -17,73 +17,79 @@ Invoking `make` at the project root will create the main executable binary, `bin
 ##Modes
 
 ###help
-**command**
-
+**command**  
 `mysql_seed <-h, --help> [MODE]`
 
-**description**
-
+**description**  
 prints operation details for mode `MODE` or general usage if not specified
 
-**examples**
+**examples**  
+`mysql_seed --help`  
+will print help concerning general usage
 
-`mysql_seed --help`
-
-`mysql_seed -h generate`
+`mysql_seed -h generate`  
+will print help concerning `generate` mode
 
 `mysql_seed --help e`
+will print help concerning `execute` mode
 
 
 
 ###generate
-- command
+**command**  
 `mysql_seed <-g, --generate> <DB_SPEC_1> [DB_SPEC_2] ... [DB_SPEC_N]`
-- description
-generates seed files for N databases according to their `DB_SPEC` specification
-- examples
+
+**description**  
+generates seed files for `N` databases according to their `DB_SPEC` specification
+examples
 
 
 ###execute
-- command
+**command**  
 `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`
+
+**description**  
 
 
 ###remove
-- command
+**command**  
 `mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`
+
+**description**  
+
 
 
 ##SPECS
 
 ###`DB_SPEC`
-- form
+**form**  
 
 `<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] ... [TBL_SPEC_N]`
-- description
-  indicates that the tables described by `TBL_SPEC`s `1` through `N` belong to the MySQL database named `DB_NAME`
+**description**  
+indicates that the tables described by `TBL_SPEC`s `1` through `N` belong to the MySQL database named `DB_NAME`
 
 ###`TBL_SPEC`
-- form
+**form**  
   `<-t, --table> <TBL_NAME> <ROW_COUNT> <COL_SPEC_1> [COL_SPEC_2] ... [COL_SPEC_N]`
-- description
-  specifies a database table with name `TBL_NAME` having `ROW_COUNT` rows and `N` columns populated according to their respective `COL_SPEC`s"
+**description**  
+specifies a database table with name `TBL_NAME` having `ROW_COUNT` rows and `N` columns populated according to their respective `COL_SPEC`s"
 
 
 ###`COL_SPEC`
-- form
+**form**  
   `<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q] [RAND_SPEC] [GRP_SPEC]`
-- description
-  specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A column type qualifier, `COL_TYPE_Q`,  may be provided to fine-tune data generation for a given type. For some `COL_TYPE`-`COL_TYPE_Q` combinations a `RAND_SPEC` may be provided to define limits on random data generation.  For all non-fixed data types a group specification, `GRP_SPEC`, may be appended to partition a column into groups.
+**description**  
+specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A column type qualifier, `COL_TYPE_Q`,  may be provided to fine-tune data generation for a given type. For some `COL_TYPE`-`COL_TYPE_Q` combinations a `RAND_SPEC` may be provided to define limits on random data generation.  For all non-fixed data types a group specification, `GRP_SPEC`, may be appended to partition a column into groups.
 
 ###`RAND_SPEC`
-- form
+**form**  
   `<-r, --random> [<-f, --from> <MIN_TYPE> | <-u, --upto> <MAX_(TYPE)> | <-r, --range> <MIN_(TYPE)> <MAX_(TYPE)>]`
-- description
+**description**  
 
 ###`GRP_SPEC`
-- form
+**form**  
   `<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, --linear>]`
-- description
+**description**  
 
 
 
