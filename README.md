@@ -18,7 +18,7 @@ Invoking `make` at the project root will create the main executable binary, `bin
 
 
 
-##MODES
+##`MODE`s
 ###`help`
 `mysql_seed <-h, --help> [MODE]`  
 prints operation details for mode `MODE` or general usage if not specified
@@ -53,7 +53,7 @@ generates seed files for `N` databases according to their `DB_SPEC` specificatio
 
 
 
-##SPECS
+##`SPEC`s
 
 ###`DB_SPEC`
 `<-d, --database> <DB_NAME> <TBL_SPEC_1> [TBL_SPEC_2] ... [TBL_SPEC_N]`  
@@ -93,6 +93,21 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 
 ###String (VARCHAR, CHAR)
 `<-s, --string>`
+
+| Qualifier       | `COL_TYPE_Q`(s)                           | description                             |example entries                                               | MySQL column type                         |
+| --------------- | ----------------------------------------- | --------------------------------------- |--------------- | ----------------------------------------- |
+| Fixed           | `<-f, --fixed> <FIXED_STRING>`            | all entries have value *FIXED_STRING*   |foo bar baz,
+                                                                                                         foo bar baz,
+                                                                                                         ... ,
+                                                                                                         foo bar baz    | CHAR(*length(FIXED_STRING)*)              |
+| Unique          | `<-u, --unique> <BASE_STRING> [GRP_SPEC]` | entries are made by concatenating
+                                                                *BASE_STRING* with an ascending integer
+                                                                (starting from "1")                     |user1, user2, ... , user*ROW_COUNT*                           | VARCHAR(*length(BASE_STRING*ROW_COUNT*)*) |
+| Hash            | `<-h, --hash> <HASH_LENGTH> [GRP_SPEC]`   | |af100, 92dd1, ... , 1d2ba      | CHAR(*HASH_LENGTH*)                       |
+| First Names     | `<-n1, --names-first> [GRP_SPEC]`         | sample of American first names  |Robert, RANDOM_FIRST_NAME, ... , RANDOM_FIRST_NAME | VARCHAR(*FIRST_NAME_LENGTH_MAX*)          |
+| Last Names      | `<-nl, --names-last> [GRP_SPEC]`          | sample of American last names   |BASE_STRING1, BASE_STRING2, ... , BASE_STRING*ROW_COUNT* | VARCHAR(*FIRST_NAME_LENGTH_MAX*)          |
+| Full Names      | `<-nf, --names-full> [GRP_SPEC]`          | sample of American last names   |BASE_STRING1, BASE_STRING2, ... , BASE_STRING*ROW_COUNT* | VARCHAR(*FIRST_NAME_LENGTH_MAX*)          |
+
 
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
 `<-i, --integer>`
