@@ -94,15 +94,15 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 ###String (VARCHAR, CHAR)
 `<-s, --string>`
 
-| Qualifier       | `COL_TYPE_Q`(s)                | description                                                              | example entries                         | MySQL type declaration                    |
-| --------------- | -------------------------------| ------------------------------------------------------------------------ | --------------------------------------- | ----------------------------------------- |
-| None            | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | user1, user2, ..., user3                | CHAR(*length(COL_NAME)*)                  |
-| Fixed           | `<-f, --fixed> <FIXED_STRING>` | all entries have value *FIXED_STRING*, **cannot append GRP_SPEC**        | foo bar, foo bar,  ..., foo bar         | CHAR(*length(FIXED_STRING)*)              |
-| Unique          | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1, foo2, ..., foo*ROW_COUNT*         | VARCHAR(*length(BASE_STRING*ROW_COUNT*)*) |
-| Hash            | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100, 92dd1, ..., 1d2ba                | CHAR(*HASH_LENGTH*)                       |
-| First Names     | `<-n1, --names-first>`         | random sample of American first names                                    | Robert, Alice, ..., Joseph              | VARCHAR(*FIRST_NAME_LENGTH_MAX*)          |
-| Last Names      | `<-nl, --names-last>`          | random sample of American last names                                     | Smith, Johnson, ..., Garcia             | VARCHAR(*LAST_NAME_LENGTH_MAX*)           |
-| Full Names      | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz, Sue E Bell, ..., Bob Joe Cook | VARCHAR(*LAST_NAME_LENGTH_MAX*)           |
+| Qualifier       | `COL_TYPE_Q`                   | description                                                              | example entries                         | MySQL type declaration                            |
+| --------------- | -------------------------------| ------------------------------------------------------------------------ | :-------------------------------------: | ------------------------------------------------- |
+| None            | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | user1<br/>user2<br/>...<br/>user3                | **CHAR(***length(COL_NAME)***)**                  |
+| Fixed           | `<-f, --fixed> <FIXED_STRING>` | all entries have value *FIXED_STRING*, **GRP_SPEC not allowed**          | foo bar, foo bar,  ..., foo bar         | **CHAR(***length(FIXED_STRING)***)**              |
+| Unique          | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1, foo2, ..., foo*ROW_COUNT*         | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
+| Hash            | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100, 92dd1, ..., 1d2ba                | **CHAR(***HASH_LENGTH***)**                       |
+| First Names     | `<-n1, --names-first>`         | random sample of American first names                                    | Robert, Alice, ..., Joseph              | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
+| Last Names      | `<-nl, --names-last>`          | random sample of American last names                                     | Smith, Johnson, ..., Garcia             | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
+| Full Names      | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz, Sue E Bell, ..., Bob Joe Cook | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
 
 
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
