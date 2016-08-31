@@ -3,19 +3,22 @@
 ##Overview
 `mysql_seed` is a command-line utility for generating large quantities of high quality tabular data intended to provision MySQL database servers. A single invokation can create multiple databases worth of data written to `.csv` files accompanied by `.mysql` scripts that will handle schema creation and data loading.
 
+
 ##Prerequisites
 - gcc >= 2.5
 - GNU Make
 
+
 ##Building
 Invoking `make` at the project root will create the main executable binary, `bin/mysql_seed`, along with executable unit tests for all tested modules in the `test` directory.
+
 
 ##Usage
 ###`mysql_seed <MODE> [SPECS]`
 
 
-##MODES
 
+##MODES
 ###`help`
 `mysql_seed <-h, --help> [MODE]`  
 prints operation details for mode `MODE` or general usage if not specified
@@ -64,7 +67,7 @@ specifies a database table with name `TBL_NAME` having `ROW_COUNT` rows and `N` 
 
 ###`COL_SPEC`
 `<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q] [RAND_SPEC] [GRP_SPEC]`  
-specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A column type qualifier, `COL_TYPE_Q`,  may be provided to fine-tune data generation for a given type. For some `COL_TYPE`-`COL_TYPE_Q` combinations a `RAND_SPEC` may be provided to define limits on random data generation.  For all non-fixed data types a group specification, `GRP_SPEC`, may be appended to partition a column into groups.
+specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A column type qualifier, `COL_TYPE_Q`,  may be provided to fine-tune data generation for a given type. For some `COL_TYPE`-`COL_TYPE_Q` combinations a `RAND_SPEC` may be provided to define limits on random data generation. For all non-fixed data specifications a group specification, `GRP_SPEC`, may be appended to partition a column into groups.
 
 
 
@@ -84,3 +87,40 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 - THIS AND THAT | OR THESE
 - HOMOGENOUS INPUT ... SEQUENCE
 - -shrtflg, --equivalent-long-flag
+
+
+##Supported Data Types
+
+###String (VARCHAR, CHAR)
+`<-s, --string>`
+
+###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
+`<-i, --integer>`
+
+###Unsinged Integer (TINYINT UNSIGNED, SMALLINT UNSIGNED, MEDIUMINT UNSIGNED, INT UNSIGNED, BIGINT UNSIGNED)
+`<-u, --unsigned-integer>`
+
+###Datetime (DATETIME)
+`<-dt, --datetime>`
+
+###Timestamp (TIMESTAMP)
+`<-ts, --timestamp>`
+
+
+##Features
+- robust thread pool implementation build with POSIX threads (pthread) API
+- graceful error handling
+  - recoverable errors are caught and reported
+  - system call failures are logged and reported after cleanup
+  - any generated files are deleted, and all dynamically allocated memory is freed on fatal errors before program termination
+
+
+##Goals
+
+###Short Term
+- Linux Compatibility
+- Windows Compatibility
+
+###Long Term
+- support for floating point types (FLOAT, DOUBLE)
+- composable string types (i.e. printf-style formatting)
