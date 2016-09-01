@@ -88,19 +88,30 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 
 ####`<-s, --string>`  
 
-| Qualifier       | `COL_TYPE_Q`                   | description                                                              | example entries                                  | MySQL type declaration                            |
-| --------------- | ------------------------------ | ------------------------------------------------------------------------ | :----------------------------------------------: | ------------------------------------------------- |
-| None (Default)  | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | user1<br/>user2<br/>...<br/>user3                | **CHAR(***length(COL_NAME)***)**                  |
-| Fixed           | `<-f, --fixed> <FIXED_STRING>` | all entries have value *FIXED_STRING*, **GRP_SPEC not allowed**          | foo bar<br/>foo bar<br/>...<br/>foo bar          | **CHAR(***length(FIXED_STRING)***)**              |
-| Unique          | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*         | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
-| Hash            | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                | **CHAR(***HASH_LENGTH***)**                       |
-| First Names     | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph              | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
-| Last Names      | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia             | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
-| Full Names      | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz<br/>Sue E Bell<br/>...<br/>Bob Joe Cook | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
+| Qualifier      | `COL_TYPE_Q`                   | description                                                              | example entries                                  | MySQL type declaration                            |
+| -------------- | ------------------------------ | ------------------------------------------------------------------------ | :----------------------------------------------: | ------------------------------------------------- |
+| None (Default) | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | user1<br/>user2<br/>...<br/>user*ROW_COUNT*      | **CHAR(***length(COL_NAME)***)**                  |
+| Fixed          | `<-f, --fixed> <FIXED_STRING>` | all entries set to *FIXED_STRING*, **GRP_SPEC not allowed**              | foo bar<br/>foo bar<br/>...<br/>foo bar          | **CHAR(***length(FIXED_STRING)***)**              |
+| Unique         | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*         | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
+| Hash           | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                | **CHAR(***HASH_LENGTH***)**                       |
+| First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph              | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
+| Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia             | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
+| Full Names     | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz<br/>Sue E Bell<br/>...<br/>Bob Joe Cook | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
 
 
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
-`<-i, --integer>`
+
+####`<-i, --integer>`
+
+| Qualifier      | `COL_TYPE_Q`                                       | description                                              | example entries                            | MySQL type declaration                                               |
+| -------------- | -------------------------------------------------- | ---------------------------------------------------------| :----------------------------------------: | -------------------------------------------------------------------- |
+| None (Default) | N/A                                                | ascending integers (starting from "1")                   | 1<br/>2<br/>...<br/>*ROW_COUNT*            | **TINYINT** - **INT** (depends on *ROWCOUNT*)                        |
+| Fixed          | `<-f, --fixed> <FIXED_INT>`                        | all entries set to *FIXED_INT*, **GRP_SPEC not allowed** | -1234567<br/>-1234567<br/>...<br/>-1234567 | **TINYINT** - **BIGINT** (depends on *FIXED_INT*)                    |
+| Unique         | `<-u, --unique> <BASE_STRING>`                     | ascending integers (starting from "1")                   | 1<br/>2<br/>...<br/>*ROW_COUNT*            | **TINYINT** - **INT** (depends on *ROWCOUNT*)                        |
+| Random Default | `<-r, --random>`                                   | random 32 bit integers                                   | -99123112<br/>1012233332<br/>...<br/>-5992 | **INT**                                                              |
+| Random From    | `<-r, --random> <-f, --from> <MIN_INT>`            | random 32 or 64 bit integers ≥ *MIN_INT*                 | 1337<br/>*MIN_INT*<br/>...<br/>-223121232  | **INT** or **BIGINT** (depends on *MIN_INT*)                         |
+| Random Upto    | `<-r, --random> <-u, --upto> <MAX_INT>`            | random 32 or 64 bit integers ≤ *MAX_INT*                 | *MAX_INT*<br/>-123123123<br/>...<br/>12313 | **INT** or **BIGINT** (depends on *MAX_INT*)                         |
+| Random Range   | `<-r, --random> <-r, --range> <MIN_INT> <MAX_INT>` | random 32 or 64 bit integers ≤ *MIN_INT* and ≥ *MAX_INT* | 412221<br/>*MAX_INT*<br/>...<br/>*MIN_INT* | **INT** or **BIGINT** (depends on larger of *MIN_INT* and *MAX_INT*) |
 
 ###Unsigned Integer (TINYINT UNSIGNED, SMALLINT UNSIGNED, MEDIUMINT UNSIGNED, INT UNSIGNED, BIGINT UNSIGNED)
 `<-u, --unsigned-integer>`
