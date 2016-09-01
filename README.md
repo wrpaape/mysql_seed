@@ -94,9 +94,12 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 | Fixed          | `<-f, --fixed> <FIXED_STRING>` | all entries set to *FIXED_STRING*, **GRP_SPEC not allowed**              | foo bar<br/>foo bar<br/>...<br/>foo bar          | **CHAR(***length(FIXED_STRING)***)**              |
 | Unique         | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*         | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
 | Hash           | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                | **CHAR(***HASH_LENGTH***)**                       |
+| UUID           | `<-uu, --uuid>`       | Universally Unique Idenfiers (version 1) | 866d0c36-3a20-11b2-fb9d-d0a637edde91<br/>866d0c37-3a20-11b2-fb9d-d0a637edde91<br/>...<br/>866d0c38-3a20-11b2-fb9d-d0a637edde91 | **CHAR(36)** |
 | First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph              | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
 | Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia             | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
 | Full Names     | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz<br/>Sue E Bell<br/>...<br/>Bob Joe Cook | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
+
+866d0c36-3a20-11b2-fb9d-d0a637edde91<br/>866d0c37-3a20-11b2-fb9d-d0a637edde91<br/>...<br/>866d0c38-3a20-11b2-fb9d-d0a637edde91
 
 
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
@@ -104,23 +107,36 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 ####`<-i, --integer>`
 
 | Qualifier      | `COL_TYPE_Q`                                       | description                                              | example entries                            | MySQL type declaration                                               |
-| -------------- | -------------------------------------------------- | ---------------------------------------------------------| :----------------------------------------: | -------------------------------------------------------------------- |
+| -------------- | -------------------------------------------------- | -------------------------------------------------------- | :----------------------------------------: | -------------------------------------------------------------------- |
 | None (Default) | N/A                                                | ascending integers (starting from "1")                   | 1<br/>2<br/>...<br/>*ROW_COUNT*            | **TINYINT** - **INT** (depends on *ROWCOUNT*)                        |
 | Fixed          | `<-f, --fixed> <FIXED_INT>`                        | all entries set to *FIXED_INT*, **GRP_SPEC not allowed** | -1234567<br/>-1234567<br/>...<br/>-1234567 | **TINYINT** - **BIGINT** (depends on *FIXED_INT*)                    |
-| Unique         | `<-u, --unique> <BASE_STRING>`                     | ascending integers (starting from "1")                   | 1<br/>2<br/>...<br/>*ROW_COUNT*            | **TINYINT** - **INT** (depends on *ROWCOUNT*)                        |
+| Unique         | `<-u, --unique>`                                   | ascending integers (starting from "1")                   | 1<br/>2<br/>...<br/>*ROW_COUNT*            | **TINYINT** - **INT** (depends on *ROWCOUNT*)                        |
 | Random Default | `<-r, --random>`                                   | random 32 bit integers                                   | -99123112<br/>1012233332<br/>...<br/>-5992 | **INT**                                                              |
 | Random From    | `<-r, --random> <-f, --from> <MIN_INT>`            | random 32 or 64 bit integers ≥ *MIN_INT*                 | 1337<br/>*MIN_INT*<br/>...<br/>-223121232  | **INT** or **BIGINT** (depends on *MIN_INT*)                         |
 | Random Upto    | `<-r, --random> <-u, --upto> <MAX_INT>`            | random 32 or 64 bit integers ≤ *MAX_INT*                 | *MAX_INT*<br/>-123123123<br/>...<br/>12313 | **INT** or **BIGINT** (depends on *MAX_INT*)                         |
 | Random Range   | `<-r, --random> <-r, --range> <MIN_INT> <MAX_INT>` | random 32 or 64 bit integers ≤ *MIN_INT* and ≥ *MAX_INT* | 412221<br/>*MAX_INT*<br/>...<br/>*MIN_INT* | **INT** or **BIGINT** (depends on larger of *MIN_INT* and *MAX_INT*) |
 
 ###Unsigned Integer (TINYINT UNSIGNED, SMALLINT UNSIGNED, MEDIUMINT UNSIGNED, INT UNSIGNED, BIGINT UNSIGNED)
-`<-u, --unsigned-integer>`
+
+####`<-u, --unsigned-integer>`
+
+| Qualifier      | `COL_TYPE_Q`                                         | description                                                         | example entries                              | MySQL type declaration                                               |
+| -------------- | ---------------------------------------------------- | ------------------------------------------------------------------- | :------------------------------------------: | -------------------------------------------------------------------- |
+| None (Default) | N/A                                                  | ascending integers (starting from "1")                              | 1<br/>2<br/>...<br/>*ROW_COUNT*              | **TINYINT UNSIGNED** - **INT UNSIGNED** (depends on *ROWCOUNT*)      |
+| Fixed          | `<-f, --fixed> <FIXED_UINT>`                         | all entries set to *FIXED_UINT*, **GRP_SPEC not allowed**           | 1234567<br/>1234567<br/>...<br/>1234567      | **TINYINT UNSIGNED** - **BIGINT UNSIGNED** (depends on *FIXED_UINT*) |
+| Unique         | `<-u, --unique>`                                     | ascending integers (starting from "1")                              | 1<br/>2<br/>...<br/>*ROW_COUNT*              | **TINYINT UNSIGNED** - **INT UNSIGNED** (depends on *ROWCOUNT*)      |
+| Random Default | `<-r, --random>`                                     | random 32 bit unsigned integers                                     | 99123112<br/>321123123<br/>...<br/>5992      | **INT UNSIGNED**                                                     |
+| Random From    | `<-r, --random> <-f, --from> <MIN_UINT>`             | random 32 or 64 bit unsigned integers ≥ *MIN_UINT*                  | 1337<br/>*MIN_UINT*<br/>...<br/>223121232    | **INT UNSIGNED** or **BIGINT UNSIGNED** (depends on *MIN_UINT*)      |
+| Random Upto    | `<-r, --random> <-u, --upto> <MAX_UINT>`             | random 32 or 64 bit unsigned integers ≤ *MAX_UINT*                  | *MAX_UINT*<br/>123123123<br/>...<br/>12313   | **INT UNSIGNED** or **BIGINT UNSIGNED** (depends on *MAX_UINT*)      |
+| Random Range   | `<-r, --random> <-r, --range> <MIN_UINT> <MAX_UINT>` | random 32 or 64 bit unsigned integers ≤ *MIN_UINT* and ≥ *MAX_UINT* | 412221<br/>*MAX_UINT*<br/>...<br/>*MIN_UINT* | **INT UNSIGNED** or **BIGINT UNSIGNED** (depends on *MAX_UINT*)      |
+
 
 ###Datetime (DATETIME)
-`<-dt, --datetime>`
+
+####`<-dt, --datetime>`
 
 ###Timestamp (TIMESTAMP)
-`<-ts, --timestamp>`
+####`<-ts, --timestamp>`
 
 
 ##Features
