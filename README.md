@@ -92,12 +92,12 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 ##Supported Data Types
 
 ###String (VARCHAR, CHAR)
-`<-s, --string>`
+`<-s, --string>`  
 
 | Qualifier       | `COL_TYPE_Q`                   | description                                                              | example entries                                  | MySQL type declaration                            |
 | --------------- | ------------------------------ | ------------------------------------------------------------------------ | :----------------------------------------------: | ------------------------------------------------- |
 | None            | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | user1<br/>user2<br/>...<br/>user3                | **CHAR(***length(COL_NAME)***)**                  |
-| Fixed           | <-f, --fixed>&nbsp;<FIXED_STRING> | all entries have value *FIXED_STRING*, **GRP_SPEC not allowed**          | foo bar<br/>foo bar<br/>...<br/>foo bar          | **CHAR(***length(FIXED_STRING)***)**              |
+| Fixed           | `<-f, --fixed> <FIXED_STRING>` | all entries have value *FIXED_STRING*, **GRP_SPEC not allowed**          | foo bar<br/>foo bar<br/>...<br/>foo bar          | **CHAR(***length(FIXED_STRING)***)**              |
 | Unique          | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*         | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
 | Hash            | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                | **CHAR(***HASH_LENGTH***)**                       |
 | First Names     | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph              | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
@@ -108,7 +108,7 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
 `<-i, --integer>`
 
-###Unsinged Integer (TINYINT UNSIGNED, SMALLINT UNSIGNED, MEDIUMINT UNSIGNED, INT UNSIGNED, BIGINT UNSIGNED)
+###Unsigned Integer (TINYINT UNSIGNED, SMALLINT UNSIGNED, MEDIUMINT UNSIGNED, INT UNSIGNED, BIGINT UNSIGNED)
 `<-u, --unsigned-integer>`
 
 ###Datetime (DATETIME)
