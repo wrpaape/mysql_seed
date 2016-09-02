@@ -141,7 +141,7 @@ ifeq (T,$(SYSTEM_WINDOWS))
         THREADS_LIB_FLAG	:= -L$(THREADS_LIB_DIR) -lpthreadGC2.dll
         THREADS_INC_FLAG	:= -I$(THREADS_INC_DIR)
 
-        SYSTEM_LIB_FLAGS	:= -lphlpapi -lWs2_32 -lKernel32
+        SYSTEM_LIB_FLAGS	:= -lphlpapi -lWs2_32 -lUser32 -lKernel32
 else
         THREADS_LIB_FLAG	:= -lpthread
         THREADS_INC_FLAG	:= $(EMPTY)

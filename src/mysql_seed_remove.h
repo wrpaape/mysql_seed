@@ -6,6 +6,20 @@
 #include "mysql_seed_file.h"	/* handle input strings */
 
 
+/* typedefs, struct declarations
+ *─────────────────────────────────────────────────────────────────────────── */
+#ifdef WIN32
+
+struct Win32DirNode {
+	HANDLE handle;
+	struct Win32DirNode *parent;
+};
+
+#define MYSQL_SEED_REMOVE_MALLOC_FAILURE				\
+MALLOC_FAILURE_MESSAGE("mysql_seed_remove")
+
+#endif /* ifdef WIN32 */
+
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
 #define REMOVE_FAILURE(REASON)						\
@@ -37,7 +51,10 @@ mysql_seed_remove_all(void)
 
 	exit_status = EXIT_SUCCESS;
 #ifdef WIN32
-	/* TODO: windows directory walk */
+	WIN32_FIND_DATA file_info;
+	HANDLE file_handle;
+	struct Win32DirNode *dir_node;
+
 
 #else
 	FTS *restrict tree;
