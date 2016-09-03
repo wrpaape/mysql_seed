@@ -238,11 +238,11 @@ mutex_lock_handle_cl(Mutex *const restrict lock,
 		     const struct HandlerClosure *const restrict cl);
 
 /* mutex_try_lock */
-extern inline enum ThreadFlag
+extern inline enum BoolStatus
 mutex_try_lock_status(Mutex *const restrict lock);
 extern inline bool
 mutex_try_lock_muffle(Mutex *const restrict lock);
-extern inline enum ThreadFlag
+extern inline enum BoolStatus
 mutex_try_lock_report(Mutex *const restrict lock,
 		      const char *restrict *const restrict failure);
 extern inline bool

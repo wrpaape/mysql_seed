@@ -577,10 +577,10 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
-	case THREAD_TRUE:
+	case BOOL_STATUS_TRUE:
 		break;
 
-	case THREAD_ERROR:	/* pool may still be alive */
+	case BOOL_STATUS_ERROR:	/* pool may still be alive */
 LIVE_POOL_FAILURE_A:
 		thread_pool_exit_on_failure(&generator.pool,
 					    failure);
@@ -657,10 +657,10 @@ DEAD_POOL_FAILURE_A:
 
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
-	case THREAD_TRUE:
+	case BOOL_STATUS_TRUE:
 		break;
 
-	case THREAD_ERROR:	/* pool may still be alive */
+	case BOOL_STATUS_ERROR:	/* pool may still be alive */
 		goto LIVE_POOL_FAILURE_A;
 
 	default:		/* thread died for reasons already reported */
@@ -710,10 +710,10 @@ DEAD_POOL_FAILURE_A:
 
 	switch (thread_pool_alive(&generator.pool,
 				  &failure)) {
-	case THREAD_TRUE:
+	case BOOL_STATUS_TRUE:
 		break;
 
-	case THREAD_ERROR:
+	case BOOL_STATUS_ERROR:
 		goto LIVE_POOL_FAILURE_A;
 
 	default:

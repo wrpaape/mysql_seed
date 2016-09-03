@@ -313,7 +313,7 @@ thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
 	return true;
 }
 
-inline enum ThreadFlag
+inline enum BoolStatus
 thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
 			      const char *restrict *const restrict failure)
 {
@@ -323,17 +323,17 @@ thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
 
 	if (!mutex_lock_report(&status->processing,
 			       failure))
-		return THREAD_FALSE;
+		return BOOL_STATUS_ERROR;
 
 	busy = status->busy;
 
 	if (!mutex_unlock_report(&status->processing,
 				 failure))
-		return THREAD_FALSE;
+		return BOOL_STATUS_ERROR;
 
 	mutex_lock_try_catch_close();
 
-	return (enum ThreadFlag) busy;
+	return (enum BoolStatus) busy;
 }
 
 
@@ -672,7 +672,7 @@ thread_pool_await(struct ThreadPool *const restrict pool,
 					     failure);
 }
 
-inline enum ThreadFlag
+inline enum BoolStatus
 thread_pool_alive(struct ThreadPool *const restrict pool,
 		  const char *restrict *const restrict failure)
 {

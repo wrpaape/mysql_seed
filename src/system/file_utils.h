@@ -10,10 +10,11 @@
 #	include <fcntl.h>	/* open */
 #endif /* ifdef WIN32 */
 
-#include <unistd.h>		    /* close, getcwd, STDOUT/IN/ERR_FILENO */
-#include "utils/utils.h"	    /* FILE/stream API */
-#include "system/system_utils.h"    /* sys headers, FAIL_SWITCH, misc macros */
-#include "string/string_utils.h"    /* string_compare */
+#include <unistd.h>		     /* close, getcwd, STDOUT/IN/ERR_FILENO */
+#include "utils/utils.h"	     /* FILE/stream API */
+#include "system/system_utils.h"     /* sys headers, FAIL_SWITCH, misc macros */
+#include "string/string_utils.h"     /* string_compare */
+#include "utils/types/bool_status.h" /* BoolStatus */
 
 /* EXTERNAL DEPENDENCIES ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
 
@@ -80,10 +81,10 @@
  *	size_t iov_len;    Length.
  * }; */
 
-/* CONSTANTS
+/* TYPEDEFS, STRUCT DECLARATIONS
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
- * CONSTANTS
+ * TYPEDEFS, STRUCT DECLARATIONS
  *
  *
  * FUNCTION-LIKE MACROS
@@ -2219,6 +2220,25 @@ rmdir_handle_cl(const char *const restrict path,
 }
 
 #ifdef WIN32
+
+/* TODO */
+/* find first file in directory other than "." and ".."  */
+inline enum BoolStatus
+find_first_contents_status(HANDLE *const restrict file,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info)
+{
+	HANDLE handle;
+
+	handle = FindFirstFile(path,
+			       info);
+
+	if (handle == INVALID_HANDLE_VALUE)
+		return BOOL_STATUS_ERROR;
+
+	handle
+
+}
 
 #else
 /* open a directory */

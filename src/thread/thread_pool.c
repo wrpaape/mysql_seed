@@ -77,7 +77,7 @@ thread_pool_status_await_failure(struct ThreadPoolStatus *const restrict status)
 extern inline bool
 thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
 				 const char *restrict *const restrict failure);
-extern inline enum ThreadFlag
+extern inline enum BoolStatus
 thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
 			      const char *restrict *const restrict failure);
 
@@ -191,7 +191,7 @@ thread_pool_start(struct ThreadPool *const restrict pool,
 extern inline bool
 thread_pool_await(struct ThreadPool *const restrict pool,
 		  const char *restrict *const restrict failure);
-extern inline enum ThreadFlag
+extern inline enum BoolStatus
 thread_pool_alive(struct ThreadPool *const restrict pool,
 		  const char *restrict *const restrict failure);
 extern inline void

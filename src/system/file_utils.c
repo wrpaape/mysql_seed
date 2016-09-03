@@ -363,6 +363,14 @@ rmdir_handle_cl(const char *const restrict path,
 		const struct HandlerClosure *const restrict fail_cl);
 
 #ifdef WIN32
+
+/* find first file in directory other than "." and ".."  */
+extern inline enum BoolStatus
+find_first_contents_status(HANDLE *const restrict file,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info);
+
+
 #else
 /* open a directory */
 extern inline bool

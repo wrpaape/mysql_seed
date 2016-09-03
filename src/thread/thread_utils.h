@@ -7,7 +7,8 @@
 #include <limits.h>			/* PTHREAD_THREADS_MAX */
 #include "time/time_utils.h"		/* time utils */
 #include "utils/closure.h"		/* ProcedureClosure, HandlerClosure */
-#include "utils/fail_switch.h"		/* bool, errno, error handling macros */
+#include "utils/fail_switch.h"		/* errno, error handling macros */
+#include "utils/types/bool_status.h"	/* bool, BoolStatus */
 
 /* typedefs, declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -20,13 +21,6 @@ typedef pthread_t Thread;
 typedef pthread_attr_t ThreadAttr;
 
 typedef pthread_key_t ThreadKey;
-
-enum ThreadFlag {
-	THREAD_ERROR = -1,
-	THREAD_FALSE = false,
-	THREAD_TRUE  = true
-};
-
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -862,18 +856,18 @@ mutex_lock_handle_cl(Mutex *const restrict lock,
 }
 
 /* mutex_try_lock */
-inline enum ThreadFlag
+inline enum BoolStatus
 mutex_try_lock_status(Mutex *const restrict lock)
 {
 	switch (mutex_try_lock_imp(lock)) {
 	case 0:
-		return THREAD_TRUE;
+		return BOOL_STATUS_TRUE;
 
 	case EBUSY:
-		return THREAD_FALSE;
+		return BOOL_STATUS_FALSE;
 
 	default:
-		return THREAD_ERROR;
+		return BOOL_STATUS_ERROR;
 	}
 }
 
@@ -884,27 +878,27 @@ mutex_try_lock_muffle(Mutex *const restrict lock)
 }
 
 /* since 3-value flag instead of bool is returned, can't use fail switch */
-inline enum ThreadFlag
+inline enum BoolStatus
 mutex_try_lock_report(Mutex *const restrict lock,
 		      const char *restrict *const restrict failure)
 {
 	switch (mutex_try_lock_imp(lock)) {
 	case 0:
-		return THREAD_TRUE;
+		return BOOL_STATUS_TRUE;
 
 	case EBUSY:
-		return THREAD_FALSE;
+		return BOOL_STATUS_FALSE;
 
 	case EINVAL:
 		*failure = FAILURE_REASONS_1("mutex_try_lock_imp",
 					     "The value specified by Mutex "
 					     "'lock' is invalid.");
-		return THREAD_ERROR;
+		return BOOL_STATUS_ERROR;
 
 	default:
 		*failure = FAILURE_REASONS_1("mutex_try_lock_imp",
 					     "unknown");
-		return THREAD_ERROR;
+		return BOOL_STATUS_ERROR;
 	}
 }
 
@@ -915,10 +909,10 @@ mutex_try_lock_handle(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	const enum ThreadFlag acquired = mutex_try_lock_report(lock,
+	const enum BoolStatus acquired = mutex_try_lock_report(lock,
 							       &failure);
 
-	if (acquired != THREAD_ERROR)
+	if (acquired != BOOL_STATUS_ERROR)
 		return (bool) acquired;
 
 	handle(arg,
@@ -933,10 +927,10 @@ mutex_try_lock_handle_cl(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	const enum ThreadFlag acquired = mutex_try_lock_report(lock,
+	const enum BoolStatus acquired = mutex_try_lock_report(lock,
 							       &failure);
 
-	if (acquired != THREAD_ERROR)
+	if (acquired != BOOL_STATUS_ERROR)
 		return (bool) acquired;
 
 	cl->handle(cl->arg,

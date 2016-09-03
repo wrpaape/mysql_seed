@@ -163,6 +163,10 @@ PARSE_FAILURE_MESSAGE(REASON ":")
 "\n" ERROR_OPEN								\
 UNDERLINE_WRAP("failed to locate mysql_seed root directory:") "\n"
 
+#define CHDIR_DB_ROOT_FAILURE_HEADER					\
+"\n" ERROR_OPEN								\
+UNDERLINE_WRAP("failed to locate mysql_seed database directory:") "\n"
+
 
 
 /* typedefs, struct declarations
@@ -661,10 +665,10 @@ mysql_seed_chdir_root_failure(const char *const restrict failure)
 {
 	char buffer[ERROR_BUFFER_SIZE];
 
-	char *restrict
-	ptr = put_string_size(&buffer[0],
-			      CHDIR_ROOT_FAILURE_HEADER,
-			      sizeof(CHDIR_ROOT_FAILURE_HEADER) - 1lu);
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  CHDIR_ROOT_FAILURE_HEADER,
+			  sizeof(CHDIR_ROOT_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
 			 failure);
@@ -684,6 +688,40 @@ mysql_seed_chdir_root(void)
 		return true;
 
 	mysql_seed_chdir_root_failure(failure);
+
+	return false;
+}
+
+/* change current working directory to database root
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+mysql_seed_chdir_db_root_failure(const char *const restrict failure)
+{
+	char buffer[ERROR_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  CHDIR_DB_ROOT_FAILURE_HEADER,
+			  sizeof(CHDIR_DB_ROOT_FAILURE_HEADER) - 1lu);
+
+	ptr = put_string(ptr,
+			 failure);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline bool
+mysql_seed_chdir_db_root(void)
+{
+	const char *restrict failure;
+
+	if (LIKELY(chdir_report(DB_ROOT_ABSPATH,
+				&failure)))
+		return true;
+
+	mysql_seed_chdir_db_root_failure(failure);
 
 	return false;
 }

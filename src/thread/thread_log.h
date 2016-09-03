@@ -3,7 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "thread/thread_utils.h"	/* Mutex */
+#include "thread/thread_utils.h"	/* Mutex, BoolStatus */
 #include "string/string_utils.h"	/* string utils */
 #include "system/file_utils.h"		/* write */
 
@@ -136,7 +136,7 @@ thread_log_try_lock_muffle(struct ThreadLog *const restrict log)
 	mutex_try_lock_muffle(&log->lock);
 }
 
-inline enum ThreadFlag
+inline enum BoolStatus
 thread_log_try_lock_report(struct ThreadLog *const restrict log,
 			   const char *restrict *const restrict failure)
 {

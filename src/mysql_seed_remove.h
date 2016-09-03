@@ -11,6 +11,7 @@
 #ifdef WIN32
 
 struct Win32DirNode {
+	char path[MAX_PATH];
 	HANDLE handle;
 	struct Win32DirNode *parent;
 };
@@ -45,20 +46,34 @@ mysql_seed_remove_all(void)
 	const char *restrict failure;
 	int exit_status;
 
-	/* ensure cwd at project root */
-	if (!mysql_seed_chdir_root())
-		return EXIT_FAILURE;
-
-	exit_status = EXIT_SUCCESS;
 #ifdef WIN32
 	WIN32_FIND_DATA file_info;
 	HANDLE file_handle;
 	struct Win32DirNode *dir_node;
+	struct Win32DirNode *next_node;
+
+	/* ensure cwd at database root */
+	if (!mysql_seed_chdir_db_root())
+		return EXIT_FAILURE;
+
+	exit_status = EXIT_SUCCESS;
+
+
+	file_handle = FindFirstFile("*"
+				    &file_info);
+
+
 
 
 #else
 	FTS *restrict tree;
 	FTSENT *restrict entry;
+
+	/* ensure cwd at project root */
+	if (!mysql_seed_chdir_root())
+		return EXIT_FAILURE;
+
+	exit_status = EXIT_SUCCESS;
 
 	char *const path_argv[] = {
 		DB_ROOT_DIRNAME, NULL
@@ -126,15 +141,11 @@ FTS_CLOSE_AND_RETURN:
 inline int
 mysql_seed_remove(char *const *db_names)
 {
-
 	const char *restrict failure;
 	int exit_status;
 
-	if (!chdir_report(DB_ROOT_ABSPATH,
-			  &failure)) {
-		print_failure(failure);
+	if (!mysql_seed_chdir_db_root())
 		return EXIT_FAILURE;
-	}
 
 	exit_status = EXIT_SUCCESS;
 

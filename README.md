@@ -72,6 +72,7 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 
 ###`GRP_SPEC`
 `<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, --linear>]`  
+splits a database column of `ROW_COUNT` entries into `GRP_COUNT` groups having equal values. An even partition type, `<-e, --even>`, specifies that entries should be split evenly into groups of the same size (±1 if `ROW_COUNT` % `GRP_COUNT` != 0). A linear partition type, `<-l, --linear>`, generates `GRP_COUNT` groups of steadily increasing size. Omitting a partition type defaults to `<-e, --even>` behavior.
 
 
 ###Notation
@@ -167,5 +168,6 @@ specifies a database column with name `COL_NAME` and data type `COL_TYPE`. A col
 - Windows Compatibility
 
 ###Long Term
+- logarithmic group partitioning
 - support for floating point types (FLOAT, DOUBLE)
 - composable string types (i.e. printf-style formatting)

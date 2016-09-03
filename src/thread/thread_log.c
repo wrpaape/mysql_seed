@@ -41,7 +41,7 @@ extern inline bool
 thread_log_try_lock_status(struct ThreadLog *const restrict log);
 extern inline void
 thread_log_try_lock_muffle(struct ThreadLog *const restrict log);
-extern inline enum ThreadFlag
+extern inline enum BoolStatus
 thread_log_try_lock_report(struct ThreadLog *const restrict log,
 			   const char *restrict *const restrict failure);
 extern inline void
