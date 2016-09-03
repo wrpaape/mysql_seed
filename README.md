@@ -10,7 +10,7 @@
 
 
 ##Building
-Invoking `make` at the project root will create the main executable binary, `bin/mysql_seed`, along with executable unit tests for all tested modules in the `test` directory.
+Invoking `make` at the project root will create the main executable binary, `bin/mysql_seed`, along with executable unit tests for most modules in the `test` directory.
 
 
 ##Usage
@@ -40,15 +40,48 @@ will print help concerning `execute` mode
 generates seed files for `N` databases according to their `DB_SPEC` specification
 
 **examples**  
+```
+mysql_seed --generate --database foo_forum --table users 5000 --column id --unsigned-integer --unique \
+                                                              --column username --string \
+                                                              --column password --string --hash 128 \
+                                                              --column age --unsigned-integer --random --range 18 99 \
+                                                              --column created_at --timestamp --unique \
+                                           --table threads 50000 --column id --unsigned-integer --unique \
+                                                                 --column user_id --unsigned-integer --unique --group 5000 --even \
+                                                                 --column title --string --unique "Some Interesting Topic Number " \
+                                                                 --column score --integer --random --range -100 1000 \
+                                                                 --column created_at --timestamp --unique \
+                                           --table posts 500000 --column id --unsigned-integer --unique \
+                                                                --column user_id --unsigned-integer --unique --group 5000 --linear \
+                                                                --column thread_id --unsigned-integer --random --range 1 50000 \
+                                                                --column content --string --fixed "This is a post." \
+                                                                --column score --integer --random --range -10 100 \
+                                                                --column created_at --timestamp --unique
+```
+will generate the following files in the `database` directory:
+```
+.
+└── foo_forum
+    ├── users.csv
+    ├── threads.csv
+    ├── posts.csv
+    └── load_foo_forum.mysql
+```
+The `*.csv` files contain the tabular data, and the `load_*.mysql` script contains MySQL statements that `CREATE` a database and its specified tables and loads the `.csv` data accordingly.
+
+
 
 
 ###`execute`
 `mysql_seed <-e, --execute> <DB_NAME> [MYSQL_ARGS]`  
+**TODO** - for now, databases can be loaded into a MySQL server with the command  
+`mysql -u`
 
 
 
 ###`remove`
 `mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`  
+deletes generated database directories. If `<-a, --all>` is specified, all files residing in the top-level `database` directory are deleted. Otherwise only those directories specified by name after `<-r, --remove>` will be deleted along with their contents.
 
 
 

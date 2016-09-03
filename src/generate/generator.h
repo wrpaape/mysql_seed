@@ -194,7 +194,9 @@ PUT_STRING_WIDTH(PTR, LOADER_CREATE_TABLE_FIELD_DELIM, 3)
 "\n"									\
 "\nLOAD DATA INFILE '" ABSPATH_PFX /* <table_filepath n> */
 #define PUT_LOADER_LOAD_TABLE_1(PTR)					\
-PUT_STRING_WIDTH(PTR, LOADER_LOAD_TABLE_1, 23)
+PTR = put_string_size(PTR,						\
+		      LOADER_LOAD_TABLE_1,				\
+		      sizeof(LOADER_LOAD_TABLE_1) - 1lu)
 
 #define LOADER_LOAD_TABLE_2						\
 "'\n\tIGNORE INTO TABLE " /* <tbl_name> */

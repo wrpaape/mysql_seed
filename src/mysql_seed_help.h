@@ -74,13 +74,10 @@ _P2_("specifies a database table with name 'TBL_NAME' having '"		\
      "respective COL_SPEC's")						\
 "\n"									\
 _H2_("COL_SPEC \t<-c, --column> <COL_NAME> <COL_TYPE> [COL_TYPE_Q_1] "	\
-     "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N] [RAND_SPEC] [GRP_SPEC]")	\
+     "[COL_TYPE_Q_2] ... [COL_TYPE_Q_N] [GRP_SPEC]")			\
 _P2_("specifies a database column with name 'COL_NAME' and data type "	\
      "'COL_TYPE' - column type qualifiers 'COL_TYPE_Q' 1 through N may"	\
      " be provided to fine-tune data generation for a given type")	\
-"\n"									\
-_H2_("RAND_SPEC\t<-r, --random> [<-f, --from> <MIN_(TYPE)> | <-u, --upto"	\
-     "> <MAX_(TYPE)> | <-r, --range> <MIN_(TYPE)> <MAX_(TYPE)>]")	\
 "\n"									\
 _H2_("GRP_SPEC \t<-g, --group> <GRP_COUNT> [<-e, --even> | <-l, "	\
      "--linear>]")							\
