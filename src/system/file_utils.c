@@ -363,13 +363,41 @@ rmdir_handle_cl(const char *const restrict path,
 		const struct HandlerClosure *const restrict fail_cl);
 
 #ifdef WIN32
+/* find next file in directory */
+extern inline bool
+find_next_contents_muffle(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info);
+extern inline enum BoolStatus
+find_next_contents_status(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info);
+extern inline enum BoolStatus
+find_next_contents_report(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info,
+			  const char *restrict *const restrict failure);
 
 /* find first file in directory other than "." and ".."  */
+extern inline bool
+find_first_contents_muffle(HANDLE *const restrict dir,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info);
 extern inline enum BoolStatus
 find_first_contents_status(HANDLE *const restrict file,
 			   const char *const restrict path,
 			   WIN32_FIND_DATA *const restrict info);
+extern inline enum BoolStatus
+find_first_contents_report(HANDLE *const restrict dir,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info,
+			   const char *restrict *const restrict failure);
 
+/* close HANDLE opened by FindFirstFile */
+extern inline void
+close_find_contents_muffle(const HANDLE dir);
+extern inline bool
+close_find_contents_status(const HANDLE dir);
+extern inline bool
+close_find_contents_report(const HANDLE dir,
+			   const char *restrict const restrict failure);
 
 #else
 /* open a directory */

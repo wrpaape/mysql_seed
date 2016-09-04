@@ -2220,24 +2220,134 @@ rmdir_handle_cl(const char *const restrict path,
 }
 
 #ifdef WIN32
+/* find next file in directory */
+inline bool
+find_next_contents_muffle(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info)
+{
+	return (bool) FindNextFile(dir,
+				   info);
+}
 
-/* TODO */
-/* find first file in directory other than "." and ".."  */
 inline enum BoolStatus
-find_first_contents_status(HANDLE *const restrict file,
+find_next_contents_status(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info)
+{
+	if (FindNextFile(dir,
+			 info))
+		return BOOL_STATUS_TRUE; /* file found */
+
+	if (GetLastError() == ERROR_NO_MORE_FILES)
+		return BOOL_STATUS_FALSE; /* no files left */
+
+	return BOOL_STATUS_ERROR; /* some other error */
+}
+
+inline enum BoolStatus
+find_next_contents_report(const HANDLE dir,
+			  WIN32_FIND_DATA *const restrict info,
+			  const char *restrict *const restrict failure)
+{
+	if (FindNextFile(dir,
+			 info))
+		return BOOL_STATUS_TRUE; /* file found */
+
+	if (GetLastError() == ERROR_NO_MORE_FILES)
+		return BOOL_STATUS_FALSE; /* no files left */
+
+	*failure = FAILURE_REASON("find_next_contents",
+				  "FindNextFile error");
+
+	return BOOL_STATUS_ERROR; /* some other error */
+}
+
+
+/* find first file in directory other than "." and ".."  */
+inline bool
+find_first_contents_muffle(HANDLE *const restrict dir,
 			   const char *const restrict path,
 			   WIN32_FIND_DATA *const restrict info)
 {
-	HANDLE handle;
+	const HANDLE handle = FindFirstFile(path,
+					    info);
+	*dir = handle;
 
-	handle = FindFirstFile(path,
-			       info);
+	/* skip first two entries, "." and ".." */
+	return (handle != INVALID_HANDLE_VALUE)
+	    && find_next_contents_muffle(handle,
+					 info)
+	    && find_next_contents_muffle(handle,
+					 info);
+}
 
-	if (handle == INVALID_HANDLE_VALUE)
+inline enum BoolStatus
+find_first_contents_status(HANDLE *const restrict dir,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info)
+{
+	const HANDLE handle = FindFirstFile(path,
+					    info);
+	*dir = handle;
+
+	if (   (handle != INVALID_HANDLE_VALUE)
+	    && (find_next_contents_status(handle,
+					  info) == BOOL_STATUS_TRUE))
+		return find_next_contents_status(handle,
+						 info);
+
+	return BOOL_STATUS_ERROR;
+}
+
+inline enum BoolStatus
+find_first_contents_report(HANDLE *const restrict dir,
+			   const char *const restrict path,
+			   WIN32_FIND_DATA *const restrict info,
+			   const char *restrict *const restrict failure)
+{
+	const HANDLE handle = FindFirstFile(path,
+					    info);
+	*dir = handle;
+
+	if (handle == INVALID_HANDLE_VALUE) {
+		*failure = FAILURE_REASON("find_first_contents",
+					  "FindFirstFile error");
+		return BOOL_STATUS_ERROR;
+	}
+
+	if (find_next_contents_report(handle,
+				      info,
+				      failure) == BOOL_STATUS_ERROR)
 		return BOOL_STATUS_ERROR;
 
-	handle
+	return find_next_contents_report(handle,
+					 info,
+					 failure);
+}
 
+/* close HANDLE opened by FindFirstFile */
+inline void
+close_find_contents_muffle(const HANDLE dir)
+{
+	(void) FindClose(dir);
+}
+
+inline bool
+close_find_contents_status(const HANDLE dir)
+{
+	return (bool) FindClose(dir);
+}
+
+inline bool
+close_find_contents_report(const HANDLE dir,
+			   const char *restrict const restrict failure)
+{
+	const bool success = (bool) FindClose(dir);
+
+	if (!success)
+		*failure = FAILURE_REASON("close_find_contents_report",
+					  "FindClose error");
+
+	return success;
 }
 
 #else
