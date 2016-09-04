@@ -57,7 +57,8 @@ mysql_seed --generate --database foo_forum --table users 5000 --column id --unsi
                                                                 --column content --string --fixed "This is a post." \
                                                                 --column score --integer --random --range -10 100 \
                                                                 --column created_at --timestamp --unique
-```
+``
+
 will generate the following files in the `database` directory:
 ```
 .
@@ -246,7 +247,6 @@ splits a database column of `ROW_COUNT` entries into `GRP_COUNT` groups having e
 
 ###Short Term
 - local timezone timestamps (instead of UTC)
-- Linux Compatibility
 - Windows Compatibility
 
 ###Long Term
