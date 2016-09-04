@@ -59,7 +59,8 @@ mysql_seed_remove_all(void)
 	exit_status = EXIT_SUCCESS;
 
 
-	file_handle = FindFirstFile("*"
+	/* TODO */
+	file_handle = FindFirstFile("*",
 				    &file_info);
 
 
