@@ -1,5 +1,5 @@
-#ifndef MYSQL_SEED_MYSQL_SEED_LOAD_H_
-#define MYSQL_SEED_MYSQL_SEED_LOAD_H_
+#ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_
+#define MYSQL_SEED_MYSQL_SEED_EXECUTE_H_
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
@@ -12,19 +12,19 @@
 
 /* print error  messsage and return 'EXIT_FAILURE'
  *─────────────────────────────────────────────────────────────────────────── */
-static inline int
-print_no_database_name(void);
+/* static inline int */
+/* print_no_database_name(void); */
 
-static inline int
-print_invalid_database_name(char *const restrict db_name);
+/* static inline int */
+/* print_invalid_database_name(char *const restrict db_name); */
 
 /* dispatch load mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-load_dispatch(char *const restrict *const restrict arg_ptr,
-	      const int rem_argc)
+execute_dispatch(char *const restrict *const restrict arg_ptr,
+		 const int rem_argc)
 {
 	return EXIT_FAILURE;
 }
 
-#endif /* ifndef MYSQL_SEED_MYSQL_SEED_LOAD_H_ */
+#endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */

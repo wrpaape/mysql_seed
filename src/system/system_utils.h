@@ -12,6 +12,7 @@
 #	include <ws2tcpip.h>	/* getaddrinfo */
 #else
 #	include <sys/ioctl.h>	/* iotcl */
+#	include <sys/types.h>	/* LINUX compatibility */
 #	include <sys/socket.h>	/* socket */
 #	include <net/if.h>	/* ifreq, ifconf */
 #	include <netdb.h>	/* getaddrinfo */

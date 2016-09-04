@@ -426,7 +426,7 @@ file_handle_process(struct FileHandle *const restrict file,
 	file_handle_close_handle_cl(file,
 				    fail_cl);
 
-	thread_try_catch_close()
+	thread_try_catch_close();
 }
 
 

@@ -46,10 +46,10 @@ mode_dispatch(char *const *const restrict from,
 		goto INVALID_MODE_FLAG;
 
 
-	case 'l':
+	case 'e':
 		if (LIKELY(*rem == '\0'))
-			return load_dispatch(from + 1l,
-					     rem_argc);
+			return execute_dispatch(from + 1l,
+						rem_argc);
 		goto INVALID_MODE_FLAG;
 
 	case 'r':
@@ -74,10 +74,10 @@ mode_dispatch(char *const *const restrict from,
 					     rem_argc);
 		break;
 
-	case 'l':
-		if (LIKELY(strings_equal("oad", rem + 1l)))
-			return load_dispatch(from + 1l,
-					     rem_argc);
+	case 'e':
+		if (LIKELY(strings_equal("xecute", rem + 1l)))
+			return execute_dispatch(from + 1l,
+						rem_argc);
 		break;
 
 	case 'r':
