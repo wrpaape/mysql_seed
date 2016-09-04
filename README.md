@@ -57,8 +57,7 @@ mysql_seed --generate --database foo_forum --table users 5000 --column id --unsi
                                                                 --column content --string --fixed "This is a post." \
                                                                 --column score --integer --random --range -10 100 \
                                                                 --column created_at --timestamp --unique
-``
-
+```
 will generate the following files in the `database` directory:
 ```
 .
