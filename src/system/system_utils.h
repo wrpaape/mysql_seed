@@ -1218,12 +1218,18 @@ getaddrinfo_report(const char *const node,
 				  "'hints->ai_socktype' not supported")
 	FAIL_SWITCH_STATUS_CASE_1(EAI_SYSTEM,
 				  "system error")
+#ifdef EAI_BADHINTS
 	FAIL_SWITCH_STATUS_CASE_1(EAI_BADHINTS,
 				  "invalid value for 'hints'")
+#endif /* ifdef EAI_BADHINTS */
+#ifdef EAI_PROTOCOL
 	FAIL_SWITCH_STATUS_CASE_1(EAI_PROTOCOL,
 				  "resolved protocol is unknown")
+#endif /* ifdef EAI_PROTOCOL */
+#ifdef EAI_OVERFLOW
 	FAIL_SWITCH_STATUS_CASE_1(EAI_OVERFLOW,
 				  "argument buffer overflow")
+#endif /* ifdef EAI_OVERFLOW */
 	FAIL_SWITCH_STATUS_CLOSE()
 
 }

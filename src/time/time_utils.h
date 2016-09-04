@@ -10,19 +10,14 @@
 #include "utils/fail_switch.h"	/* bool, error macros */
 #include "utils/closure.h"	/* Handler, HandlerClosure */
 
-#ifdef LINUX
-	#include <linux/time.h>	/* clock_gettime, CLOCK_REALTIME */
-#endif /* ifdef LINUX */
-
 #ifdef __MACH__
 #	include <sys/time.h>		/* timespec */
 #	include <mach/clock.h>
 #	include <mach/mach.h>
 
 	extern mach_port_t clock_port;
-#endif /* ifdef __MACH__ */
 
-#ifdef WIN32
+#elif defined(WIN32)
 #	include <windows.h>
 #	define exp7           10000000i64     /* 1E+7 */
 #	define exp9         1000000000i64     /* 1E+9 */
@@ -32,7 +27,7 @@ struct timespec {
 	long tv_sec;
 	long tv_nsec;
 };
-#endif /* ifdef WIN32 */
+#endif /* ifdef __MACH__ */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * EXTERNAL DEPENDENCIES
