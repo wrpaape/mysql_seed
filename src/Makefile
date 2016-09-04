@@ -28,7 +28,7 @@ endef
 # Development Mode
 # ──────────────────────────────────────────────────────────────────────────────
 # toggles certain utility flags, make targets
-DEVELOPMENT_MODE = F
+DEVELOPMENT_MODE = T
 
 
 # SYSTEM CONFIG
