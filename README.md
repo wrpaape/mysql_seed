@@ -62,13 +62,62 @@ will generate the following files in the `database` directory:
 ```
 .
 └── foo_forum
-    ├── users.csv
-    ├── threads.csv
+    ├── load_foo_forum.mysql
     ├── posts.csv
-    └── load_foo_forum.mysql
+    ├── threads.csv
+    └── users.csv
 ```
-The `*.csv` files contain the tabular data, and the `load_*.mysql` script contains MySQL statements that `CREATE` a database and its specified tables and loads the `.csv` data accordingly.
 
+The following example uses short flags and creates multiple database directories.
+```
+mysql_seed -g -d classics -t sports_drama 999999 -c id -u \
+                                                 -c title -s -u "Rocky " \
+                                                 -c director -s -nf \
+                                                 -c tomatometer -u -r -u 100 \
+                                                 -c duration -u -r -r 60 180 \
+              -d foo_shop -t products 100 -c id -u \
+                                          -c name -s -u "Product" \
+                                          -c description -s -u "this is a description for Product" \
+                                          -c price -u -r -r 100 10000 \
+                          -t clients 10000 -c id -u \
+                                           -c first_name -s -n1 \
+                                           -c last_name -s -nl \
+                                           -c business -s -u "BazBiz" -g 1000 -l \
+                                           -c email -s -f "bar@example.com" \
+                                           -c phone -u -r -r 1000000000 9999999999 \
+                          -t orders 1000000 -c id -u \
+                                            -c client_id -u -g 10000 \
+                                            -c product_id -u -r -r 1 100 \
+                                            -c UUID -s -uu \
+                                            -c quantity -u -r -r 1 1000 \
+                                            -c delivered -u -r -u 1 \
+                                            -c created_at -ts \
+              -d ynot_db -t ads 100000 -c id -u \
+                                       -c name -s -u "Popup Number " \
+                                       -c click_count -u -r \
+                                       -c created_at -ts \
+                         -t referrals 1000000 -c id -u \
+                                              -c ad_id -u -r -r 1 100000 \
+                                              -c created_at -ts
+```
+will generate the following files in the `database` directory:
+```
+.
+├── classics
+│   ├── load_classics.mysql
+│   └── sports_drama.csv
+├── foo_shop
+│   ├── clients.csv
+│   ├── load_foo_shop.mysql
+│   ├── orders.csv
+│   └── products.csv
+└── ynot_db
+    ├── ads.csv
+    ├── load_ynot_db.mysql
+    └── referrals.csv
+```
+
+The `*.csv` files contain the tabular data, and the `load_*.mysql` scripts contains MySQL statements that `CREATE` a database along with its specified tables and load the `.csv` data accordingly.
 
 
 

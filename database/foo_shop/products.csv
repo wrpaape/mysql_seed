@@ -1,0 +1,117 @@
+ 1) database/foo_shop/products.csv
+ 2)
+ 3) contains comma-separated seed data for table:
+ 4)
+ 5) 	products
+ 6)
+ 7) in MySQL database:
+ 8)
+ 9) 	foo_shop
+10)
+11) Row definition adheres to the syntax:
+12)
+13) id,name,description,price<NEWLINE>
+14)
+15) ╔═══════════════════════════════════════════╗
+16) ║ LINES 1 THROUGH 17 ARE IGNORED BY LOADER! ║
+17) ╚═══════════════════════════════════════════╝
+1,Product1,this is a description for Product1,5122
+2,Product2,this is a description for Product2,5338
+3,Product3,this is a description for Product3,6386
+4,Product4,this is a description for Product4,6451
+5,Product5,this is a description for Product5,2334
+6,Product6,this is a description for Product6,8270
+7,Product7,this is a description for Product7,5930
+8,Product8,this is a description for Product8,7469
+9,Product9,this is a description for Product9,2374
+10,Product10,this is a description for Product10,3631
+11,Product11,this is a description for Product11,9330
+12,Product12,this is a description for Product12,6154
+13,Product13,this is a description for Product13,6301
+14,Product14,this is a description for Product14,3857
+15,Product15,this is a description for Product15,9357
+16,Product16,this is a description for Product16,396
+17,Product17,this is a description for Product17,2085
+18,Product18,this is a description for Product18,9910
+19,Product19,this is a description for Product19,4385
+20,Product20,this is a description for Product20,3651
+21,Product21,this is a description for Product21,6440
+22,Product22,this is a description for Product22,2544
+23,Product23,this is a description for Product23,615
+24,Product24,this is a description for Product24,8950
+25,Product25,this is a description for Product25,7454
+26,Product26,this is a description for Product26,1795
+27,Product27,this is a description for Product27,7645
+28,Product28,this is a description for Product28,3619
+29,Product29,this is a description for Product29,1488
+30,Product30,this is a description for Product30,7629
+31,Product31,this is a description for Product31,917
+32,Product32,this is a description for Product32,9951
+33,Product33,this is a description for Product33,219
+34,Product34,this is a description for Product34,589
+35,Product35,this is a description for Product35,9848
+36,Product36,this is a description for Product36,4271
+37,Product37,this is a description for Product37,1958
+38,Product38,this is a description for Product38,7574
+39,Product39,this is a description for Product39,127
+40,Product40,this is a description for Product40,2161
+41,Product41,this is a description for Product41,8929
+42,Product42,this is a description for Product42,6756
+43,Product43,this is a description for Product43,8140
+44,Product44,this is a description for Product44,4657
+45,Product45,this is a description for Product45,2012
+46,Product46,this is a description for Product46,9577
+47,Product47,this is a description for Product47,1233
+48,Product48,this is a description for Product48,2253
+49,Product49,this is a description for Product49,5474
+50,Product50,this is a description for Product50,936
+51,Product51,this is a description for Product51,292
+52,Product52,this is a description for Product52,1494
+53,Product53,this is a description for Product53,5067
+54,Product54,this is a description for Product54,3358
+55,Product55,this is a description for Product55,2141
+56,Product56,this is a description for Product56,623
+57,Product57,this is a description for Product57,931
+58,Product58,this is a description for Product58,7666
+59,Product59,this is a description for Product59,1614
+60,Product60,this is a description for Product60,4454
+61,Product61,this is a description for Product61,3297
+62,Product62,this is a description for Product62,7876
+63,Product63,this is a description for Product63,905
+64,Product64,this is a description for Product64,8205
+65,Product65,this is a description for Product65,8122
+66,Product66,this is a description for Product66,6460
+67,Product67,this is a description for Product67,4132
+68,Product68,this is a description for Product68,3285
+69,Product69,this is a description for Product69,3825
+70,Product70,this is a description for Product70,2589
+71,Product71,this is a description for Product71,8731
+72,Product72,this is a description for Product72,9046
+73,Product73,this is a description for Product73,8990
+74,Product74,this is a description for Product74,4553
+75,Product75,this is a description for Product75,6749
+76,Product76,this is a description for Product76,6302
+77,Product77,this is a description for Product77,7098
+78,Product78,this is a description for Product78,9976
+79,Product79,this is a description for Product79,2406
+80,Product80,this is a description for Product80,2075
+81,Product81,this is a description for Product81,3417
+82,Product82,this is a description for Product82,786
+83,Product83,this is a description for Product83,8680
+84,Product84,this is a description for Product84,8119
+85,Product85,this is a description for Product85,5702
+86,Product86,this is a description for Product86,2540
+87,Product87,this is a description for Product87,1718
+88,Product88,this is a description for Product88,6508
+89,Product89,this is a description for Product89,8678
+90,Product90,this is a description for Product90,4256
+91,Product91,this is a description for Product91,1501
+92,Product92,this is a description for Product92,6169
+93,Product93,this is a description for Product93,3427
+94,Product94,this is a description for Product94,8092
+95,Product95,this is a description for Product95,4703
+96,Product96,this is a description for Product96,1676
+97,Product97,this is a description for Product97,4936
+98,Product98,this is a description for Product98,5931
+99,Product99,this is a description for Product99,2475
+100,Product100,this is a description for Product100,4142

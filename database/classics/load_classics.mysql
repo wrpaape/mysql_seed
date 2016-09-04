@@ -1,0 +1,26 @@
+# database/classics/load_classics.mysql
+#
+# seeds MySQL database classics according to the tabular data files:
+#
+# 	- database/classics/sports_drama.csv
+
+CREATE DATABASE classics;
+
+USE classics;
+
+CREATE TABLE sports_drama (
+	id MEDIUMINT UNSIGNED,
+	title VARCHAR(12),
+	director VARCHAR(37),
+	tomatometer INT UNSIGNED,
+	duration INT UNSIGNED
+);
+
+LOAD DATA INFILE '/Users/Reid/lifesize/mysql_seed/database/classics/sports_drama.csv'
+	IGNORE INTO TABLE sports_drama
+	FIELDS TERMINATED BY ','
+	       ENCLOSED BY   ''
+	       ESCAPED BY    '\\'
+	LINES  STARTING BY   ''
+	       TERMINATED BY '\n'
+	IGNORE 17 LINES;
