@@ -10,8 +10,6 @@
 
 #ifdef OSX
 #	include <net/if_dl.h>	/* sockaddr_dl, LLADDR */
-#elif defined(LINUX)
-#	include <linux/if.h>	/* ifreq */
 #endif /* ifdef OSX */
 
 
