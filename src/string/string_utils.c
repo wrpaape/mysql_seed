@@ -367,3 +367,13 @@ extern inline void
 string_interval_init(struct StringInterval *const restrict interval,
 		     char *const restrict from,
 		     const char *const restrict until);
+
+#ifdef WIN32
+/* Win32 error formatting
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline char *
+put_win32_failure(char *restrict buffer,
+		  const char *const restrict source,
+		  const unsigned int width_source,
+		  const DWORD error_code);
+#endif /* ifdef WIN32 */

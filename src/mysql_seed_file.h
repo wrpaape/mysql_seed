@@ -657,6 +657,26 @@ print_failure(const char *const restrict failure)
 		     string_length(failure));
 }
 
+#ifdef WIN32
+inline void
+print_win32_failure(const char *const restrict source,
+		    const unsigned int width_source,
+		    const DWORD error_code)
+{
+	char buffer[WIN32_FAILURE_BUFFER_SIZE];
+
+	const char *const restrict until
+	= put_win32_failure(&buffer[0],
+			    source,
+			    width_source,
+			    error_code);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     until - &buffer[0]);
+}
+#endif /* ifdef WIN32 */
+
 
 /* change current working directory to project root
  * ────────────────────────────────────────────────────────────────────────── */

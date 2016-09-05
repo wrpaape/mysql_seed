@@ -4,6 +4,10 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
+#ifdef WIN32
+#	include <windows.h>	/* FormatMessage, LocalFree */
+#endif /* ifdef WIN32 */
+
 #include <unistd.h>			/* ssize_t */
 #include "memory/memory_put_array.h"	/* memory_put, size_t */
 #include "utils/types/word_pattern.h"	/* WordPattern/Ptr, word_attrs */
@@ -18,6 +22,7 @@
 #	include <inttypes.h>	/* strtoumax */
 #	include <errno.h>	/* errno (checking return of strtoumax) */
 #endif	/* if !HAVE_INT_STRING_ATTRS */
+
 
 
 /* typedefs, struct declarations
@@ -2344,4 +2349,73 @@ string_interval_init(struct StringInterval *const restrict interval,
 	interval->until = until;
 }
 
+#ifdef WIN32
+/* Win32 error formatting
+ * ────────────────────────────────────────────────────────────────────────── */
+#define WIN32_FAILURE_BUFFER_SIZE 1024lu
+
+#define WIN32_FAILURE_HEADER_1						\
+"\n" ERROR_OPEN ANSI_UNDERLINE
+#define PUT_WIN32_FAILURE_HEADER_1(PTR)					\
+PTR = put_string_width(PTR,						\
+		       WIN32_FAILURE_HEADER_1,				\
+		       sizeof(WIN32_FAILURE_HEADER_1) - 1u)
+
+#define WIN32_FAILURE_HEADER_2						\
+" failure" ANSI_NO_UNDERLINE " - reason:\n\t- "
+#define PUT_WIN32_FAILURE_HEADER_2(PTR)					\
+PTR = put_string_width(PTR,						\
+		       WIN32_FAILURE_HEADER_2,				\
+		       sizeof(WIN32_FAILURE_HEADER_2) - 1u)
+
+#define WIN32_FAILURE_CLOSE						\
+"\n" ANSI_RESET "\n"
+
+#define WIN32_FAILURE_UNKNOWN_CLOSE					\
+"unknown" WIN32_FAILURE_CLOSE
+
+
+inline char *
+put_win32_failure(char *restrict buffer,
+		  const char *const restrict source,
+		  const unsigned int width_source,
+		  const DWORD error_code)
+{
+	char *const restrict message;
+
+	PUT_WIN32_FAILURE_HEADER_1(buffer);
+
+	buffer = put_string_width(buffer,
+				  source,
+				  width_source);
+
+	PUT_WIN32_FAILURE_HEADER_2(buffer);
+
+	const DWORD size = FormatMessage(  FORMAT_MESSAGE_FROM_SYSTEM
+					 | FORMAT_MESSAGE_IGNORE_INSERTS
+					 | FORMAT_MESSAGE_ARGUMENT_ARRAY
+					 | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+					 NULL,
+					 error_code,
+					 0,
+					 &message,
+					 0,
+					 NULL);
+
+	if (size == 0lu)
+		return put_string_width(buffer,
+					WIN32_FAILURE_UNKNOWN_CLOSE,
+					sizeof(WIN32_FAILURE_UNKNOWN_CLOSE) - 1u);
+
+	buffer = put_string_size(buffer,
+				 message,
+				 size);
+
+	(void) LocalFree(message);
+
+	return put_string_width(buffer,
+				WIN32_FAILURE_CLOSE,
+				sizeof(WIN32_FAILURE_CLOSE) - 1u);
+}
+#endif /* ifdef WIN32 */
 #endif	/* MYSQL_SEED_STRING_STRING_UTILS */

@@ -164,6 +164,12 @@ put_inspect_args(char *restrict buffer,
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
 print_failure(const char *const restrict failure);
+#ifdef WIN32
+extern inline void
+print_win32_failure(const char *const restrict source,
+		    const unsigned int width_source,
+		    const DWORD error_code);
+#endif /* ifdef WIN32 */
 
 /* change current working directory to project root
  * ────────────────────────────────────────────────────────────────────────── */

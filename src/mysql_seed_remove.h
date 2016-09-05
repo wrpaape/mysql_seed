@@ -9,7 +9,6 @@
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 #ifdef WIN32
-
 struct Win32DirNode {
 	char path[MAX_PATH];
 	HANDLE handle;
@@ -39,6 +38,33 @@ remove_failure_no_rm_spec(void)
 		     sizeof(FAILURE_NO_RM_SPEC) - 1lu);
 }
 
+#ifdef WIN32
+inline void
+mysql_seed_remove_malloc_failure(void)
+{
+	write_muffle(STDERR_FILENO,
+		     MYSQL_SEED_REMOVE_MALLOC_FAILURE,
+		     sizeof(MYSQL_SEED_REMOVE_MALLOC_FAILURE) - 1lu);
+}
+
+inline void
+free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
+{
+	struct Win32DirNode *restrict closed_node;
+
+	while (dir_node != NULL) {
+
+		(void) FindClose(dir_node->handle);
+
+		closed_node = dir_node;
+
+		dir_node = dir_node->parent;
+
+		free(closed_node);
+	}
+}
+#endif /* ifdef WIN32 */
+
 /* remove all database directories in 'database' */
 inline int
 mysql_seed_remove_all(void)
@@ -50,7 +76,7 @@ mysql_seed_remove_all(void)
 	WIN32_FIND_DATA file_info;
 	HANDLE file_handle;
 	struct Win32DirNode *dir_node;
-	struct Win32DirNode *next_node;
+	struct Win32DirNode *parent;
 
 	/* ensure cwd at database root */
 	if (!mysql_seed_chdir_db_root())
@@ -58,10 +84,20 @@ mysql_seed_remove_all(void)
 
 	exit_status = EXIT_SUCCESS;
 
+	parent = NULL;
 
-	/* TODO */
+	while (1) {
+
+
+
+	}
+
+
+
 	file_handle = FindFirstFile("*",
 				    &file_info);
+
+	if (file_handle == INVALID_HANDLE_VALUE)
 
 
 

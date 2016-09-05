@@ -365,39 +365,39 @@ rmdir_handle_cl(const char *const restrict path,
 #ifdef WIN32
 /* find next file in directory */
 extern inline bool
-find_next_contents_muffle(const HANDLE dir,
-			  WIN32_FIND_DATA *const restrict info);
+find_next_file_muffle(const HANDLE dir,
+		      WIN32_FIND_DATA *const restrict info);
 extern inline enum BoolStatus
-find_next_contents_status(const HANDLE dir,
-			  WIN32_FIND_DATA *const restrict info);
+find_next_file_status(const HANDLE dir,
+		      WIN32_FIND_DATA *const restrict info);
 extern inline enum BoolStatus
-find_next_contents_report(const HANDLE dir,
-			  WIN32_FIND_DATA *const restrict info,
-			  const char *restrict *const restrict failure);
+find_next_file_report(const HANDLE dir,
+		      WIN32_FIND_DATA *const restrict info,
+		      const char *restrict *const restrict failure);
 
 /* close HANDLE opened by FindFirstFile */
 extern inline void
-close_find_contents_muffle(const HANDLE dir);
+find_close_muffle(const HANDLE dir);
 extern inline bool
-close_find_contents_status(const HANDLE dir);
+find_close_status(const HANDLE dir);
 extern inline bool
-close_find_contents_report(const HANDLE dir,
-			   const char *restrict const restrict failure);
+find_close_report(const HANDLE dir,
+		  const char *restrict const restrict failure);
 
-/* find first file in directory other than "." and ".."  */
+/* find first file in directory */
+extern inline void
+find_first_file_muffle(HANDLE *const restrict dir,
+		       const char *const restrict path,
+		       WIN32_FIND_DATA *const restrict info);
 extern inline bool
-find_first_contents_muffle(HANDLE *const restrict dir,
-			   const char *const restrict path,
-			   WIN32_FIND_DATA *const restrict info);
-extern inline enum BoolStatus
-find_first_contents_status(HANDLE *const restrict file,
-			   const char *const restrict path,
-			   WIN32_FIND_DATA *const restrict info);
-extern inline enum BoolStatus
-find_first_contents_report(HANDLE *const restrict dir,
-			   const char *const restrict path,
-			   WIN32_FIND_DATA *const restrict info,
-			   const char *restrict *const restrict failure);
+find_first_file_status(HANDLE *const restrict dir,
+		       const char *const restrict path,
+		       WIN32_FIND_DATA *const restrict info);
+extern inline bool
+find_first_file_report(HANDLE *const restrict dir,
+		       const char *const restrict path,
+		       WIN32_FIND_DATA *const restrict info,
+		       const char *restrict *const restrict failure);
 
 #else
 /* open a directory */

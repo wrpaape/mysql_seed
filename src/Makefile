@@ -113,6 +113,7 @@ HEADER_DIR		:= $(SOURCE_DIR)
 OBJECT_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) obj)
 BINARY_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) bin)
 TEST_SOURCE_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) test)
+DATABASE_DIR		:= $(call PATH_JOIN,$(PROJECT_ROOT) database)
 TEST_HEADER_DIR		:= $(TEST_SOURCE_DIR)
 TEST_RUNNER_SOURCE_DIR	:= $(call PATH_JOIN,$(TEST_SOURCE_DIR) test_runners)
 TEST_OBJECT_DIR		:= $(OBJECT_DIR)
@@ -247,6 +248,13 @@ LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
 # ──────────────────────────────────────────────────────────────────────────────
 MKDIR	    	:= mkdir
 MKDIR_FLAGS 	:= $(EMPTY)
+
+ifeq (T,$(SYSTEM_WINDOWS))
+MKDIR_IF_DNE	= if not exist $1 $(MKDIR) $(MKDIR_FLAGS) $1
+else
+MKDIR_IF_DNE	= $(MKDIR) $(MKDIR_FLAGS) -p $1
+endif
+
 # Cleaner
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq (T,$(SYSTEM_WINDOWS))
@@ -2139,7 +2147,7 @@ TARGETS			+= $(PROJECT_OBJ)				\
 # ══════════════════════════════════════════════════════════════════════════════
 # make all targets
 # ──────────────────────────────────────────────────────────────────────────────
-all: $(TARGETS)
+all: $(TARGETS) $(DATABASE_DIR)
 
 # run all unit tests
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2151,6 +2159,10 @@ run_tests: $(TEST_BINARIES)
 clean:
 	$(RM) $(RM_FLAGS) $(TARGETS)
 
+# make database directory
+# ──────────────────────────────────────────────────────────────────────────────
+$(DATABASE_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
 
 ## MAKE PROJECT
 # ══════════════════════════════════════════════════════════════════════════════
