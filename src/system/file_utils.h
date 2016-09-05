@@ -2261,6 +2261,33 @@ find_next_contents_report(const HANDLE dir,
 	return BOOL_STATUS_ERROR; /* some other error */
 }
 
+/* close HANDLE opened by FindFirstFile */
+inline void
+close_find_contents_muffle(const HANDLE dir)
+{
+	(void) FindClose(dir);
+}
+
+inline bool
+close_find_contents_status(const HANDLE dir)
+{
+	return (bool) FindClose(dir);
+}
+
+inline bool
+close_find_contents_report(const HANDLE dir,
+			   const char *restrict const restrict failure)
+{
+	const bool success = (bool) FindClose(dir);
+
+	if (!success)
+		*failure = FAILURE_REASON("close_find_contents_report",
+					  "FindClose error");
+
+	return success;
+}
+
+
 
 /* find first file in directory other than "." and ".."  */
 inline bool
@@ -2287,13 +2314,23 @@ find_first_contents_status(HANDLE *const restrict dir,
 {
 	const HANDLE handle = FindFirstFile(path,
 					    info);
-	*dir = handle;
 
-	if (   (handle != INVALID_HANDLE_VALUE)
-	    && (find_next_contents_status(handle,
-					  info) == BOOL_STATUS_TRUE))
-		return find_next_contents_status(handle,
-						 info);
+	if (handle != INVALID_HANDLE_VALUE) {
+		if (find_next_contents_status(handle,
+					      info) == BOOL_STATUS_TRUE) {
+
+			const enum BoolStatus status
+			= find_next_contents_status(handle,
+						    info);
+
+			if (status != BOOL_STATUS_ERROR) {
+				*dir = handle;
+				return status;
+			}
+		}
+
+		close_find_contents_muffle(handle);
+	}
 
 	return BOOL_STATUS_ERROR;
 }
@@ -2322,32 +2359,6 @@ find_first_contents_report(HANDLE *const restrict dir,
 	return find_next_contents_report(handle,
 					 info,
 					 failure);
-}
-
-/* close HANDLE opened by FindFirstFile */
-inline void
-close_find_contents_muffle(const HANDLE dir)
-{
-	(void) FindClose(dir);
-}
-
-inline bool
-close_find_contents_status(const HANDLE dir)
-{
-	return (bool) FindClose(dir);
-}
-
-inline bool
-close_find_contents_report(const HANDLE dir,
-			   const char *restrict const restrict failure)
-{
-	const bool success = (bool) FindClose(dir);
-
-	if (!success)
-		*failure = FAILURE_REASON("close_find_contents_report",
-					  "FindClose error");
-
-	return success;
 }
 
 #else
