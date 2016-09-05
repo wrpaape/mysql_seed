@@ -52,7 +52,7 @@ free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
 {
 	struct Win32DirNode *restrict closed_node;
 
-	while (dir_node != NULL) {
+	do {
 
 		(void) FindClose(dir_node->handle);
 
@@ -61,7 +61,7 @@ free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
 		dir_node = dir_node->parent;
 
 		free(closed_node);
-	}
+	} while (dir_node != NULL);
 }
 #endif /* ifdef WIN32 */
 
@@ -69,12 +69,13 @@ free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
 inline int
 mysql_seed_remove_all(void)
 {
-	const char *restrict failure;
 	int exit_status;
+	const char *restrict failure;
 
 #ifdef WIN32
 	WIN32_FIND_DATA file_info;
 	HANDLE file_handle;
+	DWORD error_code;
 	struct Win32DirNode *dir_node;
 	struct Win32DirNode *parent;
 
@@ -87,6 +88,92 @@ mysql_seed_remove_all(void)
 	parent = NULL;
 
 	while (1) {
+		file_handle = FindFirstFile("*",
+					    &file_info);
+
+		if (file_handle == INVALID_HANDLE_VALUE) {
+			PRINT_WIN32_FAILURE("FindFirstFile",
+					    GetLastError());
+
+			exit_status = EXIT_FAILURE;
+
+RETURN_TO_PARENT_DIR:
+			if (parent == NULL)
+				return exit_status;
+
+			if (!chdir_report("..",
+					  &failure)) {
+				print_failure(failure);
+				free_win32_dir_nodes(parent);
+				return EXIT_FAILURE;
+			}
+
+			file_handle = parent->handle;
+			dir_node    = parent;
+			parent      = dir_node->parent;
+
+			if (!FindNextFile(file_handle,
+					  &file_info)) {
+				(void) FindClose(file_handle);
+
+				error_code = GetLastError();
+
+				if (error_code != ERROR_NO_MORE_FILES) {
+					PRINT_WIN32_FAILURE("FindNextFile",
+							    error_code);
+					exit_status = EXIT_FAILURE;
+				}
+
+				if (!rmdir_report(&dir_node.path[0],
+						  &failure)) {
+					print_failure(failure);
+					exit_status = EXIT_FAILURE;
+				}
+
+				free(dir_node);
+
+				goto RETURN_TO_PARENT_DIR;
+			}
+		}
+
+		while (is_dot_dir(&file_info.cFileName[0])) {
+
+			if (!FindNextFile(file_handle,
+					  &file_info)) {
+
+
+			}
+
+
+		}
+
+
+		while (1) {
+
+
+
+			if (  file_info.dwFileAttributes
+			    & FILE_ATTRIBUTE_DIRECTORY) {
+				dir_node = malloc(sizeof(struct Win32DirNode));
+
+				if (dir_node == NULL) {
+					mysql_seed_remove_malloc_failure();
+
+					if (parent != NULL)
+						free_win32_dir_nodes(parent);
+
+					return EXIT_FAILURE;
+				}
+
+				dir_node->parent = parent;
+
+			}
+
+		}
+
+
+
+
 
 
 
@@ -94,8 +181,6 @@ mysql_seed_remove_all(void)
 
 
 
-	file_handle = FindFirstFile("*",
-				    &file_info);
 
 	if (file_handle == INVALID_HANDLE_VALUE)
 
@@ -169,9 +254,9 @@ FTS_CLOSE_AND_RETURN:
 		print_failure(failure);
 		return EXIT_FAILURE;
 	}
+#endif /* ifdef WIN32 */
 
 	return exit_status;
-#endif /* ifdef WIN32 */
 }
 
 /* remove all contents in a directory, then the directory itself */

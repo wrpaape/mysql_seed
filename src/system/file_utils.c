@@ -571,3 +571,7 @@ put_file_permissions_string(char *restrict buffer,
 extern inline void
 file_permissions_string(char *restrict buffer,
 			const int mode);
+
+/* filename == "." or ".." */
+extern inline bool
+is_dot_dir(const char *const restrict filename);

@@ -675,6 +675,11 @@ print_win32_failure(const char *const restrict source,
 		     &buffer[0],
 		     until - &buffer[0]);
 }
+
+#define PRINT_WIN32_FAILURE(SOURCE, ERROR_CODE)				\
+print_win32_failure(SOURCE,						\
+		    sizeof(SOURCE) - 1u,				\
+		    ERROR_CODE)
 #endif /* ifdef WIN32 */
 
 

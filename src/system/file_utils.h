@@ -3165,6 +3165,25 @@ file_permissions_string(char *restrict buffer,
 	*buffer = '\0';
 }
 
+/* filename == "." or ".." */
+inline bool
+is_dot_dir(const char *const restrict filename)
+{
+	if (*filename == '.') {
+		switch (filename[1]) {
+		case '\0':
+			return true;
+
+		case '.':
+			return filename[2] == '\0';
+
+		default: /* fall through */;
+		}
+	}
+
+	return false;
+}
+
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS
  *
