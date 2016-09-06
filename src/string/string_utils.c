@@ -137,6 +137,10 @@ extern inline void
 copy_string(char *restrict buffer,
 	    const char *restrict string);
 
+extern inline void
+copy_string_stop(char *restrict buffer,
+		 const char *restrict string);
+
 extern inline char *
 put_string(char *restrict buffer,
 	   const char *restrict string);

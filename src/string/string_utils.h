@@ -563,6 +563,21 @@ copy_string(char *restrict buffer,
 	}
 }
 
+inline void
+copy_string_stop(char *restrict buffer,
+		 const char *restrict string)
+{
+	while (1) {
+		*buffer = *string;
+
+		if (*string == '\0')
+			return;
+
+		++string;
+		++buffer;
+	}
+}
+
 
 
 inline char *
