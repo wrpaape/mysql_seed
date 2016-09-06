@@ -7,9 +7,15 @@
 #
 ## MISC
 # ══════════════════════════════════════════════════════════════════════════════
+# Development Mode
+# ──────────────────────────────────────────────────────────────────────────────
+# toggles certain utility flags, make targets
+DEVELOPMENT_MODE = T
+
+
 # Phony Targets
 # ──────────────────────────────────────────────────────────────────────────────
-.PHONY: all test clean
+.PHONY: all test run_tests clean
 
 
 # String Utils
@@ -24,11 +30,6 @@ define NEWLINE :=
 
 endef
 
-
-# Development Mode
-# ──────────────────────────────────────────────────────────────────────────────
-# toggles certain utility flags, make targets
-DEVELOPMENT_MODE = T
 
 
 # SYSTEM CONFIG
@@ -230,7 +231,7 @@ CC_BASE_FLAGS	:= -std=gnu99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THRE
 ifeq (T,$(DEVELOPMENT_MODE))
 CC_FLAGS	:= -g -Wall $(CC_BASE_FLAGS)
 else
-CC_FLAGS	:= -O2 -funroll-loops -freorder-blocks $(CC_BASE_FLAGS)
+CC_FLAGS	:= -O2 -funroll-loops $(CC_BASE_FLAGS)
 endif
 # Linker
 # ──────────────────────────────────────────────────────────────────────────────
@@ -297,8 +298,7 @@ UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
 			   $(UNITY_INTERNALS_HDR)			\
 			   $(UNITY_CONFIG_HDR)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TARGETS			+= $(UNITY_OBJ)					\
-			   $(TEST_RUNNER_SOURCE_DIR)
+TARGETS			+= $(UNITY_OBJ)
 
 # independent headers
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2134,6 +2134,13 @@ TARGETS			+= $(PROJECT_OBJ)				\
 			   $(PROJECT_BIN)
 
 
+# Build Directories
+# ──────────────────────────────────────────────────────────────────────────────
+BUILD_DIRS	:= $(TEST_RUNNER_SOURCE_DIR)	\
+                   $(OBJECT_DIR)		\
+		   $(UNITY_OBJECT_DIR)		\
+		   $(BINARY_DIR)		\
+		   $(DATABASE_DIR)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2147,7 +2154,7 @@ TARGETS			+= $(PROJECT_OBJ)				\
 # ══════════════════════════════════════════════════════════════════════════════
 # make all targets
 # ──────────────────────────────────────────────────────────────────────────────
-all: $(TARGETS) $(DATABASE_DIR)
+all:  $(BUILD_DIRS) $(TARGETS)
 
 # run all unit tests
 # ──────────────────────────────────────────────────────────────────────────────
@@ -2159,8 +2166,20 @@ run_tests: $(TEST_BINARIES)
 clean:
 	$(RM) $(RM_FLAGS) $(TARGETS)
 
-# make database directory
+# ensure empty build directories are present
 # ──────────────────────────────────────────────────────────────────────────────
+$(TEST_RUNNER_SOURCE_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
+
+$(OBJECT_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
+
+$(UNITY_OBJECT_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
+
+$(BINARY_DIR):
+	$(MKDIR) $(MKDIR_FLAGS) $@
+
 $(DATABASE_DIR):
 	$(MKDIR) $(MKDIR_FLAGS) $@
 
@@ -2421,11 +2440,6 @@ $(UTILS_UTILS_OBJ): $(UTILS_UTILS_OBJ_PREQS)
 # ──────────────────────────────────────────────────────────────────────────────
 $(UNITY_OBJ): $(UNITY_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
-
-# make test_runners directory
-# ──────────────────────────────────────────────────────────────────────────────
-$(TEST_RUNNER_SOURCE_DIR):
-	$(MKDIR) $(MKDIR_FLAGS) $@
 
 
 
