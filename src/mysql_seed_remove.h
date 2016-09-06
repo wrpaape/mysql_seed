@@ -52,8 +52,23 @@ free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
 {
 	struct Win32DirNode *restrict closed_node;
 
-	do {
+	while (dir_node != NULL) {
+		(void) FindClose(dir_node->handle);
 
+		closed_node = dir_node;
+
+		dir_node = dir_node->parent;
+
+		free(closed_node);
+	}
+}
+
+inline void
+do_free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
+{
+	struct Win32DirNode *restrict closed_node;
+
+	do {
 		(void) FindClose(dir_node->handle);
 
 		closed_node = dir_node;
@@ -74,8 +89,8 @@ mysql_seed_remove_all(void)
 
 #ifdef WIN32
 	WIN32_FIND_DATA file_info;
-	HANDLE file_handle;
 	DWORD error_code;
+	HANDLE cwd_handle;
 	struct Win32DirNode *dir_node;
 	struct Win32DirNode *parent;
 
@@ -84,29 +99,28 @@ mysql_seed_remove_all(void)
 		return EXIT_FAILURE;
 
 	exit_status = EXIT_SUCCESS;
-
-	parent = NULL;
-	dir_node = NULL;
+	parent	    = NULL;
+	dir_node    = NULL;
 
 	while (1) {
-		file_handle = FindFirstFile("*",
-					    &file_info);
+		cwd_handle = FindFirstFile("*",
+					   &file_info);
 
-		if (file_handle == INVALID_HANDLE_VALUE) {
+		if (cwd_handle == INVALID_HANDLE_VALUE) {
 			PRINT_WIN32_FAILURE("FindFirstFile",
 					    GetLastError());
-
 			exit_status = EXIT_FAILURE;
-
-RETURN_TO_PARENT_DIR:
+RETURN_TO_PARENT:
 			if (parent == NULL)
 				return exit_status;
 
-			free(dir_node); /* no-op if NULL */
+			if (!rmdir_report(&dir_node->path[0],
+					  &failure)) {
+				print_failure(failure);
+				exit_status = EXIT_FAILURE;
+			}
 
-			dir_node    = parent;
-			file_handle = dir_node->handle;
-			parent      = dir_node->parent;
+			free(dir_node);
 
 			if (!chdir_report("..",
 					  &failure)) {
@@ -115,47 +129,29 @@ RETURN_TO_PARENT_DIR:
 				return EXIT_FAILURE;
 			}
 
-			/* skip dot directories ".", and ".." */
-			do {
-				if (!FindNextFile(file_handle,
-						  &file_info)) {
-					(void) FindClose(file_handle);
+			dir_node   = parent;
+			cwd_handle = dir_node->handle;
+			parent     = dir_node->parent;
 
-					error_code = GetLastError();
+			goto NEXT_HARD_LINK;
+		}
 
-					if (error_code != ERROR_NO_MORE_FILES) {
-						PRINT_WIN32_FAILURE("FindNextFile",
-								    error_code);
-						exit_status = EXIT_FAILURE;
-					}
+		/* skip dot directories ".", and ".." */
+		while (is_dot_dir(&file_info.cFileName[0])) {
+NEXT_HARD_LINK:
+			if (!FindNextFile(cwd_handle,
+					  &file_info)) {
+				(void) FindClose(cwd_handle);
 
-					if (!rmdir_report(&dir_node->path[0],
-							  &failure)) {
-						print_failure(failure);
-						exit_status = EXIT_FAILURE;
-					}
+				error_code = GetLastError();
 
-					goto RETURN_TO_PARENT_DIR;
+				if (error_code != ERROR_NO_MORE_FILES) {
+					PRINT_WIN32_FAILURE("FindNextFile",
+							    error_code);
+					exit_status = EXIT_FAILURE;
 				}
-			} while (is_dot_dir(&file_info.cFileName[0]));
 
-		} else {
-			/* skip dot directories ".", and ".." */
-			while (is_dot_dir(&file_info.cFileName[0])) {
-				if (!FindNextFile(file_handle,
-						  &file_info)) {
-					(void) FindClose(file_handle);
-
-					error_code = GetLastError();
-
-					if (error_code != ERROR_NO_MORE_FILES) {
-						PRINT_WIN32_FAILURE("FindNextFile",
-								    error_code);
-						exit_status = EXIT_FAILURE;
-					}
-
-					goto RETURN_TO_PARENT_DIR;
-				}
+				goto RETURN_TO_PARENT;
 			}
 		}
 
@@ -163,43 +159,42 @@ RETURN_TO_PARENT_DIR:
 
 		/* if directory is found */
 		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			parent   = dir_node;
 
 			/* enter directory */
-			if (!chdir_report(&file_info.cFileName[0])) {
+			if (!chdir_report(&file_info.cFileName[0],
+					  &failure)) {
 				print_failure(failure);
-
-				if (parent != NULL)
-					free_win32_dir_nodes(parent);
-
+				free_win32_dir_nodes(parent);
 				return EXIT_FAILURE;
 			}
 
 			/* push new dir_node */
+			parent   = dir_node;
 			dir_node = malloc(sizeof(struct Win32DirNode));
 
 			if (dir_node == NULL) {
 				mysql_seed_remove_malloc_failure();
-
-				if (parent != NULL)
-					free_win32_dir_nodes(parent);
-
+				free_win32_dir_nodes(parent);
 				return EXIT_FAILURE;
 			}
 
 			copy_string_stop(&dir_node->path[0],
 					 &file_info.cFileName[0]);
 
-			dir_node->handle = file_handle;
+			dir_node->handle = cwd_handle;
 			dir_node->parent = parent;
-			continue; /* search for children */
+
+		} else {
+			/* delete the file */
+			if (!unlink_report(&file_info.cFileName[0],
+					   &failure)) {
+				print_failure(failure);
+				exit_status = EXIT_FAILURE;
+			}
+
+			goto NEXT_HARD_LINK;
 		}
-
-
-
-	return exit_status;
-
-
+	}
 #else
 	FTS *restrict tree;
 	FTSENT *restrict entry;
