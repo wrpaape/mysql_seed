@@ -235,7 +235,8 @@ splits a database column of `ROW_COUNT` entries into `GRP_COUNT` groups having e
 
 
 ##Features
-- robust thread pool implementation build with POSIX threads (pthread) API
+- builds on OS X and Linux systems (Windows in progress)
+- robust thread pool implementation built with POSIX threads (pthread) API
 - graceful error handling
   - recoverable errors are caught and reported
   - system call failures are logged and reported after cleanup
@@ -245,8 +246,8 @@ splits a database column of `ROW_COUNT` entries into `GRP_COUNT` groups having e
 ##Goals
 
 ###Short Term
-- local timezone timestamps (instead of UTC)
 - Windows Compatibility
+- local timezone timestamps (instead of UTC)
 
 ###Long Term
 - logarithmic group partitioning

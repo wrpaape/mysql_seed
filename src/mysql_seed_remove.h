@@ -48,23 +48,7 @@ mysql_seed_remove_malloc_failure(void)
 }
 
 inline void
-free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
-{
-	struct Win32DirNode *restrict closed_node;
-
-	while (dir_node != NULL) {
-		(void) FindClose(dir_node->handle);
-
-		closed_node = dir_node;
-
-		dir_node = dir_node->parent;
-
-		free(closed_node);
-	}
-}
-
-inline void
-do_free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
+do_free_win32_dir_stack(struct Win32DirNode *restrict dir_node)
 {
 	struct Win32DirNode *restrict closed_node;
 
@@ -78,15 +62,158 @@ do_free_win32_dir_nodes(struct Win32DirNode *restrict dir_node)
 		free(closed_node);
 	} while (dir_node != NULL);
 }
+
+inline void
+free_win32_dir_stack(struct Win32DirNode *restrict dir_node)
+{
+	if (dir_node != NULL)
+		do_free_win32_dir_stack(dir_node);
+}
+
+inline bool
+remove_db_name(char *const restrict db_name,
+	       int *const restrict exit_status)
+{
+	WIN32_FIND_DATA file_info;
+	DWORD error_code;
+	HANDLE cwd_handle;
+	struct Win32DirNode *dir_node;
+	struct Win32DirNode *parent;
+	const char *restrict failure;
+
+	if (!chdir_report(db_name,
+			  &failure)) {
+		print_failure(failure);
+		*exit_status = EXIT_FAILURE;
+		return true; /* can't enter first-gen directory, recoverable */
+	}
+
+	dir_node = NULL;
+
+	while (1) {
+		cwd_handle = FindFirstFile("*",
+					   &file_info);
+
+		if (cwd_handle == INVALID_HANDLE_VALUE) {
+			PRINT_WIN32_FAILURE("FindFirstFile",
+					    GetLastError());
+			*exit_status = EXIT_FAILURE;
+RETURN_TO_PARENT:
+			if (dir_node == NULL)
+				goto RETURN_TO_ROOT_AND_REMOVE_DB_NAME;
+
+			if (!rmdir_report(&dir_node->path[0],
+					  &failure)) {
+				print_failure(failure);
+				*exit_status = EXIT_FAILURE;
+			}
+
+			parent = dir_node->parent;
+			free(dir_node);
+
+			if (parent == NULL)
+				goto RETURN_TO_ROOT_AND_REMOVE_DB_NAME;
+
+			/* move up a directory */
+			if (!chdir_report("..",
+					  &failure)) {
+				print_failure(failure);
+				do_free_win32_dir_stack(parent);
+				return false; /* irrecoverable */
+			}
+
+			dir_node   = parent;
+			cwd_handle = dir_node->handle;
+
+			goto NEXT_HARD_LINK;
+		}
+
+		/* skip dot directories ".", and ".." */
+		while (is_dot_dir(&file_info.cFileName[0])) {
+NEXT_HARD_LINK:
+			if (!FindNextFile(cwd_handle,
+					  &file_info)) {
+				(void) FindClose(cwd_handle);
+
+				error_code = GetLastError();
+
+				if (error_code != ERROR_NO_MORE_FILES) {
+					PRINT_WIN32_FAILURE("FindNextFile",
+							    error_code);
+					*exit_status = EXIT_FAILURE;
+				}
+
+				goto RETURN_TO_PARENT;
+			}
+		}
+
+		/* file_info describes a hard link ────────────────────────── */
+
+		/* if directory is found */
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+
+			/* enter directory */
+			if (!chdir_report(&file_info.cFileName[0],
+					  &failure)) {
+				print_failure(failure);
+				free_win32_dir_stack(dir_node);
+				return false; /* irrecoverable */
+			}
+
+			/* push new dir_node then continue main loop */
+			parent   = dir_node;
+			dir_node = malloc(sizeof(struct Win32DirNode));
+
+			if (dir_node == NULL) {
+				mysql_seed_remove_malloc_failure();
+				free_win32_dir_stack(parent);
+				return false; /* irrecoverable */
+			}
+
+			copy_string_stop(&dir_node->path[0],
+					 &file_info.cFileName[0]);
+
+			dir_node->handle = cwd_handle;
+			dir_node->parent = parent;
+
+		} else {
+			/* delete the file then search for the next hard link */
+			if (!unlink_report(&file_info.cFileName[0],
+					   &failure)) {
+				print_failure(failure);
+				*exit_status = EXIT_FAILURE;
+			}
+
+			goto NEXT_HARD_LINK;
+		}
+	}
+
+RETURN_TO_ROOT_AND_REMOVE_DB_NAME:
+	/* return to 'database' directory */
+	if (!chdir_report("..",
+			  &failure) {
+		print_failure(failure);
+		return false; /* irrecoverable */
+	    }
+
+	/* remove input first-gen 'db_name' directory */
+	if (!rmdir_report(db_name,
+			  &failure)) {
+		print_failure(failure);
+		*exit_status = EXIT_FAILURE;
+	}
+
+	return true;
+}
+
 #endif /* ifdef WIN32 */
 
 /* remove all database directories in 'database' */
 inline int
 mysql_seed_remove_all(void)
 {
-	int exit_status;
 	const char *restrict failure;
-
+	int exit_status;
 #ifdef WIN32
 	WIN32_FIND_DATA file_info;
 	DWORD error_code;
@@ -99,7 +226,6 @@ mysql_seed_remove_all(void)
 		return EXIT_FAILURE;
 
 	exit_status = EXIT_SUCCESS;
-	parent	    = NULL;
 	dir_node    = NULL;
 
 	while (1) {
@@ -111,7 +237,7 @@ mysql_seed_remove_all(void)
 					    GetLastError());
 			exit_status = EXIT_FAILURE;
 RETURN_TO_PARENT:
-			if (parent == NULL)
+			if (dir_node == NULL)
 				return exit_status;
 
 			if (!rmdir_report(&dir_node->path[0],
@@ -120,18 +246,22 @@ RETURN_TO_PARENT:
 				exit_status = EXIT_FAILURE;
 			}
 
+			parent = dir_node->parent;
 			free(dir_node);
 
+			if (parent == NULL)
+				return exit_status;
+
+			/* move up a directory */
 			if (!chdir_report("..",
 					  &failure)) {
 				print_failure(failure);
-				free_win32_dir_nodes(parent);
+				do_free_win32_dir_stack(parent);
 				return EXIT_FAILURE;
 			}
 
 			dir_node   = parent;
 			cwd_handle = dir_node->handle;
-			parent     = dir_node->parent;
 
 			goto NEXT_HARD_LINK;
 		}
@@ -164,17 +294,17 @@ NEXT_HARD_LINK:
 			if (!chdir_report(&file_info.cFileName[0],
 					  &failure)) {
 				print_failure(failure);
-				free_win32_dir_nodes(parent);
+				free_win32_dir_stack(dir_node);
 				return EXIT_FAILURE;
 			}
 
-			/* push new dir_node */
+			/* push new dir_node then continue main loop */
 			parent   = dir_node;
 			dir_node = malloc(sizeof(struct Win32DirNode));
 
 			if (dir_node == NULL) {
 				mysql_seed_remove_malloc_failure();
-				free_win32_dir_nodes(parent);
+				free_win32_dir_stack(parent);
 				return EXIT_FAILURE;
 			}
 
@@ -185,7 +315,7 @@ NEXT_HARD_LINK:
 			dir_node->parent = parent;
 
 		} else {
-			/* delete the file */
+			/* delete the file then search for the next hard link */
 			if (!unlink_report(&file_info.cFileName[0],
 					   &failure)) {
 				print_failure(failure);
@@ -262,9 +392,9 @@ FTS_CLOSE_AND_RETURN:
 		print_failure(failure);
 		return EXIT_FAILURE;
 	}
-#endif /* ifdef WIN32 */
 
 	return exit_status;
+#endif /* ifdef WIN32 */
 }
 
 /* remove all contents in a directory, then the directory itself */
@@ -274,13 +404,19 @@ mysql_seed_remove(char *const *db_names)
 	const char *restrict failure;
 	int exit_status;
 
+	/* ensure cwd at database root */
 	if (!mysql_seed_chdir_db_root())
 		return EXIT_FAILURE;
 
 	exit_status = EXIT_SUCCESS;
-
 #ifdef WIN32
+	do {
+		if (!remove_db_name(*db_names,
+				    &exit_status))
+			return EXIT_FAILURE;
 
+		++db_names;
+	} while (*db_names != NULL);
 #else
 	FTS *restrict tree;
 	FTSENT *restrict entry;
@@ -338,9 +474,8 @@ mysql_seed_remove(char *const *db_names)
 		print_failure(failure);
 		return EXIT_FAILURE;
 	}
-
-	return exit_status;
 #endif /* ifdef WIN32 */
+	return exit_status;
 }
 
 inline int
