@@ -210,6 +210,7 @@ PROJECT_TEST_BINARY_PATH 	= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),$(PROJECT
 
 
 
+ifeq (T,$(DEVELOPMENT_MODE))
 # Unity Test Framework
 # ─────────────── source ───────────────────────────────────────────────────────
 UNITY_SOURCE_PATH		= $(call SOURCE_FILE_PATH,$(UNITY_SOURCE_DIR),$1)# Unity framework implementation
@@ -217,6 +218,7 @@ UNITY_HEADER_PATH		= $(call HEADER_FILE_PATH,$(UNITY_HEADER_DIR),$1)# Uity frame
 # ─────────────── build ────────────────────────────────────────────────────────
 UNITY_SCRIPT_PATH		= $(call SCRIPT_FILE_PATH,$(UNITY_AUTO_DIR),$1)# Unity framework scripts
 UNITY_OBJECT_PATH 		= $(call OBJECT_FILE_PATH,$(UNITY_OBJECT_DIR),$1)# Unity framework object files
+endif # ifeq (T,$(DEVELOPMENT_MODE))
 
 
 
@@ -271,34 +273,13 @@ RUBY		:= ruby
 RUBY_FLAGS	:= $(EMPTY)
 
 
+# build directories
+# ──────────────────────────────────────────────────────────────────────────────
+BUILD_DIRS	:= $(OBJECT_DIR)		\
+		   $(UNITY_OBJECT_DIR)		\
+		   $(BINARY_DIR)		\
+		   $(DATABASE_DIR)
 
-
-## UNITY TEST FRAMEWORK
-# ══════════════════════════════════════════════════════════════════════════════
-UNITY_SRC 		:= $(call UNITY_SOURCE_PATH,unity)
-UNITY_HDR 		:= $(call UNITY_HEADER_PATH,unity)
-UNITY_CONFIG_HDR 	:= $(call UNITY_HEADER_PATH,unity_config)
-UNITY_INTERNALS_HDR 	:= $(call UNITY_HEADER_PATH,unity_internals)
-UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
-UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_SCRIPT_PATH,generate_test_runner)
-UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
-UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
-UNITY_LD_LIB_FLAGS	:= $(EMPTY)
-# ─────────────── run all tests ────────────────────────────────────────────────
-TEST_FILES_GLOB	:= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),*_test)
-ifeq (T,$(SYSTEM_WINDOWS))
-RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
-
-else
-RUN_ALL_TESTS	:= for test in $(TEST_FILES_GLOB); do "./$$test"; done
-endif
-# ─────────────── target prequisites ───────────────────────────────────────────
-UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
-			   $(UNITY_HDR)					\
-			   $(UNITY_INTERNALS_HDR)			\
-			   $(UNITY_CONFIG_HDR)
-# ─────────────── targets ──────────────────────────────────────────────────────
-TARGETS			+= $(UNITY_OBJ)
 
 # independent headers
 # ──────────────────────────────────────────────────────────────────────────────
@@ -326,6 +307,7 @@ STRING_STRING_TOKEN_HDR		:= $(call HELPER_HEADER_PATH,string string_token)
 STRING_STRING_MACROS_HDR	:= $(call HELPER_HEADER_PATH,string string_macros)
 MODE_HDR			:= $(call PROJECT_HEADER_PATH,mode)
 
+
 ## HELPER MODULES
 # ══════════════════════════════════════════════════════════════════════════════
 # utils/utils
@@ -333,33 +315,13 @@ MODE_HDR			:= $(call PROJECT_HEADER_PATH,mode)
 UTILS_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,utils utils)
 UTILS_UTILS_HDR			:= $(call HELPER_HEADER_PATH,utils utils)
 UTILS_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,utils utils)
-UTILS_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,utils utils)
-UTILS_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,utils utils)
-UTILS_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,utils utils)
-UTILS_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,utils utils)
-UTILS_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils utils)
 # ─────────────── target prequisites ───────────────────────────────────────────
 UTILS_UTILS_OBJ_PREQS		:= $(UTILS_UTILS_SRC) 			\
 			   	   $(UTILS_UTILS_HDR)
 UTILS_UTILS_OBJ_GROUP		:= $(UTILS_UTILS_OBJ)
-UTILS_UTILS_TRNR_SRC_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
-				   $(TEST_RUNNER_SOURCE_DIR)
-UTILS_UTILS_TEST_OBJ_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
-			   	   $(UTILS_UTILS_OBJ_PREQS) 		\
-			   	   $(UNITY_OBJ_PREQS)
-UTILS_UTILS_TRNR_OBJ_PREQS	:= $(UTILS_UTILS_TRNR_SRC)		\
-			   	   $(UTILS_UTILS_TEST_OBJ_PREQS)
-UTILS_UTILS_TEST_BIN_PREQS	:= $(UTILS_UTILS_TRNR_OBJ)		\
-				   $(UTILS_UTILS_TEST_OBJ)		\
-			   	   $(UTILS_UTILS_OBJ_GROUP)		\
-			   	   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
-TEST_BINARIES		+= $(UTILS_UTILS_TEST_BIN)
-TARGETS			+= $(UTILS_UTILS_OBJ)				\
-			   $(UTILS_UTILS_TRNR_SRC)			\
-			   $(UTILS_UTILS_TRNR_OBJ)			\
-			   $(UTILS_UTILS_TEST_OBJ)			\
-			   $(UTILS_UTILS_TEST_BIN)
+TARGETS				+= $(UTILS_UTILS_OBJ)
+
 
 
 # utils/closure
@@ -2134,13 +2096,63 @@ TARGETS			+= $(PROJECT_OBJ)				\
 			   $(PROJECT_BIN)
 
 
-# Build Directories
+
+ifeq (T,$(DEVELOPMENT_MODE))
+## UNITY TEST FRAMEWORK
+# ══════════════════════════════════════════════════════════════════════════════
+UNITY_SRC 		:= $(call UNITY_SOURCE_PATH,unity)
+UNITY_HDR 		:= $(call UNITY_HEADER_PATH,unity)
+UNITY_CONFIG_HDR 	:= $(call UNITY_HEADER_PATH,unity_config)
+UNITY_INTERNALS_HDR 	:= $(call UNITY_HEADER_PATH,unity_internals)
+UNITY_OBJ 		:= $(call UNITY_OBJECT_PATH,unity)
+UNITY_GEN_TRNR_SCRIPT	:= $(call UNITY_SCRIPT_PATH,generate_test_runner)
+UNITY_ENV_FLAGS 	:= -DUNITY_INCLUDE_CONFIG_H
+UNITY_CC_FLAGS		:= $(CC_FLAGS) $(UNITY_ENV_FLAGS) -I$(UNITY_HEADER_DIR)
+UNITY_LD_LIB_FLAGS	:= $(EMPTY)
+# ─────────────── run all tests ────────────────────────────────────────────────
+TEST_FILES_GLOB	:= $(call BINARY_FILE_PATH,$(TEST_BINARY_DIR),*_test)
+ifeq (T,$(SYSTEM_WINDOWS))
+RUN_ALL_TESTS	:= FORFILES /M $(TEST_FILES_GLOB) /C "cmd /c @file"
+
+else
+RUN_ALL_TESTS	:= for test in $(TEST_FILES_GLOB); do "./$$test"; done
+endif
+# ─────────────── target prequisites ───────────────────────────────────────────
+UNITY_OBJ_PREQS		:= $(UNITY_SRC)					\
+			   $(UNITY_HDR)					\
+			   $(UNITY_INTERNALS_HDR)			\
+			   $(UNITY_CONFIG_HDR)
+# ─────────────── targets ──────────────────────────────────────────────────────
+BUILD_DIRS 		+= $(TEST_RUNNER_SOURCE_DIR)
+TARGETS			+= $(UNITY_OBJ)
+
+
+# utils/utils unit tests
 # ──────────────────────────────────────────────────────────────────────────────
-BUILD_DIRS	:= $(TEST_RUNNER_SOURCE_DIR)	\
-                   $(OBJECT_DIR)		\
-		   $(UNITY_OBJECT_DIR)		\
-		   $(BINARY_DIR)		\
-		   $(DATABASE_DIR)
+UTILS_UTILS_TEST_SRC		:= $(call HELPER_TEST_SOURCE_PATH,utils utils)
+UTILS_UTILS_TRNR_SRC		:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,utils utils)
+UTILS_UTILS_TRNR_OBJ		:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,utils utils)
+UTILS_UTILS_TEST_OBJ		:= $(call HELPER_TEST_OBJECT_PATH,utils utils)
+UTILS_UTILS_TEST_BIN		:= $(call HELPER_TEST_BINARY_PATH,utils utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+UTILS_UTILS_TRNR_SRC_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
+				   $(TEST_RUNNER_SOURCE_DIR)
+UTILS_UTILS_TEST_OBJ_PREQS	:= $(UTILS_UTILS_TEST_SRC)		\
+			   	   $(UTILS_UTILS_OBJ_PREQS) 		\
+			   	   $(UNITY_OBJ_PREQS)
+UTILS_UTILS_TRNR_OBJ_PREQS	:= $(UTILS_UTILS_TRNR_SRC)		\
+			   	   $(UTILS_UTILS_TEST_OBJ_PREQS)
+UTILS_UTILS_TEST_BIN_PREQS	:= $(UTILS_UTILS_TRNR_OBJ)		\
+				   $(UTILS_UTILS_TEST_OBJ)		\
+			   	   $(UTILS_UTILS_OBJ_GROUP)		\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES			+= $(UTILS_UTILS_TEST_BIN)
+TARGETS				+= $(UTILS_UTILS_TRNR_SRC)		\
+				   $(UTILS_UTILS_TRNR_OBJ)		\
+				   $(UTILS_UTILS_TEST_OBJ)		\
+				   $(UTILS_UTILS_TEST_BIN)
+endif # ifeq (T,$(DEVELOPMENT_MODE))
 
 
 # ══════════════════════════════════════════════════════════════════════════════

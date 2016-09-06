@@ -7,6 +7,7 @@
 ##Prerequisites
 - gcc >= 2.5
 - GNU Make
+- ruby >= 1.9 (Unity test scripts), not needed if `DEVELOPMENT_MODE != T` 
 
 
 ##Building
