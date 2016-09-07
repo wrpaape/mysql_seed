@@ -15,7 +15,7 @@ DEVELOPMENT_MODE = T
 
 # Phony Targets
 # ──────────────────────────────────────────────────────────────────────────────
-.PHONY: all test run_tests clean
+.PHONY: all run_tests clean
 
 
 # String Utils
@@ -2487,6 +2487,7 @@ TARGETS			+= $(HELP_TRNR_SRC)				\
 			   $(HELP_TEST_OBJ)				\
 			   $(HELP_TEST_BIN)
 endif # ifeq (T,$(DEVELOPMENT_MODE))
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════
