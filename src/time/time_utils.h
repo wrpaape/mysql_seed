@@ -19,14 +19,9 @@
 
 #elif defined(WIN32)
 #	include <windows.h>
-#	define exp7           10000000i64     /* 1E+7 */
-#	define exp9         1000000000i64     /* 1E+9 */
-#	define w2ux 116444736000000000i64     /* 1.jan1601 to 1.jan1970 */
-
-struct timespec {
-	long tv_sec;
-	long tv_nsec;
-};
+#	define exp7           10000000llu     /* 1E+7 */
+#	define exp9         1000000000llu     /* 1E+9 */
+#	define w2ux 116444736000000000llu     /* 1.jan1601 to 1.jan1970 */
 #endif /* ifdef __MACH__ */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲

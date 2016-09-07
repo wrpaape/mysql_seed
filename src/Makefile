@@ -261,8 +261,11 @@ endif
 # Cleaner
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq (T,$(SYSTEM_WINDOWS))
-RM		:= del
-RM_FLAGS	:= /F /Q
+# 'clean' command exceeds 8192 character limit for windows
+# RM		:= cmd \/C del
+# RM_FLAGS	:= /F /Q
+RM		:= rm
+RM_FLAGS	:= -rf
 else
 RM		:= rm
 RM_FLAGS	:= -rf

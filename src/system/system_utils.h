@@ -8,7 +8,7 @@
 #ifdef WIN32
 #	include <windows.h>	/* DeviceIoControl */
 #	include <winsock2.h>	/* socket */
-#	include <lphlpapi.h>	/* GetAdaptersAddress */
+#	include <iphlpapi.h>	/* GetAdaptersAddress */
 #	include <ws2tcpip.h>	/* getaddrinfo */
 #else
 #	include <sys/ioctl.h>	/* iotcl */
@@ -1146,7 +1146,7 @@ sysctl_handle_cl(int *const restrict mib_name,
 }
 #endif /* ifdef OSX */
 
-
+#ifndef WIN32
 /* getaddrinfo */
 inline bool
 getaddrinfo_status(const char *const node,
@@ -1277,6 +1277,7 @@ getaddrinfo_handle_cl(const char *const node,
 			     failure);
 	__builtin_unreachable();
 }
+#endif /* ifndef WIN32 */
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

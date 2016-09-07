@@ -274,6 +274,7 @@ sysctl_handle_cl(int *const restrict mib_name,
 #endif /* ifdef OSX */
 
 
+#ifndef WIN32
 /* getaddrinfo */
 extern inline bool
 getaddrinfo_status(const char *const node,
@@ -304,3 +305,4 @@ getaddrinfo_handle_cl(const char *const node,
 		      const struct addrinfo *const hints,
 		      struct addrinfo **const result,
 		      const struct HandlerClosure *const restrict fail_cl);
+#endif /* ifndef WIN32 */
