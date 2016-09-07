@@ -94,7 +94,6 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #ifdef WIN32
-
 /* check accessability of a file */
 #	define access_imp(PATH,						\
 			  MODE)						\
@@ -136,7 +135,6 @@
 /* close a file */
 #	define close_imp(FILE_DESCRIPTOR)				\
 	_close(FILE_DESCRIPTOR)
-#	define close_imp(FILE_DESCRIPTOR)				\
 
 /* delete a file */
 #	define unlink_imp(PATH)						\
@@ -2275,7 +2273,7 @@ find_close_status(const HANDLE dir)
 
 inline bool
 find_close_report(const HANDLE dir,
-		  const char *restrict const restrict failure)
+		  const char *restrict *const restrict failure)
 {
 	const bool success = (bool) FindClose(dir);
 

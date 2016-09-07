@@ -382,7 +382,7 @@ extern inline bool
 find_close_status(const HANDLE dir);
 extern inline bool
 find_close_report(const HANDLE dir,
-		  const char *restrict const restrict failure);
+		  const char *restrict *const restrict failure);
 
 /* find first file in directory */
 extern inline void

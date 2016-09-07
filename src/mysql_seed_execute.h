@@ -4,6 +4,8 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_file.h"	/* exit, file, string utils */
+#include <my_global.h>		/* mysql API */
+#include <mysql.h>		/* mysql API */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */

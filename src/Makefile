@@ -106,6 +106,7 @@ endif
 # DIRECTORY CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 PATH_JOIN		 = $(call JOIN,$1,$(PATH_DELIM))
+SYSTEM_ROOT_PATH	 = $(call TRIM,$(PATH_DELIM)$(call PATH_JOIN,$1))
 PROJECT 		:= mysql_seed
 PROJECT_ROOT		:= ..
 PROJECT_ROOT_ABSOLUTE	:= $(call TRIM,"\"$(realpath $(PROJECT_ROOT))\"")
@@ -125,6 +126,15 @@ UNITY_SOURCE_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) src)
 UNITY_HEADER_DIR	:= $(UNITY_SOURCE_DIR)
 UNITY_OBJECT_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) obj)
 UNITY_AUTO_DIR  	:= $(call PATH_JOIN,$(UNITY_ROOT) auto)
+
+
+
+# MySQL config
+# ──────────────────────────────────────────────────────────────────────────────
+LIBMYSQLCLIENT_DIR	:= $(call SYSTEM_ROOT_PATH,usr local lib)
+MYSQL_INCLUDE_DIR	:= $(call SYSTEM_ROOT_PATH,usr local include mysql)
+
+
 
 # 'windows' directory, library flags
 # ──────────────────────────────────────────────────────────────────────────────
@@ -228,7 +238,7 @@ endif # ifeq (T,$(DEVELOPMENT_MODE))
 # ──────────────────────────────────────────────────────────────────────────────
 CC		:= gcc
 CC_ENV_FLAGS	:= -D__USE_FIXED_PROTOTYPES__ -D_GNU_SOURCE -DROOT_ABSPATH=$(PROJECT_ROOT_ABSOLUTE) $(SYS_ENV_FLAGS)
-CC_BASE_FLAGS	:= -std=gnu99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) $(THREADS_INC_FLAG)
+CC_BASE_FLAGS	:= -std=gnu99 -march=native $(CC_ENV_FLAGS) -I$(HEADER_DIR) -I$(MYSQL_INCLUDE_DIR) $(THREADS_INC_FLAG)
 
 ifeq (T,$(DEVELOPMENT_MODE))
 CC_FLAGS	:= -g -Wall $(CC_BASE_FLAGS)
@@ -245,7 +255,7 @@ LD		:= gcc
 LD_FLAGS	:= $(EMPTY)
 endif
 
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -L$(LIBMYSQLCLIENT_DIR) -lmysqlclient -lc
 
 # Make Directory
 # ──────────────────────────────────────────────────────────────────────────────
