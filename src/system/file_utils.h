@@ -6,8 +6,11 @@
 #ifdef WIN32
 #	include <io.h>		/* _open, _write, _close */
 /* #	include <direct.h>	/1* _chdir *1/ */
+#	include <windows.h>	/* FindFirst/NextFile */
 #else
 #	include <fcntl.h>	/* open */
+#	include <dirent.h>	/* directory API */
+#	include <fts.h>		/* file tree walk */
 #endif /* ifdef WIN32 */
 
 #include <unistd.h>		     /* close, getcwd, STDOUT/IN/ERR_FILENO */
@@ -91,8 +94,6 @@
  * ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
 
 #ifdef WIN32
-#	include <windows.h>	/* FindFirst/NextFile */
-#	include <direct.h>	/* directory API */
 
 /* check accessability of a file */
 #	define access_imp(PATH,						\
@@ -166,8 +167,6 @@
 	_rmdir(PATH)
 
 #else
-#	include <dirent.h>
-#	include <fts.h>
 
 /* check accessability of a file */
 #	define access_imp(PATH,						\
