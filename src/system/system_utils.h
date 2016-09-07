@@ -272,7 +272,6 @@ size_adapters_addresses_report(ULONG family,
 	FAIL_SWITCH_STATUS_OPEN(family,
 				flags,
 				reserved,
-				adapter_addresses,
 				size_pointer)
 	FAIL_SWITCH_STATUS_CASE_1(ERROR_ADDRESS_NOT_ASSOCIATED,
 				  "an address has not yet been associated with "
