@@ -5,7 +5,7 @@
 
 #ifdef WIN32
 #	include <io.h>		/* _open, _write, _close */
-#	include <direct.h>	/* _chdir */
+/* #	include <direct.h>	/1* _chdir *1/ */
 #else
 #	include <fcntl.h>	/* open */
 #endif /* ifdef WIN32 */

@@ -2413,7 +2413,7 @@ put_win32_failure(char *restrict buffer,
 					 NULL,
 					 error_code,
 					 0,
-					 &message,
+					 (LPSTR) &message,
 					 0,
 					 NULL);
 

@@ -266,7 +266,8 @@ inline bool
 size_adapters_addresses_report(ULONG family,
 			       ULONG flags,
 			       PVOID reserved,
-			       PULONG size_pointer)
+			       PULONG size_pointer,
+			       const char *restrict *const restrict failure)
 {
 	FAIL_SWITCH_STATUS_OPEN(family,
 				flags,

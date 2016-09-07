@@ -47,7 +47,8 @@ extern inline bool
 size_adapters_addresses_report(ULONG family,
 			       ULONG flags,
 			       PVOID reserved,
-			       PULONG size_pointer);
+			       PULONG size_pointer,
+			       const char *restrict *const restrict failure);
 extern inline void
 size_adapters_addresses_handle(ULONG family,
 			       ULONG flags,
