@@ -248,16 +248,16 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 #ifdef WIN32
 	ULONG size_required;
 
-	if (!size_adapters_addresses_report(0,
-					    0,
-					    NULL,
-					    &size_required,
-					    failure))
+	if (UNLIKELY(!size_adapters_addresses_report(0,
+						     0,
+						     NULL,
+						     &size_required,
+						     failure)))
 		return false;
 
 	const WINAPI heap = GetProcessHeap();
 
-	if (heap == NULL) {
+	if (UNLIKELY(heap == NULL)) {
 		*failure = UUID_GET_PROCESS_HEAP_FAILURE;
 		return false;
 	}
@@ -267,17 +267,17 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 		    0,
 		    size_required):
 
-	if (adapter_addresses == NULL) {
+	if (UNLIKELY(adapter_addresses == NULL)) {
 		*failure = UUID_HEAP_ALLOC_FAILURE;
 		return false;
 	}
 
-	if (!get_adapters_addresses_report(0,
-					   0,
-					   NULL,
-					   adapter_addresses,
-					   &size_required,
-					   failure)) {
+	if (UNLIKELY(!get_adapters_addresses_report(0,
+						    0,
+						    NULL,
+						    adapter_addresses,
+						    &size_required,
+						    failure))) {
 		(void) HeapFree(heap,
 				0,
 				adapter_addresses);
@@ -291,7 +291,7 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 					   0,
 					   adapter_addresses);
 
-	if (!free_success)
+	if (UNLIKELY(!free_success))
 		*failure = UUID_HEAP_FREE_FAILURE;
 
 	return free_success;
@@ -301,9 +301,9 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 	size_t size_required;
 	int interface_index;
 
-	if (!interface_name_to_index_report(&interface_index,
-					    MAIN_INTERFACE_NAME,
-					    failure))
+	if (UNLIKELY(!interface_name_to_index_report(&interface_index,
+						     MAIN_INTERFACE_NAME,
+						     failure)))
 		return false;
 
 	int mib_name[6u] = {
@@ -315,13 +315,13 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 		[5u] = interface_index
 	};
 
-	if (!sysctl_report(&mib_name[0],
-			   6u,
-			   NULL,
-			   &size_required,
-			   NULL,
-			   0,
-			   failure))
+	if (UNLIKELY(!sysctl_report(&mib_name[0],
+				    6u,
+				    NULL,
+				    &size_required,
+				    NULL,
+				    0,
+				    failure)))
 		return false;
 
 	configuration.ifc_buf = malloc(size_required);
@@ -331,13 +331,13 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 		return false;
 	}
 
-	if (!sysctl_report(&mib_name[0],
-			   6u,
-			   configuration.ifc_buf,
-			   &size_required,
-			   NULL,
-			   0,
-			   failure)) {
+	if (UNLIKELY(!sysctl_report(&mib_name[0],
+				    6u,
+				    configuration.ifc_buf,
+				    &size_required,
+				    NULL,
+				    0,
+				    failure))) {
 		free(configuration.ifc_buf);
 		return false;
 	}
@@ -358,18 +358,18 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 	struct ifreq request;
 	int socket_descriptor;
 
-	if (!socket_report(&socket_descriptor,
-			   PF_INET,
-			   SOCK_DGRAM,
-			   IPPROTO_IP,
-			   failure))
+	if (UNLIKELY(!socket_report(&socket_descriptor,
+				    PF_INET,
+				    SOCK_DGRAM,
+				    IPPROTO_IP,
+				    failure)))
 		return false;
 
 	SET_MAIN_INTERFACE_NAME(&request.ifr_name[0]);
 
-	if (!get_hardware_address_report(&request,
-					 socket_descriptor,
-					 failure)) {
+	if (UNLIKELY(!get_hardware_address_report(&request,
+						  socket_descriptor,
+						  failure))) {
 		close_muffle(socket_descriptor);
 		return false;
 	}
@@ -377,7 +377,7 @@ uuid_mac_address(uint8_t *const restrict mac_address,
 	const bool success = close_report(socket_descriptor,
 					  failure);
 
-	if (success)
+	if (LIKELY(success))
 		SET_MAC_ADDRESS(mac_address,
 				&request.ifr_addr.sa_data[0]);
 
@@ -763,7 +763,7 @@ random_32_uuid_constructor(const char *restrict *const restrict failure)
 			  && uuid_mac_address(&node[0],
 					      failure);
 
-	if (success) {
+	if (LIKELY(success)) {
 		mutex_init(&uuid_state.lock);
 
 		uuid_state_init_clk_seq_node(&uuid_state.clk_seq_node[0],
@@ -785,7 +785,7 @@ random_32_64_uuid_constructor(const char *restrict *const restrict failure)
 			  && uuid_mac_address(&node[0],
 					      failure);
 
-	if (success) {
+	if (LIKELY(success)) {
 		mutex_init(&uuid_state.lock);
 
 		uuid_state_init_clk_seq_node(&uuid_state.clk_seq_node[0],

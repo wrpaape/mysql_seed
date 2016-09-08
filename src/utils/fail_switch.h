@@ -3,10 +3,9 @@
 
 /* external dependencies
  * ─────────────────────────────────────────────────────────────────────────── */
-#include <stdbool.h>			/* bool */
 #include <errno.h>			/* errno */
 #include "string/string_macros.h"	/* error macros */
-#include "utils/expect.h"		/* LIKELY */
+#include "utils/expect.h"		/* bool, LIKELY */
 
 /* must define these in included file */
 #undef FAIL_SWITCH_ROUTINE

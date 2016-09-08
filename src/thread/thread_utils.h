@@ -194,10 +194,10 @@ thread_create_handle(Thread *const restrict thread,
 {
 	const char *restrict failure;
 
-	if (thread_create_report(thread,
-				 routine,
-				 r_arg,
-				 &failure))
+	if (LIKELY(thread_create_report(thread,
+					routine,
+					r_arg,
+					&failure)))
 		return;
 
 	handle(h_arg,
@@ -213,10 +213,10 @@ thread_create_handle_cl(Thread *const restrict thread,
 {
 	const char *restrict failure;
 
-	if (thread_create_report(thread,
-				 routine,
-				 r_arg,
-				 &failure))
+	if (LIKELY(thread_create_report(thread,
+					routine,
+					r_arg,
+					&failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -313,8 +313,8 @@ thread_cancel_handle(Thread thread,
 {
 	const char *restrict failure;
 
-	if (thread_cancel_report(thread,
-				 &failure))
+	if (LIKELY(thread_cancel_report(thread,
+					&failure)))
 		return;
 
 	handle(arg,
@@ -328,8 +328,8 @@ thread_cancel_handle_cl(Thread thread,
 {
 	const char *restrict failure;
 
-	if (thread_cancel_report(thread,
-				 &failure))
+	if (LIKELY(thread_cancel_report(thread,
+					&failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -444,9 +444,9 @@ thread_key_create_handle(ThreadKey *const key,
 {
 	const char *restrict failure;
 
-	if (thread_key_create_report(key,
-				     cleanup,
-				     &failure))
+	if (LIKELY(thread_key_create_report(key,
+					    cleanup,
+					    &failure)))
 		return;
 
 	handle(arg,
@@ -461,9 +461,9 @@ thread_key_create_handle_cl(ThreadKey *const key,
 {
 	const char *restrict failure;
 
-	if (thread_key_create_report(key,
-				     cleanup,
-				     &failure))
+	if (LIKELY(thread_key_create_report(key,
+					    cleanup,
+					    &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -520,9 +520,9 @@ thread_key_set_handle(ThreadKey key,
 {
 	const char *restrict failure;
 
-	if (thread_key_set_report(key,
-				  value,
-				  &failure))
+	if (LIKELY(thread_key_set_report(key,
+					 value,
+					 &failure)))
 		return;
 
 	handle(arg,
@@ -537,9 +537,9 @@ thread_key_set_handle_cl(ThreadKey key,
 {
 	const char *restrict failure;
 
-	if (thread_key_set_report(key,
-				  value,
-				  &failure))
+	if (LIKELY(thread_key_set_report(key,
+					 value,
+					 &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -579,8 +579,8 @@ thread_key_delete_handle(ThreadKey key,
 {
 	const char *restrict failure;
 
-	if (thread_key_delete_report(key,
-				     &failure))
+	if (LIKELY(thread_key_delete_report(key,
+					    &failure)))
 		return;
 
 	handle(arg,
@@ -594,8 +594,8 @@ thread_key_delete_handle_cl(ThreadKey key,
 {
 	const char *restrict failure;
 
-	if (thread_key_delete_report(key,
-				     &failure))
+	if (LIKELY(thread_key_delete_report(key,
+					    &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -637,8 +637,8 @@ thread_attr_init_handle(ThreadAttr *const restrict attr,
 {
 	const char *restrict failure;
 
-	if (thread_attr_init_report(attr,
-				    &failure))
+	if (LIKELY(thread_attr_init_report(attr,
+					   &failure)))
 		return;
 
 	handle(arg,
@@ -652,8 +652,8 @@ thread_attr_init_handle_cl(ThreadAttr *const restrict attr,
 {
 	const char *restrict failure;
 
-	if (thread_attr_init_report(attr,
-				    &failure))
+	if (LIKELY(thread_attr_init_report(attr,
+					   &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -760,13 +760,13 @@ thread_attr_destroy_handle(ThreadAttr *const restrict attr,
 {
 	const char *restrict failure;
 
-	if (!thread_attr_destroy_report(attr,
-					&failure)) {
-		handle(arg,
-		       failure);
+	if (LIKELY(thread_attr_destroy_report(attr,
+					      &failure)))
+		return;
 
-		__builtin_unreachable();
-	}
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
 }
 
 inline void
@@ -775,13 +775,14 @@ thread_attr_destroy_handle_cl(ThreadAttr *const restrict attr,
 {
 	const char *restrict failure;
 
-	if (!thread_attr_destroy_report(attr,
-					&failure)) {
-		cl->handle(cl->arg,
-			   failure);
+	if (LIKELY(thread_attr_destroy_report(attr,
+					      &failure)))
+		return;
 
-		__builtin_unreachable();
-	}
+	cl->handle(cl->arg,
+		   failure);
+
+	__builtin_unreachable();
 }
 
 
@@ -831,13 +832,13 @@ mutex_lock_handle(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	if (!mutex_lock_report(lock,
-			       &failure)) {
-		handle(arg,
-		       failure);
+	if (LIKELY(mutex_lock_report(lock,
+				     &failure)))
+		return;
 
-		__builtin_unreachable();
-	}
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
 }
 
 inline void
@@ -846,13 +847,13 @@ mutex_lock_handle_cl(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	if (!mutex_lock_report(lock,
-			       &failure)) {
-		cl->handle(cl->arg,
-			   failure);
+	if (LIKELY(mutex_lock_report(lock,
+				     &failure)))
+		return;
 
-		__builtin_unreachable();
-	}
+	cl->handle(cl->arg,
+		   failure);
+	__builtin_unreachable();
 }
 
 /* mutex_try_lock */
@@ -912,12 +913,11 @@ mutex_try_lock_handle(Mutex *const restrict lock,
 	const enum BoolStatus acquired = mutex_try_lock_report(lock,
 							       &failure);
 
-	if (acquired != BOOL_STATUS_ERROR)
+	if (LIKELY(acquired != BOOL_STATUS_ERROR))
 		return (bool) acquired;
 
 	handle(arg,
 	       failure);
-
 	__builtin_unreachable();
 }
 
@@ -930,12 +930,11 @@ mutex_try_lock_handle_cl(Mutex *const restrict lock,
 	const enum BoolStatus acquired = mutex_try_lock_report(lock,
 							       &failure);
 
-	if (acquired != BOOL_STATUS_ERROR)
+	if (LIKELY(acquired != BOOL_STATUS_ERROR))
 		return (bool) acquired;
 
 	cl->handle(cl->arg,
 		   failure);
-
 	__builtin_unreachable();
 }
 
@@ -976,13 +975,12 @@ mutex_unlock_handle(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	if (mutex_unlock_report(lock,
-				&failure))
+	if (LIKELY(mutex_unlock_report(lock,
+				       &failure)))
 		return;
 
 	handle(arg,
 	       failure);
-
 	__builtin_unreachable();
 }
 
@@ -992,13 +990,12 @@ mutex_unlock_handle_cl(Mutex *const restrict lock,
 {
 	const char *restrict failure;
 
-	if (mutex_unlock_report(lock,
-				&failure))
+	if (LIKELY(mutex_unlock_report(lock,
+				       &failure)))
 		return;
 
 	cl->handle(cl->arg,
 		   failure);
-
 	__builtin_unreachable();
 }
 
@@ -1055,8 +1052,8 @@ thread_cond_signal_handle(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_signal_report(cond,
-				      &failure))
+	if (LIKELY(thread_cond_signal_report(cond,
+					     &failure)))
 		return;
 
 	handle(arg,
@@ -1070,8 +1067,8 @@ thread_cond_signal_handle_cl(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_signal_report(cond,
-				      &failure))
+	if (LIKELY(thread_cond_signal_report(cond,
+					     &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -1112,8 +1109,8 @@ thread_cond_broadcast_handle(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_broadcast_report(cond,
-					 &failure))
+	if (LIKELY(thread_cond_broadcast_report(cond,
+						&failure)))
 		return;
 
 
@@ -1128,8 +1125,8 @@ thread_cond_broadcast_handle_cl(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_broadcast_report(cond,
-					 &failure))
+	if (LIKELY(thread_cond_broadcast_report(cond,
+						&failure)))
 		return;
 
 
@@ -1179,9 +1176,9 @@ thread_cond_await_handle(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_report(cond,
-				     lock,
-				     &failure))
+	if (LIKELY(thread_cond_await_report(cond,
+					    lock,
+					    &failure)))
 		return;
 
 	handle(arg,
@@ -1196,9 +1193,9 @@ thread_cond_await_handle_cl(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_report(cond,
-				     lock,
-				     &failure))
+	if (LIKELY(thread_cond_await_report(cond,
+					    lock,
+					    &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -1258,10 +1255,10 @@ thread_cond_await_limit_handle(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_limit_report(cond,
-					   lock,
-					   limit,
-					   &failure))
+	if (LIKELY(thread_cond_await_limit_report(cond,
+						  lock,
+						  limit,
+						  &failure)))
 		return;
 
 	handle(arg,
@@ -1277,10 +1274,10 @@ thread_cond_await_limit_handle_cl(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_limit_report(cond,
-					   lock,
-					   limit,
-					   &failure))
+	if (LIKELY(thread_cond_await_limit_report(cond,
+						  lock,
+						  limit,
+						  &failure)))
 		return;
 
 	cl->handle(cl->arg,
@@ -1346,10 +1343,10 @@ thread_cond_await_span_handle(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_span_report(cond,
-					  lock,
-					  span,
-					  &failure))
+	if (LIKELY(thread_cond_await_span_report(cond,
+						 lock,
+						 span,
+						 &failure)))
 		return;
 
 	handle(arg,
@@ -1365,10 +1362,10 @@ thread_cond_await_span_handle_cl(ThreadCond *const restrict cond,
 {
 	const char *restrict failure;
 
-	if (thread_cond_await_span_report(cond,
-					  lock,
-					  span,
-					  &failure))
+	if (LIKELY(thread_cond_await_span_report(cond,
+						 lock,
+						 span,
+						 &failure)))
 		return;
 
 	cl->handle(cl->arg,

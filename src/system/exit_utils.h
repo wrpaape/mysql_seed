@@ -102,8 +102,8 @@ exit_action_push_handle(Action *const exit_action,
 {
 	const char *restrict failure;
 
-	if (exit_action_push_report(exit_action,
-				    &failure))
+	if (LIKELY(exit_action_push_report(exit_action,
+					   &failure)))
 		return;
 
 	handle(arg,
@@ -117,8 +117,8 @@ exit_action_push_handle_cl(Action *const exit_action,
 {
 	const char *restrict failure;
 
-	if (exit_action_push_report(exit_action,
-				    &failure))
+	if (LIKELY(exit_action_push_report(exit_action,
+					   &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,

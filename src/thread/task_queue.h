@@ -595,20 +595,20 @@ task_queue_await_empty_report(struct TaskQueue *const restrict queue,
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
-	if (!mutex_lock_report(&queue->lock,
-			       failure))
+	if (UNLIKELY(!mutex_lock_report(&queue->lock,
+					failure)))
 		return false;
 
 	while (queue->head != NULL)
-		if (!thread_cond_await_report(&queue->empty,
-					      &queue->lock,
-					      failure)) {
+		if (UNLIKELY(!thread_cond_await_report(&queue->empty,
+						       &queue->lock,
+						       failure))) {
 			mutex_unlock_muffle(&queue->lock);
 			return false;
 		}
 
-	if (!mutex_unlock_report(&queue->lock,
-				 failure))
+	if (UNLIKELY(!mutex_unlock_report(&queue->lock,
+					  failure)))
 		return false;
 
 	mutex_lock_try_catch_close();
@@ -809,21 +809,21 @@ task_queue_reload_report(struct TaskQueue *const restrict queue,
 {
 	mutex_lock_try_catch_open(&queue->lock);
 
-	if (!mutex_lock_report(&queue->lock,
-			       failure))
+	if (UNLIKELY(!mutex_lock_report(&queue->lock,
+					failure)))
 		return false;
 
 	queue->head = store->head;
 	queue->last = store->last;
 
-	if (!thread_cond_signal_report(&queue->node_ready,
-				       failure)) {
+	if (UNLIKELY(!thread_cond_signal_report(&queue->node_ready,
+						failure))) {
 		mutex_unlock_muffle(&queue->lock);
 		return false;
 	}
 
-	if (!mutex_unlock_report(&queue->lock,
-				 failure))
+	if (UNLIKELY(!mutex_unlock_report(&queue->lock,
+					  failure)))
 		return false;
 
 	mutex_lock_try_catch_close();

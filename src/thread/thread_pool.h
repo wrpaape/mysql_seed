@@ -159,10 +159,10 @@ worker_crew_start(struct WorkerCrew *const restrict worker_crew,
 	struct Worker *restrict worker		  = worker_crew->from;
 
 	do {
-		if (thread_create_report(&worker->thread,
-					 &worker_spawn,
-					 worker,
-					 failure)) {
+		if (LIKELY(thread_create_report(&worker->thread,
+						&worker_spawn,
+						worker,
+						failure))) {
 			++worker;
 		} else {
 			for (struct Worker *restrict alive
@@ -292,20 +292,20 @@ thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
 {
 	mutex_lock_try_catch_open(&status->processing);
 
-	if (!mutex_lock_report(&status->processing,
-			       failure))
+	if (UNLIKELY(!mutex_lock_report(&status->processing,
+					failure)))
 		return false;
 
 	while (status->busy)
-		if (!thread_cond_await_report(&status->done,
-					      &status->processing,
-					      failure)) {
+		if (UNLIKELY(!thread_cond_await_report(&status->done,
+						       &status->processing,
+						       failure))) {
 			mutex_unlock_muffle(&status->processing);
 			return false;
 		}
 
-	if (!mutex_unlock_report(&status->processing,
-				 failure))
+	if (UNLIKELY(!mutex_unlock_report(&status->processing,
+					  failure)))
 		return false;
 
 	mutex_lock_try_catch_close();
@@ -321,14 +321,14 @@ thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
 
 	mutex_lock_try_catch_open(&status->processing);
 
-	if (!mutex_lock_report(&status->processing,
-			       failure))
+	if (UNLIKELY(!mutex_lock_report(&status->processing,
+					failure)))
 		return BOOL_STATUS_ERROR;
 
 	busy = status->busy;
 
-	if (!mutex_unlock_report(&status->processing,
-				 failure))
+	if (UNLIKELY(!mutex_unlock_report(&status->processing,
+					  failure)))
 		return BOOL_STATUS_ERROR;
 
 	mutex_lock_try_catch_close();
@@ -448,7 +448,7 @@ supervisor_start(struct Supervisor *const restrict supervisor,
 						  supervisor,
 						  failure);
 
-	if (!success) {
+	if (UNLIKELY(!success)) {
 		worker_crew_cancel_failure(&supervisor->pool->worker_crew);
 		supervisor->pool->status.busy = false;
 	}
@@ -520,20 +520,20 @@ supervisor_signal_report(struct Supervisor *const restrict supervisor,
 {
 	mutex_lock_try_catch_open(&supervisor->listening);
 
-	if (!mutex_lock_report(&supervisor->listening,
-			       failure))
+	if (UNLIKELY(!mutex_lock_report(&supervisor->listening,
+					failure)))
 		return false;
 
 	supervisor->event = event;
 
-	if (!thread_cond_signal_report(&supervisor->trigger,
-				       failure)) {
+	if (UNLIKELY(!thread_cond_signal_report(&supervisor->trigger,
+						failure))) {
 		mutex_unlock_muffle(&supervisor->listening);
 		return false;
 	}
 
-	if (!mutex_unlock_report(&supervisor->listening,
-				 failure))
+	if (UNLIKELY(!mutex_unlock_report(&supervisor->listening,
+					  failure)))
 	    return false;
 
 	mutex_lock_try_catch_close();
@@ -601,7 +601,7 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		   const size_t count_workers,
 		   const char *restrict *const restrict failure)
 {
-	if (count_workers == 0lu) {
+	if (UNLIKELY(count_workers == 0lu)) {
 		*failure = FAILURE_REASON("thread_pool_create",
 					  "no space allocated for pool from"
 					  " (count_workers == 0)");
@@ -618,7 +618,7 @@ thread_pool_create(const struct ProcedureClosure *const restrict init_tasks,
 		 + (sizeof(struct Worker)   * count_workers)
 		 + (sizeof(struct TaskNode) * count_init_tasks));
 
-	if (pool == NULL) {
+	if (UNLIKELY(pool == NULL)) {
 		*failure = MALLOC_FAILURE_MESSAGE("thread_pool_create");
 	} else {
 		struct TaskStore task_store;

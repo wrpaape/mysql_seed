@@ -342,9 +342,9 @@ access_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (access_report(path,
-			  mode,
-			  &failure))
+	if (LIKELY(access_report(path,
+				 mode,
+				 &failure)))
 		return;
 
 	handle(arg,
@@ -359,9 +359,9 @@ access_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (access_report(path,
-			  mode,
-			  &failure))
+	if (LIKELY(access_report(path,
+				 mode,
+				 &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -402,7 +402,7 @@ open_report(int *const restrict file_descriptor,
 	*file_descriptor = open_imp(path,
 				    open_flag);
 
-	if (*file_descriptor >= 0)
+	if (LIKELY(*file_descriptor >= 0))
 		return true;
 
 	switch (errno) {
@@ -522,10 +522,10 @@ open_handle(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_report(file_descriptor,
-			path,
-			open_flag,
-			&failure))
+	if (LIKELY(open_report(file_descriptor,
+			       path,
+			       open_flag,
+			       &failure)))
 		return;
 
 	handle(arg,
@@ -541,10 +541,10 @@ open_handle_cl(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_report(file_descriptor,
-			path,
-			open_flag,
-			&failure))
+	if (LIKELY(open_report(file_descriptor,
+			       path,
+			       open_flag,
+			       &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -591,7 +591,7 @@ open_mode_report(int *const restrict file_descriptor,
 					 open_flag,
 					 mode);
 
-	if (*file_descriptor >= 0)
+	if (LIKELY(*file_descriptor >= 0))
 		return true;
 
 	switch(errno) {
@@ -713,11 +713,11 @@ open_mode_handle(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_mode_report(file_descriptor,
-			     path,
-			     open_flag,
-			     mode,
-			     &failure))
+	if (LIKELY(open_mode_report(file_descriptor,
+				    path,
+				    open_flag,
+				    mode,
+				    &failure)))
 		return;
 
 	handle(arg,
@@ -734,11 +734,11 @@ open_mode_handle_cl(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_mode_report(file_descriptor,
-			     path,
-			     open_flag,
-			     mode,
-			     &failure))
+	if (LIKELY(open_mode_report(file_descriptor,
+				    path,
+				    open_flag,
+				    mode,
+				    &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -785,7 +785,7 @@ open_relative_report(int *const restrict file_descriptor,
 					     relative_path,
 					     open_flag);
 
-	if (*file_descriptor >= 0)
+	if (LIKELY(*file_descriptor >= 0))
 		return true;
 
 	switch(errno) {
@@ -909,11 +909,11 @@ open_relative_handle(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_report(file_descriptor,
-				 directory_descriptor,
-				 relative_path,
-				 open_flag,
-				 &failure))
+	if (LIKELY(open_relative_report(file_descriptor,
+					directory_descriptor,
+					relative_path,
+					open_flag,
+					&failure)))
 		return;
 
 	handle(arg,
@@ -930,11 +930,11 @@ open_relative_handle_cl(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_report(file_descriptor,
-				 directory_descriptor,
-				 relative_path,
-				 open_flag,
-				 &failure))
+	if (LIKELY(open_relative_report(file_descriptor,
+					directory_descriptor,
+					relative_path,
+					open_flag,
+					&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -987,7 +987,7 @@ open_relative_mode_report(int *const restrict file_descriptor,
 						  open_flag,
 						  mode);
 
-	if (*file_descriptor >= 0)
+	if (LIKELY(*file_descriptor >= 0))
 		return true;
 
 	switch(errno) {
@@ -1113,12 +1113,12 @@ open_relative_mode_handle(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_mode_report(file_descriptor,
-				      directory_descriptor,
-				      relative_path,
-				      open_flag,
-				      mode,
-				      &failure))
+	if (LIKELY(open_relative_mode_report(file_descriptor,
+					     directory_descriptor,
+					     relative_path,
+					     open_flag,
+					     mode,
+					     &failure)))
 		return;
 
 	handle(arg,
@@ -1136,12 +1136,12 @@ open_relative_mode_handle_cl(int *const restrict file_descriptor,
 {
 	const char *restrict failure;
 
-	if (open_relative_mode_report(file_descriptor,
-				      directory_descriptor,
-				      relative_path,
-				      open_flag,
-				      mode,
-				      &failure))
+	if (LIKELY(open_relative_mode_report(file_descriptor,
+					     directory_descriptor,
+					     relative_path,
+					     open_flag,
+					     mode,
+					     &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1242,10 +1242,10 @@ read_handle(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (read_report(file_descriptor,
-			buffer,
-			size,
-			&failure))
+	if (LIKELY(read_report(file_descriptor,
+			       buffer,
+			       size,
+			       &failure)))
 		return;
 
 	handle(arg,
@@ -1261,10 +1261,10 @@ read_handle_cl(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (read_report(file_descriptor,
-			buffer,
-			size,
-			&failure))
+	if (LIKELY(read_report(file_descriptor,
+			       buffer,
+			       size,
+			       &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1379,10 +1379,10 @@ write_handle(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (write_report(file_descriptor,
-			 buffer,
-			 size,
-			 &failure))
+	if (LIKELY(write_report(file_descriptor,
+				buffer,
+				size,
+				&failure)))
 		return;
 
 	handle(arg,
@@ -1398,10 +1398,10 @@ write_handle_cl(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (write_report(file_descriptor,
-			 buffer,
-			 size,
-			 &failure))
+	if (LIKELY(write_report(file_descriptor,
+				buffer,
+				size,
+				&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1448,8 +1448,8 @@ close_handle(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (close_report(file_descriptor,
-			 &failure))
+	if (LIKELY(close_report(file_descriptor,
+				&failure)))
 		return;
 
 	handle(arg,
@@ -1463,8 +1463,8 @@ close_handle_cl(const int file_descriptor,
 {
 	const char *restrict failure;
 
-	if (close_report(file_descriptor,
-			 &failure))
+	if (LIKELY(close_report(file_descriptor,
+				&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1545,8 +1545,8 @@ unlink_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (unlink_report(path,
-			  &failure))
+	if (LIKELY(unlink_report(path,
+				 &failure)))
 		return;
 
 	handle(arg,
@@ -1560,8 +1560,8 @@ unlink_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (unlink_report(path,
-			  &failure))
+	if (LIKELY(unlink_report(path,
+				 &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1678,10 +1678,10 @@ unlink_relative_handle(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (unlink_relative_report(directory_descriptor,
-				   relative_path,
-				   unlink_flag,
-				   &failure))
+	if (LIKELY(unlink_relative_report(directory_descriptor,
+					  relative_path,
+					  unlink_flag,
+					  &failure)))
 		return;
 
 	handle(arg,
@@ -1697,10 +1697,10 @@ unlink_relative_handle_cl(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (unlink_relative_report(directory_descriptor,
-				   relative_path,
-				   unlink_flag,
-				   &failure))
+	if (LIKELY(unlink_relative_report(directory_descriptor,
+					  relative_path,
+					  unlink_flag,
+					  &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1773,9 +1773,9 @@ stat_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (stat_report(path,
-			buffer,
-			&failure))
+	if (LIKELY(stat_report(path,
+			       buffer,
+			       &failure)))
 		return;
 
 	handle(arg,
@@ -1790,9 +1790,9 @@ stat_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (stat_report(path,
-			buffer,
-			&failure))
+	if (LIKELY(stat_report(path,
+			       buffer,
+			       &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -1887,9 +1887,9 @@ mkdir_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (mkdir_report(path,
-			 mode,
-			 &failure))
+	if (LIKELY(mkdir_report(path,
+				mode,
+				&failure)))
 		return;
 
 	handle(arg,
@@ -1904,9 +1904,9 @@ mkdir_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (mkdir_report(path,
-			 mode,
-			 &failure))
+	if (LIKELY(mkdir_report(path,
+				mode,
+				&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2016,10 +2016,10 @@ mkdir_relative_handle(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (mkdir_relative_report(directory_descriptor,
-				  relative_path,
-				  mode,
-				  &failure))
+	if (LIKELY(mkdir_relative_report(directory_descriptor,
+					 relative_path,
+					 mode,
+					 &failure)))
 		return;
 
 	handle(arg,
@@ -2035,10 +2035,10 @@ mkdir_relative_handle_cl(const int directory_descriptor,
 {
 	const char *restrict failure;
 
-	if (mkdir_relative_report(directory_descriptor,
-				  relative_path,
-				  mode,
-				  &failure))
+	if (LIKELY(mkdir_relative_report(directory_descriptor,
+					 relative_path,
+					 mode,
+					 &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2100,8 +2100,8 @@ chdir_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (chdir_report(path,
-			 &failure))
+	if (LIKELY(chdir_report(path,
+				&failure)))
 		return;
 
 	handle(arg,
@@ -2115,8 +2115,8 @@ chdir_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (chdir_report(path,
-			 &failure))
+	if (LIKELY(chdir_report(path,
+				&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2192,8 +2192,8 @@ rmdir_handle(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (rmdir_report(path,
-			 &failure))
+	if (LIKELY(rmdir_report(path,
+				&failure)))
 		return;
 
 	handle(arg,
@@ -2207,8 +2207,8 @@ rmdir_handle_cl(const char *const restrict path,
 {
 	const char *restrict failure;
 
-	if (rmdir_report(path,
-			 &failure))
+	if (LIKELY(rmdir_report(path,
+				&failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2234,7 +2234,7 @@ find_next_file_status(const HANDLE dir,
 			 info))
 		return BOOL_STATUS_TRUE; /* file found */
 
-	if (GetLastError() == ERROR_NO_MORE_FILES)
+	if (LIKELY(GetLastError() == ERROR_NO_MORE_FILES))
 		return BOOL_STATUS_FALSE; /* no files left */
 
 	return BOOL_STATUS_ERROR; /* some other error */
@@ -2249,7 +2249,7 @@ find_next_file_report(const HANDLE dir,
 			 info))
 		return BOOL_STATUS_TRUE; /* file found */
 
-	if (GetLastError() == ERROR_NO_MORE_FILES)
+	if (LIKELY(GetLastError() == ERROR_NO_MORE_FILES))
 		return BOOL_STATUS_FALSE; /* no files left */
 
 	*failure = FAILURE_REASON("find_next_file",
@@ -2277,7 +2277,7 @@ find_close_report(const HANDLE dir,
 {
 	const bool success = (bool) FindClose(dir);
 
-	if (!success)
+	if (UNLIKELY(!success))
 		*failure = FAILURE_REASON("find_close",
 					  "unknown");
 
@@ -2315,7 +2315,7 @@ find_first_file_report(HANDLE *const restrict dir,
 	 *dir = FindFirstFile(path,
 			      info);
 
-	 if (*dir == INVALID_HANDLE_VALUE) {
+	 if (UNLIKELY(*dir == INVALID_HANDLE_VALUE)) {
 		 *failure = FAILURE_REASON("find_first_file",
 					   "unknown");
 		 return false;
@@ -2352,7 +2352,7 @@ opendir_report(DIR *restrict *const restrict dir,
 {
 	*dir = opendir(path);
 
-	if (*dir != NULL)
+	if (LIKELY(*dir != NULL))
 		return true;
 
 	switch (errno) {
@@ -2422,9 +2422,9 @@ opendir_handle(DIR *restrict *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (opendir_report(dir,
-			   path,
-			   &failure))
+	if (LIKELY(opendir_report(dir,
+				  path,
+				  &failure)))
 		return;
 
 	handle(arg,
@@ -2439,9 +2439,9 @@ opendir_handle_cl(DIR *restrict *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (opendir_report(dir,
-			   path,
-			   &failure))
+	if (LIKELY(opendir_report(dir,
+				  path,
+				  &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2477,7 +2477,7 @@ readdir_report(DIR *const restrict dir,
 
 	*entry = readdir(dir);
 
-	if (errno == 0)
+	if (LIKELY(errno == 0))
 		return true;
 
 	switch (errno) {
@@ -2505,9 +2505,9 @@ readdir_handle(DIR *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (readdir_report(dir,
-			   entry,
-			   &failure))
+	if (LIKELY(readdir_report(dir,
+				  entry,
+				  &failure)))
 		return;
 
 	handle(arg,
@@ -2522,9 +2522,9 @@ readdir_handle_cl(DIR *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (readdir_report(dir,
-			   entry,
-			   &failure))
+	if (LIKELY(readdir_report(dir,
+				  entry,
+				  &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2570,8 +2570,8 @@ closedir_handle(DIR *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (closedir_report(dir,
-			    &failure))
+	if (LIKELY(closedir_report(dir,
+				   &failure)))
 		return;
 
 	handle(arg,
@@ -2586,8 +2586,8 @@ closedir_handle_cl(DIR *const restrict dir,
 {
 	const char *restrict failure;
 
-	if (closedir_report(dir,
-			    &failure))
+	if (LIKELY(closedir_report(dir,
+				   &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2637,7 +2637,7 @@ fts_open_report(FTS *restrict *const restrict tree,
 			 options,
 			 compare);
 
-	if (*tree != NULL)
+	if (LIKELY(*tree != NULL))
 		return true;
 
 	switch (errno) {
@@ -2716,11 +2716,11 @@ fts_open_handle(FTS *restrict *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_open_report(tree,
-			    path_argv,
-			    options,
-			    compare,
-			    &failure))
+	if (LIKELY(fts_open_report(tree,
+				   path_argv,
+				   options,
+				   compare,
+				   &failure)))
 		return;
 
 	handle(arg,
@@ -2738,11 +2738,11 @@ fts_open_handle_cl(FTS *restrict *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_open_report(tree,
-			    path_argv,
-			    options,
-			    compare,
-			    &failure))
+	if (LIKELY(fts_open_report(tree,
+				   path_argv,
+				   options,
+				   compare,
+				   &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2790,8 +2790,8 @@ fts_close_handle(FTS *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_close_report(tree,
-			     &failure))
+	if (LIKELY(fts_close_report(tree,
+				    &failure)))
 		return;
 
 	handle(arg,
@@ -2805,8 +2805,8 @@ fts_close_handle_cl(FTS *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_close_report(tree,
-			     &failure))
+	if (LIKELY(fts_close_report(tree,
+				    &failure)))
 		return;
 
 	fail_cl->handle(fail_cl->arg,
@@ -2852,7 +2852,7 @@ fts_read_report(FTSENT *restrict *const restrict entry,
 	*entry = fts_read(tree);
 
 	if (*entry == NULL) {
-		if (errno == 0)
+		if (LIKELY(errno == 0))
 			return true;
 
 		*failure = strerror(errno);
@@ -3007,9 +3007,9 @@ fts_read_handle(FTSENT *restrict *const restrict entry,
 {
 	const char *restrict failure;
 
-	if (fts_read_report(entry,
-			    tree,
-			    &failure))
+	if (LIKELY(fts_read_report(entry,
+				   tree,
+				   &failure)))
 		return;
 
 	fts_close_muffle(tree);
@@ -3027,9 +3027,9 @@ fts_read_handle_cl(FTSENT *restrict *const restrict entry,
 {
 	const char *restrict failure;
 
-	if (fts_read_report(entry,
-			    tree,
-			    &failure))
+	if (LIKELY(fts_read_report(entry,
+				   tree,
+				   &failure)))
 		return;
 
 	fts_close_muffle(tree);
@@ -3087,10 +3087,10 @@ fts_set_handle(FTS *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_set_report(tree,
-			   entry,
-			   options,
-			   &failure))
+	if (LIKELY(fts_set_report(tree,
+				  entry,
+				  options,
+				  &failure)))
 		return;
 
 	fts_close_muffle(tree);
@@ -3108,10 +3108,10 @@ fts_set_handle_cl(FTS *const restrict tree,
 {
 	const char *restrict failure;
 
-	if (fts_set_report(tree,
-			   entry,
-			   options,
-			   &failure))
+	if (LIKELY(fts_set_report(tree,
+				  entry,
+				  options,
+				  &failure)))
 		return;
 
 	fts_close_muffle(tree);
