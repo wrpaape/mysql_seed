@@ -22,7 +22,7 @@ build_table_header(void *arg)
 
 	table->file.contents.bytes = malloc(table->file.contents.length);
 
-	if (table->file.contents.bytes == NULL) {
+	if (UNLIKELY(table->file.contents.bytes == NULL)) {
 		handler_closure_call(&table->fail_cl,
 				     BTH_MALLOC_FAILURE);
 		__builtin_unreachable();

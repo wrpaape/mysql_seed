@@ -46,7 +46,7 @@ build_loader(void *arg)
 
 	contents = malloc(size_est);
 
-	if (contents == NULL) {
+	if (UNLIKELY(contents == NULL)) {
 		handler_closure_call(&database->fail_cl,
 				     MALLOC_FAILURE_MESSAGE("build_loader"));
 		__builtin_unreachable();

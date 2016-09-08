@@ -477,7 +477,7 @@ counter_init_internals(struct Counter *const restrict counter)
 
 	counter->pointers = malloc(size_counter);
 
-	if (counter->pointers == NULL) {
+	if (UNLIKELY(counter->pointers == NULL)) {
 		handler_closure_call(&counter->fail_cl,
 				     CC_ALLOC_FAILURE_MESSAGE);
 		__builtin_unreachable();

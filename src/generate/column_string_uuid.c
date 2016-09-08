@@ -26,7 +26,7 @@ build_column_string_uuid(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSUUID_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -118,7 +118,7 @@ build_column_string_uuid_group(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSUUID_MALLOC_FAILURE);
 		__builtin_unreachable();

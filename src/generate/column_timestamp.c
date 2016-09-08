@@ -32,7 +32,7 @@ build_column_timestamp_fixed(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCTF_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -104,7 +104,7 @@ build_column_timestamp_unique(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCTU_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -195,7 +195,7 @@ build_column_timestamp_unique_group(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCTU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();

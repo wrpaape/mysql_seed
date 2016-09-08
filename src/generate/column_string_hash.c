@@ -66,7 +66,7 @@ build_column_string_hash(void *arg)
 
 	column->contents = malloc(size_hash_state_buffer + length_column);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSH_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -195,7 +195,7 @@ build_column_string_hash_group(void *arg)
 				  + size_hash_state_buffer
 				  + length_column);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSH_MALLOC_FAILURE);
 		__builtin_unreachable();

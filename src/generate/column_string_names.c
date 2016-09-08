@@ -463,7 +463,7 @@ build_column_string_names_first(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FIRST_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -536,7 +536,7 @@ build_column_string_names_first_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FIRST_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -632,7 +632,7 @@ build_column_string_names_last(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_LAST_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -703,7 +703,7 @@ build_column_string_names_last_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_LAST_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -800,7 +800,7 @@ build_column_string_names_full(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FULL_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -871,7 +871,7 @@ build_column_string_names_full_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSN_FULL_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();

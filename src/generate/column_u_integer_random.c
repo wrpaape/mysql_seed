@@ -52,7 +52,7 @@ build_column_u_integer_random(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIR_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -137,7 +137,7 @@ build_column_u_integer_random_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIR_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -250,7 +250,7 @@ build_column_u_integer_random_from(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRF_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -336,7 +336,7 @@ build_column_u_integer_random_from_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRF_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -449,7 +449,7 @@ build_column_u_integer_random_upto(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRU_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -535,7 +535,7 @@ build_column_u_integer_random_upto_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -648,7 +648,7 @@ build_column_u_integer_random_range(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRR_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -734,7 +734,7 @@ build_column_u_integer_random_range_group(void *arg)
 
 	column->contents = malloc(size_est);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIRR_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();

@@ -33,7 +33,7 @@ build_column_datetime_fixed(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCDF_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -105,7 +105,7 @@ build_column_datetime_unique(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCDU_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -196,7 +196,7 @@ build_column_datetime_unique_group(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCDU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();

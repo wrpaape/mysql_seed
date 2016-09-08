@@ -30,7 +30,7 @@ build_column_string_fixed(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSF_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -98,7 +98,7 @@ build_column_string_unique(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSU_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -192,7 +192,7 @@ build_column_string_unique_group(void *arg)
 
 	column->contents = malloc(contents_alloc);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCSU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();

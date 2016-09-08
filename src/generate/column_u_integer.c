@@ -28,7 +28,7 @@ build_column_u_integer_fixed(void *arg)
 
 	column->contents = malloc(length_contents);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIF_MALLOC_FAILURE);
 		__builtin_unreachable();
@@ -162,7 +162,7 @@ build_column_u_integer_unique_group(void *arg)
 
 	column->contents = malloc(contents_alloc);
 
-	if (column->contents == NULL) {
+	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
 				     BCUIU_GROUP_MALLOC_FAILURE);
 		__builtin_unreachable();
