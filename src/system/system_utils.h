@@ -157,7 +157,7 @@ socket_report(int *const restrict socket_descriptor,
 				    type,
 				    protocol);
 
-	if (*socket_descriptor >= 0)
+	if (LIKELY(*socket_descriptor >= 0))
 		return true;
 
 	switch (errno) {
@@ -199,11 +199,11 @@ socket_handle(int *const restrict socket_descriptor,
 {
 	const char *restrict failure;
 
-	if (socket_report(socket_descriptor,
-			  domain,
-			  type,
-			  protocol,
-			  &failure))
+	if (LIKELY(socket_report(socket_descriptor,
+				 domain,
+				 type,
+				 protocol,
+				 &failure)))
 		return;
 
 	handle(arg,
@@ -220,11 +220,11 @@ socket_handle_cl(int *const restrict socket_descriptor,
 {
 	const char *restrict failure;
 
-	if (socket_report(socket_descriptor,
-			  domain,
-			  type,
-			  protocol,
-			  &failure))
+	if (LIKELY(socket_report(socket_descriptor,
+				 domain,
+				 type,
+				 protocol,
+				 &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -302,11 +302,11 @@ size_adapters_addresses_handle(ULONG family,
 {
 	const char *restrict failure;
 
-	if (size_adapters_addresses_report(family,
-					   flags,
-					   reserved,
-					   size_pointer,
-					   &failure))
+	if (LIKELY(size_adapters_addresses_report(family,
+						  flags,
+						  reserved,
+						  size_pointer,
+						  &failure)))
 		return;
 
 	handle(arg,
@@ -323,11 +323,11 @@ size_adapters_addresses_handle_cl(ULONG family,
 {
 	const char *restrict failure;
 
-	if (size_adapters_addresses_report(family,
-					   flags,
-					   reserved,
-					   size_pointer,
-					   &failure))
+	if (LIKELY(size_adapters_addresses_report(family,
+						  flags,
+						  reserved,
+						  size_pointer,
+						  &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -417,12 +417,12 @@ get_adapters_addresses_handle(ULONG family,
 {
 	const char *restrict failure;
 
-	if (get_adapters_addresses_report(family,
-					  flags,
-					  reserved,
-					  adapter_addresses,
-					  size_pointer,
-					  &failure))
+	if (LIKELY(get_adapters_addresses_report(family,
+						 flags,
+						 reserved,
+						 adapter_addresses,
+						 size_pointer,
+						 &failure)))
 		return;
 
 	handle(arg,
@@ -440,12 +440,12 @@ get_adapters_addresses_handle_cl(ULONG family,
 {
 	const char *restrict failure;
 
-	if (get_adapters_addresses_report(family,
-					  flags,
-					  reserved,
-					  adapter_addresses,
-					  size_pointer,
-					  &failure))
+	if (LIKELY(get_adapters_addresses_report(family,
+						 flags,
+						 reserved,
+						 adapter_addresses,
+						 size_pointer,
+						 &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -480,7 +480,7 @@ interface_name_to_index_report(int *const restrict index,
 {
 	*index = interface_name_to_index_imp(name);
 
-	if (*index != 0)
+	if (LIKELY(*index != 0))
 		return true;
 
 	switch (errno) {
@@ -588,9 +588,9 @@ interface_name_to_index_handle(int *const restrict index,
 {
 	const char *restrict failure;
 
-	if (interface_name_to_index_report(index,
-					   name,
-					   &failure))
+	if (LIKELY(interface_name_to_index_report(index,
+						  name,
+						  &failure)))
 		return;
 
 	handle(arg,
@@ -605,9 +605,9 @@ interface_name_to_index_handle_cl(int *const restrict index,
 {
 	const char *restrict failure;
 
-	if (interface_name_to_index_report(index,
-					   name,
-					   &failure))
+	if (LIKELY(interface_name_to_index_report(index,
+						  name,
+						  &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -666,9 +666,9 @@ get_interface_networks_handle(struct ifconf *const restrict configuration,
 {
 	const char *restrict failure;
 
-	if (get_interface_networks_report(configuration,
-					  device_descriptor,
-					  &failure))
+	if (LIKELY(get_interface_networks_report(configuration,
+						 device_descriptor,
+						 &failure)))
 		return;
 
 	handle(arg,
@@ -683,9 +683,9 @@ get_interface_networks_handle_cl(struct ifconf *const restrict configuration,
 {
 	const char *restrict failure;
 
-	if (get_interface_networks_report(configuration,
-					  device_descriptor,
-					  &failure))
+	if (LIKELY(get_interface_networks_report(configuration,
+						 device_descriptor,
+						 &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -743,9 +743,9 @@ get_device_active_flags_handle(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_device_active_flags_report(request,
-					   device_descriptor,
-					   &failure))
+	if (LIKELY(get_device_active_flags_report(request,
+						  device_descriptor,
+						  &failure)))
 		return;
 
 	handle(arg,
@@ -760,9 +760,9 @@ get_device_active_flags_handle_cl(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_device_active_flags_report(request,
-					   device_descriptor,
-					   &failure))
+	if (LIKELY(get_device_active_flags_report(request,
+						  device_descriptor,
+						  &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -820,9 +820,9 @@ get_winsize_handle(struct winsize *const restrict window,
 {
 	const char *restrict failure;
 
-	if (get_winsize_report(window,
-			       file_descriptor,
-			       &failure))
+	if (LIKELY(get_winsize_report(window,
+				      file_descriptor,
+				      &failure)))
 		return;
 
 	handle(arg,
@@ -837,9 +837,9 @@ get_winsize_handle_cl(struct winsize *const restrict window,
 {
 	const char *restrict failure;
 
-	if (get_winsize_report(window,
-			       file_descriptor,
-			       &failure))
+	if (LIKELY(get_winsize_report(window,
+				      file_descriptor,
+				      &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -899,9 +899,9 @@ get_interface_index_handle(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_interface_index_report(request,
-				       device_descriptor,
-				       &failure))
+	if (LIKELY(get_interface_index_report(request,
+					      device_descriptor,
+					      &failure)))
 		return;
 
 	handle(arg,
@@ -916,9 +916,9 @@ get_interface_index_handle_cl(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_interface_index_report(request,
-				       device_descriptor,
-				       &failure))
+	if (LIKELY(get_interface_index_report(request,
+					      device_descriptor,
+					      &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -976,9 +976,9 @@ get_hardware_address_handle(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_hardware_address_report(request,
-					device_descriptor,
-					&failure))
+	if (LIKELY(get_hardware_address_report(request,
+					       device_descriptor,
+					       &failure)))
 		return;
 
 	handle(arg,
@@ -993,9 +993,9 @@ get_hardware_address_handle_cl(struct ifreq *const restrict request,
 {
 	const char *restrict failure;
 
-	if (get_hardware_address_report(request,
-					device_descriptor,
-					&failure))
+	if (LIKELY(get_hardware_address_report(request,
+					       device_descriptor,
+					       &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -1106,13 +1106,13 @@ sysctl_handle(int *const restrict mib_name,
 {
 	const char *restrict failure;
 
-	if (sysctl_report(mib_name,
-			  length_name,
-			  old_data,
-			  size_old_data,
-			  new_data,
-			  size_new_data,
-			  &failure))
+	if (LIKELY(sysctl_report(mib_name,
+				 length_name,
+				 old_data,
+				 size_old_data,
+				 new_data,
+				 size_new_data,
+				 &failure)))
 		return;
 
 	handle(arg,
@@ -1131,13 +1131,13 @@ sysctl_handle_cl(int *const restrict mib_name,
 {
 	const char *restrict failure;
 
-	if (sysctl_report(mib_name,
-			  length_name,
-			  old_data,
-			  size_old_data,
-			  new_data,
-			  size_new_data,
-			  &failure))
+	if (LIKELY(sysctl_report(mib_name,
+				 length_name,
+				 old_data,
+				 size_old_data,
+				 new_data,
+				 size_new_data,
+				 &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -1245,11 +1245,11 @@ getaddrinfo_handle(const char *const node,
 {
 	const char *restrict failure;
 
-	if (getaddrinfo_report(node,
-			       service,
-			       hints,
-			       result,
-			       &failure))
+	if (LIKELY(getaddrinfo_report(node,
+				      service,
+				      hints,
+				      result,
+				      &failure)))
 		return;
 
 	handle(arg,
@@ -1266,11 +1266,11 @@ getaddrinfo_handle_cl(const char *const node,
 {
 	const char *restrict failure;
 
-	if (getaddrinfo_report(node,
-			       service,
-			       hints,
-			       result,
-			       &failure))
+	if (LIKELY(getaddrinfo_report(node,
+				      service,
+				      hints,
+				      result,
+				      &failure)))
 		return;
 
 	handler_closure_call(fail_cl,

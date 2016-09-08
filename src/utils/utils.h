@@ -34,10 +34,6 @@ do {									\
 
 #define MACRO_EXPAND_ARGS(MACRO, ...) MACRO(__VA_ARGS__)
 
-#define LIKELY(BOOL)   __builtin_expect(BOOL, 1)
-#define UNLIKELY(BOOL) __builtin_expect(BOOL, 0)
-
-
 /* returns 'THIS' or 'THAT' according to the predicate 'THIS CMP THAT',
  * where 'CMP' is a binary relational operator */
 #define THIS_OR_THAT(THIS, THAT, CMP) (((THIS) CMP (THAT)) ? (THIS) : (THAT))

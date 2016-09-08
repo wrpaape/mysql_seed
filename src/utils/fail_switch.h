@@ -6,6 +6,7 @@
 #include <stdbool.h>			/* bool */
 #include <errno.h>			/* errno */
 #include "string/string_macros.h"	/* error macros */
+#include "utils/expect.h"		/* LIKELY */
 
 /* must define these in included file */
 #undef FAIL_SWITCH_ROUTINE
@@ -30,9 +31,10 @@ _FS_HANDLE_FAILURE_CASE(default,					\
 /* diagnose failure according to return status
  * ────────────────────────────────────────────────────────────────────────── */
 #define FAIL_SWITCH_STATUS_OPEN(...)					\
-switch (FAIL_SWITCH_ROUTINE(__VA_ARGS__)) {				\
-case FAIL_SWITCH_STATUS_SUCCESS:					\
-	return true;
+const int __fail_switch_status = FAIL_SWITCH_ROUTINE(__VA_ARGS__);	\
+if (LIKELY(__fail_switch_status == FAIL_SWITCH_STATUS_SUCCESS))		\
+	return true;							\
+switch (__fail_switch_status) {
 
 #define FAIL_SWITCH_STATUS_CASE_1(STATUS, R1)				\
 _FS_HANDLE_FAILURE_STATUS(STATUS,					\
@@ -66,10 +68,10 @@ FAIL_SWITCH_STATUS_DEFAULT_CASE()					\
 /* diagnose failure according to errno
  * ────────────────────────────────────────────────────────────────────────── */
 #define FAIL_SWITCH_ERRNO_OPEN(...)					\
-if (FAIL_SWITCH_ROUTINE(__VA_ARGS__)					\
-    != FAIL_SWITCH_ERRNO_FAILURE)					\
+if (LIKELY(   FAIL_SWITCH_ROUTINE(__VA_ARGS__)				\
+	   != FAIL_SWITCH_ERRNO_FAILURE))				\
 	return true;							\
-switch (errno)	{
+switch (errno) {
 
 
 #define FAIL_SWITCH_ERRNO_CASE_1(ERRNO, R1)				\

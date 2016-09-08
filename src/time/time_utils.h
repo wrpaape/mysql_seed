@@ -166,7 +166,7 @@ inline bool
 time_report(time_t *const restrict now,
 	    const char *restrict *const restrict failure)
 {
-	if (time(now) >= 0)
+	if (LIKELY(time(now) >= 0))
 		return true;
 
 	switch (errno) {
@@ -186,8 +186,8 @@ time_handle(time_t *const restrict now,
 {
 	const char *restrict failure;
 
-	if (time_report(now,
-			&failure))
+	if (LIKELY(time_report(now,
+			       &failure)))
 		return;
 
 	handle(arg,
@@ -201,8 +201,8 @@ time_handle_cl(time_t *const restrict now,
 {
 	const char *restrict failure;
 
-	if (time_report(now,
-			&failure))
+	if (LIKELY(time_report(now,
+			       &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -370,8 +370,8 @@ timestamp_now_report(struct Timestamp *const restrict timestamp,
 {
 	time_t now;
 
-	if (time_report(&now,
-			failure)) {
+	if (LIKELY(time_report(&now,
+			       failure))) {
 		timestamp_init(timestamp,
 			       now);
 		return true;
@@ -387,8 +387,8 @@ timestamp_now_handle(struct Timestamp *const restrict timestamp,
 {
 	const char *restrict failure;
 
-	if (timestamp_now_report(timestamp,
-				 &failure))
+	if (LIKELY(timestamp_now_report(timestamp,
+					&failure)))
 		return;
 
 	handle(arg,
@@ -402,8 +402,8 @@ timestamp_now_handle_cl(struct Timestamp *const restrict timestamp,
 {
 	const char *restrict failure;
 
-	if (timestamp_now_report(timestamp,
-				 &failure))
+	if (LIKELY(timestamp_now_report(timestamp,
+					&failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -423,8 +423,8 @@ timespec_now_muffle(struct timespec *const restrict time)
  * https://gist.github.com/jbenet/1087739A (source) */
 	mach_timespec_t mach_time;
 
-	if (clock_get_time(clock_port,
-			   &mach_time) != KERN_SUCCESS)
+	if (LIKELY(clock_get_time(clock_port,
+				  &mach_time) != KERN_SUCCESS))
 		return;
 
 	time->tv_sec  = mach_time.tv_sec;
@@ -454,8 +454,8 @@ timespec_now_status(struct timespec *const restrict time)
 #ifdef __MACH__
 	mach_timespec_t mach_time;
 
-	if (clock_get_time(clock_port,
-			   &mach_time) != KERN_SUCCESS)
+	if (LIKELY(clock_get_time(clock_port,
+				  &mach_time) != KERN_SUCCESS))
 		return false;
 
 	time->tv_sec  = mach_time.tv_sec;
@@ -489,13 +489,15 @@ timespec_now_report(struct timespec *const restrict time,
 
 #undef	FAIL_SWITCH_ROUTINE
 #define FAIL_SWITCH_ROUTINE clock_get_time
-	switch (clock_get_time(clock_port,
-			       &mach_time)) {
-	case KERN_SUCCESS:
+	const kern_return_t status = clock_get_time(clock_port,
+						    &mach_time);
+	if (LIKELY(status == KERN_SUCCESS)) {
 		time->tv_sec  = mach_time.tv_sec;
 		time->tv_nsec = mach_time.tv_nsec;
 		return true;
+	}
 
+	switch (status) {
 	FAIL_SWITCH_STATUS_CASE_1(KERN_INVALID_ADDRESS,
 				  "The specified address is not currently "
 				  "valid.")
@@ -681,8 +683,8 @@ timespec_now_handle(struct timespec *const restrict time,
 {
 	const char *restrict failure;
 
-	if (timespec_now_report(time,
-				&failure))
+	if (LIKELY(timespec_now_report(time,
+				       &failure)))
 		return;
 
 	handle(arg,
@@ -696,8 +698,8 @@ timespec_now_handle_cl(struct timespec *const restrict time,
 {
 	const char *restrict failure;
 
-	if (timespec_now_report(time,
-				&failure))
+	if (LIKELY(timespec_now_report(time,
+				       &failure)))
 		return;
 
 	handler_closure_call(fail_cl,
@@ -750,7 +752,7 @@ timespec_offset_now_report(struct timespec *restrict time,
 {
 	const bool success = timespec_now_report(time,
 						 failure);
-	if (success)
+	if (LIKELY(success))
 		timespec_offset(time,
 				offset);
 	return success;
