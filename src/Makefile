@@ -10,7 +10,7 @@
 # Development Mode
 # ──────────────────────────────────────────────────────────────────────────────
 # toggles utility flags, make targets
-DEVELOPMENT_MODE = T
+DEVELOPMENT_MODE = F
 
 
 # Phony Targets

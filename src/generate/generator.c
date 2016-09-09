@@ -16,34 +16,6 @@ loader_file_init(struct FileHandle *const restrict file,
 		 const struct String *const restrict db_name,
 		 const struct Dirpath *const restrict db_dirpath);
 
-/* Rowspan Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-rowspan_init(struct Rowspan *const restrict rowspan,
-	     struct RowBlock *const restrict parent);
-
-
-/* RowspanInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-rowspan_interval_init(struct RowspanInterval *const restrict interval,
-		      struct Rowspan *const restrict from,
-		      const struct Rowspan *const restrict until);
-
-/* RowBlock Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-row_block_init(struct RowBlock *const restrict row_block,
-	       struct Rowspan *restrict rowspan,
-	       const struct Rowspan *const restrict rowspans_until,
-	       const size_t row_count);
-
-/* RowBlockInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-row_block_interval_init(struct RowBlockInterval *const restrict interval,
-			struct RowBlock *const restrict from,
-			const struct RowBlock *const restrict until);
 
 /* Column Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -87,18 +59,13 @@ column_exit_on_failure(void *arg,
 			     failure);
 	__builtin_unreachable();
 }
+
 extern inline void
 column_init(struct Column *const restrict column,
 	    const struct ColSpec *const restrict spec,
 	    struct Rowspan *const restrict rowspans_from,
 	    struct Table *const restrict parent);
 
-/* ColumnInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-column_interval_init(struct ColumnInterval *const restrict interval,
-		     struct Column *const restrict from,
-		     const struct Column *const restrict until);
 
 /* Table Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -142,15 +109,7 @@ table_exit_on_failure(void *arg,
 			     failure);
 	__builtin_unreachable();
 }
-/* extern inline void */
-/* table_init(struct Table *const restrict table, */
 
-/* TableInterval Operations
- * ────────────────────────────────────────────────────────────────────────── */
-extern inline void
-table_interval_init(struct TableInterval *const restrict interval,
-		    struct Table *const restrict from,
-		    const struct Table *const restrict until);
 
 /* Database Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -195,12 +154,6 @@ database_exit_on_failure(void *arg,
 	__builtin_unreachable();
 }
 
-/* DatabaseInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-extern inline void
-database_interval_init(struct DatabaseInterval *const restrict interval,
-		       struct Database *const restrict from,
-		       const struct Database *const restrict until);
 
 /* Generator Operations
  *─────────────────────────────────────────────────────────────────────────── */

@@ -238,7 +238,7 @@ mysql_seed_generate_constructors(const unsigned int ctor_flags)
 			  && (   (ctor_flags == NONE_CTOR_FLAG)
 			      || (GEN_CTOR_MAP[ctor_flags](&failure)));
 
-	if (!success)
+	if (UNLIKELY(!success))
 		generate_failure_constructor(failure);
 
 	return success;
@@ -286,7 +286,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	size_t count_row_blocks_div;
 	unsigned int col_count;
 
-	if (!mysql_seed_generate_constructors(count->ctor_flags)) {
+	if (UNLIKELY(!mysql_seed_generate_constructors(count->ctor_flags))) {
 		*exit_status = EXIT_FAILURE;
 		return;
 	}
@@ -530,8 +530,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 			 &generator.workers[0],
 			 COUNT_GENERATOR_WORKERS);
 
-	if (!thread_pool_start(&generator.pool,
-			       &failure)) {
+	if (UNLIKELY(!thread_pool_start(&generator.pool,
+					&failure))) {
 		generate_failure_thread_pool(failure);
 
 		free(generator_alloc);
@@ -570,8 +570,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	next_node->next = NULL;
 
 	/* wait for first set of tasks to complete */
-	if (!thread_pool_await(&generator.pool,
-			       &failure))
+	if (UNLIKELY(!thread_pool_await(&generator.pool,
+					&failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 
@@ -615,9 +615,9 @@ DEAD_POOL_FAILURE_A:
 	}
 
 	/* assign second set of tasks */
-	if (!thread_pool_reload(&generator.pool,
-				&generator.build.table_headers,
-				&failure))
+	if (UNLIKELY(!thread_pool_reload(&generator.pool,
+					 &generator.build.table_headers,
+					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	/* build next set of tasks */
@@ -651,8 +651,8 @@ DEAD_POOL_FAILURE_A:
 	next_node->next = NULL;
 
 	/* wait for second set of tasks to complete */
-	if (!thread_pool_await(&generator.pool,
-			       &failure))
+	if (UNLIKELY(!thread_pool_await(&generator.pool,
+					&failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	switch (thread_pool_alive(&generator.pool,
@@ -668,9 +668,9 @@ DEAD_POOL_FAILURE_A:
 	}
 
 	/* assign third set of tasks */
-	if (!thread_pool_reload(&generator.pool,
-				&generator.build.table_contents,
-				&failure))
+	if (UNLIKELY(!thread_pool_reload(&generator.pool,
+					 &generator.build.table_contents,
+					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	/* build fourth and final set of tasks */
@@ -703,8 +703,8 @@ DEAD_POOL_FAILURE_A:
 	next_node->next = NULL;
 
 	/* wait for third set of tasks to complete */
-	if (!thread_pool_await(&generator.pool,
-			       &failure))
+	if (UNLIKELY(!thread_pool_await(&generator.pool,
+					&failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 
@@ -721,9 +721,9 @@ DEAD_POOL_FAILURE_A:
 	}
 
 	/* assign fourth and final set of tasks */
-	if (!thread_pool_reload(&generator.pool,
-				&generator.build.table_files,
-				&failure))
+	if (UNLIKELY(!thread_pool_reload(&generator.pool,
+					 &generator.build.table_files,
+					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	/* free columns */
@@ -731,15 +731,15 @@ DEAD_POOL_FAILURE_A:
 		     (const struct Column *const restrict) rowspans);
 
 	/* wait for fourth and final set of tasks to complete */
-	if (   thread_pool_await(&generator.pool,
-				 &failure)
-	    && thread_pool_stop(&generator.pool,
-				&failure)) {
+	if (   LIKELY(thread_pool_await(&generator.pool,
+					&failure))
+	    && LIKELY(thread_pool_stop(&generator.pool,
+				       &failure))) {
 
-		if (thread_pool_await_exit_success(&generator.pool,
-						   &failure)) {
-			if (   thread_pool_exit_status(&generator.pool)
-			    == EXIT_SUCCESS)
+		if (LIKELY(thread_pool_await_exit_success(&generator.pool,
+							  &failure))) {
+			if (LIKELY(   thread_pool_exit_status(&generator.pool)
+				   == EXIT_SUCCESS))
 				mysql_seed_generate_destructors(exit_status);
 			else
 				goto DEAD_POOL_FAILURE_B;

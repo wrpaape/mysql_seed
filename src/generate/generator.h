@@ -605,63 +605,6 @@ loader_file_init(struct FileHandle *const restrict file,
 		    filename_size);
 }
 
-/* Rowspan Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-rowspan_init(struct Rowspan *const restrict rowspan,
-	     struct RowBlock *const restrict parent)
-{
-	rowspan->parent = parent;
-}
-
-/* RowspanInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-rowspan_interval_init(struct RowspanInterval *const restrict interval,
-		      struct Rowspan *const restrict from,
-		      const struct Rowspan *const restrict until)
-{
-	interval->from  = from;
-	interval->until = until;
-}
-
-/* RowBlock Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-row_block_init(struct RowBlock *const restrict row_block,
-	       struct Rowspan *restrict rowspan,
-	       const struct Rowspan *const restrict rowspans_until,
-	       const size_t row_count)
-{
-	length_lock_init(&row_block->total,
-			 0lu);
-
-	rowspan_interval_init(&row_block->rowspans,
-			      rowspan,
-			      rowspans_until);
-
-	do {
-		rowspan_init(rowspan,
-			     row_block);
-		++rowspan;
-	} while (rowspan < rowspans_until);
-
-
-	row_block->row_count = row_count;
-}
-
-
-/* RowBlockInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-row_block_interval_init(struct RowBlockInterval *const restrict interval,
-			struct RowBlock *const restrict from,
-			const struct RowBlock *const restrict until)
-{
-	interval->from  = from;
-	interval->until = until;
-}
-
 
 /* Column Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -689,17 +632,6 @@ column_init(struct Column *const restrict column,
 	column->parent = parent;
 }
 
-/* ColumnInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-column_interval_init(struct ColumnInterval *const restrict interval,
-		     struct Column *const restrict from,
-		     const struct Column *const restrict until)
-{
-	interval->from  = from;
-	interval->until = until;
-}
-
 
 /* Table Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -708,62 +640,6 @@ table_exit_on_failure(void *arg,
 		      const char *restrict faliure)
 __attribute__((noreturn));
 
-/* inline void */
-/* table_init(struct Table *const restrict table, */
-/* 	   const struct TblSpec *const restrict spec, */
-/* 	   struct Column *restrict column, */
-/* 	   struct Rowspan *restrict rowspan, */
-/* 	   struct Database *const restrict parent) */
-/* { */
-
-/* 	table_file_init(&table->file, */
-/* 			&spec->name, */
-/* 			&parent->dirpath); */
-
-/* 	length_lock_init(&table->total, */
-/* 			 0lu); */
-
-/* 	table->spec = spec; */
-
-/* 	table->contents = NULL; /1* no-op in free on early exit *1/ */
-
-/* 	column_interval_init(&table->columns, */
-/* 			     column, */
-/* 			     columns_until); */
-
-/* 	struct ColSpec *restrict col_spec = spec->col_specs->from; */
-
-/* 	do { */
-/* 		column_init(column, */
-/* 			    col_spec, */
-/* 			    ) */
-
-/* 		++column; */
-/* 	} while (column < columns_until); */
-
-/* 	row_block_interval_init(&table->row_blocks, */
-/* 				row_block, */
-/* 				row_blocks_until); */
-
-/* 	handler_closure_init(&table->fail_cl, */
-/* 			     &table_exit_on_failure, */
-/* 			     table); */
-
-/* 	table->parent = parent; */
-/* } */
-
-
-/* TableInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-table_interval_init(struct TableInterval *const restrict interval,
-		    struct Table *const restrict from,
-		    const struct Table *const restrict until)
-{
-	interval->from	= from;
-	interval->until = until;
-}
-
 
 /* Database Operations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -771,18 +647,6 @@ void
 database_exit_on_failure(void *arg,
 			 const char *restrict faliure)
 __attribute__((noreturn));
-
-
-/* DatabaseInterval Operations
- *─────────────────────────────────────────────────────────────────────────── */
-inline void
-database_interval_init(struct DatabaseInterval *const restrict interval,
-		       struct Database *const restrict from,
-		       const struct Database *const restrict until)
-{
-	interval->from  = from;
-	interval->until = until;
-}
 
 
 /* Generator Operations
