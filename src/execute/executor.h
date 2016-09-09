@@ -8,6 +8,15 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define COUNT_EXECUTOR_WORKERS 4lu
 
+/* default MySQL connection parameters */
+#define MYSQL_DEFAULT_HOST	NULL
+#define MYSQL_DEFAULT_USER	NULL
+#define MYSQL_DEFAULT_PASSWORD	NULL
+#define MYSQL_DEFAULT_DB	NULL
+#define MYSQL_DEFAULT_PORT	0u
+#define MYSQL_DEFAULT_SOCKET	NULL
+#define MYSQL_DEFAULT_FLAGS	0lu
+
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct MysqlServer {
@@ -15,21 +24,27 @@ struct MysqlServer {
 	MYSQL *connection;
 };
 
-struct Credentials {
-	const char *host;
-	const char *user;
-	const char *password;
-	unsigned int port;
-	const char *socket;
-	unsigned long flags;
+
+struct ExecSpec {
+	struct ArgvInterval db_names;
+	const char *restrict user;
+	const char *restrict password;
 };
+
 
 struct Executor {
 	struct ThreadPool pool;	/* all child threads */
 	struct Worker workers[COUNT_EXECUTOR_WORKERS];
 	struct TaskStore load_databases;
+	struct ThreadLog log;
 	struct MysqlServer server;
-	struct Credentials con_spec;
+	struct ExecSpec *exec_spec;
+	int *exit_status;
+};
+
+
+struct ExecArg {
+	struct Executor *executor;
 };
 
 

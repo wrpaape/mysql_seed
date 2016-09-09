@@ -515,66 +515,6 @@ ANSI_NORMAL " EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 "\n" ANSI_UNDERLINE "GENERATOR EXITING ON FAILURE" ANSI_NO_UNDERLINE "\n"
 
 
-/* cleanup
- * ────────────────────────────────────────────────────────────────────────── */
-inline void
-column_destroy(struct Column *const restrict column)
-{
-	free(column->contents);
-}
-
-inline void
-table_destroy(struct Table *const restrict table)
-{
-	free(table->file.contents.bytes);
-
-	const struct Column *const restrict until = table->columns.until;
-	struct Column *restrict from = table->columns.from + 1l; /* skip IDs */
-
-	do {
-		column_destroy(from);
-
-		++from;
-
-	} while (from < until);
-}
-
-
-inline void
-database_destroy(struct Database *const restrict database)
-{
-	const struct Table *const restrict until = database->tables.until;
-	struct Table *restrict from		 = database->tables.from;
-
-	do {
-		table_destroy(from);
-
-		++from;
-
-	} while (from < until);
-}
-
-inline void
-generator_destroy(struct Generator *const restrict generator)
-{
-	/* counter_free_internals(&generator->counter); */
-
-	const struct Database *const restrict until
-	= generator->databases.until;
-
-	struct Database *restrict from = generator->databases.from;
-
-	do {
-		database_destroy(from);
-
-		++from;
-
-	} while (from < until);
-
-
-}
-
-
 /* init Generator FileHandle, Dirpath
  *─────────────────────────────────────────────────────────────────────────── */
 inline void

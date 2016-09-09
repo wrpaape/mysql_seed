@@ -708,13 +708,13 @@ mysql_seed_chdir_root(void)
 {
 	const char *restrict failure;
 
-	if (LIKELY(chdir_report(ROOT_ABSPATH,
-				&failure)))
-		return true;
+	const bool success = chdir_report(ROOT_ABSPATH,
+					  &failure);
 
-	mysql_seed_chdir_root_failure(failure);
+	if (UNLIKELY(!success))
+		mysql_seed_chdir_root_failure(failure);
 
-	return false;
+	return success;
 }
 
 /* change current working directory to database root
@@ -742,13 +742,13 @@ mysql_seed_chdir_db_root(void)
 {
 	const char *restrict failure;
 
-	if (LIKELY(chdir_report(DB_ROOT_ABSPATH,
-				&failure)))
-		return true;
+	const bool success = chdir_report(DB_ROOT_ABSPATH,
+					  &failure);
 
-	mysql_seed_chdir_db_root_failure(failure);
+	if (UNLIKELY(!success))
+		mysql_seed_chdir_db_root_failure(failure);
 
-	return false;
+	return success;
 }
 
 

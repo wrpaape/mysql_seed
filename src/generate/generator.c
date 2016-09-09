@@ -1,16 +1,5 @@
 #include "generate/generator.h"
 
-/* cleanup
- * ────────────────────────────────────────────────────────────────────────── */
-extern inline void
-column_destroy(struct Column *const restrict column);
-extern inline void
-table_destroy(struct Table *const restrict table);
-extern inline void
-database_destroy(struct Database *const restrict database);
-extern inline void
-generator_destroy(struct Generator *const restrict generator);
-
 /* init Generator FileHandle, Dirpath
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
