@@ -292,9 +292,9 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	}
 
 	const size_t row_block_row_count_max
-	= (count->row_count_max < COUNT_WORKERS)
+	= (count->row_count_max < COUNT_GENERATOR_WORKERS)
 	? count->row_count_max
-	: (count->row_count_max / COUNT_WORKERS);
+	: (count->row_count_max / COUNT_GENERATOR_WORKERS);
 
 	const size_t count_row_blocks_max = (count->rows
 					     / row_block_row_count_max)
@@ -528,7 +528,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	thread_pool_init(&generator.pool,
 			 &generator.build.counter_columns_loaders,
 			 &generator.workers[0],
-			 COUNT_WORKERS);
+			 COUNT_GENERATOR_WORKERS);
 
 	if (!thread_pool_start(&generator.pool,
 			       &failure)) {

@@ -50,7 +50,7 @@
 #define FIXED_STRING_LENGTH_MAX		240lu
 #define FIXED_STRING_LENGTH_MAX_STRING	"240"
 
-#define COUNT_WORKERS 4lu
+#define COUNT_GENERATOR_WORKERS 4lu
 
 /* file templates
  *─────────────────────────────────────────────────────────────────────────── */
@@ -482,7 +482,7 @@ struct GeneratorTaskList {
 
 struct Generator {
 	struct ThreadPool pool;			/* all child threads */
-	struct Worker workers[COUNT_WORKERS];
+	struct Worker workers[COUNT_GENERATOR_WORKERS];
 	struct GeneratorTaskList build;
 	struct Counter counter;			/* shared by all */
 	struct ThreadLog log;

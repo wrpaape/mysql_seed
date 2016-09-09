@@ -1159,7 +1159,7 @@ read_status(const int file_descriptor,
 {
 	return read_imp(file_descriptor,
 			buffer,
-			size) == 0;
+			size) != -1;
 }
 
 inline void

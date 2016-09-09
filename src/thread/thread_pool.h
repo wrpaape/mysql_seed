@@ -290,27 +290,33 @@ inline bool
 thread_pool_status_await_success(struct ThreadPoolStatus *const restrict status,
 				 const char *restrict *const restrict failure)
 {
+	bool success;
+
 	mutex_lock_try_catch_open(&status->processing);
 
-	if (UNLIKELY(!mutex_lock_report(&status->processing,
-					failure)))
-		return false;
+	success = mutex_lock_report(&status->processing,
+				    failure);
 
-	while (status->busy)
-		if (UNLIKELY(!thread_cond_await_report(&status->done,
-						       &status->processing,
-						       failure))) {
-			mutex_unlock_muffle(&status->processing);
-			return false;
+	if (LIKELY(success)) {
+		while (status->busy) {
+			success = thread_cond_await_report(&status->done,
+							   &status->processing,
+							   failure);
+
+			if (UNLIKELY(!success)) {
+				mutex_unlock_muffle(&status->processing);
+				goto POP_MUTEX_CLEANUP;
+			}
 		}
 
-	if (UNLIKELY(!mutex_unlock_report(&status->processing,
-					  failure)))
-		return false;
+		success = mutex_unlock_report(&status->processing,
+					      failure);
+	}
 
+POP_MUTEX_CLEANUP:
 	mutex_lock_try_catch_close();
 
-	return true;
+	return success;
 }
 
 inline enum BoolStatus
@@ -518,27 +524,30 @@ supervisor_signal_report(struct Supervisor *const restrict supervisor,
 			 SupervisorEvent *const event,
 			 const char *restrict *const restrict failure)
 {
+	bool success;
+
 	mutex_lock_try_catch_open(&supervisor->listening);
 
-	if (UNLIKELY(!mutex_lock_report(&supervisor->listening,
-					failure)))
-		return false;
 
-	supervisor->event = event;
+	success = mutex_lock_report(&supervisor->listening,
+				   failure);
 
-	if (UNLIKELY(!thread_cond_signal_report(&supervisor->trigger,
-						failure))) {
-		mutex_unlock_muffle(&supervisor->listening);
-		return false;
+	if (LIKELY(success)) {
+		supervisor->event = event;
+
+		success = thread_cond_signal_report(&supervisor->trigger,
+						   failure);
+
+		if (LIKELY(success))
+			success = mutex_unlock_report(&supervisor->listening,
+						     failure);
+		else
+			mutex_unlock_muffle(&supervisor->listening);
 	}
-
-	if (UNLIKELY(!mutex_unlock_report(&supervisor->listening,
-					  failure)))
-	    return false;
 
 	mutex_lock_try_catch_close();
 
-	return true;
+	return success;
 }
 
 inline void
