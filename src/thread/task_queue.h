@@ -593,27 +593,33 @@ inline bool
 task_queue_await_empty_report(struct TaskQueue *const restrict queue,
 			      const char *restrict *const restrict failure)
 {
+	bool success;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
-	if (UNLIKELY(!mutex_lock_report(&queue->lock,
-					failure)))
-		return false;
+	success = mutex_lock_report(&queue->lock,
+				    failure);
 
-	while (queue->head != NULL)
-		if (UNLIKELY(!thread_cond_await_report(&queue->empty,
-						       &queue->lock,
-						       failure))) {
-			mutex_unlock_muffle(&queue->lock);
-			return false;
+	if (LIKELY(success)) {
+		while (queue->head != NULL) {
+			success = thread_cond_await_report(&queue->empty,
+							   &queue->lock,
+							   failure);
+
+			if (UNLIKELY(!success)) {
+				mutex_unlock_muffle(&queue->lock);
+				goto POP_MUTEX_CLEANUP;
+			}
 		}
 
-	if (UNLIKELY(!mutex_unlock_report(&queue->lock,
-					  failure)))
-		return false;
+		success = mutex_unlock_report(&queue->lock,
+					      failure);
+	}
 
+POP_MUTEX_CLEANUP:
 	mutex_lock_try_catch_close();
 
-	return true;
+	return success;
 }
 
 inline void
@@ -807,28 +813,30 @@ task_queue_reload_report(struct TaskQueue *const restrict queue,
 			 struct TaskStore *const restrict store,
 			 const char *restrict *const restrict failure)
 {
+	bool success;
+
 	mutex_lock_try_catch_open(&queue->lock);
 
-	if (UNLIKELY(!mutex_lock_report(&queue->lock,
-					failure)))
-		return false;
+	success = mutex_lock_report(&queue->lock,
+				    failure);
 
-	queue->head = store->head;
-	queue->last = store->last;
+	if (LIKELY(success)) {
+		queue->head = store->head;
+		queue->last = store->last;
 
-	if (UNLIKELY(!thread_cond_signal_report(&queue->node_ready,
-						failure))) {
-		mutex_unlock_muffle(&queue->lock);
-		return false;
+		success = thread_cond_signal_report(&queue->node_ready,
+						    failure);
+
+		if (LIKELY(success))
+			success = mutex_unlock_report(&queue->lock,
+						      failure);
+		else
+			mutex_unlock_muffle(&queue->lock);
 	}
-
-	if (UNLIKELY(!mutex_unlock_report(&queue->lock,
-					  failure)))
-		return false;
 
 	mutex_lock_try_catch_close();
 
-	return true;
+	return success;
 }
 
 inline void

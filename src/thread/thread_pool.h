@@ -323,23 +323,26 @@ inline enum BoolStatus
 thread_pool_status_check_busy(struct ThreadPoolStatus *const restrict status,
 			      const char *restrict *const restrict failure)
 {
-	bool busy;
+	enum BoolStatus busy;
 
 	mutex_lock_try_catch_open(&status->processing);
 
-	if (UNLIKELY(!mutex_lock_report(&status->processing,
-					failure)))
-		return BOOL_STATUS_ERROR;
+	if (LIKELY(mutex_lock_report(&status->processing,
+				     failure))) {
 
-	busy = status->busy;
+		busy = (enum BoolStatus) status->busy;
 
-	if (UNLIKELY(!mutex_unlock_report(&status->processing,
-					  failure)))
-		return BOOL_STATUS_ERROR;
+		if (UNLIKELY(!mutex_unlock_report(&status->processing,
+						  failure)))
+			busy = BOOL_STATUS_ERROR;
+
+	} else {
+		busy = BOOL_STATUS_ERROR;
+	}
 
 	mutex_lock_try_catch_close();
 
-	return (enum BoolStatus) busy;
+	return busy;
 }
 
 
@@ -527,7 +530,6 @@ supervisor_signal_report(struct Supervisor *const restrict supervisor,
 	bool success;
 
 	mutex_lock_try_catch_open(&supervisor->listening);
-
 
 	success = mutex_lock_report(&supervisor->listening,
 				   failure);

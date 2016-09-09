@@ -272,8 +272,8 @@ thread_log_append_uint(struct ThreadLog *const restrict log,
 		       const uintmax_t n)
 {
 	log->current = put_uint_until(log->current,
-					  n,
-					  log->until);
+				      n,
+				      log->until);
 }
 
 inline void
@@ -281,8 +281,8 @@ thread_log_append_int(struct ThreadLog *const restrict log,
 		      const intmax_t n)
 {
 	log->current = put_int_until(log->current,
-					 n,
-					 log->until);
+				     n,
+				     log->until);
 }
 
 inline void
@@ -290,8 +290,8 @@ thread_log_append_pointer_id(struct ThreadLog *const restrict log,
 			     void *const restrict pointer)
 {
 	log->current = put_pointer_id_until(log->current,
-						pointer,
-						log->until);
+					    pointer,
+					    log->until);
 }
 
 inline void
@@ -344,10 +344,10 @@ thread_log_append_int_length(struct ThreadLog *const restrict log,
 					+ length;
 
 	log->current = put_int_until(log->current,
-					 n,
-					 (length_ptr > log->until)
-					 ? log->until
-					 : length_ptr);
+				     n,
+				     (length_ptr > log->until)
+				     ? log->until
+				     : length_ptr);
 }
 
 inline void
@@ -359,10 +359,10 @@ thread_log_append_pointer_id_length(struct ThreadLog *const restrict log,
 					+ length;
 
 	log->current = put_pointer_id_until(log->current,
-						pointer,
-						(length_ptr > log->until)
-						? log->until
-						: length_ptr);
+					    pointer,
+					    (length_ptr > log->until)
+					    ? log->until
+					    : length_ptr);
 }
 
 inline void
