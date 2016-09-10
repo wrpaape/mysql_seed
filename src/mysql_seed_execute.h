@@ -3,20 +3,24 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
-#include "execute/execute.h"	/* mysql API */
+#include "execute/execute.h"	/* execute mode */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define INVALID_DATABASE_FLAG_HEADER INVALID_FLAG_HEADER("DATABASE")
-#define NO_DATABASE_FLAG_MESSAGE NO_FLAG_MESSAGE("DATABASE")
+#define FAILURE_NO_EXEC_SPEC						\
+EXECUTE_FAILURE("no EXEC_SPEC provided") MORE_INFO_MESSAGE
 
-/* print error  messsage and return 'EXIT_FAILURE'
+
+/* print error messsage
  *─────────────────────────────────────────────────────────────────────────── */
-/* static inline int */
-/* print_no_database_name(void); */
-
-/* static inline int */
-/* print_invalid_database_name(char *const restrict db_name); */
+/* irrecoverable failures */
+inline void
+generate_failure_no_exec_spec(void);
+{
+	write_muffle(STDERR_FILENO,
+		     FAILURE_NO_EXEC_SPEC,
+		     sizeof(FAILURE_NO_EXEC_SPEC) - 1lu);
+}
 
 /* dispatch load mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
@@ -24,7 +28,10 @@ inline int
 execute_dispatch(char *const restrict *const restrict arg_ptr,
 		 const int rem_argc)
 {
-	return EXIT_FAILURE;
+	if (rem_argc == 0lu) {
+		generate_failure_no_exec_spec();
+		return EXIT_FAILURE;
+	}
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */
