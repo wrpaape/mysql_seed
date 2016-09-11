@@ -10,7 +10,7 @@
 # Development Mode
 # ──────────────────────────────────────────────────────────────────────────────
 # toggles utility flags, make targets
-DEVELOPMENT_MODE = F
+DEVELOPMENT_MODE = T
 
 
 # Phony Targets
@@ -1094,19 +1094,38 @@ GENERATE_GENERATE_OBJ_GROUP	:= $(GENERATE_GENERATE_OBJ)			\
 TARGETS				+= $(GENERATE_GENERATE_OBJ)
 
 
+
 ## EXECUTE MODULES
 # ══════════════════════════════════════════════════════════════════════════════
+# execute/executor
+# ──────────────────────────────────────────────────────────────────────────────
+EXECUTE_EXECUTOR_SRC 		:= $(call HELPER_SOURCE_PATH,execute executor)
+EXECUTE_EXECUTOR_HDR		:= $(call HELPER_HEADER_PATH,execute executor)
+EXECUTE_EXECUTOR_OBJ 		:= $(call HELPER_OBJECT_PATH,execute executor)
+# ─────────────── target prequisites ───────────────────────────────────────────
+EXECUTE_EXECUTOR_OBJ_PREQS	:= $(EXECUTE_EXECUTOR_SRC) 		\
+			   	   $(EXECUTE_EXECUTOR_HDR) 		\
+			   	   $(FILE_HDR)				\
+				   $(THREAD_THREAD_POOL_HDR)
+EXECUTE_EXECUTOR_OBJ_GROUP	:= $(EXECUTE_EXECUTOR_OBJ)		\
+			   	   $(FILE_OBJ_GROUP)			\
+				   $(THREAD_THREAD_POOL_OBJ_GROUP)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TARGETS				+= $(EXECUTE_EXECUTE_OBJ)
+
+
+
 # execute/execute
 # ──────────────────────────────────────────────────────────────────────────────
 EXECUTE_EXECUTE_SRC 		:= $(call HELPER_SOURCE_PATH,execute execute)
 EXECUTE_EXECUTE_HDR		:= $(call HELPER_HEADER_PATH,execute execute)
 EXECUTE_EXECUTE_OBJ 		:= $(call HELPER_OBJECT_PATH,execute execute)
 # ─────────────── target prequisites ───────────────────────────────────────────
-EXECUTE_EXECUTE_OBJ_PREQS	:= $(EXECUTE_EXECUTE_SRC) 	\
-			   	   $(EXECUTE_EXECUTE_HDR) 	\
-			   	   $(FILE_HDR)
-EXECUTE_EXECUTE_OBJ_GROUP	:= $(EXECUTE_EXECUTE_OBJ)	\
-			   	   $(FILE_OBJ_GROUP)
+EXECUTE_EXECUTE_OBJ_PREQS	:= $(EXECUTE_EXECUTE_SRC) 		\
+			   	   $(EXECUTE_EXECUTE_HDR) 		\
+			   	   $(EXECUTE_EXECUTOR_HDR)
+EXECUTE_EXECUTE_OBJ_GROUP	:= $(EXECUTE_EXECUTE_OBJ)		\
+			   	   $(EXECUTE_EXECUTOR_OBJ_GROUP)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TARGETS				+= $(EXECUTE_EXECUTE_OBJ)
 
@@ -1136,10 +1155,10 @@ EXECUTE_SRC 		:= $(call PROJECT_SOURCE_PATH,execute)
 EXECUTE_HDR		:= $(call PROJECT_HEADER_PATH,execute)
 EXECUTE_OBJ 		:= $(call PROJECT_OBJECT_PATH,execute)
 # ─────────────── target prequisites ───────────────────────────────────────────
-EXECUTE_OBJ_PREQS	:= $(EXECUTE_SRC) 	\
-			   $(EXECUTE_HDR) 	\
+EXECUTE_OBJ_PREQS	:= $(EXECUTE_SRC) 		\
+			   $(EXECUTE_HDR) 		\
 			   $(EXECUTE_EXECUTE_HDR)
-EXECUTE_OBJ_GROUP	:= $(EXECUTE_OBJ)	\
+EXECUTE_OBJ_GROUP	:= $(EXECUTE_OBJ)		\
 			   $(EXECUTE_EXECUTE_OBJ_GROUP)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TARGETS			+= $(EXECUTE_OBJ)
@@ -2410,6 +2429,34 @@ TARGETS				+= $(GENERATE_GENERATE_TRNR_SRC)	\
 
 ## EXECUTE MODULES
 # ══════════════════════════════════════════════════════════════════════════════
+# execute/executor unit test
+# ──────────────────────────────────────────────────────────────────────────────
+EXECUTE_EXECUTOR_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,execute executor)
+EXECUTE_EXECUTOR_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,execute executor)
+EXECUTE_EXECUTOR_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,execute executor)
+EXECUTE_EXECUTOR_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,execute executor)
+EXECUTE_EXECUTOR_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,execute executor)
+# ─────────────── target prequisites ───────────────────────────────────────────
+EXECUTE_EXECUTOR_TRNR_SRC_PREQS	:= $(EXECUTE_EXECUTOR_TEST_SRC)		\
+			   	   $(TEST_RUNNER_SOURCE_DIR)
+EXECUTE_EXECUTOR_TEST_OBJ_PREQS	:= $(EXECUTE_EXECUTOR_TEST_SRC)		\
+			   	   $(EXECUTE_EXECUTOR_OBJ_PREQS) 	\
+			   	   $(UNITY_OBJ_PREQS)
+EXECUTE_EXECUTOR_TRNR_OBJ_PREQS	:= $(EXECUTE_EXECUTOR_TRNR_SRC)		\
+			   	   $(EXECUTE_EXECUTOR_TEST_OBJ_PREQS)
+EXECUTE_EXECUTOR_TEST_BIN_PREQS	:= $(EXECUTE_EXECUTOR_TRNR_OBJ)		\
+			   	   $(EXECUTE_EXECUTOR_TEST_OBJ)		\
+			   	   $(EXECUTE_EXECUTOR_OBJ_GROUP)	\
+			   	   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES			+= $(EXECUTE_EXECUTOR_TEST_BIN)
+TARGETS				+= $(EXECUTE_EXECUTOR_TRNR_SRC)		\
+				   $(EXECUTE_EXECUTOR_TRNR_OBJ)		\
+				   $(EXECUTE_EXECUTOR_TEST_OBJ)		\
+				   $(EXECUTE_EXECUTOR_TEST_BIN)
+
+
+
 # execute/execute unit test
 # ──────────────────────────────────────────────────────────────────────────────
 EXECUTE_EXECUTE_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,execute execute)
@@ -2484,7 +2531,7 @@ EXECUTE_TRNR_OBJ_PREQS	:= $(EXECUTE_TRNR_SRC)				\
 			   $(EXECUTE_TEST_OBJ_PREQS)
 EXECUTE_TEST_BIN_PREQS	:= $(EXECUTE_TRNR_OBJ)				\
 			   $(EXECUTE_TEST_OBJ)				\
-			   $(EXECUTE_OBJ)				\
+			   $(EXECUTE_OBJ_GROUP)				\
 			   $(UNITY_OBJ)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TEST_BINARIES		+= $(EXECUTE_TEST_BIN)
@@ -2655,6 +2702,11 @@ $(THREAD_THREAD_UTILS_OBJ): $(THREAD_THREAD_UTILS_OBJ_PREQS)
 # make execute/execute object
 # ──────────────────────────────────────────────────────────────────────────────
 $(EXECUTE_EXECUTE_OBJ): $(EXECUTE_EXECUTE_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+# make execute/executor object
+# ──────────────────────────────────────────────────────────────────────────────
+$(EXECUTE_EXECUTOR_OBJ): $(EXECUTE_EXECUTOR_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 # make generate/generate object
@@ -2977,6 +3029,26 @@ $(EXECUTE_EXECUTE_TEST_OBJ): $(EXECUTE_EXECUTE_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(EXECUTE_EXECUTE_TRNR_SRC): $(EXECUTE_EXECUTE_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for execute/executor
+# make:
+# 	execute_executor_test		binary,
+# 	execute_executor_test_runner 	object,
+# 	execute_executor_test		object, and
+# 	execute_executor_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(EXECUTE_EXECUTOR_TEST_BIN): $(EXECUTE_EXECUTOR_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(EXECUTE_EXECUTOR_TRNR_OBJ): $(EXECUTE_EXECUTOR_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(EXECUTE_EXECUTOR_TEST_OBJ): $(EXECUTE_EXECUTOR_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(EXECUTE_EXECUTOR_TRNR_SRC): $(EXECUTE_EXECUTOR_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 

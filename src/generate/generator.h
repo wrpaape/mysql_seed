@@ -9,9 +9,12 @@
 #include "random/random_generator.h"	/* number generator closures */
 #include "generate/group.h"		/* group partitioner */
 
-/* minimum valid spec lengths
+
+/* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
-/* -c COL_NAME COL_TYPE */
+/* minimum valid spec lengths
+ *
+ * -c COL_NAME COL_TYPE */
 #define COL_SPEC_LENGTH_MIN	   3lu
 #define COL_SPEC_LENGTH_MIN_STRING "3"
 
@@ -22,9 +25,9 @@
 /* -d DB_NAME TBL_SPEC */
 #define DB_SPEC_LENGTH_MIN	   8lu
 #define DB_SPEC_LENGTH_MIN_STRING "8"
+#define DB_SPEC_MINIMAL							\
+"-d DB_NAME -t TBL_NAME ROW_COUNT -c COL_NAME COL_TYPE"
 
-/* macro constants
- *─────────────────────────────────────────────────────────────────────────── */
 /* Counter limits */
 #if (SIZE_MAX < UINT32_MAX)
 #	define UPTO_MAX				9999lu

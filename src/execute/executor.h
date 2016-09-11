@@ -4,6 +4,7 @@
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_file.h"	/* exit, file, string utils */
+#include "thread/thread_pool.h"	/* ThreadPool */
 #include <my_global.h>		/* mysql API */
 #include <mysql.h>		/* mysql API */
 
@@ -20,6 +21,11 @@
 #define MYSQL_DEFAULT_PORT	0u
 #define MYSQL_DEFAULT_SOCKET	NULL
 #define MYSQL_DEFAULT_FLAGS	0lu
+
+/* -d DB_NAME */
+#define EXEC_SPEC_LENGTH_MIN		2lu
+#define EXEC_SPEC_LENGTH_MIN_STRING	"2"
+#define EXEC_SPEC_MINIMAL		"-d DB_NAME"
 
 
 /* typedefs, struct declarations
@@ -43,7 +49,7 @@ struct Executor {
 	struct TaskStore load_databases;
 	struct ThreadLog log;
 	struct MysqlServer server;
-	struct ExecSpec *exec_spec;
+	const struct ExecSpec *restrict exec_spec;
 	int *exit_status;
 };
 
@@ -52,8 +58,5 @@ struct ExecArg {
 	struct Executor *executor;
 };
 
-
-void
-load_database(void *arg);
 
 #endif /* ifndef MYSQL_SEED_EXECUTE_EXECUTOR_H_ */

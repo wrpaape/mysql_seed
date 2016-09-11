@@ -30,4 +30,4 @@ invalid_mode(char *const restrict mode);
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
 help_dispatch(char *const restrict *const restrict arg,
-	      const int rem_argc);
+	      const unsigned int rem_argc);

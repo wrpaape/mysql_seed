@@ -13,7 +13,7 @@ print_invalid_mode_flag(char *const restrict arg);
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
 mode_dispatch(char *const *const restrict from,
-	      const int rem_argc);
+	      const unsigned int rem_argc);
 
 
 /* main entry point
@@ -28,5 +28,5 @@ main(int argc,
 	}
 
 	return mode_dispatch(argv + 1l,
-			     argc - 2);
+			     argc - 2u);
 }

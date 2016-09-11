@@ -483,7 +483,7 @@ remove_dispatch(char *const *const restrict arg)
 {
 	const char *restrict rm_spec = *arg;
 
-	if (rm_spec == NULL) {
+	if (UNLIKELY(rm_spec == NULL)) {
 		remove_failure_no_rm_spec();
 		return EXIT_FAILURE;
 	}

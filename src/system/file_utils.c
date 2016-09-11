@@ -260,7 +260,7 @@ unlink_relative_handle_cl(const int directory_descriptor,
 			  const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifndef WIN32 */
 
-/* fetch info on a file */
+/* fetch info on a file from its path */
 extern inline bool
 stat_status(const char *const restrict path,
 	    struct StatBuffer *const restrict buffer);
@@ -280,6 +280,27 @@ extern inline void
 stat_handle_cl(const char *const restrict path,
 	       struct StatBuffer *const restrict buffer,
 	       const struct HandlerClosure *const restrict fail_cl);
+
+/* fetch info on a file from its file descriptor */
+extern inline bool
+fstat_status(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer);
+extern inline void
+fstat_muffle(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer);
+extern inline bool
+fstat_report(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer,
+	     const char *restrict *const restrict failure);
+extern inline void
+fstat_handle(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer,
+	     Handler *const handle,
+	     void *arg);
+extern inline void
+fstat_handle_cl(const int file_descriptor,
+		struct StatBuffer *const restrict buffer,
+		const struct HandlerClosure *const restrict fail_cl);
 
 /* mkdir (absolute or relative path) */
 extern inline bool

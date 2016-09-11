@@ -142,12 +142,20 @@
 #	undef unlink_relative_imp
 #	warning "unlink_relative undefined"
 
-/* fetch info on a file */
+/* buffer struct for stat_imp, fstat_imp */
+#	define StatBuffer _stat
+
+/* fetch info on a file from its path */
 #	define stat_imp(PATH,						\
 			BUFFER)						\
 	_stat(PATH,							\
 	      BUFFER)
-#	define StatBuffer _stat
+
+/* fetch info on a file from its file descriptor */
+#	define fstat_imp(FILE_DESCRIPTOR,				\
+			 BUFFER)					\
+	_fstat(FILE_DESCRIPTOR,						\
+	       BUFFER)
 
 /* make a directory */
 #	define mkdir_imp(PATH,						\
@@ -228,12 +236,20 @@
 		 RELATIVE_PATH,						\
 		 UNLINK_FLAG)
 
-/* fetch info on a file */
+/* buffer struct for stat_imp, fstat_imp */
+#	define StatBuffer stat
+
+/* fetch info on a file from its path */
 #	define stat_imp(PATH,						\
 			BUFFER)						\
 	stat(PATH,							\
 	     BUFFER)
-#	define StatBuffer stat
+
+/* fetch info on a file from its file descriptor */
+#	define fstat_imp(FILE_DESCRIPTOR,				\
+			 BUFFER)					\
+	fstat(FILE_DESCRIPTOR,						\
+	      BUFFER)
 
 /* make a directory */
 #	define mkdir_imp(PATH,						\
@@ -1709,7 +1725,7 @@ unlink_relative_handle_cl(const int directory_descriptor,
 }
 #endif /* ifndef WIN32 */
 
-/* fetch info on a file */
+/* fetch info on a file from its path */
 inline bool
 stat_status(const char *const restrict path,
 	    struct StatBuffer *const restrict buffer)
@@ -1733,7 +1749,6 @@ stat_report(const char *const restrict path,
 	    struct StatBuffer *const restrict buffer,
 	    const char *restrict *const restrict failure)
 {
-
 	FAIL_SWITCH_ERRNO_OPEN(path,
 			       buffer)
 	FAIL_SWITCH_ERRNO_CASE_1(EACCES,
@@ -1799,6 +1814,85 @@ stat_handle_cl(const char *const restrict path,
 			failure);
 	__builtin_unreachable();
 }
+
+
+/* fetch info on a file from its file descriptor */
+inline bool
+fstat_status(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer)
+{
+	return fstat_imp(file_descriptor,
+			 buffer) == 0;
+}
+
+inline void
+fstat_muffle(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer)
+{
+	(void) fstat_imp(file_descriptor,
+			 buffer);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE fstat_imp
+inline bool
+fstat_report(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(file_descriptor,
+			       buffer)
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'file_descriptor' is not a valid open file "
+				 "descriptor.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'buffer' points to an invalid address.")
+	FAIL_SWITCH_ERRNO_CASE_1(EIO,
+				 "An I/O error occurred while reading from or "
+				 "writing to the file system.")
+	FAIL_SWITCH_ERRNO_CASE_1(EOVERFLOW,
+				 "The file size in bytes or the number of "
+				 "blocks allocated to the file or the file "
+				 "serial number cannot be represented correctly"
+				 " in the structure pointed to by 'buffer'.")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+fstat_handle(const int file_descriptor,
+	     struct StatBuffer *const restrict buffer,
+	     Handler *const handle,
+	     void *arg)
+{
+	const char *restrict failure;
+
+	if (LIKELY(fstat_report(file_descriptor,
+				buffer,
+				&failure)))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+fstat_handle_cl(const int file_descriptor,
+		struct StatBuffer *const restrict buffer,
+		const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (LIKELY(fstat_report(file_descriptor,
+				buffer,
+				&failure)))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
 
 
 /* mkdir (absolute or relative path) */

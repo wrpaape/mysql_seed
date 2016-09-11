@@ -53,7 +53,7 @@ print_invalid_mode_flag(char *const restrict arg)
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 mode_dispatch(char *const *const restrict from,
-	      const int rem_argc)
+	      const unsigned int rem_argc)
 {
 	char *const restrict flag = *from;
 

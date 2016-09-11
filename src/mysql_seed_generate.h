@@ -67,8 +67,8 @@ GENERATE_FAILURE("no valid DB_SPEC")
 #define ERROR_DB_SPEC_SHORT						\
 PARSE_ERROR_MESSAGE("DB_SPEC too short - need at least "		\
 		    DB_SPEC_LENGTH_MIN_STRING " arguments to describe "	\
-		    "a database in generate mode, ignoring final "	\
-		    "DB_SPEC starting with:")
+		    "a database in generate mode (" DB_SPEC_MINIMAL ")"	\
+		    ", ignoring final DB_SPEC starting with:")
 
 #define ERROR_EXPECTED_DB_FLAG_HEADER					\
 PARSE_ERROR_HEADER("expected DATABASE flag instead of")
@@ -7117,9 +7117,9 @@ parse_db_specs(struct GenerateParseState *const restrict state)
 
 inline int
 generate_dispatch(char *const restrict *const restrict arg,
-		  const int rem_argc)
+		  const unsigned int rem_argc)
 {
-	if (rem_argc == 0lu) {
+	if (UNLIKLEY(rem_argc == 0u)) {
 		generate_failure_no_db_spec();
 		return EXIT_FAILURE;
 	}
