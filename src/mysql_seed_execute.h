@@ -12,62 +12,66 @@
 EXECUTE_FAILURE("no EXEC_SPEC provided") MORE_INFO_MESSAGE
 
 #define FAILURE_EXEC_SPEC_SHORT						\
-GENERATE_FAILURE("EXEC_SPEC too short - need at least "			\
-		 EXEC_SPEC_LENGTH_MIN_STRING " arguments to load a "	\
-		 "single database into MySQL using default USER with "	\
-		 "no PASSWORD (" EXEC_SPEC_MINIMAL ")"
+EXECUTE_FAILURE("EXEC_SPEC too short - need at least "			\
+		EXEC_SPEC_LENGTH_MIN_STRING " arguments to load a "	\
+		"single database into MySQL using default USER with "	\
+		"no PASSWORD (" EXEC_SPEC_MINIMAL ")")
 
 
-/* print error messsage
+/* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
+#define EXECUTE_DISPATH_MAP_LENGTH 7u
+
+
+/* typedefs, struct declarations
+ *─────────────────────────────────────────────────────────────────────────── */
+typedef int
+ExecuteDispatchNode(char *const restrict *restrict arg);
+
+
+/* global constants
+ *─────────────────────────────────────────────────────────────────────────── */
+extern ExecuteDispatchNode *const
+EXECUTE_DISPATCH_MAP[EXECUTE_DISPATH_MAP_LENGTH];
+
+
+inline int
+execute_dispatch_large(char *const restrict *restrict arg,
+		       char *const restrict *const restrict until)
+{
+	return EXIT_FAILURE;
+}
+
+/* ExecuteDispatchNodes
+ *─────────────────────────────────────────────────────────────────────────── */
+int
+execute_dispatch6(char *const restrict *restrict arg);
+int
+execute_dispatch5(char *const restrict *restrict arg);
+int
+execute_dispatch4(char *const restrict *restrict arg);
+int
+execute_dispatch3(char *const restrict *restrict arg);
+int
+execute_dispatch2(char *const restrict *restrict arg);
 /* irrecoverable failures */
-inline void
-execute_failure_no_exec_spec(void)
-{
-	write_muffle(STDERR_FILENO,
-		     FAILURE_NO_EXEC_SPEC,
-		     sizeof(FAILURE_NO_EXEC_SPEC) - 1lu);
-}
+int
+execute_failure_short_exec_spec(char *const restrict *restrict arg);
+int
+execute_failure_no_exec_spec(char *const restrict *restrict arg);
 
-inline void
-execute_failure_short_exec_spec(void)
-{
-	write_muffle(STDERR_FILENO,
-		     FAILURE_EXEC_SPEC_SHORT,
-		     sizeof(FAILURE_EXEC_SPEC_SHORT) - 1lu);
-}
-
-/* parse argv
- *─────────────────────────────────────────────────────────────────────────── */
-inline bool
-parse_
 
 
 /* dispatch load mode according to 'arg'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-execute_dispatch(char *const restrict *const restrict arg,
+execute_dispatch(char *const restrict *restrict arg,
 		 const unsigned int rem_argc)
 {
-	struct ExecSpec exec_spec;
-
-
-	switch (rem_argc) {
-	default:
-
-	case 2u:
-		break;
-
-	case 1u:
-		generate_failure_db_spec_short();
-		return EXIT_FAILURE;
-
-	case 0u:
-		generate_failure_no_db_spec();
-		return EXIT_FAILURE;
-	}
-
-	return mysql_seed_execute(&exec_spec);
+	return (rem_argc < EXECUTE_DISPATH_MAP_LENGTH)
+	     ? (EXECUTE_DISPATCH_MAP[rem_argc])(arg)
+	     : execute_dispatch_large(arg,
+				      arg + rem_argc);
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */

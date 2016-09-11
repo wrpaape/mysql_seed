@@ -7119,7 +7119,7 @@ inline int
 generate_dispatch(char *const restrict *const restrict arg,
 		  const unsigned int rem_argc)
 {
-	if (UNLIKLEY(rem_argc == 0u)) {
+	if (UNLIKELY(rem_argc == 0u)) {
 		generate_failure_no_db_spec();
 		return EXIT_FAILURE;
 	}
