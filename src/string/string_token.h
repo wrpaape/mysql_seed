@@ -49,14 +49,22 @@ do {				\
 #define _ANSI_BG(PTR, B3)	_BIG_ANSI(PTR, 52, B3)
 
 /* 4 bytes */
-#define ANSI_FAINT	"\e[2m"
-#define ANSI_UNDERLINE	"\e[4m"
-#define ANSI_BRIGHT	"\e[1m"
-#define ANSI_RESET	"\e[0m"
-#define ANSI_CLEAR	"\e[2J"
-#define ANSI_BLINK	"\e[5m"
-#define ANSI_INVERSE	"\e[7m"
-#define ANSI_REVERSE	ANSI_INVERSE
+#define ANSI_FAINT		"\e[2m"
+#define ANSI_UNDERLINE		"\e[4m"
+#define ANSI_BRIGHT		"\e[1m"
+#define ANSI_RESET		"\e[0m"
+#define ANSI_CLEAR		"\e[2J"
+#define ANSI_BLINK		"\e[5m"
+#define ANSI_INVERSE		"\e[7m"
+#define ANSI_REVERSE		ANSI_INVERSE
+#define ANSI_FAINT_WIDTH	4
+#define ANSI_UNDERLINE_WIDTH	4
+#define ANSI_BRIGHT_WIDTH	4
+#define ANSI_RESET_WIDTH	4
+#define ANSI_CLEAR_WIDTH	4
+#define ANSI_BLINK_WIDTH	4
+#define ANSI_INVERSE_WIDTH	4
+#define ANSI_REVERSE_WIDTH	4
 
 #define PUT_ANSI_RESET(PTR)	_SML_ANSI(PTR, 48)
 #define PUT_ANSI_BRIGHT(PTR)	_SML_ANSI(PTR, 49)
@@ -70,6 +78,9 @@ do {				\
 #define ANSI_NORMAL		"\e[22m"
 #define ANSI_BLINK_OFF		"\e[25m"
 #define ANSI_NO_UNDERLINE	"\e[24m"
+#define ANSI_NORMAL_WIDTH	5
+#define ANSI_BLINK_OFF_WIDTH	5
+#define ANSI_NO_UNDERLINE_WIDTH	5
 
 #define ANSI_BLACK_BG		"\e[40m"
 #define ANSI_RED_BG		"\e[41m"
@@ -87,6 +98,22 @@ do {				\
 #define ANSI_RED		"\e[31m"
 #define ANSI_MAGENTA		"\e[35m"
 #define ANSI_BLACK		"\e[30m"
+#define ANSI_BLACK_BG_WIDTH	5
+#define ANSI_RED_BG_WIDTH	5
+#define ANSI_GREEN_BG_WIDTH	5
+#define ANSI_YELLOW_BG_WIDTH	5
+#define ANSI_BLUE_BG_WIDTH	5
+#define ANSI_MAGENTA_BG_WIDTH	5
+#define ANSI_CYAN_BG_WIDTH	5
+#define ANSI_WHITE_BG_WIDTH	5
+#define ANSI_WHITE_WIDTH	5
+#define ANSI_BLUE_WIDTH		5
+#define ANSI_CYAN_WIDTH		5
+#define ANSI_GREEN_WIDTH	5
+#define ANSI_YELLOW_WIDTH	5
+#define ANSI_RED_WIDTH		5
+#define ANSI_MAGENTA_WIDTH	5
+#define ANSI_BLACK_WIDTH	5
 
 #define PUT_ANSI_NORMAL(PTR)		_ANSI_OFF(PTR, 50)
 #define PUT_ANSI_NO_UNDERLINE(PTR)	_ANSI_OFF(PTR, 52)

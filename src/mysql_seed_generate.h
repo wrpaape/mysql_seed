@@ -101,7 +101,7 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring DB_SPEC starting"	\
 		   " with")
 
 #define ERROR_INVALID_DB_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySQL maximum of "			\
 		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"	\
 		" ignoring DB_SPEC starting with:") "\n"
 
@@ -122,7 +122,7 @@ PARSE_ERROR_HEADER("invalid TBL_NAME (empty), ignoring DB_SPEC "	\
 		   "starting with")
 
 #define ERROR_INVALID_TBL_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySQL maximum of "			\
 		TBL_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints"	\
 		", ignoring DB_SPEC starting with:") "\n"
 
@@ -143,7 +143,7 @@ PARSE_ERROR_HEADER("invalid COL_NAME (empty), ignoring DB_SPEC "	\
 		   "starting with")
 
 #define ERROR_INVALID_COL_NAME_REASON_LONG				\
-"\n" ERROR_WRAP("reason - exceeded MySql maximum of "			\
+"\n" ERROR_WRAP("reason - exceeded MySQL maximum of "			\
 		COL_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints"	\
 		", ignoring DB_SPEC starting with:") "\n"
 
@@ -581,7 +581,7 @@ invalid_db_name_invalid(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 DB_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_DB_NAME_REASON_INVALID,
@@ -609,7 +609,7 @@ invalid_db_name_long(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 DB_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_DB_NAME_REASON_LONG,
@@ -686,7 +686,7 @@ invalid_tbl_name_invalid(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 TBL_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_TBL_NAME_REASON_INVALID,
@@ -714,7 +714,7 @@ invalid_tbl_name_long(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 TBL_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_TBL_NAME_REASON_LONG,
@@ -790,7 +790,7 @@ invalid_col_name_invalid(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 COL_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_NAME_REASON_INVALID,
@@ -818,7 +818,7 @@ invalid_col_name_long(const struct GenerateArgvState *const restrict argv)
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
+				 COL_NAME_LENGTH_MAX);
 
 	ptr = put_string_size(ptr,
 			      ERROR_INVALID_COL_NAME_REASON_LONG,
@@ -2547,8 +2547,7 @@ parse_db_name(struct String *const restrict db_name,
 	}
 
 	unsigned int width;
-
-	size_t rem_code_points = DB_NAME_LENGTH_MAX;
+	unsigned int rem_code_points = DB_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -2570,7 +2569,7 @@ parse_db_name(struct String *const restrict db_name,
 
 		--rem_code_points;
 
-		if (rem_code_points == 0lu) {
+		if (rem_code_points == 0u) {
 			invalid_db_name_long(argv);
 			return false;
 		}
@@ -2591,8 +2590,7 @@ parse_tbl_name(struct String *const restrict tbl_name,
 	}
 
 	unsigned int width;
-
-	size_t rem_code_points = TBL_NAME_LENGTH_MAX;
+	unsigned int rem_code_points = TBL_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -2614,7 +2612,7 @@ parse_tbl_name(struct String *const restrict tbl_name,
 
 		--rem_code_points;
 
-		if (rem_code_points == 0lu) {
+		if (rem_code_points == 0u) {
 			invalid_tbl_name_long(argv);
 			return false;
 		}
@@ -2635,8 +2633,7 @@ parse_col_name(struct String *const restrict col_name,
 	}
 
 	unsigned int width;
-
-	size_t rem_code_points = COL_NAME_LENGTH_MAX;
+	unsigned int rem_code_points = COL_NAME_LENGTH_MAX;
 
 	while (1) {
 		width = utf8_width(octets);
@@ -2658,7 +2655,7 @@ parse_col_name(struct String *const restrict col_name,
 
 		--rem_code_points;
 
-		if (rem_code_points == 0lu) {
+		if (rem_code_points == 0u) {
 			invalid_col_name_long(argv);
 			return false;
 		}
@@ -2676,8 +2673,7 @@ parse_base_string(struct StringBuilder *const restrict base,
 	= (const octet_t *restrict) base_bytes;
 
 	unsigned int width;
-
-	size_t rem_code_points = BASE_STRING_LENGTH_MAX;
+	unsigned int rem_code_points = BASE_STRING_LENGTH_MAX;
 
 	while (1) {
 		if (*octets == '\0') {
@@ -2699,7 +2695,7 @@ parse_base_string(struct StringBuilder *const restrict base,
 
 		--rem_code_points;
 
-		if (rem_code_points == 0lu) {
+		if (rem_code_points == 0u) {
 			invalid_base_string_long(argv);
 			return false;
 		}
@@ -2716,8 +2712,7 @@ parse_fixed_string(struct StringBuilder *const restrict fixed,
 	= (const octet_t *restrict) fixed_bytes;
 
 	unsigned int width;
-
-	size_t rem_code_points = BASE_STRING_LENGTH_MAX;
+	unsigned int rem_code_points = BASE_STRING_LENGTH_MAX;
 
 	while (1) {
 		if (*octets == '\0') {
@@ -2739,7 +2734,7 @@ parse_fixed_string(struct StringBuilder *const restrict fixed,
 
 		--rem_code_points;
 
-		if (rem_code_points == 0lu) {
+		if (rem_code_points == 0u) {
 			invalid_fixed_string_long(argv);
 			return false;
 		}
