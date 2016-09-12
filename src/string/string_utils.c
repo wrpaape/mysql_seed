@@ -369,8 +369,8 @@ string_init(struct String *const restrict string,
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
 string_interval_init(struct StringInterval *const restrict interval,
-		     char *const restrict from,
-		     const char *const restrict until);
+		     struct String *const restrict from,
+		     const struct String *const restrict until);
 
 #ifdef WIN32
 /* Win32 error formatting

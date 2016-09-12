@@ -44,8 +44,8 @@ mysql_init_failure(MYSQL *const restrict connection)
 			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
-			 ANSI_RESET,
-			 ANSI_RESET_WIDTH);
+			 ERROR_CLOSE,
+			 ERROR_CLOSE_WIDTH);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -66,8 +66,8 @@ mysql_real_connect_failure(MYSQL *const restrict connection)
 			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
-			 ANSI_RESET,
-			 ANSI_RESET_WIDTH);
+			 ERROR_CLOSE,
+			 ERROR_CLOSE_WIDTH);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -88,12 +88,20 @@ mysql_real_query_failure(MYSQL *const restrict connection)
 			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
-			 ANSI_RESET,
-			 ANSI_RESET_WIDTH);
+			 ERROR_CLOSE,
+			 ERROR_CLOSE_WIDTH);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
 		     ptr - &buffer[0]);
+}
+
+inline void
+execute_failure_malloc(void)
+{
+	write_muffle(STDERR_FILENO,
+		     EXECUTE_FAILURE_MALLOC,
+		     sizeof(EXECUTE_FAILURE_MALLOC) - 1lu);
 }
 
 
@@ -124,12 +132,13 @@ load_db_path_init(char *restrict load_db_path,
 inline int
 mysql_seed_execute(const char *const restrict user,
 		   const char *const restrict password,
-		   const char *const restrict db_name)
+		   const struct String *const restrict db_name)
 {
-
 	char load_db_path[PATH_MAX];
-	struct StatBuffer buffer;
 	MYSQL connection;
+	struct StatBuffer stat_buffer;
+	const char *restrict failure;
+	int file_descriptor;
 
 	if (mysql_init(&connection) == NULL) {
 		mysql_init_failure(&connection);
@@ -145,13 +154,75 @@ mysql_seed_execute(const char *const restrict user,
 			       MYSQL_DEFAULT_SOCKET,
 			       MYSQL_DEFAULT_FLAGS) == NULL) {
 		mysql_real_connect_failure(&connection);
+		mysql_close(&connection);
 		return EXIT_FAILURE;
 	}
 
+	load_db_path_init(&load_db_path[0],
+			  db_name);
 
+	/* open the loader script */
+	if (!open_report(&file_descriptor,
+			 &load_db_path[0],
+			 O_RDONLY,
+			 &failure)) {
+		print_failure(failure);
+		close_muffle(file_descriptor);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
 
+	/* load loader script into main memory buffer */
+	if (UNLIKELY(!fstat_report(file_descriptor,
+				   &stat_buffer,
+				   &failure))) {
+		print_failure(failure);
+		close_muffle(file_descriptor);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
 
-	return EXIT_FAILURE;
+	char *const restrict load_db_buffer = malloc(stat_buffer.st_size);
+
+	if (UNLIKELY(load_db_buffer == NULL)) {
+		execute_failure_malloc();
+		close_muffle(file_descriptor);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
+
+	if (UNLIKELY(!read_report(file_descriptor,
+				  load_db_buffer,
+				  stat_buffer.st_size,
+				  &failure))) {
+		print_failure(failure);
+		free(load_db_buffer);
+		close_muffle(file_descriptor);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
+
+	if (UNLIKELY(mysql_real_query(&connection,
+				      load_db_buffer,
+				      stat_buffer.st_size) != 0)) {
+		mysql_real_query_failure(&connection);
+		free(load_db_buffer);
+		close_muffle(file_descriptor);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
+
+	free(load_db_buffer);
+
+	if (UNLIKELY(!close_report(file_descriptor,
+				   &failure))) {
+		print_failure(failure);
+		mysql_close(&connection);
+		return EXIT_FAILURE;
+	}
+
+	mysql_close(&connection);
+	return EXIT_SUCCESS;
 }
 
 inline int

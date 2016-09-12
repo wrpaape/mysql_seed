@@ -30,7 +30,7 @@ execute_invalid_db_name_long(const char *const restrict db_name);
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
 execute_parse_db_name(struct String *const restrict db_name,
-		      const char *const restrict arg);
+		      char *const restrict arg);
 
 
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded
@@ -70,12 +70,16 @@ execute_dispatch3(char *const restrict *restrict arg)
 int
 execute_dispatch2(char *const restrict *restrict arg)
 {
-	if (LIKELY(flag_match(*arg,
-			      'd',
-			      "database")))
+	struct String db_name;
+
+	if (   LIKELY(flag_match(*arg,
+				 'd',
+				 "database"))
+	    && execute_parse_db_name(&db_name,
+				     arg[1]))
 		return mysql_seed_execute(NULL,
 					  NULL,
-					  arg[1]);
+					  &db_name);
 
 	execute_expected_db_flag(*arg);
 	return EXIT_FAILURE;

@@ -36,6 +36,13 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #define ERROR_OPEN		ANSI_BRIGHT ANSI_RED
 #define ERROR_WRAP(STRING)	ERROR_OPEN STRING ANSI_RESET
+#define ERROR_CLOSE		ANSI_RESET "\n"
+#ifdef WIN32
+#	define ERROR_CLOSE_WIDTH	6	/* 4 + CR + LF */
+#else
+#	define ERROR_CLOSE_WIDTH	5	/* 4 + CR */
+#endif /* ifdef WIN32 */
+
 
 #define ERROR_HEADER_OPEN(SOURCE, TYPE, ...)				\
 "\n" ERROR_OPEN UNDERLINE_WRAP(SOURCE " " TYPE) __VA_ARGS__  "\n"

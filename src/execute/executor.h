@@ -37,7 +37,7 @@ struct MysqlServer {
 
 
 struct ExecSpec {
-	struct ArgvInterval db_names;
+	struct StringInterval db_names;
 	const char *restrict user;
 	const char *restrict password;
 };

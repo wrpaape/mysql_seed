@@ -136,7 +136,7 @@ execute_invalid_db_name_long(const char *const restrict db_name)
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
 execute_parse_db_name(struct String *const restrict db_name,
-		      const char *const restrict arg)
+		      char *const restrict arg)
 {
 	const octet_t *restrict octets
 	= (const octet_t *restrict) arg;

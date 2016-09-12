@@ -43,8 +43,8 @@ struct Label {
 };
 
 struct StringInterval {
-	char *restrict from;
-	const char *restrict until;
+	struct String *restrict from;
+	const struct String *restrict until;
 };
 
 typedef char *
@@ -2357,8 +2357,8 @@ string_init(struct String *const restrict string,
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
 string_interval_init(struct StringInterval *const restrict interval,
-		     char *const restrict from,
-		     const char *const restrict until)
+		     struct String *const restrict from,
+		     const struct String *const restrict until)
 {
 	interval->from	= from;
 	interval->until = until;

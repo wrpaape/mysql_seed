@@ -8,18 +8,20 @@ extern inline void
 mysql_real_connect_failure(MYSQL *const restrict connection);
 extern inline void
 mysql_real_query_failure(MYSQL *const restrict connection);
+extern inline void
+execute_failure_malloc(void);
 
 
 /* helper functions
  * ────────────────────────────────────────────────────────────────────────── */
-inline void
+extern inline void
 load_db_path_init(char *restrict load_db_path,
 		  const struct String *const restrict db_name);
 
 extern inline int
 mysql_seed_execute(const char *const restrict user,
 		   const char *const restrict password,
-		   const char *const restrict db_name);
+		   const struct String *const restrict db_name);
 
 extern inline int
 mysql_seed_execute_multi(const struct ExecSpec *const restrict exec_spec);
