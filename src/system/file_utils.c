@@ -215,6 +215,11 @@ close_handle(const int file_descriptor,
 extern inline void
 close_handle_cl(const int file_descriptor,
 		const struct HandlerClosure *const restrict fail_cl);
+void
+close_cleanup(void *arg)
+{
+	close_muffle((const int) (const intptr_t) arg);
+}
 
 /* unlink (absolute or relative path) */
 extern inline bool

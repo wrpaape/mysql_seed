@@ -8,12 +8,6 @@
 
 /* error messages
  * ────────────────────────────────────────────────────────────────────────── */
-#define EXECUTE_FAILURE(REASON)						\
-"\n" FAILURE_HEADER_WRAP("execute", " - " REASON)
-
-#define EXECUTE_FAILURE_MALLOC						\
-EXECUTE_FAILURE(MALLOC_FAILURE_REASON)
-
 #define MYSQL_INIT_FAILURE_HEADER					\
 FAILURE_HEADER_REASON("mysql_init")
 
@@ -105,48 +99,20 @@ execute_failure_malloc(void)
 }
 
 
-/* helper functions
- * ────────────────────────────────────────────────────────────────────────── */
+
 inline void
-load_db_path_init(char *restrict load_db_path,
-		  const struct String *const restrict db_name)
-{
-	load_db_path = put_string_size(load_db_path,
-				       DB_ROOT_ABSPATH_PFX,
-				       sizeof(DB_ROOT_ABSPATH_PFX) - 1lu);
-
-	load_db_path = put_string_size(load_db_path,
-				       db_name->bytes,
-				       db_name->length);
-
-	PUT_STRING_WIDTH(load_db_path,
-			 PATH_DELIM_STRING LOADER_FILENAME_PFX,
-			 LOADER_FILENAME_PFX_WIDTH);
-
-	load_db_path = put_string_size(load_db_path,
-				       db_name->bytes,
-				       db_name->length);
-
-	SET_STRING_WIDTH(load_db_path,
-			 LOADER_FILENAME_SFX,
-			 LOADER_FILENAME_SFX_WIDTH);
-}
-
-
-inline int
-mysql_seed_execute(const char *const restrict user,
+mysql_seed_execute(const struct String *const restrict db_name
+		   const char *const restrict user,
 		   const char *const restrict password,
-		   const struct String *const restrict db_name)
+		   int *const restrict exit_status)
 {
-	char load_db_path[PATH_MAX];
 	MYSQL connection;
-	struct StatBuffer stat_buffer;
 	const char *restrict failure;
 	int file_descriptor;
 
 	if (mysql_init(&connection) == NULL) {
 		mysql_init_failure(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK0;
 	}
 
 	if (mysql_real_connect(&connection,
@@ -158,8 +124,7 @@ mysql_seed_execute(const char *const restrict user,
 			       MYSQL_DEFAULT_SOCKET,
 			       MYSQL_DEFAULT_FLAGS) == NULL) {
 		mysql_real_connect_failure(&connection);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK1;
 	}
 
 	load_db_path_init(&load_db_path[0],
@@ -171,9 +136,7 @@ mysql_seed_execute(const char *const restrict user,
 			 O_RDONLY,
 			 &failure)) {
 		print_failure(failure);
-		close_muffle(file_descriptor);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK1;
 	}
 
 	/* load loader script into main memory buffer */
@@ -181,18 +144,14 @@ mysql_seed_execute(const char *const restrict user,
 				   &stat_buffer,
 				   &failure))) {
 		print_failure(failure);
-		close_muffle(file_descriptor);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK2;
 	}
 
 	char *const restrict load_db_buffer = malloc(stat_buffer.st_size);
 
 	if (UNLIKELY(load_db_buffer == NULL)) {
 		execute_failure_malloc();
-		close_muffle(file_descriptor);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK2;
 	}
 
 	if (UNLIKELY(!read_report(file_descriptor,
@@ -200,22 +159,14 @@ mysql_seed_execute(const char *const restrict user,
 				  stat_buffer.st_size,
 				  &failure))) {
 		print_failure(failure);
-		free(load_db_buffer);
-		close_muffle(file_descriptor);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK3;
 	}
-
-	puts(load_db_buffer);
 
 	if (UNLIKELY(mysql_real_query(&connection,
 				      load_db_buffer,
 				      stat_buffer.st_size) != 0)) {
 		mysql_real_query_failure(&connection);
-		free(load_db_buffer);
-		close_muffle(file_descriptor);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK3;
 	}
 
 	free(load_db_buffer);
@@ -223,12 +174,20 @@ mysql_seed_execute(const char *const restrict user,
 	if (UNLIKELY(!close_report(file_descriptor,
 				   &failure))) {
 		print_failure(failure);
-		mysql_close(&connection);
-		return EXIT_FAILURE;
+		goto EXECUTE_FAILURE_STACK1;
 	}
 
 	mysql_close(&connection);
-	return EXIT_SUCCESS;
+	return;
+
+EXECUTE_FAILURE_STACK3:
+		free(load_db_buffer);
+EXECUTE_FAILURE_STACK2:
+		close_muffle(file_descriptor);
+EXECUTE_FAILURE_STACK1:
+		mysql_close(&connection);
+EXECUTE_FAILURE_STACK0:
+		*exit_status = EXIT_FAILURE;
 }
 
 inline int

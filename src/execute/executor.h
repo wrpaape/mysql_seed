@@ -9,6 +9,15 @@
 #include <mysql.h>		/* mysql API */
 
 
+/* error messages
+ * ────────────────────────────────────────────────────────────────────────── */
+#define EXECUTE_FAILURE(REASON)						\
+"\n" FAILURE_HEADER_WRAP("execute", " - " REASON)
+
+#define EXECUTE_FAILURE_MALLOC						\
+EXECUTE_FAILURE(MALLOC_FAILURE_REASON)
+
+
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
 #define COUNT_EXECUTOR_WORKERS 4lu
@@ -57,6 +66,69 @@ struct Executor {
 struct ExecArg {
 	struct Executor *executor;
 };
+
+
+/* print error
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+execute_failure_malloc(void)
+{
+	write_muffle(STDERR_FILENO,
+		     EXECUTE_FAILURE_MALLOC,
+		     sizeof(EXECUTE_FAILURE_MALLOC) - 1lu);
+}
+
+/* helper functions
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+load_db_path_init(char *restrict load_db_path,
+		  const struct String *const restrict db_name)
+{
+	load_db_path = put_string_size(load_db_path,
+				       DB_ROOT_ABSPATH_PFX,
+				       sizeof(DB_ROOT_ABSPATH_PFX) - 1lu);
+
+	load_db_path = put_string_size(load_db_path,
+				       db_name->bytes,
+				       db_name->length);
+
+	PUT_STRING_WIDTH(load_db_path,
+			 PATH_DELIM_STRING LOADER_FILENAME_PFX,
+			 LOADER_FILENAME_PFX_WIDTH);
+
+	load_db_path = put_string_size(load_db_path,
+				       db_name->bytes,
+				       db_name->length);
+
+	SET_STRING_WIDTH(load_db_path,
+			 LOADER_FILENAME_SFX,
+			 LOADER_FILENAME_SFX_WIDTH);
+}
+
+inline bool
+load_db_buffer_init(const struct String *const restrict db_name
+		    int *const restrict exit_status)
+{
+	char load_db_path[PATH_MAX];
+	struct StatBuffer stat_buffer;
+	int file_descriptor;
+	bool success;
+
+	/* open the loader script */
+	if (!open_report(&file_descriptor,
+			 &load_db_path[0],
+			 O_RDONLY,
+			 &failure)) {
+		print_failure(failure);
+		goto EXECUTE_FAILURE_STACK1;
+	}
+
+
+
+
+
+
+}
 
 
 #endif /* ifndef MYSQL_SEED_EXECUTE_EXECUTOR_H_ */

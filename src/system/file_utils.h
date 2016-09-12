@@ -1488,6 +1488,9 @@ close_handle_cl(const int file_descriptor,
 	__builtin_unreachable();
 }
 
+void
+close_cleanup(void *arg);
+
 
 /* unlink (absolute or relative path) */
 inline bool

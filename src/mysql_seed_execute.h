@@ -176,6 +176,18 @@ execute_parse_db_name(struct String *const restrict db_name,
 	}
 }
 
+inline bool
+execute_db_flag_match(const char *const restrict arg)
+{
+	const bool matched_db_flag = flag_match(arg,
+						'd',
+						"database");
+
+	if (!matched_db_flag)
+		execute_expected_db_flag(arg);
+
+	return matched_db_flag;
+}
 
 
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded

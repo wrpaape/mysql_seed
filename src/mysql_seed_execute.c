@@ -32,6 +32,8 @@ extern inline bool
 execute_parse_db_name(struct String *const restrict db_name,
 		      char *const restrict arg);
 
+extern inline bool
+execute_db_flag_match(const char *const restrict arg);
 
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded
  *─────────────────────────────────────────────────────────────────────────── */
@@ -72,16 +74,19 @@ execute_dispatch2(char *const restrict *restrict arg)
 {
 	struct String db_name;
 
-	if (   LIKELY(flag_match(*arg,
-				 'd',
-				 "database"))
+	if (   execute_db_flag_match(*arg)
 	    && execute_parse_db_name(&db_name,
-				     arg[1]))
-		return mysql_seed_execute(NULL,
-					  NULL,
-					  &db_name);
+				     arg[1])) {
+		int exit_status = EXIT_SUCCESS;
 
-	execute_expected_db_flag(*arg);
+		mysql_seed_execute(MYSQL_DEFAULT_USER,
+				   MYSQL_DEFAULT_PASSWORD,
+				   &db_name,
+				   &exit_status);
+
+		return exit_status;
+	}
+
 	return EXIT_FAILURE;
 }
 
