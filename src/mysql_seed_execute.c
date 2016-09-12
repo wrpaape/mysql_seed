@@ -65,7 +65,10 @@ execute_dispatch4(char *const restrict *restrict arg)
 int
 execute_dispatch3(char *const restrict *restrict arg)
 {
-	return EXIT_FAILURE;
+	struct String db_names[2];
+
+
+
 }
 
 /* at most 1 database */

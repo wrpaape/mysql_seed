@@ -118,6 +118,7 @@ load_db_path_init(char *restrict load_db_path,
 			 LOADER_FILENAME_SFX_WIDTH);
 }
 
+/* call from main thread */
 inline bool
 load_db_buffer_init_report(struct String *const restrict load_db_buffer,
 			   const struct String *const restrict db_name,
@@ -180,6 +181,56 @@ load_db_buffer_init_report(struct String *const restrict load_db_buffer,
 	}
 
 	return success;
+}
+
+
+/* call from worker thread */
+inline void
+load_db_buffer_init_handle_cl(struct String *const restrict load_db_buffer,
+			      const struct String *const restrict db_name,
+			      const struct HandlerClosure *const restrict fail_cl)
+{
+	char load_db_path[PATH_MAX];
+	struct StatBuffer stat_buffer;
+	int file_descriptor;
+
+	load_db_path_init(&load_db_path[0],
+			  db_name);
+
+	file_descriptor = -1;
+
+	thread_try_catch_open(&close_cleanup,
+			      (void *) (intptr_t) file_descriptor);
+
+	/* open the loader script */
+	open_handle_cl(&file_descriptor,
+		       &load_db_path[0],
+		       O_RDONLY,
+		       fail_cl);
+
+	fstat_handle_cl(file_descriptor,
+			&stat_buffer,
+			fail_cl);
+
+	load_db_buffer->bytes = malloc(stat_buffer.st_size);
+
+	if (UNLIKELY(load_db_buffer->bytes == NULL)){
+		handler_closure_call(fail_cl,
+				     EXECUTE_FAILURE_MALLOC);
+		__builtin_unreachable();
+	}
+
+	read_handle_cl(file_descriptor,
+		       load_db_buffer->bytes,
+		       stat_buffer.st_size,
+		       fail_cl);
+
+	close_handle_cl(file_descriptor,
+			fail_cl);
+
+	thread_try_catch_close();
+
+	load_db_buffer->length = stat_buffer.st_size;
 }
 
 
