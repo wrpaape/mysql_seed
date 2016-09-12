@@ -115,9 +115,13 @@ load_db_path_init(char *restrict load_db_path,
 				       DB_ROOT_ABSPATH_PFX,
 				       sizeof(DB_ROOT_ABSPATH_PFX) - 1lu);
 
+	load_db_path = put_string_size(load_db_path,
+				       db_name->bytes,
+				       db_name->length);
+
 	PUT_STRING_WIDTH(load_db_path,
-			 LOADER_FILENAME_PFX,
-			 LOADER_FILENAME_PFX_NN_WIDTH);
+			 PATH_DELIM_STRING LOADER_FILENAME_PFX,
+			 LOADER_FILENAME_PFX_WIDTH);
 
 	load_db_path = put_string_size(load_db_path,
 				       db_name->bytes,
@@ -201,6 +205,8 @@ mysql_seed_execute(const char *const restrict user,
 		mysql_close(&connection);
 		return EXIT_FAILURE;
 	}
+
+	puts(load_db_buffer);
 
 	if (UNLIKELY(mysql_real_query(&connection,
 				      load_db_buffer,
