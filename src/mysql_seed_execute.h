@@ -177,7 +177,7 @@ execute_parse_db_name(struct String *const restrict db_name,
 }
 
 inline bool
-execute_db_flag_match(const char *const restrict arg)
+execute_db_flag_match(char *const restrict arg)
 {
 	const bool matched_db_flag = flag_match(arg,
 						'd',

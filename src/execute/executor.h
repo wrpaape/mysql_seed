@@ -37,6 +37,19 @@ EXECUTE_FAILURE(MALLOC_FAILURE_REASON)
 #define EXEC_SPEC_MINIMAL		"-d DB_NAME"
 
 
+#define MYSQL_REAL_CONNECT(CONNECTION,					\
+			   USER,					\
+			   PASSWORD)					\
+mysql_real_connect(CONNECTION,						\
+		   MYSQL_DEFAULT_HOST,					\
+		   USER,						\
+		   PASSWORD,						\
+		   MYSQL_DEFAULT_DB,					\
+		   MYSQL_DEFAULT_PORT,					\
+		   MYSQL_DEFAULT_SOCKET,				\
+		   MYSQL_DEFAULT_FLAGS)
+
+
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct MysqlServer {
@@ -106,28 +119,67 @@ load_db_path_init(char *restrict load_db_path,
 }
 
 inline bool
-load_db_buffer_init(const struct String *const restrict db_name
-		    int *const restrict exit_status)
+load_db_buffer_init_report(struct String *const restrict load_db_buffer,
+			   const struct String *const restrict db_name,
+			   const char *restrict *const restrict failure)
 {
 	char load_db_path[PATH_MAX];
 	struct StatBuffer stat_buffer;
 	int file_descriptor;
 	bool success;
 
+	load_db_path_init(&load_db_path[0],
+			  db_name);
+
 	/* open the loader script */
-	if (!open_report(&file_descriptor,
-			 &load_db_path[0],
-			 O_RDONLY,
-			 &failure)) {
-		print_failure(failure);
-		goto EXECUTE_FAILURE_STACK1;
+	success = open_report(&file_descriptor,
+			      &load_db_path[0],
+			      O_RDONLY,
+			      failure);
+
+	if (success) {
+		/* load loader script into main memory buffer */
+		success = fstat_report(file_descriptor,
+				       &stat_buffer,
+				       failure);
+
+		if (LIKELY(success)) {
+			load_db_buffer->bytes = malloc(stat_buffer.st_size);
+
+			success = (load_db_buffer->bytes != NULL);
+
+			if (LIKELY(success)) {
+				success = read_report(file_descriptor,
+						      load_db_buffer->bytes,
+						      stat_buffer.st_size,
+						      failure);
+
+				if (LIKELY(success)) {
+					success = close_report(file_descriptor,
+							       failure);
+
+					if (LIKELY(success)) {
+						load_db_buffer->length
+						= stat_buffer.st_size;
+					} else {
+						free(load_db_buffer->bytes);
+					}
+				} else {
+					free(load_db_buffer->bytes);
+					close_muffle(file_descriptor);
+				}
+			} else {
+				*failure = EXECUTE_FAILURE_MALLOC;
+				close_muffle(file_descriptor);
+			}
+		} else {
+			close_muffle(file_descriptor);
+		}
+	} else {
+		close_muffle(file_descriptor);
 	}
 
-
-
-
-
-
+	return success;
 }
 
 

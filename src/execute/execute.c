@@ -8,14 +8,11 @@ extern inline void
 mysql_real_connect_failure(MYSQL *const restrict connection);
 extern inline void
 mysql_real_query_failure(MYSQL *const restrict connection);
-extern inline void
-execute_failure_malloc(void);
-
 
 extern inline void
-mysql_seed_execute(const char *const restrict user,
+mysql_seed_execute(const struct String *const restrict db_name,
+		   const char *const restrict user,
 		   const char *const restrict password,
-		   const struct String *const restrict db_name,
 		   int *const restrict exit_status);
 
 extern inline int
