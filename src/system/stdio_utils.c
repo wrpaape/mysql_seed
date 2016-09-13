@@ -2,11 +2,13 @@
 
 /* global variables
  * ────────────────────────────────────────────────────────────────────────── */
+sig_t sigint_handler;
 #ifdef WIN32
 HANDLE stdin_handle;
 DWORD stdin_mode;
 #else
 struct termios stdin_attr;
+tcflag_t stdin_lflag;
 #endif	/* idef WIN32 */
 
 
@@ -124,10 +126,13 @@ tcsetattr_handle_cl(const int file_descriptor,
 		    const struct HandlerClosure *const restrict fail_cl);
 #endif	/* idef WIN32 */
 
+/* set global variables for stdin operations */
+extern inline bool
+stdin_constructor(const char *restrict *const restrict failure);
 
-/* restore stdin to original state */
+/* restore stdin to original state immediately */
 void
-catch_restore_stdin(int signal_name)
+catch_stdin_restore(int signal_name)
 {
 #ifdef WIN32
 	set_console_mode_muffle(stdin_handle,
@@ -138,15 +143,48 @@ catch_restore_stdin(int signal_name)
 			 &stdin_attr);
 #endif	/* idef WIN32 */
 }
-
+extern inline void
+stdin_restore_muffle(void);
 extern inline bool
-restore_stdin(const char *restrict *const restrict failure);
+stdin_restore_report(const char *restrict *const restrict failure);
 
-
+/* flush stdin before restoring to original state */
+extern inline void
+stdin_flush_restore_muffle(void);
 extern inline bool
-flush_input_overflow(const char *restrict *const restrict failure);
+stdin_flush_restore_report(const char *restrict *const restrict failure);
 
+/* restore original stdin tty state on SIGINT */
 extern inline bool
-read_input(char *const restrict buffer,
-	   const size_t size_max,
-	   const char *restrict *const restrict failure);
+stdin_hide_try_catch_open_report(const char *restrict *const restrict failure);
+extern inline void
+stdin_hide_try_catch_close_muffle(void);
+extern inline bool
+stdin_hide_try_catch_close_report(const char *restrict *const restrict failure);
+
+/* turn off echo */
+extern inline bool
+stdin_hide_report(const char *restrict *const restrict failure);
+
+
+/* set up environment for reading password on stdin */
+extern inline bool
+read_password_open_report(const char *restrict *const restrict failure);
+
+/* tear down environment set up by read_password_open_report (without flush) */
+extern inline void
+read_password_close_muffle(void);
+extern inline bool
+read_password_close_report(const char *restrict *const restrict failure);
+
+/* tear down environment set up by read_password_open_report (with flush) */
+extern inline void
+read_password_flush_close_muffle(void);
+extern inline bool
+read_password_flush_close_report(const char *restrict *const restrict failure);
+
+/* read password from newline-terminated stdin input → buffer (size_max > 0) */
+extern inline bool
+read_password(char *const restrict buffer,
+	      const size_t size_max,
+	      const char *restrict *const restrict failure);

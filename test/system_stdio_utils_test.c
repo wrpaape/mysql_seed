@@ -14,11 +14,11 @@ void test_stdio_utils(void)
 	char buffer[20];
 	const char *restrict failure;
 
-	TEST_ASSERT_TRUE_MESSAGE(read_input(&buffer[0],
-					    sizeof(buffer),
-					    &failure),
+	TEST_ASSERT_TRUE_MESSAGE(read_password(&buffer[0],
+					       sizeof(buffer),
+					       &failure),
 				 failure);
 
-	printf("read 20 characters: %s\n",
+	printf("read upto 20 characters: %s\n",
 	       &buffer[0]);
 }
