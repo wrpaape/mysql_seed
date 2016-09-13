@@ -11,13 +11,15 @@
 #define STRINGIFY(X)	    #X
 #define EXPAND_STRINGIFY(X) STRINGIFY(X)
 
-/* system-dependent path-delimiter */
+/* system-dependent path-delimiter, "newline" character */
 #ifdef WIN32
 #	define PATH_DELIM '\\'
 #	define PATH_DELIM_STRING "\\"
+#	define NL_CHAR	'\r'
 #else
 #	define PATH_DELIM '/'
 #	define PATH_DELIM_STRING "/"
+#	define NL_CHAR	'\n'
 #endif /* ifdef WIN32 */
 
 #define PUT_PATH_DELIM(PTR) PUT_CHAR(PTR, PATH_DELIM)

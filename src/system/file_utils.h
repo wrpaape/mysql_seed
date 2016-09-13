@@ -3230,6 +3230,36 @@ ftsent_compare_names(const FTSENT **x,
 #endif /* ifdef WIN32 */
 
 
+/* read newline-terminated input from STDIN (size_max > 0)
+ * and replace \n with \0 */
+inline void
+read_input_muffle(char *const restrict buffer,
+		  const ssize_t size_max)
+{
+	ssize_t size_read;
+	char *const restrict last = buffer + size_max - 1l;
+
+	/* read STDIN until EOF */
+	while (1) {
+		size_read = read_imp(STDIN_FILENO,
+				     buffer,
+				     size_max);
+
+		if (size_read < size_max) {
+			if (size_read == -1l) {
+				*buffer = '\0';
+			else
+				buffer[size_read - 1lu] = '\0';
+
+			return;
+		}
+
+		if (*last == NL_CHAR)
+	}
+
+}
+
+
 /* inspect file permissions (10 chars long) */
 inline char *
 put_file_permissions_string(char *restrict buffer,

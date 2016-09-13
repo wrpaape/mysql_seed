@@ -590,6 +590,11 @@ ftsent_compare_names(const FTSENT **x,
 		     const FTSENT **y);
 #endif /* ifdef WIN32 */
 
+extern inline void
+read_input_muffle(char *const restrict buffer,
+		  const ssize_t size_max);
+
+
 /* inspect file permissions */
 extern inline char *
 put_file_permissions_string(char *restrict buffer,
