@@ -307,3 +307,29 @@ getaddrinfo_handle_cl(const char *const node,
 		      struct addrinfo **const result,
 		      const struct HandlerClosure *const restrict fail_cl);
 #endif /* ifndef WIN32 */
+
+/* signal */
+extern inline bool
+signal_status(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action);
+extern inline void
+signal_muffle(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action);
+extern inline bool
+signal_report(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action,
+	      const char *restrict *const restrict failure);
+extern inline void
+signal_handle(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action,
+	      Handler *const handle,
+	      void *arg);
+extern inline void
+signal_handle_cl(sig_t *const restrict last,
+		 const int name,
+		 const sig_t action,
+		 const struct HandlerClosure *const restrict fail_cl);

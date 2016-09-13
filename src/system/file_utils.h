@@ -1289,6 +1289,143 @@ read_handle_cl(const int file_descriptor,
 }
 
 
+/* read_size */
+inline bool
+read_size_status(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size)
+{
+	*size_read = (size_t) read_imp(file_descriptor,
+				       buffer,
+				       size);
+
+	return ((ssize_t) *size_read) >= 0l;
+}
+
+inline void
+read_size_muffle(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size)
+{
+	*size_read = (size_t) read_imp(file_descriptor,
+				       buffer,
+				       size);
+}
+
+#undef  FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE read_imp
+inline bool
+read_size_report(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size,
+		 const char *restrict *const restrict failure)
+{
+	*size_read = (size_t) read_imp(file_descriptor,
+				       buffer,
+				       size);
+
+	if (LIKELY(((ssize_t) *size_read) >= 0l))
+		return true;
+
+	switch (errno) {
+	FAIL_SWITCH_ERRNO_CASE_1(EAGAIN,
+				 "The file was marked for non-blocking I/O, and"
+				 " no data were ready to be read.")
+	FAIL_SWITCH_ERRNO_CASE_1(EBADF,
+				 "'file_descriptor' is not a valid file or "
+				 "socket descriptor open for reading.")
+	FAIL_SWITCH_ERRNO_CASE_1(EFAULT,
+				 "'buffer' points outside the allocated address"
+				 " space.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINTR,
+				 "A read from a slow device was interrupted "
+				 "before any data arrived by the delivery of a "
+				 "signal.")
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "The pointer associated with 'file_descriptor'"
+				 " was negative.")
+	FAIL_SWITCH_ERRNO_CASE_3(EIO,
+				 "An I/O error occurred while reading from the "
+				 "file system.",
+				 "The process group is orphaned.",
+				 "The file is a regular file, 'size' is greater"
+				 " than 0, the starting position is before the "
+				 "end-of-file, and the starting position is "
+				 "greater than or equal to the offset maximum "
+				 "established for the open file descriptor "
+				 "associated with 'file_descriptor'.")
+	FAIL_SWITCH_ERRNO_CASE_1(EISDIR,
+				 "An attempt was made to read a directory.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOBUFS,
+				 "An attempt to allocate a memory buffer failed"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOMEM,
+				 "Insufficient memory is available.")
+	FAIL_SWITCH_ERRNO_CASE_2(ENXIO,
+				 "An action was requested of a device that does"
+				 " not exist.",
+				 "A requested action cannot be performed by the"
+				 " device.")
+	FAIL_SWITCH_ERRNO_CASE_1(ECONNRESET,
+				 "The connection was closed by the peer during "
+				 "a read attempt on a socket.")
+	FAIL_SWITCH_ERRNO_CASE_1(ENOTCONN,
+				 "A read was attempted on an unconnected socket"
+				 ".")
+	FAIL_SWITCH_ERRNO_CASE_1(ETIMEDOUT,
+				 "A transmission timeout occurs during a read "
+				 "attempt on a socket.")
+	FAIL_SWITCH_ERRNO_DEFAULT_CASE()
+	}
+}
+
+inline void
+read_size_handle(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size,
+		 Handler *const handle,
+		 void *arg)
+{
+	const char *restrict failure;
+
+	if (LIKELY(read_size_report(size_read,
+				    file_descriptor,
+				    buffer,
+				    size,
+				    &failure)))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+read_size_handle_cl(size_t *const restrict size_read,
+		    const int file_descriptor,
+		    void *const restrict buffer,
+		    const size_t size,
+		    const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (LIKELY(read_size_report(size_read,
+				    file_descriptor,
+				    buffer,
+				    size,
+				    &failure)))
+		return;
+
+	fail_cl->handle(fail_cl->arg,
+			failure);
+	__builtin_unreachable();
+}
+
+
 /* write */
 inline bool
 write_status(const int file_descriptor,
@@ -3228,36 +3365,6 @@ ftsent_compare_names(const FTSENT **x,
 			      (*y)->fts_name);
 }
 #endif /* ifdef WIN32 */
-
-
-/* read newline-terminated input from STDIN (size_max > 0)
- * and replace \n with \0 */
-inline void
-read_input_muffle(char *const restrict buffer,
-		  const ssize_t size_max)
-{
-	ssize_t size_read;
-	char *const restrict last = buffer + size_max - 1l;
-
-	/* read STDIN until EOF */
-	while (1) {
-		size_read = read_imp(STDIN_FILENO,
-				     buffer,
-				     size_max);
-
-		if (size_read < size_max) {
-			if (size_read == -1l) {
-				*buffer = '\0';
-			else
-				buffer[size_read - 1lu] = '\0';
-
-			return;
-		}
-
-		if (*last == NL_CHAR)
-	}
-
-}
 
 
 /* inspect file permissions (10 chars long) */

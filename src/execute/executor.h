@@ -94,47 +94,48 @@ execute_failure_malloc(void)
 /* helper functions
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
-load_db_path_init(char *restrict load_db_path,
-		  const struct String *const restrict db_name)
+query_path_set(char *restrict query_path,
+	       const struct String *const restrict db_name)
 {
-	load_db_path = put_string_size(load_db_path,
-				       DB_ROOT_ABSPATH_PFX,
-				       sizeof(DB_ROOT_ABSPATH_PFX) - 1lu);
+	query_path = put_string_size(query_path,
+				     DB_ROOT_ABSPATH_PFX,
+				     sizeof(DB_ROOT_ABSPATH_PFX) - 1lu);
 
-	load_db_path = put_string_size(load_db_path,
-				       db_name->bytes,
-				       db_name->length);
+	query_path = put_string_size(query_path,
+				     db_name->bytes,
+				     db_name->length);
 
-	PUT_STRING_WIDTH(load_db_path,
+	PUT_STRING_WIDTH(query_path,
 			 PATH_DELIM_STRING LOADER_FILENAME_PFX,
 			 LOADER_FILENAME_PFX_WIDTH);
 
-	load_db_path = put_string_size(load_db_path,
-				       db_name->bytes,
-				       db_name->length);
+	query_path = put_string_size(query_path,
+				     db_name->bytes,
+				     db_name->length);
 
-	SET_STRING_WIDTH(load_db_path,
+	SET_STRING_WIDTH(query_path,
 			 LOADER_FILENAME_SFX,
 			 LOADER_FILENAME_SFX_WIDTH);
 }
 
 /* call from main thread */
 inline bool
-load_db_buffer_init_report(struct String *const restrict load_db_buffer,
-			   const struct String *const restrict db_name,
-			   const char *restrict *const restrict failure)
+query_load_report(struct String *const restrict query,
+		  const struct String *const restrict db_name,
+		  const char *restrict *const restrict failure)
 {
-	char load_db_path[PATH_MAX];
+	char query_path[PATH_MAX];
 	struct StatBuffer stat_buffer;
+	size_t size_read;
 	int file_descriptor;
 	bool success;
 
-	load_db_path_init(&load_db_path[0],
-			  db_name);
+	query_path_set(&query_path[0],
+		       db_name);
 
 	/* open the loader script */
 	success = open_report(&file_descriptor,
-			      &load_db_path[0],
+			      &query_path[0],
 			      O_RDONLY,
 			      failure);
 
@@ -145,28 +146,28 @@ load_db_buffer_init_report(struct String *const restrict load_db_buffer,
 				       failure);
 
 		if (LIKELY(success)) {
-			load_db_buffer->bytes = malloc(stat_buffer.st_size);
+			query->bytes = malloc(stat_buffer.st_size);
 
-			success = (load_db_buffer->bytes != NULL);
+			success = (query->bytes != NULL);
 
 			if (LIKELY(success)) {
-				success = read_report(file_descriptor,
-						      load_db_buffer->bytes,
-						      stat_buffer.st_size,
-						      failure);
+				success = read_size_report(&size_read,
+							   file_descriptor,
+							   query->bytes,
+							   stat_buffer.st_size,
+							   failure);
 
 				if (LIKELY(success)) {
 					success = close_report(file_descriptor,
 							       failure);
 
 					if (LIKELY(success)) {
-						load_db_buffer->length
-						= stat_buffer.st_size;
+						query->length = size_read;
 					} else {
-						free(load_db_buffer->bytes);
+						free(query->bytes);
 					}
 				} else {
-					free(load_db_buffer->bytes);
+					free(query->bytes);
 					close_muffle(file_descriptor);
 				}
 			} else {
@@ -186,16 +187,17 @@ load_db_buffer_init_report(struct String *const restrict load_db_buffer,
 
 /* call from worker thread */
 inline void
-load_db_buffer_init_handle_cl(struct String *const restrict load_db_buffer,
-			      const struct String *const restrict db_name,
-			      const struct HandlerClosure *const restrict fail_cl)
+query_load_handle_cl(struct String *const restrict query,
+		     const struct String *const restrict db_name,
+		     const struct HandlerClosure *const restrict fail_cl)
 {
-	char load_db_path[PATH_MAX];
+	char query_path[PATH_MAX];
 	struct StatBuffer stat_buffer;
+	size_t size_read;
 	int file_descriptor;
 
-	load_db_path_init(&load_db_path[0],
-			  db_name);
+	query_path_set(&query_path[0],
+		       db_name);
 
 	file_descriptor = -1;
 
@@ -204,7 +206,7 @@ load_db_buffer_init_handle_cl(struct String *const restrict load_db_buffer,
 
 	/* open the loader script */
 	open_handle_cl(&file_descriptor,
-		       &load_db_path[0],
+		       &query_path[0],
 		       O_RDONLY,
 		       fail_cl);
 
@@ -212,25 +214,26 @@ load_db_buffer_init_handle_cl(struct String *const restrict load_db_buffer,
 			&stat_buffer,
 			fail_cl);
 
-	load_db_buffer->bytes = malloc(stat_buffer.st_size);
+	query->bytes = malloc(stat_buffer.st_size);
 
-	if (UNLIKELY(load_db_buffer->bytes == NULL)){
+	if (UNLIKELY(query->bytes == NULL)) {
 		handler_closure_call(fail_cl,
 				     EXECUTE_FAILURE_MALLOC);
 		__builtin_unreachable();
 	}
 
-	read_handle_cl(file_descriptor,
-		       load_db_buffer->bytes,
-		       stat_buffer.st_size,
-		       fail_cl);
+	read_size_handle_cl(&size_read,
+			    file_descriptor,
+			    query->bytes,
+			    stat_buffer.st_size,
+			    fail_cl);
 
 	close_handle_cl(file_descriptor,
 			fail_cl);
 
 	thread_try_catch_close();
 
-	load_db_buffer->length = stat_buffer.st_size;
+	query->length = size_read;
 }
 
 

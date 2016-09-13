@@ -22,6 +22,7 @@
 #	include <sys/sysctl.h>	/* sysctl */
 #endif /* ifdef OSX */
 
+#include <signal.h>		/* sig_t, signal */
 #include <sys/uio.h>		/* read, write */
 #include <sys/types.h>		/* ssize_t, chmod API */
 #include <sys/stat.h>		/* mkdir */
@@ -1278,6 +1279,90 @@ getaddrinfo_handle_cl(const char *const node,
 	__builtin_unreachable();
 }
 #endif /* ifndef WIN32 */
+
+/* signal */
+inline bool
+signal_status(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action)
+{
+	*last = signal(name,
+		       action);
+
+	return *last != SIG_ERR;
+}
+
+inline void
+signal_muffle(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action)
+{
+	*last = signal(name,
+		       action);
+}
+
+inline bool
+signal_report(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action,
+	      const char *restrict *const restrict failure)
+{
+	*last = signal(name,
+		       action);
+
+	const bool success = (*last != SIG_ERR);
+
+	if (UNLIKELY(!success))
+		*failure = FAILURE_REASONS_2("signal",
+					     "'name' is not a valid signal "
+					     "number.",
+					     "An attempt was made to ignore or "
+					     "supply a handler for 'SIGKILL' or"
+					     " 'SIGSTOP'.");
+
+	return success;
+}
+
+inline void
+signal_handle(sig_t *const restrict last,
+	      const int name,
+	      const sig_t action,
+	      Handler *const handle,
+	      void *arg)
+{
+	const char *restrict failure;
+
+	if (LIKELY(signal_report(last,
+				 name,
+				 action,
+				 &failure)))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+signal_handle_cl(sig_t *const restrict last,
+		 const int name,
+		 const sig_t action,
+		 const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (LIKELY(signal_report(last,
+				 name,
+				 action,
+				 &failure)))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+
+
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

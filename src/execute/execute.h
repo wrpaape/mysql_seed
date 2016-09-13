@@ -100,7 +100,7 @@ mysql_seed_execute(const struct String *const restrict db_name,
 		   int *const restrict exit_status)
 {
 	MYSQL connection;
-	struct String load_db_buffer;
+	struct String query;
 	const char *restrict failure;
 
 	if (UNLIKELY(mysql_init(&connection) == NULL)) {
@@ -114,19 +114,18 @@ mysql_seed_execute(const struct String *const restrict db_name,
 			mysql_real_connect_failure(&connection);
 			*exit_status = EXIT_FAILURE;
 
-		} else if (load_db_buffer_init_report(&load_db_buffer,
-						      db_name,
-						      &failure)) {
+		} else if (query_load_report(&query,
+					     db_name,
+					     &failure)) {
 
-			if (UNLIKELY(   mysql_real_query(&connection,
-							 load_db_buffer.bytes,
-							 load_db_buffer.length)
-				     != 0)) {
+			if (UNLIKELY(mysql_real_query(&connection,
+						      query.bytes,
+						      query.length) != 0)) {
 				mysql_real_query_failure(&connection);
 				*exit_status = EXIT_FAILURE;
 			}
 
-			free(load_db_buffer.bytes);
+			free(query.bytes);
 
 		} else {
 			print_failure(failure);

@@ -174,6 +174,37 @@ read_handle_cl(const int file_descriptor,
 	       const size_t size,
 	       const struct HandlerClosure *const restrict fail_cl);
 
+/* read_size */
+extern inline bool
+read_size_status(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size);
+extern inline void
+read_size_muffle(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size);
+extern inline bool
+read_size_report(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size,
+		 const char *restrict *const restrict failure);
+extern inline void
+read_size_handle(size_t *const restrict size_read,
+		 const int file_descriptor,
+		 void *const restrict buffer,
+		 const size_t size,
+		 Handler *const handle,
+		 void *arg);
+extern inline void
+read_size_handle_cl(size_t *const restrict size_read,
+		    const int file_descriptor,
+		    void *const restrict buffer,
+		    const size_t size,
+		    const struct HandlerClosure *const restrict fail_cl);
+
 /* write */
 extern inline bool
 write_status(const int file_descriptor,
@@ -589,10 +620,6 @@ extern inline int
 ftsent_compare_names(const FTSENT **x,
 		     const FTSENT **y);
 #endif /* ifdef WIN32 */
-
-extern inline void
-read_input_muffle(char *const restrict buffer,
-		  const ssize_t size_max);
 
 
 /* inspect file permissions */

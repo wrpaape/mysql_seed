@@ -651,6 +651,22 @@ TARGETS				+= $(SYSTEM_FILE_UTILS_OBJ)
 
 
 
+# system/stdio_utils
+# ──────────────────────────────────────────────────────────────────────────────
+SYSTEM_STDIO_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_HDR		:= $(call HELPER_HEADER_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_OBJ 		:= $(call HELPER_OBJECT_PATH,system stdio_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+SYSTEM_STDIO_UTILS_OBJ_PREQS	:= $(SYSTEM_STDIO_UTILS_SRC) 		\
+			   	   $(SYSTEM_STDIO_UTILS_HDR)		\
+			   	   $(SYSTEM_FILE_UTILS_HDR)
+SYSTEM_STDIO_UTILS_OBJ_GROUP	:= $(SYSTEM_STDIO_UTILS_OBJ)		\
+			   	   $(SYSTEM_FILE_UTILS_OBJ_GROUP)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TARGETS				+= $(SYSTEM_STDIO_UTILS_OBJ)
+
+
+
 # system/exit_utils
 # ──────────────────────────────────────────────────────────────────────────────
 SYSTEM_EXIT_UTILS_SRC 		:= $(call HELPER_SOURCE_PATH,system exit_utils)
@@ -1774,6 +1790,33 @@ TARGETS			+= $(SYSTEM_FILE_UTILS_TRNR_SRC)				\
 			   $(SYSTEM_FILE_UTILS_TEST_BIN)
 
 
+# system/stdio_utils unit test
+# ──────────────────────────────────────────────────────────────────────────────
+SYSTEM_STDIO_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_TRNR_SRC	:= $(call HELPER_TEST_RUNNER_SOURCE_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_TRNR_OBJ	:= $(call HELPER_TEST_RUNNER_OBJECT_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_TEST_OBJ	:= $(call HELPER_TEST_OBJECT_PATH,system stdio_utils)
+SYSTEM_STDIO_UTILS_TEST_BIN	:= $(call HELPER_TEST_BINARY_PATH,system stdio_utils)
+# ─────────────── target prequisites ───────────────────────────────────────────
+SYSTEM_STDIO_UTILS_TRNR_SRC_PREQS	:= $(SYSTEM_STDIO_UTILS_TEST_SRC)		\
+			   		   $(TEST_RUNNER_SOURCE_DIR)
+SYSTEM_STDIO_UTILS_TEST_OBJ_PREQS	:= $(SYSTEM_STDIO_UTILS_TEST_SRC)		\
+			   		   $(SYSTEM_STDIO_UTILS_OBJ_PREQS) 		\
+			   		   $(UNITY_OBJ_PREQS)
+SYSTEM_STDIO_UTILS_TRNR_OBJ_PREQS	:= $(SYSTEM_STDIO_UTILS_TRNR_SRC)		\
+			   		   $(SYSTEM_STDIO_UTILS_TEST_OBJ_PREQS)
+SYSTEM_STDIO_UTILS_TEST_BIN_PREQS	:= $(SYSTEM_STDIO_UTILS_TRNR_OBJ)		\
+			   		   $(SYSTEM_STDIO_UTILS_TEST_OBJ)		\
+			   		   $(SYSTEM_STDIO_UTILS_OBJ_GROUP)		\
+			   		   $(UNITY_OBJ)
+# ─────────────── targets ──────────────────────────────────────────────────────
+TEST_BINARIES		+= $(SYSTEM_STDIO_UTILS_TEST_BIN)
+TARGETS			+= $(SYSTEM_STDIO_UTILS_TRNR_SRC)				\
+			   $(SYSTEM_STDIO_UTILS_TRNR_OBJ)				\
+			   $(SYSTEM_STDIO_UTILS_TEST_OBJ)				\
+			   $(SYSTEM_STDIO_UTILS_TEST_BIN)
+
+
 # system/exit_utils unit test
 # ──────────────────────────────────────────────────────────────────────────────
 SYSTEM_EXIT_UTILS_TEST_SRC	:= $(call HELPER_TEST_SOURCE_PATH,system exit_utils)
@@ -2804,6 +2847,11 @@ $(SYSTEM_SYSTEM_UTILS_OBJ): $(SYSTEM_SYSTEM_UTILS_OBJ_PREQS)
 $(SYSTEM_FILE_UTILS_OBJ): $(SYSTEM_FILE_UTILS_OBJ_PREQS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
+# make system/stdio_utils object
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_STDIO_UTILS_OBJ): $(SYSTEM_STDIO_UTILS_OBJ_PREQS)
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
 # make system/exit_utils object
 # ──────────────────────────────────────────────────────────────────────────────
 $(SYSTEM_EXIT_UTILS_OBJ): $(SYSTEM_EXIT_UTILS_OBJ_PREQS)
@@ -3169,6 +3217,26 @@ $(SYSTEM_FILE_UTILS_TEST_OBJ): $(SYSTEM_FILE_UTILS_TEST_OBJ_PREQS)
 	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
 
 $(SYSTEM_FILE_UTILS_TRNR_SRC): $(SYSTEM_FILE_UTILS_TRNR_SRC_PREQS)
+	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
+
+
+# for system/stdio_utils
+# make:
+# 	system_stdio_utils_test		binary,
+# 	system_stdio_utils_test_runner 	object,
+# 	system_stdio_utils_test		object, and
+# 	system_stdio_utils_test_runner	source
+# ──────────────────────────────────────────────────────────────────────────────
+$(SYSTEM_STDIO_UTILS_TEST_BIN): $(SYSTEM_STDIO_UTILS_TEST_BIN_PREQS)
+	$(LD) $(LD_FLAGS) $^ $(UNITY_LD_LIB_FLAGS) $(LD_LIB_FLAGS) -o $@
+
+$(SYSTEM_STDIO_UTILS_TRNR_OBJ): $(SYSTEM_STDIO_UTILS_TRNR_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_STDIO_UTILS_TEST_OBJ): $(SYSTEM_STDIO_UTILS_TEST_OBJ_PREQS)
+	$(CC) $(UNITY_CC_FLAGS) -c $< -o $@
+
+$(SYSTEM_STDIO_UTILS_TRNR_SRC): $(SYSTEM_STDIO_UTILS_TRNR_SRC_PREQS)
 	$(RUBY) $(RUBY_FLAGS) $(UNITY_GEN_TRNR_SCRIPT) $< $@
 
 
