@@ -6,16 +6,6 @@
 #include "system/exit_utils.h"		/* exit, file, string utils */
 #include "thread/thread_utils.h"	/* memory_copy, parallelization utils */
 
-/* cap reads on input strings
- *─────────────────────────────────────────────────────────────────────────── */
-#define ARGC_INSPECT_MAX 10lu
-#define LENGTH_INSPECT_MAX (sizeof("--generate") * 2lu)
-#define ERROR_BUFFER_SIZE 128lu
-#define ARG_INSPECT_BUFFER_SIZE (LENGTH_INSPECT_MAX + ERROR_BUFFER_SIZE)
-#define ARGV_INSPECT_BUFFER_SIZE ((((LENGTH_INSPECT_MAX + 4lu)		\
-				   * ARGC_INSPECT_MAX) + ERROR_BUFFER_SIZE))
-#define ARG_ARGV_INSPECT_BUFFER_SIZE (  ARG_INSPECT_BUFFER_SIZE		\
-				      + ARGV_INSPECT_BUFFER_SIZE)
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */
@@ -41,6 +31,18 @@
 #define COL_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * COL_NAME_LENGTH_MAX)
 #define COL_NAME_SIZE_MAX    (COL_NAME_NN_SIZE_MAX + 1lu) /* '\0' */
 #define COL_NAME_LENGTH_MAX_STRING "63"
+
+
+/* cap reads on input strings
+ *─────────────────────────────────────────────────────────────────────────── */
+#define ARGC_INSPECT_MAX 10lu
+#define LENGTH_INSPECT_MAX DB_NAME_NN_SIZE_MAX
+#define ERROR_BUFFER_SIZE 128lu
+#define ARG_INSPECT_BUFFER_SIZE (LENGTH_INSPECT_MAX + 4lu + ERROR_BUFFER_SIZE)
+#define ARGV_INSPECT_BUFFER_SIZE ((((LENGTH_INSPECT_MAX + 4lu)		\
+				   * ARGC_INSPECT_MAX) + ERROR_BUFFER_SIZE))
+#define ARG_ARGV_INSPECT_BUFFER_SIZE (  ARG_INSPECT_BUFFER_SIZE		\
+				      + ARGV_INSPECT_BUFFER_SIZE)
 
 
 /* file naming conventions
@@ -162,6 +164,9 @@ INPUT_OPEN TEXT ANSI_RESET
 
 #define MORE_INFO_MESSAGE						\
 "\n\n" INPUT_WRAP("mysql_seed -h")  " for more info\n"
+
+#define IGNORING_FLAG							\
+"\n" ERROR_WRAP("ignoring flag") "\n"
 
 #define PARSE_ERROR_MESSAGE(REASON)					\
 "\n" ERROR_HEADER_WRAP("parse", "error", " - " REASON)

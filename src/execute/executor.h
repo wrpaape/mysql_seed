@@ -62,11 +62,15 @@ union MysqlPassword {
 	const char *restrict bytes;
 };
 
+struct MysqlCredentials {
+	union MysqlPassword password;
+	const char *restrict user;
+};
+
 
 struct ExecSpec {
+	struct MysqlCredentials credentials;
 	struct StringInterval db_names;
-	const char *restrict user;
-	union MysqlPassword password;
 };
 
 

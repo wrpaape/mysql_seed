@@ -25,11 +25,16 @@ PARSE_ERROR_HEADER("expected DATABASE flag instead of")
 #define EXECUTE_EXPECTED_PW_DB_FLAG_HEADER				\
 PARSE_ERROR_HEADER("expected PASSWORD flag or DATABASE flag instead of")
 
-#define EXECUTE_REMAINING_E
-
 #define EXECUTE_EXPECTED_USR_PW_DB_FLAG_HEADER				\
 PARSE_ERROR_HEADER("expected USER flag, PASSWORD flag, or DATABASE "	\
 		   "flag instead of")
+
+#define EXECUTE_PASSWORD_ALREADY_SET					\
+PARSE_ERROR_HEADER("PASSWORD already set, ignoring flag")
+
+#define EXECUTE_USER_ALREADY_SET_HEADER					\
+PARSE_ERROR_HEADER("USER already set to ")
+
 
 /* parsing DB_NAME */
 #define EXECUTE_INVALID_DB_NAME_HEADER					\
@@ -51,25 +56,31 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring")			\
 #define MYSQL_PASSWORD_PROMPT						\
 "\n" ANSI_BRIGHT ANSI_WHITE "enter your MySQL password: " ANSI_RESET
 
+
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
 #define EXECUTE_DISPATCH_MAP_LENGTH 7u
 
 
-/* typedefs, struct declarations
- *─────────────────────────────────────────────────────────────────────────── */
-typedef int
-ExecuteDispatchNode(char *const restrict *restrict from);
-
-
-/* global constants
- *─────────────────────────────────────────────────────────────────────────── */
-extern ExecuteDispatchNode *const
-EXECUTE_DISPATCH_MAP[EXECUTE_DISPATCH_MAP_LENGTH];
-
-
 /* print errors
  *─────────────────────────────────────────────────────────────────────────── */
+inline void
+execute_failure_no_exec_spec(void)
+{
+	write_muffle(STDERR_FILENO,
+		     FAILURE_NO_EXEC_SPEC,
+		     sizeof(FAILURE_NO_EXEC_SPEC) - 1lu);
+}
+
+inline void
+execute_failure_short_exec_spec(void)
+{
+	write_muffle(STDERR_FILENO,
+		     FAILURE_EXEC_SPEC_SHORT,
+		     sizeof(FAILURE_EXEC_SPEC_SHORT) - 1lu);
+}
+
+
 inline void
 execute_expected_db_flag(const char *const restrict invalid)
 {
@@ -145,6 +156,37 @@ execute_invalid_db_name_long(const char *const restrict db_name)
 		     ptr - &buffer[0]);
 }
 
+inline void
+execute_password_already_set(void)
+{
+	write_muffle(STDERR_FILENO,
+		     EXECUTE_PASSWORD_ALREADY_SET,
+		     sizeof(EXECUTE_PASSWORD_ALREADY_SET) - 1lu);
+}
+
+inline void
+execute_user_already_set(const char *const restrict user)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  EXECUTE_USER_ALREADY_SET_HEADER,
+			  sizeof(EXECUTE_USER_ALREADY_SET_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 user,
+				 MYSQL_USER_NN_SIZE_MAX);
+
+	ptr = put_string_size(ptr,
+			      IGNORING_FLAG,
+			      sizeof(IGNORING_FLAG) - 1lu);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
 
 /* parsing DB_NAME
  *─────────────────────────────────────────────────────────────────────────── */
@@ -190,6 +232,47 @@ execute_parse_db_name(struct String *const restrict db_name,
 	}
 }
 
+
+inline struct String *
+execute_parse_db_names_recover(struct String *restrict db_names,
+			       char *const restrict *restrict from,
+			       char *const restrict *restrict until)
+{
+	while (from < until) {
+		if (execute_parse_db_name(db_names,
+					  *from))
+			++db_names;
+
+		++from;
+	}
+
+	return db_names;
+}
+
+inline struct String *
+execute_parse_db_names(struct String *restrict db_names,
+		       char *const restrict *restrict from,
+		       char *const restrict *restrict until,
+		       int *const restrict exit_status)
+{
+	while (from < until) {
+		if (!execute_parse_db_name(db_names,
+					   *from)) {
+			*exit_status = EXIT_FAILURE;
+			return execute_parse_db_names_recover(db_names,
+							      from + 1l,
+							      until);
+		}
+
+		++db_names;
+		++from;
+	}
+
+	return db_names;
+}
+
+
+
 inline bool
 execute_db_flag_match(char *const restrict arg)
 {
@@ -202,6 +285,7 @@ execute_db_flag_match(char *const restrict arg)
 
 	return matched_db_flag;
 }
+
 
 
 /* read MySQL password
@@ -225,48 +309,13 @@ read_mysql_password(char *const restrict buffer,
 }
 
 
-
-/* if EXEC_SPEC is correct, at least 2 databases need to be loaded
- *─────────────────────────────────────────────────────────────────────────── */
-inline int
-execute_dispatch_large(char *const restrict *restrict from,
-		       char *const restrict *const restrict until)
-{
-	return EXIT_FAILURE;
-}
-
-/* ExecuteDispatchNodes
- *─────────────────────────────────────────────────────────────────────────── */
-/* at least 1 database */
-int
-execute_dispatch6(char *const restrict *restrict from);
-int
-execute_dispatch5(char *const restrict *restrict from);
-int
-execute_dispatch4(char *const restrict *restrict from);
-int
-execute_dispatch3(char *const restrict *restrict from);
-/* at most 1 database */
-int
-execute_dispatch2(char *const restrict *restrict from);
-/* irrecoverable failures */
-int
-execute_failure_short_exec_spec(char *const restrict *restrict from);
-int
-execute_failure_no_exec_spec(char *const restrict *restrict from);
-
-
-
 /* dispatch load mode according to 'from'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
 execute_dispatch(char *const restrict *restrict from,
 		 const unsigned int rem_argc)
 {
-	return (rem_argc < EXECUTE_DISPATCH_MAP_LENGTH)
-	     ? (EXECUTE_DISPATCH_MAP[rem_argc])(from)
-	     : execute_dispatch_large(from,
-				      from + rem_argc);
+	return EXIT_FAILURE;
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */
