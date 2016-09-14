@@ -1363,6 +1363,77 @@ signal_handle_cl(sig_t *const restrict last,
 }
 
 
+/* raise */
+inline bool
+raise_status(const int signal_name)
+{
+	return raise(signal_name) == 0;
+}
+
+inline void
+raise_muffle(const int signal_name)
+{
+	(void) raise(signal_name);
+}
+
+#undef	FAIL_SWITCH_ROUTINE
+#define FAIL_SWITCH_ROUTINE raise
+inline bool
+raise_report(const int signal_name,
+	     const char *restrict *const restrict failure)
+{
+	FAIL_SWITCH_ERRNO_OPEN(signal_name)
+	FAIL_SWITCH_ERRNO_CASE_1(EINVAL,
+				 "'signal_name' is not a valid, supported "
+				 "signal number.")
+	FAIL_SWITCH_ERRNO_CASE_1(EPERM,
+				 "The sending process is not the super-user and"
+				 " its effective user id does not match the "
+				 "effective user-id of the receiving process. "
+				 " When signaling a process group, this error "
+				 "is returned if any members of the group could"
+				 " not be signaled.")
+	FAIL_SWITCH_ERRNO_CASE_2(ESRCH,
+				 "No process or process group could be found "
+				 "corresponding to the process id returned by '"
+				 "getpid'.",
+				 "The process id was given as '0', but the "
+				 "sending process does not have a process group"
+				 ".")
+	FAIL_SWITCH_ERRNO_CLOSE()
+}
+
+inline void
+raise_handle(const int signal_name,
+	     Handler *const handle,
+	     void *arg)
+{
+	const char *restrict failure;
+
+	if (LIKELY(raise_report(signal_name,
+				&failure)))
+		return;
+
+	handle(arg,
+	       failure);
+	__builtin_unreachable();
+}
+
+inline void
+raise_handle_cl(const int signal_name,
+		const struct HandlerClosure *const restrict fail_cl)
+{
+	const char *restrict failure;
+
+	if (LIKELY(raise_report(signal_name,
+				&failure)))
+		return;
+
+	handler_closure_call(fail_cl,
+			     failure);
+	__builtin_unreachable();
+}
+
 
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * TOP-LEVEL FUNCTIONS */

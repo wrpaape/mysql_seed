@@ -142,7 +142,11 @@ catch_stdin_restore(int signal_name)
 			 TCSANOW,
 			 &stdin_attr);
 #endif	/* idef WIN32 */
+	stdin_hide_try_catch_close_muffle();
+
+	raise_muffle(signal_name);
 }
+
 extern inline void
 stdin_restore_muffle(void);
 extern inline bool

@@ -333,3 +333,19 @@ signal_handle_cl(sig_t *const restrict last,
 		 const int name,
 		 const sig_t action,
 		 const struct HandlerClosure *const restrict fail_cl);
+
+/* raise */
+extern inline bool
+raise_status(const int signal_name);
+extern inline void
+raise_muffle(const int signal_name);
+extern inline bool
+raise_report(const int signal_name,
+	     const char *restrict *const restrict failure);
+extern inline void
+raise_handle(const int signal_name,
+	     Handler *const handle,
+	     void *arg);
+extern inline void
+raise_handle_cl(const int signal_name,
+		const struct HandlerClosure *const restrict fail_cl);

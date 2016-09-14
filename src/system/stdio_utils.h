@@ -7,7 +7,7 @@
 #	include <termios.h>	/* termios */
 #endif	/* indef WIN32 */
 
-#include "system/file_utils.h"	/* unistd */
+#include "system/file_utils.h"	/* file/signal utils, unistd */
 
 
 /* global variables
