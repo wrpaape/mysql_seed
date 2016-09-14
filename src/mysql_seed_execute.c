@@ -47,7 +47,7 @@ read_mysql_password(char *const restrict buffer,
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-execute_dispatch_large(char *const restrict *restrict arg,
+execute_dispatch_large(char *const restrict *restrict from,
 		       char *const restrict *const restrict until);
 
 
@@ -55,41 +55,48 @@ execute_dispatch_large(char *const restrict *restrict arg,
  *─────────────────────────────────────────────────────────────────────────── */
 /* at least 1 database */
 int
-execute_dispatch6(char *const restrict *restrict arg)
+execute_dispatch6(char *const restrict *restrict from)
 {
 	return EXIT_FAILURE;
 }
 
 int
-execute_dispatch5(char *const restrict *restrict arg)
+execute_dispatch5(char *const restrict *restrict from)
 {
 	return EXIT_FAILURE;
 }
 
 int
-execute_dispatch4(char *const restrict *restrict arg)
+execute_dispatch4(char *const restrict *restrict from)
 {
 	return EXIT_FAILURE;
 }
 
+/* at most 2 database */
 int
-execute_dispatch3(char *const restrict *restrict arg)
+execute_dispatch3(char *const restrict *restrict from)
 {
+	struct ExecSpec exec_spec;
 	struct String db_names[2];
 
 
+	const char *restrict arg = *from;
+
+
+
+	return EXIT_FAILURE;
 
 }
 
 /* at most 1 database */
 int
-execute_dispatch2(char *const restrict *restrict arg)
+execute_dispatch2(char *const restrict *restrict from)
 {
 	struct String db_name;
 
-	if (   execute_db_flag_match(*arg)
+	if (   execute_db_flag_match(*from)
 	    && execute_parse_db_name(&db_name,
-				     arg[1])) {
+				     from[1])) {
 		int exit_status = EXIT_SUCCESS;
 
 		mysql_seed_execute(&db_name,
@@ -105,7 +112,7 @@ execute_dispatch2(char *const restrict *restrict arg)
 
 /* irrecoverable failures */
 int
-execute_failure_short_exec_spec(char *const restrict *restrict arg)
+execute_failure_short_exec_spec(char *const restrict *restrict from)
 {
 	write_muffle(STDERR_FILENO,
 		     FAILURE_EXEC_SPEC_SHORT,
@@ -115,7 +122,7 @@ execute_failure_short_exec_spec(char *const restrict *restrict arg)
 }
 
 int
-execute_failure_no_exec_spec(char *const restrict *restrict arg)
+execute_failure_no_exec_spec(char *const restrict *restrict from)
 {
 	write_muffle(STDERR_FILENO,
 		     FAILURE_NO_EXEC_SPEC,
@@ -127,5 +134,5 @@ execute_failure_no_exec_spec(char *const restrict *restrict arg)
 /* dispatch load mode according to 'arg_ptr'
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
-execute_dispatch(char *const restrict *restrict arg,
+execute_dispatch(char *const restrict *restrict from,
 		 const unsigned int rem_argc);

@@ -3539,7 +3539,7 @@ parse_column_complete(struct GenerateParseState *const restrict state,
 		return;
 	}
 
-	char *restrict arg = *(state->argv.arg.from);
+	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
 		error_expected_col_spec_close(state);
@@ -3547,7 +3547,7 @@ parse_column_complete(struct GenerateParseState *const restrict state,
 	}
 
 	++arg;
-	char *const restrict rem = arg + 1l;
+	const char *const restrict rem = arg + 1l;
 
 	switch (*arg) {
 	case '-':
@@ -3710,7 +3710,7 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 		return;
 	}
 
-	char *restrict arg = *(state->argv.arg.from);
+	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
 		error_expected_grp_spec_close(state);
@@ -3718,7 +3718,7 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 	}
 
 	++arg;
-	char *const restrict rem = arg + 1l;
+	const char *const restrict rem = arg + 1l;
 
 	switch (*arg) {
 	case '-':

@@ -22,6 +22,15 @@ EXECUTE_FAILURE("EXEC_SPEC too short - need at least "			\
 #define EXECUTE_EXPECTED_DB_FLAG_HEADER					\
 PARSE_ERROR_HEADER("expected DATABASE flag instead of")
 
+#define EXECUTE_EXPECTED_PW_DB_FLAG_HEADER				\
+PARSE_ERROR_HEADER("expected PASSWORD flag or DATABASE flag instead of")
+
+#define EXECUTE_REMAINING_E
+
+#define EXECUTE_EXPECTED_USR_PW_DB_FLAG_HEADER				\
+PARSE_ERROR_HEADER("expected USER flag, PASSWORD flag, or DATABASE "	\
+		   "flag instead of")
+
 /* parsing DB_NAME */
 #define EXECUTE_INVALID_DB_NAME_HEADER					\
 PARSE_ERROR_HEADER("invalid DB_NAME")
@@ -50,7 +59,7 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring")			\
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 typedef int
-ExecuteDispatchNode(char *const restrict *restrict arg);
+ExecuteDispatchNode(char *const restrict *restrict from);
 
 
 /* global constants
@@ -220,7 +229,7 @@ read_mysql_password(char *const restrict buffer,
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-execute_dispatch_large(char *const restrict *restrict arg,
+execute_dispatch_large(char *const restrict *restrict from,
 		       char *const restrict *const restrict until)
 {
 	return EXIT_FAILURE;
@@ -230,34 +239,34 @@ execute_dispatch_large(char *const restrict *restrict arg,
  *─────────────────────────────────────────────────────────────────────────── */
 /* at least 1 database */
 int
-execute_dispatch6(char *const restrict *restrict arg);
+execute_dispatch6(char *const restrict *restrict from);
 int
-execute_dispatch5(char *const restrict *restrict arg);
+execute_dispatch5(char *const restrict *restrict from);
 int
-execute_dispatch4(char *const restrict *restrict arg);
+execute_dispatch4(char *const restrict *restrict from);
 int
-execute_dispatch3(char *const restrict *restrict arg);
+execute_dispatch3(char *const restrict *restrict from);
 /* at most 1 database */
 int
-execute_dispatch2(char *const restrict *restrict arg);
+execute_dispatch2(char *const restrict *restrict from);
 /* irrecoverable failures */
 int
-execute_failure_short_exec_spec(char *const restrict *restrict arg);
+execute_failure_short_exec_spec(char *const restrict *restrict from);
 int
-execute_failure_no_exec_spec(char *const restrict *restrict arg);
+execute_failure_no_exec_spec(char *const restrict *restrict from);
 
 
 
-/* dispatch load mode according to 'arg'
+/* dispatch load mode according to 'from'
  *─────────────────────────────────────────────────────────────────────────── */
 inline int
-execute_dispatch(char *const restrict *restrict arg,
+execute_dispatch(char *const restrict *restrict from,
 		 const unsigned int rem_argc)
 {
 	return (rem_argc < EXECUTE_DISPATCH_MAP_LENGTH)
-	     ? (EXECUTE_DISPATCH_MAP[rem_argc])(arg)
-	     : execute_dispatch_large(arg,
-				      arg + rem_argc);
+	     ? (EXECUTE_DISPATCH_MAP[rem_argc])(from)
+	     : execute_dispatch_large(from,
+				      from + rem_argc);
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */
