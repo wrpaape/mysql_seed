@@ -654,41 +654,6 @@ read_password_flush_close_report(const char *restrict *const restrict failure)
 }
 
 
-/* read newline-terminated input from STDIN (size_max > 0)
- * and replace \n with \0 */
-/* inline bool */
-/* read_input(char *const restrict buffer, */
-/* 	   const size_t size_max, */
-/* 	   const char *restrict *const restrict failure) */
-/* { */
-/* 	return false; */
-	/* size_t size_read; */
-	/* bool success; */
-
-	/* success = read_size_report(&size_read, */
-	/* 			   STDIN_FILENO, */
-	/* 			   buffer, */
-	/* 			   size_max, */
-	/* 			   failure); */
-
-	/* if (LIKELY(success)) { */
-	/* 	if (LIKELY(size_read > 0lu)) { */
-	/* 		char *const restrict last = buffer + size_read - 1l; */
-
-	/* 		/1* if (   (size_read == size_max) *1/ */
-	/* 		/1*     && (*last != NL_CHAR)) *1/ */
-	/* 		/1* 	success = flush_input_overflow(failure); *1/ */
-
-	/* 		*last = '\0'; */
-	/* 	} else { */
-	/* 		*buffer = '\0'; */
-	/* 	} */
-	/* } */
-
-	/* return success; */
-/* } */
-
-
 /* read password from newline-terminated stdin input → buffer (size_max > 0) */
 inline bool
 read_password(char *const restrict buffer,
@@ -698,9 +663,11 @@ read_password(char *const restrict buffer,
 	size_t size_read;
 	bool success;
 
+	/* hide tty input, catch interrupts to restore state */
 	success = read_password_open_report(failure);
 
 	if (LIKELY(success)) {
+		/* read hidden input */
 		success = read_size_report(&size_read,
 					   STDIN_FILENO,
 					   buffer,
@@ -713,8 +680,8 @@ read_password(char *const restrict buffer,
 				= buffer + size_read - 1l;
 
 				/* if buffer is filled and the last character is
-				 * not a newline, flush stdin before restoring
-				 * tty state */
+				 * not a newline, buffer overflowed → flush
+				 * stdin before restoring tty state */
 				success
 				= (   (size_read == size_max)
 				   && (*last != NL_CHAR))
@@ -731,7 +698,7 @@ read_password(char *const restrict buffer,
 				*buffer = '\0';
 			}
 		} else {
-			read_password_close_muffle();
+			read_password_flush_close_muffle();
 		}
 	} else {
 		read_password_close_muffle();
@@ -741,7 +708,7 @@ read_password(char *const restrict buffer,
 }
 
 
-/* clear FAIL_SWITCH constant macros */
+/* clear FAIL_SWITCH macro constants */
 #undef FAIL_SWITCH_ROUTINE
 #undef FAIL_SWITCH_ERRNO_FAILURE
 #undef FAIL_SWITCH_FAILURE_POINTER

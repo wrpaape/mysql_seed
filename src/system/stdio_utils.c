@@ -134,6 +134,7 @@ stdin_constructor(const char *restrict *const restrict failure);
 void
 catch_stdin_restore(int signal_name)
 {
+	/* restore original stdin tty state */
 #ifdef WIN32
 	set_console_mode_muffle(stdin_handle,
 				stdin_mode);
@@ -142,8 +143,11 @@ catch_stdin_restore(int signal_name)
 			 TCSANOW,
 			 &stdin_attr);
 #endif	/* idef WIN32 */
+
+	/* retore previous SIGINT handler */
 	stdin_hide_try_catch_close_muffle();
 
+	/* reraise SIGINT */
 	raise_muffle(signal_name);
 }
 
@@ -169,7 +173,6 @@ stdin_hide_try_catch_close_report(const char *restrict *const restrict failure);
 /* turn off echo */
 extern inline bool
 stdin_hide_report(const char *restrict *const restrict failure);
-
 
 /* set up environment for reading password on stdin */
 extern inline bool

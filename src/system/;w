@@ -22,7 +22,7 @@
 #	include <sys/sysctl.h>	/* sysctl */
 #endif /* ifdef OSX */
 
-#include <signal.h>		/* sig_t, signal, raise */
+#include <signal.h>		/* sig_t, signal */
 #include <sys/uio.h>		/* read, write */
 #include <sys/types.h>		/* ssize_t, chmod API */
 #include <sys/stat.h>		/* mkdir */

@@ -3424,7 +3424,7 @@ is_dot_dir(const char *const restrict filename)
 /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
  * HELPER FUNCTIONS */
 
-/* clear FAIL_SWITCH constant macros */
+/* clear FAIL_SWITCH macro constants */
 #undef FAIL_SWITCH_ROUTINE
 #undef FAIL_SWITCH_ERRNO_FAILURE
 #undef FAIL_SWITCH_FAILURE_POINTER

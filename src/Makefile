@@ -1171,10 +1171,12 @@ EXECUTE_SRC 		:= $(call PROJECT_SOURCE_PATH,execute)
 EXECUTE_HDR		:= $(call PROJECT_HEADER_PATH,execute)
 EXECUTE_OBJ 		:= $(call PROJECT_OBJECT_PATH,execute)
 # ─────────────── target prequisites ───────────────────────────────────────────
-EXECUTE_OBJ_PREQS	:= $(EXECUTE_SRC) 		\
-			   $(EXECUTE_HDR) 		\
+EXECUTE_OBJ_PREQS	:= $(EXECUTE_SRC) 			\
+			   $(EXECUTE_HDR) 			\
+			   $(SYSTEM_STDIO_UTILS_HDR)		\
 			   $(EXECUTE_EXECUTE_HDR)
-EXECUTE_OBJ_GROUP	:= $(EXECUTE_OBJ)		\
+EXECUTE_OBJ_GROUP	:= $(EXECUTE_OBJ)			\
+			   $(SYSTEM_STDIO_UTILS_OBJ_GROUP)	\
 			   $(EXECUTE_EXECUTE_OBJ_GROUP)
 # ─────────────── targets ──────────────────────────────────────────────────────
 TARGETS			+= $(EXECUTE_OBJ)

@@ -49,30 +49,33 @@ do {				\
 #define _ANSI_BG(PTR, B3)	_BIG_ANSI(PTR, 52, B3)
 
 /* 4 bytes */
-#define ANSI_FAINT		"\e[2m"
-#define ANSI_UNDERLINE		"\e[4m"
-#define ANSI_BRIGHT		"\e[1m"
-#define ANSI_RESET		"\e[0m"
-#define ANSI_CLEAR		"\e[2J"
-#define ANSI_BLINK		"\e[5m"
-#define ANSI_INVERSE		"\e[7m"
-#define ANSI_REVERSE		ANSI_INVERSE
-#define ANSI_FAINT_NN_WIDTH	4
-#define ANSI_UNDERLINE_NN_WIDTH	4
-#define ANSI_BRIGHT_NN_WIDTH	4
-#define ANSI_RESET_NN_WIDTH	4
-#define ANSI_CLEAR_NN_WIDTH	4
-#define ANSI_BLINK_NN_WIDTH	4
-#define ANSI_INVERSE_NN_WIDTH	4
-#define ANSI_REVERSE_NN_WIDTH	4
-#define ANSI_FAINT_WIDTH	5
-#define ANSI_UNDERLINE_WIDTH	5
-#define ANSI_BRIGHT_WIDTH	5
-#define ANSI_RESET_WIDTH	5
-#define ANSI_CLEAR_WIDTH	5
-#define ANSI_BLINK_WIDTH	5
-#define ANSI_INVERSE_WIDTH	5
-#define ANSI_REVERSE_WIDTH	5
+#define ANSI_FAINT			"\e[2m"
+#define ANSI_UNDERLINE			"\e[4m"
+#define ANSI_BRIGHT			"\e[1m"
+#define ANSI_RESET			"\e[0m"
+#define ANSI_CLEAR			"\e[2J"
+#define ANSI_CLEAR_LINE			"\e[2K"
+#define ANSI_BLINK			"\e[5m"
+#define ANSI_INVERSE			"\e[7m"
+#define ANSI_REVERSE			ANSI_INVERSE
+#define ANSI_FAINT_NN_WIDTH		4
+#define ANSI_UNDERLINE_NN_WIDTH		4
+#define ANSI_BRIGHT_NN_WIDTH		4
+#define ANSI_RESET_NN_WIDTH		4
+#define ANSI_CLEAR_NN_WIDTH		4
+#define ANSI_CLEAR_LINE_NN_WIDTH	4
+#define ANSI_BLINK_NN_WIDTH		4
+#define ANSI_INVERSE_NN_WIDTH		4
+#define ANSI_REVERSE_NN_WIDTH		4
+#define ANSI_FAINT_WIDTH		5
+#define ANSI_UNDERLINE_WIDTH		5
+#define ANSI_BRIGHT_WIDTH		5
+#define ANSI_RESET_WIDTH		5
+#define ANSI_CLEAR_WIDTH		5
+#define ANSI_CLEAR_LINE_WIDTH		5
+#define ANSI_BLINK_WIDTH		5
+#define ANSI_INVERSE_WIDTH		5
+#define ANSI_REVERSE_WIDTH		5
 
 #define PUT_ANSI_RESET(PTR)	_SML_ANSI(PTR, 48)
 #define PUT_ANSI_BRIGHT(PTR)	_SML_ANSI(PTR, 49)

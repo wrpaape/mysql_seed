@@ -19,6 +19,14 @@
 
 /* MySQL string limits
  *─────────────────────────────────────────────────────────────────────────── */
+#define MYSQL_USER_LENGTH_MAX  31lu /* non-null UTF8 codepoints */
+#define MYSQL_USER_NN_SIZE_MAX (UTF8_SIZE_MAX * MYSQL_USER_LENGTH_MAX)
+#define MYSQL_USER_SIZE_MAX    (MYSQL_USER_NN_SIZE_MAX + 1lu) /* '\0' */
+
+#define MYSQL_PASSWORD_LENGTH_MAX  31lu	/* non-null UTF8 codepoints */
+#define MYSQL_PASSWORD_NN_SIZE_MAX (UTF8_SIZE_MAX * MYSQL_PASSWORD_LENGTH_MAX)
+#define MYSQL_PASSWORD_SIZE_MAX	   (MYSQL_PASSWORD_NN_SIZE_MAX + 1lu) /* '\0' */
+
 #define DB_NAME_LENGTH_MAX  63lu /* non-null UTF8 codepoints */
 #define DB_NAME_NN_SIZE_MAX (UTF8_SIZE_MAX * DB_NAME_LENGTH_MAX)
 #define DB_NAME_SIZE_MAX    (DB_NAME_NN_SIZE_MAX + 1lu) /* '\0' */

@@ -3,6 +3,7 @@
 
 /* external dependencies
  *─────────────────────────────────────────────────────────────────────────── */
+#include "system/stdio_utils.h"	/* read_password */
 #include "execute/execute.h"	/* execute mode */
 
 
@@ -36,6 +37,9 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring")			\
 		DB_NAME_LENGTH_MAX_STRING " non-null UTF-8 codepoints,"	\
 		" ignoring")
 
+/* MySQL password prompt */
+#define MYSQL_PASSWORD_PROMPT						\
+ANSI_BRIGHT ANSI_WHITE "enter your MySQL password: " ANSI_RESET
 
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
@@ -188,6 +192,28 @@ execute_db_flag_match(char *const restrict arg)
 
 	return matched_db_flag;
 }
+
+
+/* read MySQL password
+ *─────────────────────────────────────────────────────────────────────────── */
+inline bool
+read_mysql_password(char *const restrict buffer,
+		    const size_t size_max,
+		    const char *restrict *const restrict failure)
+{
+	return LIKELY(write_report(STDIN_FILENO,
+				   MYSQL_PASSWORD_PROMPT,
+				   sizeof(MYSQL_PASSWORD_PROMPT) - 1lu,
+				   failure))
+	    && LIKELY(read_password(buffer,
+				    size_max,
+				    failure))
+	    && write_report(STDIN_FILENO,
+			    ANSI_CLEAR_LINE "\n",
+			    sizeof(ANSI_CLEAR_LINE "\n") - 1lu,
+			    failure);
+}
+
 
 
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded

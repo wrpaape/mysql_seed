@@ -35,11 +35,21 @@ execute_parse_db_name(struct String *const restrict db_name,
 extern inline bool
 execute_db_flag_match(char *const restrict arg);
 
+
+/* read MySQL password
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline bool
+read_mysql_password(char *const restrict buffer,
+		    const size_t size_max,
+		    const char *restrict *const restrict failure);
+
+
 /* if EXEC_SPEC is correct, at least 2 databases need to be loaded
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline int
 execute_dispatch_large(char *const restrict *restrict arg,
 		       char *const restrict *const restrict until);
+
 
 /* ExecuteDispatchNodes
  *─────────────────────────────────────────────────────────────────────────── */
