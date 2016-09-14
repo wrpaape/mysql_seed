@@ -16,7 +16,8 @@ EXECUTE_FAILURE("no EXEC_SPEC provided") MORE_INFO_MESSAGE
 EXECUTE_FAILURE("EXEC_SPEC too short - need at least "			\
 		EXEC_SPEC_LENGTH_MIN_STRING " arguments to load a "	\
 		"single database into MySQL using default USER with "	\
-		"no PASSWORD (" EXEC_SPEC_MINIMAL ")")
+		"no PASSWORD (" EXEC_SPEC_MINIMAL ERROR_OPEN ")")	\
+		MORE_INFO_MESSAGE
 
 #define EXECUTE_EXPECTED_DB_FLAG_HEADER					\
 PARSE_ERROR_HEADER("expected DATABASE flag instead of")
@@ -39,7 +40,7 @@ PARSE_ERROR_HEADER("invalid DB_NAME (empty), ignoring")			\
 
 /* MySQL password prompt */
 #define MYSQL_PASSWORD_PROMPT						\
-ANSI_BRIGHT ANSI_WHITE "enter your MySQL password: " ANSI_RESET
+"\n" ANSI_BRIGHT ANSI_WHITE "enter your MySQL password: " ANSI_RESET
 
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */

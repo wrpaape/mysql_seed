@@ -51,8 +51,8 @@ GENERATE_FAILURE("no DB_SPEC provided") MORE_INFO_MESSAGE
 #define FAILURE_DB_SPEC_SHORT						\
 GENERATE_FAILURE("DB_SPEC too short - need at least "			\
 		 DB_SPEC_LENGTH_MIN_STRING " arguments to describe "	\
-		 "a database in generate mode, ignoring DB_SPEC "	\
-		 "starting with:")
+		 "a database in generate mode (" DB_SPEC_MINIMAL	\
+		 ERROR_OPEN "), ignoring DB_SPEC starting with:")
 
 #define GENERATE_FAILURE_NO_VALID_DB_SPEC				\
 GENERATE_FAILURE("no valid DB_SPEC")

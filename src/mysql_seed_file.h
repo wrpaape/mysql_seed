@@ -154,7 +154,14 @@ PUT_CHAR(PTR, FIELD_DELIM)
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define MORE_INFO_MESSAGE "\n\nmysql_seed -h for more info\n"
+#define INPUT_OPEN							\
+ANSI_RESET ANSI_BRIGHT ANSI_INVERSE
+/* ANSI_BRIGHT ANSI_WHITE_BG ANSI_BLACK */
+#define INPUT_WRAP(TEXT)						\
+INPUT_OPEN TEXT ANSI_RESET
+
+#define MORE_INFO_MESSAGE						\
+"\n\n" INPUT_WRAP("mysql_seed -h")  " for more info\n"
 
 #define PARSE_ERROR_MESSAGE(REASON)					\
 "\n" ERROR_HEADER_WRAP("parse", "error", " - " REASON)
