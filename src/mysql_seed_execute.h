@@ -19,13 +19,10 @@ EXECUTE_FAILURE("EXEC_SPEC too short - need at least "			\
 		"no PASSWORD (" EXEC_SPEC_MINIMAL ERROR_OPEN ")")	\
 		MORE_INFO_MESSAGE
 
-#define EXECUTE_EXPECTED_DB_FLAG_HEADER					\
-PARSE_ERROR_HEADER("expected DATABASE flag instead of")
-
-#define EXECUTE_EXPECTED_PW_DB_FLAG_HEADER				\
+#define EXECUTE_EXPECTED_PWD_DB_FLAG_HEADER				\
 PARSE_ERROR_HEADER("expected PASSWORD flag or DATABASE flag instead of")
 
-#define EXECUTE_EXPECTED_USR_PW_DB_FLAG_HEADER				\
+#define EXECUTE_EXPECTED_USR_PWD_DB_FLAG_HEADER				\
 PARSE_ERROR_HEADER("expected USER flag, PASSWORD flag, or DATABASE "	\
 		   "flag instead of")
 
@@ -80,25 +77,6 @@ execute_failure_short_exec_spec(void)
 		     sizeof(FAILURE_EXEC_SPEC_SHORT) - 1lu);
 }
 
-
-inline void
-execute_expected_db_flag(const char *const restrict invalid)
-{
-	char buffer[ARG_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  EXECUTE_EXPECTED_DB_FLAG_HEADER,
-			  sizeof(EXECUTE_EXPECTED_DB_FLAG_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 invalid,
-				 LENGTH_INSPECT_MAX);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
 
 inline void
 execute_invalid_db_name_empty(void)
@@ -188,6 +166,37 @@ execute_user_already_set(const char *const restrict user)
 }
 
 
+/* parsing MySQL credentials
+ *─────────────────────────────────────────────────────────────────────────── */
+inline bool
+read_mysql_password(char *const restrict buffer,
+		    const size_t size_max,
+		    const char *restrict *const restrict failure)
+{
+	return LIKELY(write_report(STDIN_FILENO,
+				   MYSQL_PASSWORD_PROMPT,
+				   sizeof(MYSQL_PASSWORD_PROMPT) - 1lu,
+				   failure))
+	    && LIKELY(read_password(buffer,
+				    size_max,
+				    failure))
+	    && write_report(STDIN_FILENO,
+			    ANSI_CLEAR_LINE "\n",
+			    sizeof(ANSI_CLEAR_LINE "\n") - 1lu,
+			    failure);
+}
+
+inline char *const restrict *restrict
+execute_parse_credentials(struct MysqlCredentials *const restrict credentials,
+			  char *const restrict *restrict from,
+			  char *const restrict *restrict until,
+			  int *const restrict exit_status)
+{
+	return until;
+}
+
+
+
 /* parsing DB_NAME
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
@@ -269,43 +278,6 @@ execute_parse_db_names(struct String *restrict db_names,
 	}
 
 	return db_names;
-}
-
-
-
-inline bool
-execute_db_flag_match(char *const restrict arg)
-{
-	const bool matched_db_flag = flag_match(arg,
-						'd',
-						"database");
-
-	if (!matched_db_flag)
-		execute_expected_db_flag(arg);
-
-	return matched_db_flag;
-}
-
-
-
-/* read MySQL password
- *─────────────────────────────────────────────────────────────────────────── */
-inline bool
-read_mysql_password(char *const restrict buffer,
-		    const size_t size_max,
-		    const char *restrict *const restrict failure)
-{
-	return LIKELY(write_report(STDIN_FILENO,
-				   MYSQL_PASSWORD_PROMPT,
-				   sizeof(MYSQL_PASSWORD_PROMPT) - 1lu,
-				   failure))
-	    && LIKELY(read_password(buffer,
-				    size_max,
-				    failure))
-	    && write_report(STDIN_FILENO,
-			    ANSI_CLEAR_LINE "\n",
-			    sizeof(ANSI_CLEAR_LINE "\n") - 1lu,
-			    failure);
 }
 
 
