@@ -4,7 +4,7 @@
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 extern inline void
-generate_failure_no_db_spec(void);
+generate_failure_no_db_specs(void);
 extern inline void
 generate_failure_short_db_spec(char *const restrict *const restrict from,
 			       char *const restrict *const restrict until);

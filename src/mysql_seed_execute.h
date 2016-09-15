@@ -33,14 +33,14 @@ PARSE_ERROR_HEADER("PASSWORD already set, ignoring flag")
 PARSE_ERROR_HEADER("USER already set to ")
 
 #define EXECUTE_NO_DB_NAMES						\
-EXECUTE_FAILURE("no DB_NAMES provided")
+EXECUTE_FAILURE("no DB_NAMEs provided")
 
 #define EXECUTE_NO_USER_OR_DB_NAMES					\
 EXECUTE_FAILURE("no USER when standalone USER_FLAG was specified and "	\
-		"no DB_NAMES provided")
+		"no DB_NAMEs provided")
 
 #define EXECUTE_NO_VALID_DB_NAMES					\
-EXECUTE_FAILURE("no valid DB_NAMES provided")
+EXECUTE_FAILURE("no valid DB_NAMEs provided")
 
 
 /* parsing DB_NAME */
@@ -645,7 +645,13 @@ inline int
 execute_dispatch(char *const restrict *restrict from,
 		 const unsigned int rem_argc)
 {
-	return EXIT_FAILURE;
+	if (rem_argc == 0lu) {
+		execute_failure_no_exec_spec();
+		return EXIT_FAILURE;
+	}
+
+
+	struct StringInterval db_names;
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */

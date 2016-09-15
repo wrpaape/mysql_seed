@@ -45,8 +45,8 @@
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
-#define FAILURE_NO_DB_SPEC						\
-GENERATE_FAILURE("no DB_SPEC provided") MORE_INFO_MESSAGE
+#define FAILURE_NO_DB_SPECS						\
+GENERATE_FAILURE("no DB_SPECs provided") MORE_INFO_MESSAGE
 
 #define FAILURE_DB_SPEC_SHORT						\
 GENERATE_FAILURE("DB_SPEC too short - need at least "			\
@@ -465,11 +465,11 @@ generate_parse_error(struct GenerateParseState *const restrict state);
  *─────────────────────────────────────────────────────────────────────────── */
 /* irrecoverable failures */
 inline void
-generate_failure_no_db_spec(void)
+generate_failure_no_db_specs(void)
 {
 	write_muffle(STDERR_FILENO,
-		     FAILURE_NO_DB_SPEC,
-		     sizeof(FAILURE_NO_DB_SPEC) - 1lu);
+		     FAILURE_NO_DB_SPECS,
+		     sizeof(FAILURE_NO_DB_SPECS) - 1lu);
 }
 
 inline void
@@ -7115,7 +7115,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		  const unsigned int rem_argc)
 {
 	if (UNLIKELY(rem_argc == 0u)) {
-		generate_failure_no_db_spec();
+		generate_failure_no_db_specs();
 		return EXIT_FAILURE;
 	}
 	/* calculate max required size for all components + their specs
