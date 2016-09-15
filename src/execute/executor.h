@@ -26,7 +26,7 @@ EXECUTE_FAILURE(MALLOC_FAILURE_REASON)
 #define MYSQL_DEFAULT_HOST	NULL
 #define MYSQL_DEFAULT_USER	NULL
 #define MYSQL_DEFAULT_PASSWORD	NULL
-#define MYSQL_DEFAULT_DB	NULL
+#define MYSQL_DEFAULT_DATABASE	NULL
 #define MYSQL_DEFAULT_PORT	0u
 #define MYSQL_DEFAULT_SOCKET	NULL
 #define MYSQL_DEFAULT_FLAGS	CLIENT_MULTI_STATEMENTS
@@ -44,7 +44,7 @@ mysql_real_connect(CONNECTION,						\
 		   MYSQL_DEFAULT_HOST,					\
 		   USER,						\
 		   PASSWORD,						\
-		   MYSQL_DEFAULT_DB,					\
+		   MYSQL_DEFAULT_DATABASE,				\
 		   MYSQL_DEFAULT_PORT,					\
 		   MYSQL_DEFAULT_SOCKET,				\
 		   MYSQL_DEFAULT_FLAGS)
@@ -69,7 +69,7 @@ struct MysqlCredentials {
 
 
 struct ExecSpec {
-	struct MysqlCredentials credentials;
+	struct MysqlCredentials creds;
 	struct StringInterval db_names;
 };
 

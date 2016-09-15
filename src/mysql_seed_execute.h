@@ -32,6 +32,12 @@ PARSE_ERROR_HEADER("PASSWORD already set, ignoring flag")
 #define EXECUTE_USER_ALREADY_SET_HEADER					\
 PARSE_ERROR_HEADER("USER already set to ")
 
+#define EXECUTE_NO_DB_NAMES						\
+PARSE_ERROR_HEADER("no DB_NAMES provided")
+
+#define EXECUTE_NO_VALID_DB_NAMES					\
+PARSE_ERROR_HEADER("no valid DB_NAMES provided")
+
 
 /* parsing DB_NAME */
 #define EXECUTE_INVALID_DB_NAME_HEADER					\
@@ -165,34 +171,190 @@ execute_user_already_set(const char *const restrict user)
 		     ptr - &buffer[0]);
 }
 
+inline void
+execute_no_db_names(void)
+{
+	write_muffle(STDERR_FILENO,
+		     EXECUTE_NO_DB_NAMES,
+		     sizeof(EXECUTE_NO_DB_NAMES) - 1lu);
+}
+
+inline void
+execute_no_valid_db_names(void)
+{
+	write_muffle(STDERR_FILENO,
+		     EXECUTE_NO_VALID_DB_NAMES,
+		     sizeof(EXECUTE_NO_VALID_DB_NAMES) - 1lu);
+}
+
 
 /* parsing MySQL credentials
  *─────────────────────────────────────────────────────────────────────────── */
 inline bool
-read_mysql_password(char *const restrict buffer,
-		    const size_t size_max,
-		    const char *restrict *const restrict failure)
+read_mysql_password(char *const restrict buffer);
 {
-	return LIKELY(write_report(STDIN_FILENO,
-				   MYSQL_PASSWORD_PROMPT,
-				   sizeof(MYSQL_PASSWORD_PROMPT) - 1lu,
-				   failure))
-	    && LIKELY(read_password(buffer,
-				    size_max,
-				    failure))
-	    && write_report(STDIN_FILENO,
-			    ANSI_CLEAR_LINE "\n",
-			    sizeof(ANSI_CLEAR_LINE "\n") - 1lu,
-			    failure);
+	const char *restrict failure;
+
+	const bool success
+	= LIKELY(write_report(STDIN_FILENO,
+			      MYSQL_PASSWORD_PROMPT,
+			      sizeof(MYSQL_PASSWORD_PROMPT) - 1lu,
+			      &failure))
+       && LIKELY(read_password(buffer,
+			       MYSQL_PASSWORD_SIZE_MAX,
+			       &failure))
+       && write_report(STDIN_FILENO,
+		       ANSI_CLEAR_LINE "\n",
+		       sizeof(ANSI_CLEAR_LINE "\n") - 1lu,
+		       &failure);
+
+	if (UNLIKELY(!success))
+		print_failure(failure);
+
+	return success;
 }
 
 inline char *const restrict *restrict
-execute_parse_credentials(struct MysqlCredentials *const restrict credentials,
-			  char *const restrict *restrict from,
-			  char *const restrict *restrict until,
-			  int *const restrict exit_status)
+execute_parse_pwd_short_first(struct MysqlCredentials *const restrict creds,
+			      char *const restrict rem_flag,
+			      char *const restrict *restrict from,
+			      char *const restrict *restrict until)
 {
-	return until;
+	if (*rem_flag == '\0') {
+		if (UNLIKELY(!read_mysql_password(&creds->password->buffer[0])))
+			return NULL;
+	} else {
+		creds->password->bytes = rem_flag;
+	}
+
+	++from;
+	if (from == until) {
+		execute_no_db_names();
+		return NULL;
+	}
+
+	const char *restrict arg = *from;
+}
+
+inline char *const restrict *restrict
+execute_parse_user_short_first(struct MysqlCredentials *const restrict creds,
+			       char *const restrict rem_flag,
+			       char *const restrict *restrict from,
+			       char *const restrict *restrict until)
+{
+	if (*rem_flag == '\0') {
+		++from;
+		if (from == until) {
+			execute_no_db_names();
+			return NULL;
+		}
+
+		creds->user = from;
+
+	} else {
+		creds->user = rem_flag;
+	}
+
+	++from;
+	if (from == until) {
+		execute_no_db_names();
+		return NULL;
+	}
+
+	const char *restrict arg = *from;
+
+	if (*arg != '-') {
+DEFAULT_PASSWORD:
+		creds->password->bytes = MYSQL_DEFAULT_PASSWORD;
+		return from;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+
+	switch (*arg) {
+	case '-':
+		arg = string_starts_with(rem,
+					 "password");
+		if (arg == NULL)
+			goto DEFAULT_PASSWORD;
+
+
+
+	case 'p':
+
+	default:
+		goto DEFAULT_PASSWORD;
+	}
+}
+
+inline char *const restrict *restrict
+execute_parse_credentials(struct MysqlCredentials *const restrict creds,
+			  char *const restrict *restrict from,
+			  char *const restrict *restrict until)
+{
+	const char *restrict arg = *from;
+
+	if (*arg != '-') {
+DEFAULT_CREDENTIALS:
+		creds->password->bytes = MYSQL_DEFAULT_PASSWORD;
+		creds->user	       = MYSQL_DEFAULT_USER:
+		return from;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break; /* parse long SPEC */
+
+	case 'p':
+		return execute_parse_pwd_short_first(creds,
+						     rem,
+						     from,
+						     until);
+
+	case 'u':
+		return execute_parse_user_short_first(creds,
+						      rem,
+						      from,
+						      until);
+
+	default:
+		goto DEFAULT_CREDENTIALS;
+	}
+
+
+	switch (*rem) {
+	case 'p':
+		arg = string_starts_with(rem + 1l,
+					 "password=");
+
+		if (arg == NULL)
+			goto DEFAULT_CREDENTIALS;
+
+		return execute_parse_password_first(creds,
+						    arg,
+						    from,
+						    until);
+
+	case 'u':
+		arg = string_starts_with(rem + 1l,
+					 "user=");
+
+		if (arg == NULL)
+			goto DEFAULT_CREDENTIALS;
+
+		return execute_parse_user_first(creds,
+						arg,
+						from,
+						until);
+
+	default:
+		goto DEFAULT_CREDENTIALS;
+	}
 }
 
 

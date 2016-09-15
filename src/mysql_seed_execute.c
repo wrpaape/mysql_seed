@@ -16,19 +16,32 @@ extern inline void
 execute_password_already_set(void);
 extern inline void
 execute_user_already_set(const char *const restrict user);
+extern inline void
+execute_no_db_names(void);
+extern inline void
+execute_no_valid_db_names(void);
 
 /* parsing MySQL credentials
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-read_mysql_password(char *const restrict buffer,
-		    const size_t size_max,
-		    const char *restrict *const restrict failure);
+read_mysql_password(char *const restrict buffer);
+
+extern inline char *const restrict *restrict
+execute_parse_pwd_short_first(struct MysqlCredentials *const restrict creds,
+			      char *const restrict rem_flag,
+			      char *const restrict *restrict from,
+			      char *const restrict *restrict until);
+
+extern inline char *const restrict *restrict
+execute_parse_user_short_first(struct MysqlCredentials *const restrict creds,
+			       char *const restrict rem_flag,
+			       char *const restrict *restrict from,
+			       char *const restrict *restrict until);
 
 extern inline char *const restrict *restrict
 execute_parse_credentials(struct MysqlCredentials *const restrict credentials,
 			  char *const restrict *restrict from,
-			  char *const restrict *restrict until,
-			  int *const restrict exit_status);
+			  char *const restrict *restrict until);
 
 /* parsing DB_NAME
  *─────────────────────────────────────────────────────────────────────────── */
