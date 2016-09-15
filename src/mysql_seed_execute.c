@@ -19,24 +19,42 @@ execute_user_already_set(const char *const restrict user);
 extern inline void
 execute_no_db_names(void);
 extern inline void
+execute_no_user_or_db_names(void);
+extern inline void
 execute_no_valid_db_names(void);
 
 /* parsing MySQL credentials
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline bool
-read_mysql_password(char *const restrict buffer);
-
+read_mysql_password(struct MysqlPassword *const restrict password);
+extern inline char *const restrict *restrict
+execute_parse_user(const char *restrict *const restrict user,
+		   char *const restrict *restrict from,
+		   char *const restrict *restrict until);
+extern inline char *const restrict *restrict
+execute_parse_pwd(struct MysqlPassword *const restrict password,
+		  char *const restrict *restrict from,
+		  char *const restrict *restrict until);
 extern inline char *const restrict *restrict
 execute_parse_pwd_short_first(struct MysqlCredentials *const restrict creds,
-			      char *const restrict rem_flag,
+			      const char *restrict rem_flag,
 			      char *const restrict *restrict from,
 			      char *const restrict *restrict until);
-
+extern inline char *const restrict *restrict
+execute_parse_pwd_long_first(struct MysqlCredentials *const restrict creds,
+			     const char *restrict rem_flag,
+			     char *const restrict *restrict from,
+			     char *const restrict *restrict until);
 extern inline char *const restrict *restrict
 execute_parse_user_short_first(struct MysqlCredentials *const restrict creds,
-			       char *const restrict rem_flag,
+			       const char *restrict rem_flag,
 			       char *const restrict *restrict from,
 			       char *const restrict *restrict until);
+extern inline char *const restrict *restrict
+execute_parse_user_long_first(struct MysqlCredentials *const restrict creds,
+			      const char *restrict rem_flag,
+			      char *const restrict *restrict from,
+			      char *const restrict *restrict until);
 
 extern inline char *const restrict *restrict
 execute_parse_credentials(struct MysqlCredentials *const restrict credentials,

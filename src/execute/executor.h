@@ -57,13 +57,13 @@ struct MysqlServer {
 	MYSQL *connection;
 };
 
-union MysqlPassword {
+struct MysqlPassword {
 	char buffer[MYSQL_PASSWORD_SIZE_MAX];
 	const char *restrict bytes;
 };
 
 struct MysqlCredentials {
-	union MysqlPassword password;
+	struct MysqlPassword password;
 	const char *restrict user;
 };
 
