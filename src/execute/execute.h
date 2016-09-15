@@ -91,17 +91,54 @@ mysql_real_query_failure(MYSQL *const restrict connection)
 }
 
 
-
-
+/* load database(s) into server
+ * ────────────────────────────────────────────────────────────────────────── */
+/* load a single database into MySQL server */
 inline void
-mysql_seed_execute(const struct String *const restrict db_name,
-		   const char *const restrict user,
-		   const char *const restrict password,
+execute_single(MYSQL *const restrict connection,
+	       const struct String *const restrict db_name,
+	       int *const restrict exit_status)
+{
+	struct String query;
+	const char *restrict failure;
+
+	if (query_load_report(&query,
+			      db_name,
+			      &failure)) {
+		if (UNLIKELY(mysql_real_query(connection,
+					      query.bytes,
+					      query.length) != 0)) {
+			mysql_real_query_failure(connection);
+			*exit_status = EXIT_FAILURE;
+		}
+
+		free(query.bytes);
+
+	} else {
+		print_failure(failure);
+		*exit_status = EXIT_FAILURE;
+	}
+}
+
+/* load a multiple databases into MySQL server in parallel */
+inline void
+execute_multiple(MYSQL *const restrict connection,
+		 const struct StringInterval *const restrict db_names,
+		 const unsigned int count_db_names,
+		 int *const restrict exit_status)
+{
+}
+
+
+/* connect to server then dispatch loading
+ * ────────────────────────────────────────────────────────────────────────── */
+inline void
+mysql_seed_execute(const struct MysqlCredentials *const restrict creds,
+		   const struct StringInterval *const restrict db_names,
+		   const unsigned int count_db_names,
 		   int *const restrict exit_status)
 {
 	MYSQL connection;
-	struct String query;
-	const char *restrict failure;
 
 	if (UNLIKELY(mysql_init(&connection) == NULL)) {
 		mysql_init_failure(&connection);
@@ -109,37 +146,25 @@ mysql_seed_execute(const struct String *const restrict db_name,
 
 	} else {
 		if (MYSQL_REAL_CONNECT(&connection,
-				       user,
-				       password) == NULL) {
+				       creds->user,
+				       creds->password.bytes) == NULL) {
 			mysql_real_connect_failure(&connection);
 			*exit_status = EXIT_FAILURE;
 
-		} else if (query_load_report(&query,
-					     db_name,
-					     &failure)) {
-
-			if (UNLIKELY(mysql_real_query(&connection,
-						      query.bytes,
-						      query.length) != 0)) {
-				mysql_real_query_failure(&connection);
-				*exit_status = EXIT_FAILURE;
-			}
-
-			free(query.bytes);
+		} else if (count_db_names == 1u) {
+			execute_single(&connection,
+				       db_names->from,
+				       exit_status);
 
 		} else {
-			print_failure(failure);
-			*exit_status = EXIT_FAILURE;
+			execute_multiple(&connection,
+					 db_names,
+					 count_db_names,
+					 exit_status);
 		}
 
 		mysql_close(&connection);
 	}
-}
-
-inline int
-mysql_seed_execute_multi(const struct ExecSpec *const restrict exec_spec)
-{
-	return EXIT_FAILURE;
 }
 
 /* worker entry point */

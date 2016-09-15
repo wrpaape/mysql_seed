@@ -12,15 +12,31 @@ void tearDown(void)
 void test_execute_execute(void)
 {
 	/* run only if foo_forum has been generated */
-	const struct String db_name = {
+	struct String db_name = {
 		.bytes	= "foo_forum",
 		.length = 9lu
 	};
 
-	int exit_status;
+	const struct StringInterval db_names = {
+		.from  = &db_name,
+		.until = &db_name + 1l
+	};
 
-	mysql_seed_execute(&db_name,
-			   "root",
-			   MYSQL_DEFAULT_PASSWORD,
+	const struct MysqlCredentials creds = {
+		.password.bytes = MYSQL_DEFAULT_PASSWORD,
+		.user		= "root"
+	};
+
+
+
+
+	int exit_status = EXIT_SUCCESS;
+
+	mysql_seed_execute(&creds,
+			   &db_names,
+			   1u,
 			   &exit_status);
+
+	TEST_ASSERT_EQUAL_INT(EXIT_SUCCESS,
+			      exit_status);
 }

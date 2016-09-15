@@ -12,26 +12,6 @@
 #define FAILURE_NO_EXEC_SPEC						\
 EXECUTE_FAILURE("no EXEC_SPEC provided") MORE_INFO_MESSAGE
 
-#define FAILURE_EXEC_SPEC_SHORT						\
-EXECUTE_FAILURE("EXEC_SPEC too short - need at least "			\
-		EXEC_SPEC_LENGTH_MIN_STRING " arguments to load a "	\
-		"single database into MySQL using default USER with "	\
-		"no PASSWORD (" EXEC_SPEC_MINIMAL ERROR_OPEN ")")	\
-		MORE_INFO_MESSAGE
-
-#define EXECUTE_EXPECTED_PWD_DB_FLAG_HEADER				\
-PARSE_ERROR_HEADER("expected PASSWORD flag or DATABASE flag instead of")
-
-#define EXECUTE_EXPECTED_USR_PWD_DB_FLAG_HEADER				\
-PARSE_ERROR_HEADER("expected USER flag, PASSWORD flag, or DATABASE "	\
-		   "flag instead of")
-
-#define EXECUTE_PASSWORD_ALREADY_SET					\
-PARSE_ERROR_HEADER("PASSWORD already set, ignoring flag")
-
-#define EXECUTE_USER_ALREADY_SET_HEADER					\
-PARSE_ERROR_HEADER("USER already set to ")
-
 #define EXECUTE_NO_DB_NAMES						\
 EXECUTE_FAILURE("no DB_NAMEs provided")
 
@@ -79,13 +59,6 @@ execute_failure_no_exec_spec(void)
 		     sizeof(FAILURE_NO_EXEC_SPEC) - 1lu);
 }
 
-inline void
-execute_failure_short_exec_spec(void)
-{
-	write_muffle(STDERR_FILENO,
-		     FAILURE_EXEC_SPEC_SHORT,
-		     sizeof(FAILURE_EXEC_SPEC_SHORT) - 1lu);
-}
 
 
 inline void
@@ -138,37 +111,6 @@ execute_invalid_db_name_long(const char *const restrict db_name)
 			      EXECUTE_INVALID_DB_NAME_REASON_LONG,
 			      sizeof(EXECUTE_INVALID_DB_NAME_REASON_LONG)
 			      - 1lu);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
-execute_password_already_set(void)
-{
-	write_muffle(STDERR_FILENO,
-		     EXECUTE_PASSWORD_ALREADY_SET,
-		     sizeof(EXECUTE_PASSWORD_ALREADY_SET) - 1lu);
-}
-
-inline void
-execute_user_already_set(const char *const restrict user)
-{
-	char buffer[ARGV_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  EXECUTE_USER_ALREADY_SET_HEADER,
-			  sizeof(EXECUTE_USER_ALREADY_SET_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 user,
-				 MYSQL_USER_NN_SIZE_MAX);
-
-	ptr = put_string_size(ptr,
-			      IGNORING_FLAG,
-			      sizeof(IGNORING_FLAG) - 1lu);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -345,7 +287,7 @@ DEFAULT_PASSWORD:
 			goto PARSE_COMPLETE;
 
 		case '=':
-			password->bytes = rem;
+			password->bytes = arg + 1l;
 			goto PARSE_COMPLETE;
 
 		default:
@@ -622,7 +564,7 @@ execute_parse_db_names(struct String *restrict db_names,
 		       char *const restrict *restrict until,
 		       int *const restrict exit_status)
 {
-	while (from < until) {
+	do {
 		if (!execute_parse_db_name(db_names,
 					   *from)) {
 			*exit_status = EXIT_FAILURE;
@@ -633,7 +575,7 @@ execute_parse_db_names(struct String *restrict db_names,
 
 		++db_names;
 		++from;
-	}
+	} while (from < until);
 
 	return db_names;
 }
@@ -651,7 +593,60 @@ execute_dispatch(char *const restrict *restrict from,
 	}
 
 
+	char *const restrict *restrict until = from + rem_argc;
+
+
+	struct MysqlCredentials creds;
+
+	from = execute_parse_credentials(&creds,
+					 from,
+					 until);
+
+	if (from == NULL)
+		return EXIT_FAILURE;
+
+
+
+
 	struct StringInterval db_names;
+
+	db_names.from = malloc(sizeof(struct String) * (until - from));
+
+	if (UNLIKELY(db_names.from == NULL)) {
+		execute_failure_malloc();
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+
+	db_names.until
+	= execute_parse_db_names(db_names.from,
+				 from,
+				 until,
+				 &exit_status);
+
+	const unsigned int count_db_names
+	= db_names.until - db_names.from;
+
+	/* printf("got user: %s\n    pass: %s\n", */
+	/*        creds.user, creds.password.bytes); */
+
+	/* for (struct String *db = db_names.from; db < db_names.until; ++db) */
+	/* 	printf("\t%s\n", db->bytes); */
+
+	/* exit(0); */
+
+	if (count_db_names > 0u)
+		mysql_seed_execute(&creds,
+				   &db_names,
+				   count_db_names,
+				   &exit_status);
+	else
+		execute_no_valid_db_names();
+
+	free(db_names.from);
+
+	return exit_status;
 }
 
 #endif /* ifndef MYSQL_SEED_MYSQL_SEED_EXECUTE_H_ */
