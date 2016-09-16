@@ -5,6 +5,13 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "mysql_seed_file.h"	/* handle input strings */
 
+/* error messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define REMOVE_FAILURE(REASON)						\
+"\n" FAILURE_HEADER_WRAP("remove", " - " REASON)
+
+#define FAILURE_NO_RM_SPEC						\
+REMOVE_FAILURE("no RM_SPEC provided") MORE_INFO_MESSAGE
 
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
@@ -15,18 +22,10 @@ struct Win32DirNode {
 	struct Win32DirNode *parent;
 };
 
-#define MYSQL_SEED_REMOVE_MALLOC_FAILURE				\
-MALLOC_FAILURE_MESSAGE("mysql_seed_remove")
-
+#define REMOVE_FAILURE_MALLOC						\
+REMOVE_FAILURE(MALLOC_FAILURE_REASON)
 #endif /* ifdef WIN32 */
 
-/* error messages
- *─────────────────────────────────────────────────────────────────────────── */
-#define REMOVE_FAILURE(REASON)						\
-"\n" FAILURE_HEADER_WRAP("remove", " - " REASON)
-
-#define FAILURE_NO_RM_SPEC						\
-REMOVE_FAILURE("no RM_SPEC provided") MORE_INFO_MESSAGE
 
 
 /* irrecoverable failures */
@@ -40,11 +39,11 @@ remove_failure_no_rm_spec(void)
 
 #ifdef WIN32
 inline void
-mysql_seed_remove_malloc_failure(void)
+remove_failure_malloc(void)
 {
 	write_muffle(STDERR_FILENO,
-		     MYSQL_SEED_REMOVE_MALLOC_FAILURE,
-		     sizeof(MYSQL_SEED_REMOVE_MALLOC_FAILURE) - 1lu);
+		     REMOVE_FAILURE_MALLOC,
+		     sizeof(REMOVE_FAILURE_MALLOC) - 1lu);
 }
 
 inline void
@@ -165,7 +164,7 @@ NEXT_HARD_LINK:
 			dir_node = malloc(sizeof(struct Win32DirNode));
 
 			if (dir_node == NULL) {
-				mysql_seed_remove_malloc_failure();
+				remove_failure_malloc();
 				free_win32_dir_stack(parent);
 				return false; /* irrecoverable */
 			}
@@ -303,7 +302,7 @@ NEXT_HARD_LINK:
 			dir_node = malloc(sizeof(struct Win32DirNode));
 
 			if (dir_node == NULL) {
-				mysql_seed_remove_malloc_failure();
+				remove_failure_malloc();
 				free_win32_dir_stack(parent);
 				return EXIT_FAILURE;
 			}
@@ -479,14 +478,15 @@ mysql_seed_remove(char *const *db_names)
 }
 
 inline int
-remove_dispatch(char *const *const restrict arg)
+remove_dispatch(char *const *const restrict arg,
+		const unsigned int rem_argc)
 {
-	const char *restrict rm_spec = *arg;
-
-	if (UNLIKELY(rm_spec == NULL)) {
+	if (rem_argc == 0u) {
 		remove_failure_no_rm_spec();
 		return EXIT_FAILURE;
 	}
+
+	const char *restrict rm_spec = *arg;
 
 	if (*rm_spec != '-')
 		return mysql_seed_remove(arg);

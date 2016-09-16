@@ -605,9 +605,6 @@ execute_dispatch(char *const restrict *restrict from,
 	if (from == NULL)
 		return EXIT_FAILURE;
 
-
-
-
 	struct StringInterval db_names;
 
 	db_names.from = malloc(sizeof(struct String) * (until - from));

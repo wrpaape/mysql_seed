@@ -227,6 +227,12 @@ put_string_stop_width(char *const restrict buffer,
 		      const char *const restrict string,
 		      const unsigned int width);
 
+extern inline char *
+put_string_width_until(char *const restrict buffer,
+		       const char *const restrict string,
+		       const unsigned int width,
+		       const char *const restrict until);
+
 extern inline void
 put_stub_closure_init(struct PutStubClosure *const restrict closure,
 		      const char *const restrict bytes,

@@ -7114,7 +7114,7 @@ inline int
 generate_dispatch(char *const restrict *const restrict arg,
 		  const unsigned int rem_argc)
 {
-	if (UNLIKELY(rem_argc == 0u)) {
+	if (rem_argc == 0u) {
 		generate_failure_no_db_specs();
 		return EXIT_FAILURE;
 	}
@@ -7210,7 +7210,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 							   + 1l
 							   - DB_SPEC_LENGTH_MIN;
 
-	if (UNLIKELY(arg >= db_spec_until)) {
+	if (arg >= db_spec_until) {
 		generate_failure_short_db_spec(arg,
 					       arg_until);
 		return EXIT_FAILURE;
@@ -7252,7 +7252,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	/* populate specs according to argv */
 	parse_db_specs(&state);
 
-	if (UNLIKELY(state.generator.databases == 0u)) {
+	if (state.generator.databases == 0u) {
 		generate_failure_no_valid_db_spec();
 		free(spec_alloc);
 		return EXIT_FAILURE;

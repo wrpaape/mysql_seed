@@ -1062,6 +1062,21 @@ put_string_stop_width ## WIDTH (char *const restrict buffer,		\
 FOR_ALL_CHAR_BUFFER_WIDTHS_STOP(DEFINE_PUT_STRING_STOP_WIDTH)
 
 
+inline char *
+put_string_width_until(char *const restrict buffer,
+		       const char *const restrict string,
+		       const unsigned int width,
+		       const char *const restrict until)
+{
+	const size_t size_until = until - buffer;
+
+	return put_string_width(buffer,
+				string,
+				(size_until < width)
+				? ((const unsigned int) size_until)
+				: width);
+}
+
 inline void
 put_stub_closure_init(struct PutStubClosure *const restrict closure,
 		      const char *const restrict bytes,

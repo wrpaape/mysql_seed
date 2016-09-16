@@ -7,7 +7,7 @@ remove_failure_no_rm_spec(void);
 
 #ifdef WIN32
 extern inline void
-mysql_seed_remove_malloc_failure(void);
+remove_failure_malloc(void);
 
 extern inline void
 do_free_win32_dir_stack(struct Win32DirNode *restrict dir_node);
@@ -29,4 +29,5 @@ extern inline int
 mysql_seed_remove(char *const *db_names);
 
 extern inline int
-remove_dispatch(char *const *const restrict arg);
+remove_dispatch(char *const *const restrict arg,
+		const unsigned int rem_argc);

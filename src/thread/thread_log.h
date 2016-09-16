@@ -19,8 +19,8 @@ ANSI_YELLOW "THREAD LOG " ACTION " FOR:\t"
 #define THREAD_LOG_LABEL_1 ANSI_WHITE_BG ANSI_BLUE
 #define THREAD_LOG_LABEL_2 ANSI_BLACK_BG " " ANSI_BLUE_BG ANSI_WHITE
 
-#define THREAD_LOG_OPEN_HEADER THREAD_LOG_HEADER_1("OPEN")
-#define THREAD_LOG_CLOSE_HEADER  THREAD_LOG_HEADER_1("CLOSE")
+#define THREAD_LOG_OPEN_HEADER  THREAD_LOG_HEADER_1("OPEN")
+#define THREAD_LOG_CLOSE_HEADER THREAD_LOG_HEADER_1("CLOSE")
 
 
 /* declarations
@@ -306,6 +306,17 @@ thread_log_append_string_size(struct ThreadLog *const restrict log,
 }
 
 inline void
+thread_log_append_string_width(struct ThreadLog *const restrict log,
+			       const char *const restrict string,
+			       const unsigned int width)
+{
+	log->current = put_string_width_until(log->current,
+					      string,
+					      width,
+					      log->until);
+}
+
+inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length)
@@ -314,10 +325,10 @@ thread_log_append_string_length(struct ThreadLog *const restrict log,
 					+ length;
 
 	log->current = put_string_until(log->current,
-					    string,
-					    (length_ptr > log->until)
-					    ? log->until
-					    : length_ptr);
+					string,
+					(length_ptr > log->until)
+					? log->until
+					: length_ptr);
 }
 
 inline void

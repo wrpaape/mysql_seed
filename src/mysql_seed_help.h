@@ -242,17 +242,17 @@ help_dispatch(char *const restrict *const restrict arg,
 
 	switch (*mode) {
 	case 'g':
-		if (LIKELY(((*rem == '\0') || strings_equal("enerate", rem))))
+		if (((*rem == '\0') || strings_equal("enerate", rem)))
 			return help_generate();
 		break;
 
 	case 'h':
-		if (LIKELY(((*rem == '\0') || strings_equal("elp", rem))))
+		if (((*rem == '\0') || strings_equal("elp", rem)))
 			return help_usage();
 		break;
 
 	case 'e':
-		if (LIKELY(((*rem == '\0') || strings_equal("xecute", rem))))
+		if (((*rem == '\0') || strings_equal("xecute", rem)))
 			return help_execute();
 		break;
 

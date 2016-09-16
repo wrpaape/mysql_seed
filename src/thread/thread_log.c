@@ -107,6 +107,10 @@ thread_log_append_string_size(struct ThreadLog *const restrict log,
 			      const char *const restrict string,
 			      const size_t size);
 extern inline void
+thread_log_append_string_width(struct ThreadLog *const restrict log,
+			       const char *const restrict string,
+			       const unsigned int width);
+extern inline void
 thread_log_append_string_length(struct ThreadLog *const restrict log,
 				const char *const restrict string,
 				const size_t length);

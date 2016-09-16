@@ -77,16 +77,16 @@ struct ExecSpec {
 struct Executor {
 	struct ThreadPool pool;	/* all child threads */
 	struct Worker workers[COUNT_EXECUTOR_WORKERS];
-	struct TaskStore load_databases;
+	struct TaskStore build_databases;
 	struct ThreadLog log;
 	struct MysqlServer server;
-	const struct ExecSpec *restrict exec_spec;
-	int *exit_status;
+	int exit_status;
 };
 
 
 struct ExecArg {
 	struct Executor *executor;
+	const struct String *db_name;
 };
 
 
@@ -99,6 +99,7 @@ execute_failure_malloc(void)
 		     EXECUTE_FAILURE_MALLOC,
 		     sizeof(EXECUTE_FAILURE_MALLOC) - 1lu);
 }
+
 
 /* helper functions
  * ────────────────────────────────────────────────────────────────────────── */
@@ -170,11 +171,11 @@ query_load_report(struct String *const restrict query,
 					success = close_report(file_descriptor,
 							       failure);
 
-					if (LIKELY(success)) {
+					if (LIKELY(success))
 						query->length = size_read;
-					} else {
+					else
 						free(query->bytes);
-					}
+
 				} else {
 					free(query->bytes);
 					close_muffle(file_descriptor);
