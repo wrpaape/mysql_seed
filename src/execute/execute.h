@@ -258,10 +258,10 @@ mysql_flush_results(MYSQL *const restrict mysql)
 	while (1) {
 		result = mysql_store_result(mysql);
 
-		if (UNLIKELY(result == NULL))
+		if (UNLIKELY(mysql_errno(mysql) != 0u))
 			return false;
 
-		mysql_free_result(result);
+		mysql_free_result(result);	/* no-op on NULL */
 
 		status = mysql_next_result(mysql);
 
@@ -289,8 +289,8 @@ executor_locked_query(struct Executor *const restrict executor,
 					    query->length) == 0)) {
 
 			if (LIKELY(mysql_flush_results(server->mysql))) {
-				if (UNLIKELY(mutex_unlock_report(&server->lock,
-								 &failure))) {
+				if (UNLIKELY(!mutex_unlock_report(&server->lock,
+								  &failure))) {
 					log_execute_failure(&executor->log,
 							    failure);
 					executor->exit_status = EXIT_FAILURE;
@@ -381,9 +381,9 @@ executor_shutdown(struct Executor *const restrict executor)
 		success = (executor->exit_status == EXIT_SUCCESS);
 
 		if (success) {
-			success
-			= LIKELY(   thread_pool_exit_status(&executor->pool)
-				 == EXIT_SUCCESS);
+			success = (   thread_pool_exit_status(&executor->pool)
+				   == EXIT_SUCCESS);
+
 		} else {
 			thread_log_append_close(&executor->log);
 
@@ -505,7 +505,7 @@ execute_multiple(MYSQL *const restrict mysql,
 					       &failure))) {
 
 			if (executor_shutdown(&executor)) {
-				if (UNLIKELY(thread_utils_destructor(&failure))) {
+				if (UNLIKELY(!thread_utils_destructor(&failure))) {
 					execute_failure_destructor(failure);
 					*exit_status = EXIT_FAILURE;
 				}
