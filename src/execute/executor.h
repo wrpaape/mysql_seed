@@ -22,7 +22,7 @@ EXECUTE_FAILURE(MALLOC_FAILURE_REASON)
  *─────────────────────────────────────────────────────────────────────────── */
 #define COUNT_EXECUTOR_WORKERS 4lu
 
-/* default MySQL connection parameters */
+/* default MySQL mysql parameters */
 #define MYSQL_DEFAULT_HOST	NULL
 #define MYSQL_DEFAULT_USER	NULL
 #define MYSQL_DEFAULT_PASSWORD	NULL
@@ -53,8 +53,8 @@ mysql_real_connect(CONNECTION,						\
 /* typedefs, struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct MysqlServer {
-	Mutex query_lock;
-	MYSQL *connection;
+	Mutex lock;
+	MYSQL *mysql;
 };
 
 struct MysqlPassword {

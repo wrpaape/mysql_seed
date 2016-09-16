@@ -153,8 +153,8 @@ thread_create_status(Thread *const restrict thread, Routine *const routine,
 
 inline void
 thread_create_muffle(Thread *const restrict thread,
-			  Routine *const routine,
-			  void *arg)
+		     Routine *const routine,
+		     void *arg)
 {
 	(void) thread_create_imp(thread,
 				 routine,
@@ -182,6 +182,8 @@ thread_create_report(Thread *const restrict thread,
 				  "would be exceeded"
 #endif /* ifdef THREADS_MAX */
 				  ".")
+	FAIL_SWITCH_STATUS_CASE_1(EINVAL,
+				  "The global thread attribute is invalid.")
 	FAIL_SWITCH_STATUS_CLOSE()
 }
 

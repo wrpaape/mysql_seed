@@ -39,7 +39,7 @@ FAILURE_HEADER_WRAP("execute thread pool", ":")
 /* print error
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
-mysql_init_failure(MYSQL *const restrict mysql)
+mysql_init_failure(MYSQL *const restrict connection)
 {
 	char buffer[MYSQL_ERROR_BUFFER_SIZE];
 
@@ -49,7 +49,7 @@ mysql_init_failure(MYSQL *const restrict mysql)
 			  sizeof(MYSQL_INIT_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
-			 mysql_error(mysql));
+			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
 			 ERROR_CLOSE,
@@ -61,7 +61,7 @@ mysql_init_failure(MYSQL *const restrict mysql)
 }
 
 inline void
-mysql_real_connect_failure(MYSQL *const restrict mysql)
+mysql_real_connect_failure(MYSQL *const restrict connection)
 {
 	char buffer[MYSQL_ERROR_BUFFER_SIZE];
 
@@ -71,7 +71,7 @@ mysql_real_connect_failure(MYSQL *const restrict mysql)
 			  sizeof(MYSQL_REAL_CONNECT_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
-			 mysql_error(mysql));
+			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
 			 ERROR_CLOSE,
@@ -83,7 +83,7 @@ mysql_real_connect_failure(MYSQL *const restrict mysql)
 }
 
 inline void
-mysql_real_query_failure(MYSQL *const restrict mysql)
+mysql_real_query_failure(MYSQL *const restrict connection)
 {
 	char buffer[MYSQL_ERROR_BUFFER_SIZE];
 
@@ -93,7 +93,7 @@ mysql_real_query_failure(MYSQL *const restrict mysql)
 			  sizeof(MYSQL_REAL_QUERY_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
-			 mysql_error(mysql));
+			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
 			 ERROR_CLOSE,
@@ -106,7 +106,7 @@ mysql_real_query_failure(MYSQL *const restrict mysql)
 
 inline void
 log_mysql_real_query_failure(struct ThreadLog *const restrict log,
-			     MYSQL *const restrict mysql)
+			     MYSQL *const restrict connection)
 {
 	mutex_lock_try_catch_open(&log->lock);
 
@@ -118,7 +118,7 @@ log_mysql_real_query_failure(struct ThreadLog *const restrict log,
 				      - 1lu);
 
 	thread_log_append_string(log,
-				 mysql_error(mysql));
+				 mysql_error(connection));
 
 	thread_log_append_string_width(log,
 				       ERROR_CLOSE,
@@ -130,7 +130,7 @@ log_mysql_real_query_failure(struct ThreadLog *const restrict log,
 }
 
 inline void
-mysql_flush_results_failure(MYSQL *const restrict mysql)
+mysql_flush_results_failure(MYSQL *const restrict connection)
 {
 	char buffer[MYSQL_ERROR_BUFFER_SIZE];
 
@@ -140,7 +140,7 @@ mysql_flush_results_failure(MYSQL *const restrict mysql)
 			  sizeof(MYSQL_FLUSH_RESULTS_FAILURE_HEADER) - 1lu);
 
 	ptr = put_string(ptr,
-			 mysql_error(mysql));
+			 mysql_error(connection));
 
 	PUT_STRING_WIDTH(ptr,
 			 ERROR_CLOSE,
@@ -153,7 +153,7 @@ mysql_flush_results_failure(MYSQL *const restrict mysql)
 
 inline void
 log_mysql_flush_results_failure(struct ThreadLog *const restrict log,
-				MYSQL *const restrict mysql)
+				MYSQL *const restrict connection)
 {
 	mutex_lock_try_catch_open(&log->lock);
 
@@ -165,7 +165,7 @@ log_mysql_flush_results_failure(struct ThreadLog *const restrict log,
 				      - 1lu);
 
 	thread_log_append_string(log,
-				 mysql_error(mysql));
+				 mysql_error(connection));
 
 	thread_log_append_string_width(log,
 				       ERROR_CLOSE,
@@ -250,20 +250,20 @@ execute_failure_thread_pool(const char *const restrict failure)
 /* flush results of a query
  * ────────────────────────────────────────────────────────────────────────── */
 inline bool
-mysql_flush_results(MYSQL *const restrict mysql)
+mysql_flush_results(MYSQL *const restrict connection)
 {
 	MYSQL_RES *restrict result;
 	int status;
 
 	while (1) {
-		result = mysql_store_result(mysql);
+		result = mysql_store_result(connection);
 
 		if (UNLIKELY(result == NULL))
 			return false;
 
 		mysql_free_result(result);
 
-		status = mysql_next_result(mysql);
+		status = mysql_next_result(connection);
 
 		if (status != 0)
 			return status < 0;
@@ -280,31 +280,26 @@ executor_locked_query(struct Executor *const restrict executor,
 	const char *restrict failure;
 	struct MysqlServer *const restrict server = &executor->server;
 
-	mutex_lock_try_catch_open(&server->lock);
+	mutex_lock_try_catch_open(&server->query_lock);
 
-	if(LIKELY(mutex_lock_report(&server->lock,
+	if(LIKELY(mutex_lock_report(&server->query_lock,
 				    &failure))) {
-		if (LIKELY(mysql_real_query(server->mysql,
+		if (LIKELY(mysql_real_query(server->connection,
 					    query->bytes,
 					    query->length) == 0)) {
 
-			if (LIKELY(mysql_flush_results(server->mysql))) {
-				if (UNLIKELY(mutex_unlock_report(&server->lock,
-								 &failure))) {
-					log_execute_failure(&executor->log,
-							    failure);
-					executor->exit_status = EXIT_FAILURE;
-				}
-			} else {
-				mutex_unlock_muffle(&server->lock);
-				log_mysql_flush_results_failure(&executor->log,
-								server->mysql);
+			if (LIKELY(mysql_flush_exe_results(server->connection)))
+
+			if (UNLIKELY(mutex_unlock_report(&server->query_lock,
+							 &failure))) {
+				log_execute_failure(&executor->log,
+						    failure);
 				executor->exit_status = EXIT_FAILURE;
 			}
 		} else {
-			mutex_unlock_muffle(&server->lock);
+			mutex_unlock_muffle(&server->query_lock);
 			log_mysql_real_query_failure(&executor->log,
-						     server->mysql);
+						     server->connection);
 			executor->exit_status = EXIT_FAILURE;
 		}
 	} else {
@@ -404,7 +399,7 @@ executor_shutdown(struct Executor *const restrict executor)
  * ────────────────────────────────────────────────────────────────────────── */
 /* load a single database into MySQL server */
 inline void
-execute_single(MYSQL *const restrict mysql,
+execute_single(MYSQL *const restrict connection,
 	       const struct String *const restrict db_name,
 	       int *const restrict exit_status)
 {
@@ -414,16 +409,16 @@ execute_single(MYSQL *const restrict mysql,
 	if (query_load_report(&query,
 			      db_name,
 			      &failure)) {
-		if (LIKELY(mysql_real_query(mysql,
+		if (LIKELY(mysql_real_query(connection,
 					    query.bytes,
 					    query.length) == 0)) {
-			if (UNLIKELY(!mysql_flush_results(mysql))) {
-				mysql_flush_results_failure(mysql);
-				*exit_status = EXIT_FAILURE;
+
+			if (UNLIKELY(!mysql_flush_results(connection))) {
 			}
 
+
 		} else {
-			mysql_real_query_failure(mysql);
+			mysql_real_query_failure(connection);
 			*exit_status = EXIT_FAILURE;
 		}
 
@@ -438,7 +433,7 @@ execute_single(MYSQL *const restrict mysql,
 
 /* load a multiple databases into MySQL server in parallel */
 inline void
-execute_multiple(MYSQL *const restrict mysql,
+execute_multiple(MYSQL *const restrict connection,
 		 const struct StringInterval *const restrict db_names,
 		 const unsigned int count_db_names,
 		 int *const restrict exit_status)
@@ -489,8 +484,8 @@ execute_multiple(MYSQL *const restrict mysql,
 			"executor");
 
 	/* initialize the server */
-	mutex_init(&executor.server.lock);
-	executor.server.mysql = mysql;
+	mutex_init(&executor.server.query_lock);
+	executor.server.connection = connection;
 
 	executor.exit_status = EXIT_SUCCESS;
 
@@ -539,32 +534,32 @@ mysql_seed_execute(const struct MysqlCredentials *const restrict creds,
 		   const unsigned int count_db_names,
 		   int *const restrict exit_status)
 {
-	MYSQL mysql;
+	MYSQL connection;
 
-	if (UNLIKELY(mysql_init(&mysql) == NULL)) {
-		mysql_init_failure(&mysql);
+	if (UNLIKELY(mysql_init(&connection) == NULL)) {
+		mysql_init_failure(&connection);
 		*exit_status = EXIT_FAILURE;
 
 	} else {
-		if (MYSQL_REAL_CONNECT(&mysql,
+		if (MYSQL_REAL_CONNECT(&connection,
 				       creds->user,
 				       creds->password.bytes) == NULL) {
-			mysql_real_connect_failure(&mysql);
+			mysql_real_connect_failure(&connection);
 			*exit_status = EXIT_FAILURE;
 
 		} else if (count_db_names == 1u) {
-			execute_single(&mysql,
+			execute_single(&connection,
 				       db_names->from,
 				       exit_status);
 
 		} else {
-			execute_multiple(&mysql,
+			execute_multiple(&connection,
 					 db_names,
 					 count_db_names,
 					 exit_status);
 		}
 
-		mysql_close(&mysql);
+		mysql_close(&connection);
 	}
 }
 

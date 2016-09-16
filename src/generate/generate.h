@@ -20,13 +20,13 @@
 GENERATE_FAILURE(MALLOC_FAILURE_REASON)
 
 #define GENERATE_FAILURE_CTOR_HEADER					\
-FAILURE_HEADER_WRAP("generate constructor", ":") "\n"
+FAILURE_HEADER_WRAP("generate constructor", ":")
 
 #define GENERATE_FAILURE_DTOR_HEADER					\
-FAILURE_HEADER_WRAP("generate destructor", ":") "\n"
+FAILURE_HEADER_WRAP("generate destructor", ":")
 
 #define GENERATE_FAILURE_THREAD_POOL_HEADER				\
-FAILURE_HEADER_WRAP("generate thread pool", ":") "\n"
+FAILURE_HEADER_WRAP("generate thread pool", ":")
 
 /* constructor flags
  *─────────────────────────────────────────────────────────────────────────── */
