@@ -12,9 +12,9 @@
 # toggles utility flags, make targets
 DEVELOPMENT_MODE = T
 
-# directory where MySQL binary libmysqlclient.{a,so,lib} resides
-LIBMYSQLCLIENT_DIR	:= /usr/local/lib
 
+# path to MySQL library dependency (comment out if unsure where located)
+LIBMYSQLCLIENT	:= /usr/local/lib/libmysqlclient.dylib
 
 
 # Phony Targets
@@ -33,8 +33,6 @@ define NEWLINE :=
 
 
 endef
-
-
 
 # SYSTEM CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
@@ -107,6 +105,7 @@ endif
 
 
 
+
 # DIRECTORY CONFIG
 # ══════════════════════════════════════════════════════════════════════════════
 PATH_JOIN		 = $(call JOIN,$1,$(PATH_DELIM))
@@ -161,6 +160,17 @@ else
                         SYSTEM_LIB_FLAGS	:= -lrt -lm
         else
                         SYSTEM_LIB_FLAGS	:= $(EMPTY)
+        endif
+endif
+
+
+# attempt to find MySQL binary dependency if not provided
+# ──────────────────────────────────────────────────────────────────────────────
+ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
+        ifeq (T,$(SYSTEM_WINDOWS))
+                LIBMYSQLCLIENT := $(shell dir /s libmysqlclient.lib)
+        else
+                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.{a,so,dylib})
         endif
 endif
 
@@ -254,7 +264,7 @@ LD		:= gcc
 LD_FLAGS	:= $(EMPTY)
 endif
 
-LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) -L$(LIBMYSQLCLIENT_DIR) -lmysqlclient -lc
+LD_LIB_FLAGS	:= $(THREADS_LIB_FLAG) $(SYSTEM_LIB_FLAGS) $(LIBMYSQLCLIENT) -lc
 
 # Make Directory
 # ──────────────────────────────────────────────────────────────────────────────
@@ -283,6 +293,8 @@ endif
 # ──────────────────────────────────────────────────────────────────────────────
 RUBY		:= ruby
 RUBY_FLAGS	:= $(EMPTY)
+
+
 
 
 # build directories
