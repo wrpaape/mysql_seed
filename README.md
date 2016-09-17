@@ -329,6 +329,7 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 
 ###Short Term
 - Windows Compatibility
+- `verbose` flag for `execute` mode to toggle on/off blocking and error reports from MySQL process
 - local timezone timestamps (instead of UTC)
 
 ###Long Term

@@ -12,6 +12,10 @@
 # toggles utility flags, make targets
 DEVELOPMENT_MODE = T
 
+# directory where MySQL binary libmysqlclient.{a,so,lib} resides
+LIBMYSQLCLIENT_DIR	:= /usr/local/lib
+
+
 
 # Phony Targets
 # ──────────────────────────────────────────────────────────────────────────────
@@ -126,13 +130,8 @@ UNITY_SOURCE_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) src)
 UNITY_HEADER_DIR	:= $(UNITY_SOURCE_DIR)
 UNITY_OBJECT_DIR	:= $(call PATH_JOIN,$(UNITY_ROOT) obj)
 UNITY_AUTO_DIR  	:= $(call PATH_JOIN,$(UNITY_ROOT) auto)
+MYSQL_INCLUDE_DIR	:= $(call PATH_JOIN,$(PROJECT_ROOT) include mysql)
 
-
-
-# MySQL config
-# ──────────────────────────────────────────────────────────────────────────────
-LIBMYSQLCLIENT_DIR	:= $(call SYSTEM_ROOT_PATH,usr local lib)
-MYSQL_INCLUDE_DIR	:= $(call SYSTEM_ROOT_PATH,usr local include mysql)
 
 
 
