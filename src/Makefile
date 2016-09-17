@@ -13,8 +13,8 @@
 DEVELOPMENT_MODE = T
 
 
-# path to MySQL library dependency (comment out if unsure where located)
-LIBMYSQLCLIENT	:= /usr/local/lib/libmysqlclient.dylib
+# path to MySQL library dependency (remove if unsure where located)
+# LIBMYSQLCLIENT	:= /usr/local/lib/libmysqlclient.dylib
 
 
 # Phony Targets
@@ -167,10 +167,12 @@ endif
 # attempt to find MySQL binary dependency if not provided
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
-        ifeq (T,$(SYSTEM_WINDOWS))
+        ifeq      (T,$(SYSTEM_WINDOWS))
                 LIBMYSQLCLIENT := $(shell dir /s libmysqlclient.lib)
+        else ifeq (T,$(SYSTEM_OSX))
+                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.{dylib,a})
         else
-                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.{a,so,dylib})
+                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.{so,a})
         endif
 endif
 
