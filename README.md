@@ -125,8 +125,18 @@ The `*.csv` files contain the tabular data, and the `load_*.mysql` scripts conta
 
 ###`execute`
 `mysql_seed <-e, --execute> [CRED_SPEC] <DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`  
-**TODO** - for now, databases can be loaded one at a time into a MySQL server with the command  
-`mysql -uroot < path/to/database/DB_NAME/load_DB_NAME.mysql`
+loads one or more generated databases into a local MySQL server
+
+**examples**  
+```
+mysql_seed --execute --user root --password foo_forum
+```
+will, after requesting a password, connect to MySQL as `root` and run the provisioning script `database/foo_forum/load_foo_forum.mysql` generated in the first `generate` mode example.
+
+```
+mysql_seed -e -ptastyham classics foo_shop ynot_db
+```
+will connect to MySQL as the default user with password `tastyham` and create the databases `classics`, `foo_shop`, and `ynot_db` and provision them with the data generated in the second `generate` mode example.
 
 
 
@@ -134,6 +144,61 @@ The `*.csv` files contain the tabular data, and the `load_*.mysql` scripts conta
 `mysql_seed <-r, --remove> <-a, --all | DB_NAME_1> [DB_NAME_2] ... [DB_NAME_N]`  
 deletes generated database directories. If `<-a, --all>` is specified, all files residing in the top-level `database` directory are deleted. Otherwise only those directories specified by name after `<-r, --remove>` will be deleted along with their contents.
 
+
+**examples**  
+After running the `generate` mode examples, the `database` directory would look like this:
+```
+.
+├── classics
+│   ├── load_classics.mysql
+│   └── sports_drama.csv
+├── foo_forum
+│   ├── load_foo_forum.mysql
+│   ├── posts.csv
+│   ├── threads.csv
+│   └── users.csv
+├── foo_shop
+│   ├── clients.csv
+│   ├── load_foo_shop.mysql
+│   ├── orders.csv
+│   └── products.csv
+└── ynot_db
+    ├── ads.csv
+    ├── load_ynot_db.mysql
+    └── referrals.csv
+```
+
+Invoking `mysql_seed` like this:
+```
+mysql_seed --remove classics ynot_db`
+```
+will clear out the `classics` and `ynot_db` subdirectories:
+```
+.
+├── foo_forum
+│   ├── load_foo_forum.mysql
+│   ├── posts.csv
+│   ├── threads.csv
+│   └── users.csv
+└── foo_shop
+    ├── clients.csv
+    ├── load_foo_shop.mysql
+    ├── orders.csv
+    └── products.csv
+```
+
+To clear all files and directories under `database` in one go, the shorthand
+```
+mysql_seed -r -a`
+```
+or
+```
+mysql_seed -r --all`
+```
+is provided for convenience.
+
+**warning**  
+`remove` mode behaves similarly to `rm -rf` in that **everything** residing in the target directory(ies) is deleted indiscriminately, not just those files produced by a `generate` invokation.
 
 
 
