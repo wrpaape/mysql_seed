@@ -215,17 +215,21 @@ invalid_hash_length_zero(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
-/* parsing printf */
+/* parsing INTRP_SPEC */
 extern inline void
-no_format_string(const struct GenerateArgvState *const restrict argv);
+no_intrp_spec(const struct GenerateArgvState *const restrict argv);
 extern inline void
-error_no_format_string(struct GenerateParseState *const restrict state);
+error_no_intrp_spec(struct GenerateParseState *const restrict state);
 
 /* parsing next SPEC */
 extern inline void
 expected_col_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_col_spec_close(struct GenerateParseState *const restrict state);
+extern inline void
+expected_intrp_spec_close(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_expected_intrp_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
 expected_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
@@ -263,7 +267,6 @@ tbl_flag_match(struct GenerateArgvState *const restrict argv);
 
 extern inline bool
 col_flag_match(struct GenerateArgvState *const restrict argv);
-
 
 /* parse UTF-8 identifiers from input
  *─────────────────────────────────────────────────────────────────────────── */
@@ -328,13 +331,13 @@ parse_column_complete(struct GenerateParseState *const restrict state,
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 type_set_char(struct PutLabelClosure *const restrict type,
-	      const uintmax_t length);
+	      const size_t length);
 extern inline void
 type_set_char_parsed_length(struct PutLabelClosure *const restrict type,
 			    const char *restrict length);
 extern inline void
 type_set_varchar(struct PutLabelClosure *const restrict type,
-		 const uintmax_t length);
+		 const size_t length);
 extern inline void
 type_set_timestamp(struct PutLabelClosure *const restrict type);
 extern inline void
@@ -422,6 +425,24 @@ error_multiple_grp_specs(struct GenerateParseState *const restrict state);
 extern inline void
 parse_grp_spec(struct GenerateParseState *const restrict state,
 	       GenerateParseNode *const set_col_spec);
+
+/* INTRP_SPEC dispatch
+ * ────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_next_fill(struct GenerateParseState *const restrict state);
+
+extern inline void
+intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
+		      struct PutLabelClosure *const restrict col_type);
+extern inline void
+intrp_spec_state_close(struct IntrpSpecState *const restrict intrp);
+
+extern inline void
+parse_intrp_spec(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_complete(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_col_spec,
+		     GenerateParseNode *const handle_grp_spec);
 
 /* set COL_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -708,8 +729,6 @@ extern inline void
 parse_timestamp_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_datetime_qualifier(struct GenerateParseState *const restrict state);
-extern inline void
-parse_printf_spec(struct GenerateParseState *const restrict state);
 
 
 extern inline void

@@ -16,7 +16,7 @@ union HashStateBufferPointer {
 
 /* macro constants
  * ────────────────────────────────────────────────────────────────────────── */
-#define HASH_LENGTH_MAX	       255lu	/* arbitrary upper limit on length */
+#define HASH_LENGTH_MAX	       255lu	/* CHAR max length */
 #define HASH_LENGTH_MAX_STRING "255"
 
 struct HashState {
