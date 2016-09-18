@@ -215,6 +215,12 @@ invalid_hash_length_zero(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
+/* parsing printf */
+extern inline void
+no_format_string(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_no_format_string(struct GenerateParseState *const restrict state);
+
 /* parsing next SPEC */
 extern inline void
 expected_col_spec_close(const struct GenerateArgvState *const restrict argv);
@@ -702,6 +708,10 @@ extern inline void
 parse_timestamp_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_datetime_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_printf_spec(struct GenerateParseState *const restrict state);
+
+
 extern inline void
 parse_col_type(struct GenerateParseState *const restrict state);
 extern inline void

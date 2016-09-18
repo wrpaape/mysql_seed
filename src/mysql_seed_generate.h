@@ -293,6 +293,11 @@ PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 		"HASH_LENGTH_MAX (" HASH_LENGTH_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
+/* parsing printf */
+#define ERROR_NO_FORMAT_STRING						\
+PARSE_ERROR_HEADER("no FORMAT string provided, ignoring DB_SPEC "	\
+		   "starting with")
+
 /* parsing RAND_SPEC */
 #define ERROR_INVALID_RAND_SPEC_HEADER					\
 PARSE_ERROR_HEADER("invalid RAND_SPEC component")
@@ -2266,6 +2271,36 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv)
 		     ptr - &buffer[0]);
 }
 
+/* parsing printf */
+inline void
+no_format_string(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_NO_FORMAT_STRING,
+			  sizeof(ERROR_NO_FORMAT_STRING) - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from - 1l);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_no_format_string(struct GenerateParseState *const restrict state)
+{
+	no_format_string(&state->argv);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
+}
+
+
+/* parsing next SPEC */
 inline void
 expected_col_spec_close(const struct GenerateArgvState *const restrict argv)
 {
@@ -6763,6 +6798,23 @@ NEXT_DB_SPEC:		column_datetime_default(state);
 	}
 }
 
+
+inline void
+parse_printf_spec(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_format_string(state);
+		return;
+	}
+
+
+
+
+}
+
+
 inline void
 parse_col_type(struct GenerateParseState *const restrict state)
 {
@@ -6809,8 +6861,15 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		return;
 
 	case 'd':
-		if (*rem == 't' && rem[1] == '\0') {
+		if (*rem == 't' && rem[1] == '\0')
 			parse_datetime_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'p':
+		if (*rem == '\0') {
+			parse_printf_spec(state);
 			return;
 		}
 
@@ -6850,8 +6909,15 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		return;
 
 	case 'd':
-		if (strings_equal("atetime", rem + 1l)) {
+		if (strings_equal("atetime", rem + 1l))
 			parse_datetime_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'p':
+		if (strings_equal("rintf", rem + 1l)) {
+			parse_printf_spec(state);
 			return;
 		}
 
