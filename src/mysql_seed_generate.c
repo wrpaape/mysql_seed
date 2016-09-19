@@ -431,11 +431,24 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 extern inline void
 intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
 		      struct PutLabelClosure *const restrict col_type);
+
 extern inline void
 intrp_spec_state_close(struct IntrpSpecState *const restrict intrp);
 
 extern inline void
 parse_next_fill(struct GenerateParseState *const restrict state);
+
+/* parse intrp qualifiers */
+extern inline void
+parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_string_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state);
 
 extern inline void
 parse_intrp(struct GenerateParseState *const restrict state);
@@ -445,6 +458,7 @@ parse_next_intrp(struct GenerateParseState *const restrict state);
 
 extern inline void
 parse_intrp_spec(struct GenerateParseState *const restrict state);
+
 extern inline void
 parse_intrp_complete(struct GenerateParseState *const restrict state,
 		     GenerateParseNode *const set_intrp,

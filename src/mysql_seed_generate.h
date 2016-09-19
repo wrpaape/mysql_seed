@@ -3962,9 +3962,116 @@ parse_next_fill(struct GenerateParseState *const restrict state)
 	}
 }
 
+/* parse intrp qualifiers */
+inline void
+parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
+{
+}
+
+/* TODO: intrp type qualifiers */
+inline void
+parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state)
+{
+}
+inline void
+parse_intrp_string_qualifier(struct GenerateParseState *const restrict state)
+{
+}
+inline void
+parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state)
+{
+}
+inline void
+parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state)
+{
+}
+
 inline void
 parse_intrp(struct GenerateParseState *const restrict state)
 {
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		parse_next_fill(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break; /* parse long SPEC */
+
+	case 'i':
+		if (*rem == '\0')
+			parse_intrp_integer_qualifier(state);
+		else
+			parse_next_fill(state);
+		return;
+
+	case 's':
+		if (*rem == '\0')
+			parse_intrp_string_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 't':
+		if (*rem == 's' && rem[1] == '\0')
+			parse_intrp_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (*rem == 't' && rem[1] == '\0') {
+			parse_intrp_datetime_qualifier(state);
+			return;
+		}
+
+	default:
+		parse_next_fill(state);
+	}
+
+	switch (*rem) {
+	case 'i':
+		if (strings_equal("nteger", rem + 1l))
+			parse_intrp_integer_qualifier(state);
+		else
+			parse_next_fill(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nsigned-integer", rem + 1l))
+			parse_intrp_u_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 's':
+		if (strings_equal("tring", rem + 1l))
+			parse_intrp_string_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 't':
+		if (strings_equal("imestamp", rem + 1l))
+			parse_intrp_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atetime", rem + 1l)) {
+			parse_intrp_datetime_qualifier(state);
+			return;
+		}
+
+	default:
+		parse_next_fill(state);
+	}
 }
 
 inline void
