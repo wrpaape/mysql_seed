@@ -438,7 +438,35 @@ intrp_spec_state_close(struct IntrpSpecState *const restrict intrp);
 extern inline void
 parse_next_fill(struct GenerateParseState *const restrict state);
 
-/* parse intrp qualifiers */
+extern inline void
+parse_intrp_complete(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_intrp,
+		     GenerateParseNode *const handle_grp_spec);
+
+/* set INTRP
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+intrp_integer_default(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_unique(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_unique_group(struct GenerateParseState *const restrict state);
+
+/* parse INTRP type qualifiers
+ *─────────────────────────────────────────────────────────────────────────── */
+extern inline void
+parse_intrp_integer_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_unique(struct GenerateParseState *const restrict state);
+
+/* dispatch parsing of INTRP type qualifiers
+ *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
 parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
@@ -459,10 +487,6 @@ parse_next_intrp(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_spec(struct GenerateParseState *const restrict state);
 
-extern inline void
-parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_intrp,
-		     GenerateParseNode *const handle_grp_spec);
 
 /* set COL_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
