@@ -4064,12 +4064,16 @@ NEXT_DB_SPEC:		set_intrp(state);
 inline void
 intrp_integer_default(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-	const size_t row_count			= state->specs.tbl->row_count;
-	size_t *const restrict counter_upto	= &state->database.counter_upto;
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build = &build_column_integer_unique;
+
+	intrp->length	   += uint_digit_count(row_count);
+	intrp->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
@@ -4078,12 +4082,16 @@ intrp_integer_default(struct GenerateParseState *const restrict state)
 inline void
 intrp_integer_default_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-	const size_t grp_count			= col_spec->grp_spec.count;
-	size_t *const restrict counter_upto	= &state->database.counter_upto;
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build = &build_column_integer_unique_group;
+
+	intrp->length	   += uint_digit_count(grp_count);
+	intrp->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
@@ -4092,12 +4100,16 @@ intrp_integer_default_group(struct GenerateParseState *const restrict state)
 inline void
 intrp_integer_unique(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-	const size_t row_count			= state->specs.tbl->row_count;
-	size_t *const restrict counter_upto	= &state->database.counter_upto;
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build = &build_column_integer_unique;
+
+	intrp->length	   += uint_digit_count(row_count);
+	intrp->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
@@ -4106,12 +4118,16 @@ intrp_integer_unique(struct GenerateParseState *const restrict state)
 inline void
 intrp_integer_unique_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec = state->specs.col;
-	const size_t grp_count			= col_spec->grp_spec.count;
-	size_t *const restrict counter_upto	= &state->database.counter_upto;
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build = &build_column_integer_unique_group;
+
+	intrp->length	   += uint_digit_count(grp_count);
+	intrp->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
@@ -4187,6 +4203,43 @@ parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
 			error_invalid_integer_type_q(state);
 		return;
 
+	case 'u':
+		if (*rem == '\0')
+			parse_intrp_integer_unique(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		intrp_integer_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_integer_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		intrp_integer_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_integer_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		intrp_integer_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
 	default:
 		error_invalid_integer_type_q(state);
 	}
@@ -4200,6 +4253,23 @@ parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
 			error_invalid_integer_type_q(state);
 		return;
 
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_integer_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_integer_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
 	default:
 		error_invalid_integer_type_q(state);
 	}
