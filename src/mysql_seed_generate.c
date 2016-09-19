@@ -429,19 +429,25 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 /* INTRP_SPEC dispatch
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
-parse_next_fill(struct GenerateParseState *const restrict state);
-
-extern inline void
 intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
 		      struct PutLabelClosure *const restrict col_type);
 extern inline void
 intrp_spec_state_close(struct IntrpSpecState *const restrict intrp);
 
 extern inline void
+parse_next_fill(struct GenerateParseState *const restrict state);
+
+extern inline void
+parse_intrp(struct GenerateParseState *const restrict state);
+
+extern inline void
+parse_next_intrp(struct GenerateParseState *const restrict state);
+
+extern inline void
 parse_intrp_spec(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_col_spec,
+		     GenerateParseNode *const set_intrp,
 		     GenerateParseNode *const handle_grp_spec);
 
 /* set COL_SPEC

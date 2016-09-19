@@ -477,8 +477,6 @@ GenerateParseNode(struct GenerateParseState *const restrict state);
 inline void
 parse_next_col_spec(struct GenerateParseState *const restrict state);
 inline void
-parse_next_fill(struct GenerateParseState *const restrict state);
-inline void
 parse_next_db_spec(struct GenerateParseState *const restrict state);
 inline void
 parse_next_tbl_spec(struct GenerateParseState *const restrict state);
@@ -3927,14 +3925,16 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 /* INTRP_SPEC dispatch
  * ────────────────────────────────────────────────────────────────────────── */
 inline void
+parse_next_intrp(struct GenerateParseState *const restrict state);
+
+inline void
 intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
-		     struct PutLabelClosure *const restrict col_type)
+		      struct PutLabelClosure *const restrict col_type)
 {
 	intrp->length	    = 0lu;
 	intrp->col_type     = col_type;
 	intrp->set_col_type = &type_set_char;
 }
-
 
 inline void
 intrp_spec_state_close(struct IntrpSpecState *const restrict intrp)
@@ -3950,9 +3950,36 @@ intrp_spec_state_close(struct IntrpSpecState *const restrict intrp)
 inline void
 parse_next_fill(struct GenerateParseState *const restrict state)
 {
+	struct StringBuilder *const restrict fill
+	= &state->specs.col->type_q.string.fixed;
 
+	if (parse_fixed_string(fill,
+			       &state->argv)) {
+		state->specs.intrp.length += fill->length;
+		parse_next_intrp(state);
+	} else {
+		generate_parse_error(state);
+	}
 }
 
+inline void
+parse_intrp(struct GenerateParseState *const restrict state)
+{
+}
+
+inline void
+parse_next_intrp(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from < state->argv.arg.until) {
+		++(state->specs.col);	/* increment col_spec interval */
+		parse_intrp(state);
+	} else {
+		intrp_spec_state_close(&state->specs.intrp);
+		generate_parse_complete(state);
+	}
+}
 
 inline void
 parse_intrp_spec(struct GenerateParseState *const restrict state)
@@ -3962,7 +3989,7 @@ parse_intrp_spec(struct GenerateParseState *const restrict state)
 	if (state->argv.arg.from < state->argv.arg.until) {
 		intrp_spec_state_init(&state->specs.intrp,
 				      &state->specs.col->type);
-		parse_next_fill(state);
+		parse_intrp(state);
 	} else {
 		error_no_intrp_spec(state);
 	}
@@ -3970,13 +3997,13 @@ parse_intrp_spec(struct GenerateParseState *const restrict state)
 
 inline void
 parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_col_spec,
+		     GenerateParseNode *const set_intrp,
 		     GenerateParseNode *const handle_grp_spec)
 {
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		set_col_spec(state);
+		set_intrp(state);
 		generate_parse_complete(state);
 		return;
 	}
@@ -3984,7 +4011,8 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-		error_expected_intrp_spec_close(state);
+NEXT_FILL:	set_intrp(state);
+		parse_next_fill(state);
 		return;
 	}
 
@@ -3996,43 +4024,34 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 		break; /* parse long SPEC */
 
 	case 'g':
-		if (*rem == '\0')
+		if (*rem == '\0') {
 			handle_grp_spec(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'f':
-		if (*rem == '\0')
-			parse_next_fill(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
+			return;
+		}
+		goto NEXT_FILL;
 
 	case 'c':
 		if (*rem == '\0') {
-NEXT_COL_SPEC:		set_col_spec(state);
+NEXT_COL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_next_col_spec(state);
-		} else {
-			error_expected_intrp_spec_close(state);
+			return;
 		}
-		return;
+		goto NEXT_FILL;
 
 	case 't':
 		if (*rem == '\0') {
-NEXT_TBL_SPEC:		set_col_spec(state);
+NEXT_TBL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
-		} else {
-			error_expected_intrp_spec_close(state);
+			return;
 		}
-		return;
+		goto NEXT_FILL;
 
 	case 'd':
 		if (*rem == '\0') {
-NEXT_DB_SPEC:		set_col_spec(state);
+NEXT_DB_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
@@ -4040,48 +4059,39 @@ NEXT_DB_SPEC:		set_col_spec(state);
 		}
 
 	default:
-		error_expected_intrp_spec_close(state);
-		return;
+		goto NEXT_FILL;
 	}
 
 
 	switch (*rem) {
 	case 'g':
-		if (strings_equal("roup", rem + 1l))
+		if (strings_equal("roup", rem + 1l)) {
 			handle_grp_spec(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'f':
-		if (strings_equal("ill", rem + 1l))
-			parse_next_fill(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
+			return;
+		}
+		goto NEXT_FILL;
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))
 			goto NEXT_COL_SPEC;
 
-		error_expected_intrp_spec_close(state);
-		return;
+		goto NEXT_FILL;
 
 	case 't':
 		if (strings_equal("able", rem + 1l))
 			goto NEXT_TBL_SPEC;
 
-		error_expected_intrp_spec_close(state);
-		return;
+		goto NEXT_FILL;
 
 	case 'd':
 		if (strings_equal("atabase", rem + 1l))
 			goto NEXT_DB_SPEC;
 
 	default:
-		error_expected_intrp_spec_close(state);
+		goto NEXT_FILL;
 	}
 }
+
 
 
 /* set COL_SPEC
@@ -6625,6 +6635,13 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 			return;
 		}
 
+	case 'i':
+		if (*rem == '\0')
+			parse_intrp_spec(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
 	case 'c':
 		if (*rem == '\0') {
 NEXT_COL_SPEC:		column_string_default(state);
@@ -6740,6 +6757,13 @@ NEXT_DB_SPEC:		column_string_default(state);
 			error_invalid_string_type_q(state);
 			return;
 		}
+
+	case 'i':
+		if (strings_equal("nterpolate", rem + 1l))
+			parse_intrp_spec(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
 
 	case 'c':
 		if (strings_equal("olumn", rem + 1l))
