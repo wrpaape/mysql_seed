@@ -295,11 +295,6 @@ PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 		"HASH_LENGTH_MAX (" HASH_LENGTH_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
-/* parsing INTRP_SPEC */
-#define ERROR_NO_INTRP_SPEC						\
-PARSE_ERROR_HEADER("no INTRP_SPEC provided, ignoring DB_SPEC starting "	\
-		   "with")
-
 /* parsing RAND_SPEC */
 #define ERROR_INVALID_RAND_SPEC_HEADER					\
 PARSE_ERROR_HEADER("invalid RAND_SPEC component")
@@ -414,20 +409,32 @@ PARSE_ERROR_HEADER("may have no more than 1 GRP_SPEC per column, "	\
 PARSE_ERROR_HEADER("cannot have GRP_SPEC for fixed column data, "	\
 		   "ignoring DB_SPEC starting with")
 
+/* parsing JOIN_SPEC */
+#define ERROR_NO_JOIN_SPEC						\
+PARSE_ERROR_HEADER("no JOIN_SPEC provided, ignoring DB_SPEC starting "	\
+		   "with")
+
+#define ERROR_INVALID_JOIN_HEADER					\
+PARSE_ERROR_HEADER("invalid JOIN")
+
+#define ERROR_INVALID_JOIN_REASON_NOTSUP				\
+"\n" ERROR_WRAP("reason - not supported, ignoring DB_SPEC starting "	\
+		"with:") "\n"
+
+#define ERROR_EXPECTED_JOIN_HEADER					\
+PARSE_ERROR_HEADER("expected JOIN after " INPUT_WRAP("'+'") ERROR_OPEN	\
+		   ", ignoring DB_SPEC starting with")
+
 /* parsing next SPEC */
 #define ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected GROUP flag, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
-#define ERROR_EXPECTED_NEXT_INTRP_HEADER				\
-PARSE_ERROR_HEADER("expected COL_TYPE, GROUP flag, COLUMN flag, TABLE "	\
-		   "flag, DATABASE flag, or end of arguments instead of")
-
 #define ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected PART_TYPE, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
-#define ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER			\
+#define ERROR_EXPECTED_JOIN_GRP_SPEC_CLOSE_HEADER			\
 PARSE_ERROR_HEADER("expected PART_TYPE, COL_TYPE, COLUMN flag, TABLE "	\
 		   "flag, DATABASE flag, or end of arguments instead of")
 
@@ -439,7 +446,7 @@ typedef void
 SetStringType(struct PutLabelClosure *const restrict type,
 	      const size_t length);
 
-struct IntrpSpecState {
+struct JoinSpecState {
 	size_t length;			  /* accumlated (VAR)CHAR length */
 	struct PutLabelClosure *col_type; /* holds column type declaration */
 	SetStringType *set_col_type;
@@ -449,7 +456,7 @@ struct GenerateSpecState {
 	struct DbSpec  *db;
 	struct TblSpec *tbl;
 	struct ColSpec *col;
-	struct IntrpSpecState intrp;
+	struct JoinSpecState join;
 };
 
 struct GenerateArgvState {
@@ -2290,16 +2297,16 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv)
 		     ptr - &buffer[0]);
 }
 
-/* parsing INTRP_SPEC */
+/* parsing JOIN_SPEC */
 inline void
-no_intrp_spec(const struct GenerateArgvState *const restrict argv)
+no_join_spec(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_NO_INTRP_SPEC,
-			  sizeof(ERROR_NO_INTRP_SPEC) - 1lu);
+			  ERROR_NO_JOIN_SPEC,
+			  sizeof(ERROR_NO_JOIN_SPEC) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
@@ -2311,12 +2318,81 @@ no_intrp_spec(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-error_no_intrp_spec(struct GenerateParseState *const restrict state)
+error_no_join_spec(struct GenerateParseState *const restrict state)
 {
-	no_intrp_spec(&state->argv);
+	no_join_spec(&state->argv);
 	*(state->valid.last) = NULL;
 	state->exit_status = EXIT_FAILURE;
 }
+
+inline void
+invalid_join(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_INVALID_JOIN_HEADER,
+			  sizeof(ERROR_INVALID_JOIN_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      ERROR_INVALID_JOIN_REASON_NOTSUP,
+			      sizeof(ERROR_INVALID_JOIN_REASON_NOTSUP) - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_invalid_join(struct GenerateParseState *const restrict state)
+{
+	invalid_join(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+expected_join(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_JOIN_HEADER,
+			  sizeof(ERROR_EXPECTED_JOIN_HEADER) - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      IGNORING_DB_SPEC_STARTING_WITH,
+			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_expected_join(struct GenerateParseState *const restrict state)
+{
+	expected_join(&state->argv);
+	generate_parse_error(state);
+}
+
 
 
 /* parsing next SPEC */
@@ -2355,40 +2431,6 @@ error_expected_col_spec_close(struct GenerateParseState *const restrict state)
 }
 
 inline void
-expected_next_intrp(const struct GenerateArgvState *const restrict argv)
-{
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_NEXT_INTRP_HEADER,
-			  sizeof(ERROR_EXPECTED_NEXT_INTRP_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
-
-	ptr = put_string_size(ptr,
-			      IGNORING_DB_SPEC_STARTING_WITH,
-			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
-
-	ptr = put_inspect_args(ptr,
-			       argv->db_spec.from,
-			       argv->arg.from);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
-error_expected_next_intrp(struct GenerateParseState *const restrict state)
-{
-	expected_next_intrp(&state->argv);
-	generate_parse_error(state);
-}
-
-inline void
 expected_grp_spec_close(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
@@ -2423,14 +2465,14 @@ error_expected_grp_spec_close(struct GenerateParseState *const restrict state)
 }
 
 inline void
-expected_intrp_grp_spec_close(const struct GenerateArgvState *const restrict argv)
+expected_join_grp_spec_close(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER)
+			  ERROR_EXPECTED_JOIN_GRP_SPEC_CLOSE_HEADER,
+			  sizeof(ERROR_EXPECTED_JOIN_GRP_SPEC_CLOSE_HEADER)
 			  - 1lu);
 
 	ptr = put_string_inspect(ptr,
@@ -2451,9 +2493,9 @@ expected_intrp_grp_spec_close(const struct GenerateArgvState *const restrict arg
 }
 
 inline void
-error_expected_intrp_grp_spec_close(struct GenerateParseState *const restrict state)
+error_expected_join_grp_spec_close(struct GenerateParseState *const restrict state)
 {
-	expected_intrp_grp_spec_close(&state->argv);
+	expected_join_grp_spec_close(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -3616,7 +3658,7 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 }
 
 inline void
-assign_intrp_integer_random_from(size_t *const restrict intrp_length,
+assign_join_integer_random_from(size_t *const restrict join_length,
 				 struct IntegerRandSpec *const restrict rand_spec,
 				 unsigned int *const restrict ctor_flags,
 				 const intmax_t from)
@@ -3625,7 +3667,7 @@ assign_intrp_integer_random_from(size_t *const restrict intrp_length,
 	= &rand_spec->gen.from;
 
 	if (from < INT32_MIN) {
-		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		const uint64_t span = INT64_MAX - from + 1u;
 
@@ -3643,7 +3685,7 @@ assign_intrp_integer_random_from(size_t *const restrict intrp_length,
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
 	} else if (from > INT32_MAX) {
-		*intrp_length += DIGIT_COUNT_INT64_MAX;
+		*join_length += DIGIT_COUNT_INT64_MAX;
 
 		const uint64_t span = INT64_MAX - from + 1u;
 
@@ -3675,7 +3717,7 @@ assign_intrp_integer_random_from(size_t *const restrict intrp_length,
 		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
 
 	} else {
-		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		const uint32_t span = INT32_MAX - from + 1u;
 
@@ -3695,7 +3737,7 @@ assign_intrp_integer_random_from(size_t *const restrict intrp_length,
 }
 
 inline void
-assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
+assign_join_integer_random_upto(size_t *const restrict join_length,
 				 struct IntegerRandSpec *const restrict rand_spec,
 				 unsigned int *const restrict ctor_flags,
 				 const intmax_t upto)
@@ -3704,7 +3746,7 @@ assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
 	= &rand_spec->gen.upto;
 
 	if (upto > INT32_MAX) {
-		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		const uint64_t span = upto - INT64_MIN + 1u;
 
@@ -3720,7 +3762,7 @@ assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
 	} else if (upto < INT32_MIN) {
-		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		const uint64_t span = upto - INT64_MIN + 1u;
 
@@ -3748,7 +3790,7 @@ assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
 		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
 
 	} else {
-		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		const uint64_t span = upto - INT32_MIN + 1u;
 
@@ -3766,7 +3808,7 @@ assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
 }
 
 inline void
-assign_intrp_integer_random_range(size_t *const restrict intrp_length,
+assign_join_integer_random_range(size_t *const restrict join_length,
 				  struct IntegerRandSpec *const restrict rand_spec,
 				  unsigned int *const restrict ctor_flags,
 				  const intmax_t min,
@@ -3777,7 +3819,7 @@ assign_intrp_integer_random_range(size_t *const restrict intrp_length,
 	= &rand_spec->gen.range;
 
 	if (min < INT32_MIN) {
-		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		range_cl->params.bound.uint64.threshold
 		= RANDOM_THRESHOLD((uint64_t) span);
@@ -3793,7 +3835,7 @@ assign_intrp_integer_random_range(size_t *const restrict intrp_length,
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
 	} else if (max > INT32_MAX) {
-		*intrp_length += DIGIT_COUNT_INT64_MAX;
+		*join_length += DIGIT_COUNT_INT64_MAX;
 
 		if (span < UINT32_MAX) {
 			range_cl->params.bound.uint32.threshold
@@ -3823,7 +3865,7 @@ assign_intrp_integer_random_range(size_t *const restrict intrp_length,
 		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
 
 	} else {
-		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		*join_length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		range_cl->params.bound.uint32.threshold
 		= RANDOM_THRESHOLD((uint32_t) span);
@@ -3841,7 +3883,7 @@ assign_intrp_integer_random_range(size_t *const restrict intrp_length,
 }
 
 inline void
-assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
+assign_join_u_integer_random_from(size_t *const restrict join_length,
 				   struct UIntegerRandSpec *const restrict rand_spec,
 				   unsigned int *const restrict ctor_flags,
 				   const uintmax_t from)
@@ -3850,7 +3892,7 @@ assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
 	= &rand_spec->gen.from;
 
 	if (from > UINT32_MAX) {
-		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+		*join_length += DIGIT_COUNT_UINT64_MAX;
 
 		const uint64_t span = UINT64_MAX - from + 1u;
 
@@ -3882,7 +3924,7 @@ assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
 		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
 
 	} else {
-		*intrp_length += DIGIT_COUNT_UINT32_MAX;
+		*join_length += DIGIT_COUNT_UINT32_MAX;
 
 		const uint32_t span = UINT32_MAX - from + 1u;
 
@@ -3902,7 +3944,7 @@ assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
 }
 
 inline void
-assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
+assign_join_u_integer_random_upto(size_t *const restrict join_length,
 				   struct UIntegerRandSpec *const restrict rand_spec,
 				   unsigned int *const restrict ctor_flags,
 				   const uintmax_t upto)
@@ -3911,7 +3953,7 @@ assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
 	= &rand_spec->gen.upto;
 
 	if (upto > UINT32_MAX) {
-		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+		*join_length += DIGIT_COUNT_UINT64_MAX;
 
 		const uint64_t span = upto + 1u;
 
@@ -3927,7 +3969,7 @@ assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
 	} else {
-		*intrp_length += DIGIT_COUNT_UINT32_MAX;
+		*join_length += DIGIT_COUNT_UINT32_MAX;
 
 		const uint32_t span = upto + 1u;
 
@@ -3945,7 +3987,7 @@ assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
 }
 
 inline void
-assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
+assign_join_u_integer_random_range(size_t *const restrict join_length,
 				    struct UIntegerRandSpec *const restrict rand_spec,
 				    unsigned int *const restrict ctor_flags,
 				    const uintmax_t min,
@@ -3956,7 +3998,7 @@ assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
 	= &rand_spec->gen.range;
 
 	if (max > UINT32_MAX) {
-		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+		*join_length += DIGIT_COUNT_UINT64_MAX;
 
 		if (span > UINT32_MAX) {
 			range_cl->params.bound.uint32.threshold
@@ -3986,7 +4028,7 @@ assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
 		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
 
 	} else {
-		*intrp_length += DIGIT_COUNT_UINT32_MAX;
+		*join_length += DIGIT_COUNT_UINT32_MAX;
 
 		range_cl->params.bound.uint32.threshold
 		= RANDOM_THRESHOLD((uint32_t) span);
@@ -4348,60 +4390,59 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 
 
 
-/* INTRP_SPEC dispatch
+/* JOIN_SPEC dispatch
  * ────────────────────────────────────────────────────────────────────────── */
 /* make compiler happy */
 inline void
-parse_next_intrp(struct GenerateParseState *const restrict state);
-inline void
-parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
-inline void
-parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state);
-inline void
-parse_intrp_string_qualifier(struct GenerateParseState *const restrict state);
-inline void
-parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state);
-inline void
-parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state);
+parse_next_join(struct GenerateParseState *const restrict state);
 
 inline void
-intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
-		      struct PutLabelClosure *const restrict col_type)
+join_spec_state_init(struct JoinSpecState *const restrict join,
+		     struct PutLabelClosure *const restrict col_type)
 {
-	intrp->length	    = 0lu;
-	intrp->col_type     = col_type;
-	intrp->set_col_type = &type_set_char;
+	join->length	   = 0lu;
+	join->col_type     = col_type;
+	join->set_col_type = &type_set_char;
 }
 
 inline void
-intrp_spec_state_close(struct IntrpSpecState *const restrict intrp)
+join_spec_state_close(struct JoinSpecState *const restrict join)
 {
-	if (intrp->length > CHAR_LENGTH_MAX)
-		type_set_varchar(intrp->col_type,
-				 intrp->length);
+	if (join->length > CHAR_LENGTH_MAX)
+		type_set_varchar(join->col_type,
+				 join->length);
 	else
-		intrp->set_col_type(intrp->col_type,
-				    intrp->length);
+		join->set_col_type(join->col_type,
+				    join->length);
 }
 
 inline void
 parse_next_fill(struct GenerateParseState *const restrict state)
 {
-	struct StringBuilder *const restrict fill
-	= &state->specs.col->type_q.string.fixed;
+	/* TODO TODO TODO */
+	/* struct StringBuilder *const restrict fill */
+	/* = &state->specs.col->type_q.string.fixed; */
 
-	if (parse_fixed_string(fill,
-			       &state->argv)) {
-		state->specs.intrp.length += fill->length;
-		parse_next_intrp(state);
-	} else {
-		generate_parse_error(state);
-	}
+	/* if (!parse_fixed_string(fill, */
+	/* 			&state->argv)) { */
+	/* 	generate_parse_error(state); */
+	/* 	return; */
+	/* } */
+
+	/* state->specs.join.length += fill->length; */
+
+	/* ++(state->argv.from); */
+
+	/* if (state->argv.from == state->argv.until) { */
+
+	/* } */
+
+	/* parse_next_join(state); */
 }
 
 inline void
-parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_intrp,
+parse_join_complete(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_join,
 		     GenerateParseNode *const handle_grp_spec)
 {
 	/* TODO TODO TODO */
@@ -4409,103 +4450,103 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 
 
 inline void
-parse_intrp_grp_spec(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_intrp)
+parse_join_grp_spec(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_join)
 {
 	/* TODO TODO TODO */
 }
 
-/* set INTRP
+/* set JOIN
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-intrp_integer_default(struct GenerateParseState *const restrict state)
+join_integer_default(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	const size_t row_count		    = state->specs.tbl->row_count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique;
 
-	intrp->length	   += uint_digit_count(row_count);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += uint_digit_count(row_count);
+	join->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
 }
 
 inline void
-intrp_integer_default_group(struct GenerateParseState *const restrict state)
+join_integer_default_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	const size_t grp_count		    = col_spec->grp_spec.count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique_group;
 
-	intrp->length	   += uint_digit_count(grp_count);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += uint_digit_count(grp_count);
+	join->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
 }
 
 inline void
-intrp_integer_unique(struct GenerateParseState *const restrict state)
+join_integer_unique(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	const size_t row_count		    = state->specs.tbl->row_count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique;
 
-	intrp->length	   += uint_digit_count(row_count);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += uint_digit_count(row_count);
+	join->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
 		*counter_upto = row_count;
 }
 
 inline void
-intrp_integer_unique_group(struct GenerateParseState *const restrict state)
+join_integer_unique_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	const size_t grp_count		    = col_spec->grp_spec.count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique_group;
 
-	intrp->length	   += uint_digit_count(grp_count);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += uint_digit_count(grp_count);
+	join->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
 		*counter_upto = grp_count;
 }
 
 inline void
-intrp_integer_fixed(struct GenerateParseState *const restrict state)
+join_integer_fixed(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec = state->specs.col;
 
 	col_spec->name.bytes = NULL;
 
-	state->specs.intrp.length += col_spec->type_q.integer.fixed.width;
+	state->specs.join.length += col_spec->type_q.integer.fixed.width;
 
 	col_spec->build = &build_column_integer_fixed;
 }
 
 inline void
-intrp_integer_random_default(struct GenerateParseState *const restrict state)
+join_integer_random_default(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
@@ -4516,17 +4557,17 @@ intrp_integer_random_default(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_random;
 
-	intrp->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	join->set_col_type = &type_set_varchar;
 
 	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 inline void
-intrp_integer_random_default_group(struct GenerateParseState *const restrict state)
+join_integer_random_default_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
@@ -4537,23 +4578,23 @@ intrp_integer_random_default_group(struct GenerateParseState *const restrict sta
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_random_group;
 
-	intrp->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
-	intrp->set_col_type = &type_set_varchar;
+	join->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	join->set_col_type = &type_set_varchar;
 
 	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
 inline void
-intrp_integer_random_from(struct GenerateParseState *const restrict state)
+join_integer_random_from(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t from = col_spec->type_q.integer.scale.from;
 
@@ -4565,7 +4606,7 @@ intrp_integer_random_from(struct GenerateParseState *const restrict state)
 
 		col_spec->build = &build_column_integer_random;
 
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 		return;
@@ -4579,13 +4620,13 @@ intrp_integer_random_from(struct GenerateParseState *const restrict state)
 
 		col_spec->build = &build_column_integer_random;
 
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
 		return;
 
 	default:
-		assign_intrp_integer_random_from(&intrp->length,
+		assign_join_integer_random_from(&join->length,
 						 rand_spec,
 						 &state->database.ctor_flags,
 						 from);
@@ -4595,16 +4636,16 @@ intrp_integer_random_from(struct GenerateParseState *const restrict state)
 }
 
 inline void
-intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
+join_integer_random_from_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t from = col_spec->type_q.integer.scale.from;
 
@@ -4616,7 +4657,7 @@ intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
 
 		col_spec->build = &build_column_integer_random_group;
 
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 		return;
@@ -4630,13 +4671,13 @@ intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
 
 		col_spec->build = &build_column_integer_random_group;
 
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
 		return;
 
 	default:
-		assign_intrp_integer_random_from(&intrp->length,
+		assign_join_integer_random_from(&join->length,
 						 rand_spec,
 						 &state->database.ctor_flags,
 						 from);
@@ -4646,22 +4687,22 @@ intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
 }
 
 inline void
-intrp_integer_random_upto(struct GenerateParseState *const restrict state)
+join_integer_random_upto(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t upto = col_spec->type_q.integer.scale.upto;
 
 	switch (upto) {
 	case INT32_MAX:
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_32;
 
@@ -4673,7 +4714,7 @@ intrp_integer_random_upto(struct GenerateParseState *const restrict state)
 		return;
 
 	case INT64_MAX:
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_64;
 
@@ -4685,7 +4726,7 @@ intrp_integer_random_upto(struct GenerateParseState *const restrict state)
 		return;
 
 	default:
-		assign_intrp_integer_random_upto(&intrp->length,
+		assign_join_integer_random_upto(&join->length,
 						 rand_spec,
 						 &state->database.ctor_flags,
 						 upto);
@@ -4695,22 +4736,22 @@ intrp_integer_random_upto(struct GenerateParseState *const restrict state)
 }
 
 inline void
-intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
+join_integer_random_upto_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t upto = col_spec->type_q.integer.scale.upto;
 
 	switch (upto) {
 	case INT32_MAX:
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_32;
 
@@ -4722,7 +4763,7 @@ intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
 		return;
 
 	case INT64_MAX:
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_64;
 
@@ -4734,7 +4775,7 @@ intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
 		return;
 
 	default:
-		assign_intrp_integer_random_upto(&intrp->length,
+		assign_join_integer_random_upto(&join->length,
 						 rand_spec,
 						 &state->database.ctor_flags,
 						 upto);
@@ -4744,10 +4785,10 @@ intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
 }
 
 inline void
-intrp_integer_random_range(struct GenerateParseState *const restrict state)
+join_integer_random_range(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
@@ -4756,7 +4797,7 @@ intrp_integer_random_range(struct GenerateParseState *const restrict state)
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t min    = range->min;
 	const intmax_t max    = range->max;
@@ -4764,7 +4805,7 @@ intrp_integer_random_range(struct GenerateParseState *const restrict state)
 
 	switch (delta) {
 	case UINT32_MAX:
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_32;
 
@@ -4776,7 +4817,7 @@ intrp_integer_random_range(struct GenerateParseState *const restrict state)
 		return;
 
 	case UINT64_MAX:
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_64;
 
@@ -4788,7 +4829,7 @@ intrp_integer_random_range(struct GenerateParseState *const restrict state)
 		return;
 
 	default:
-		assign_intrp_integer_random_range(&intrp->length,
+		assign_join_integer_random_range(&join->length,
 						  rand_spec,
 						  &state->database.ctor_flags,
 						  min,
@@ -4800,10 +4841,10 @@ intrp_integer_random_range(struct GenerateParseState *const restrict state)
 }
 
 inline void
-intrp_integer_random_range_group(struct GenerateParseState *const restrict state)
+join_integer_random_range_group(struct GenerateParseState *const restrict state)
 {
-	struct ColSpec *const restrict col_spec	    = state->specs.col;
-	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
 	struct IntegerRandSpec *const restrict rand_spec
 	= &col_spec->type_q.integer.rand_spec;
 
@@ -4812,7 +4853,7 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 
 	col_spec->name.bytes = NULL;
 
-	intrp->set_col_type = &type_set_varchar;
+	join->set_col_type = &type_set_varchar;
 
 	const intmax_t min    = range->min;
 	const intmax_t max    = range->max;
@@ -4820,7 +4861,7 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 
 	switch (delta) {
 	case UINT32_MAX:
-		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT32_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_32;
 
@@ -4832,7 +4873,7 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 		return;
 
 	case UINT64_MAX:
-		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+		join->length += (DIGIT_COUNT_INT64_MIN + 1lu);
 
 		rand_spec->gen.unbound = &generate_i_64;
 
@@ -4844,7 +4885,7 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 		return;
 
 	default:
-		assign_intrp_integer_random_range(&intrp->length,
+		assign_join_integer_random_range(&join->length,
 						  rand_spec,
 						  &state->database.ctor_flags,
 						  min,
@@ -4856,40 +4897,40 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 }
 
 
-/* parse INTRP type qualifiers
+/* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-parse_intrp_integer_default_group(struct GenerateParseState *const restrict state)
+parse_join_integer_default_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_default_group);
+	parse_join_grp_spec(state,
+			     &join_integer_default_group);
 }
 
 inline void
-parse_intrp_integer_default(struct GenerateParseState *const restrict state)
+parse_join_integer_default(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_complete(state,
-			     &intrp_integer_default,
-			     &parse_intrp_integer_default_group);
+	parse_join_complete(state,
+			     &join_integer_default,
+			     &parse_join_integer_default_group);
 }
 
 inline void
-parse_intrp_integer_unique_group(struct GenerateParseState *const restrict state)
+parse_join_integer_unique_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_unique_group);
+	parse_join_grp_spec(state,
+			     &join_integer_unique_group);
 }
 
 inline void
-parse_intrp_integer_unique(struct GenerateParseState *const restrict state)
+parse_join_integer_unique(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_complete(state,
-			     &intrp_integer_unique,
-			     &parse_intrp_integer_unique_group);
+	parse_join_complete(state,
+			     &join_integer_unique,
+			     &parse_join_integer_unique_group);
 }
 
 inline void
-parse_intrp_integer_fixed(struct GenerateParseState *const restrict state)
+parse_join_integer_fixed(struct GenerateParseState *const restrict state)
 {
 	intmax_t parsed;
 	char *restrict from;
@@ -4953,36 +4994,36 @@ parse_intrp_integer_fixed(struct GenerateParseState *const restrict state)
 		fixed_int->width	= 2u;
 	}
 
-	parse_intrp_complete(state,
-			     &intrp_integer_fixed,
+	parse_join_complete(state,
+			     &join_integer_fixed,
 			     &error_grp_spec_for_fixed_data);
 }
 
 inline void
-parse_intrp_integer_random_default_group(struct GenerateParseState *const restrict state)
+parse_join_integer_random_default_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_random_default_group);
+	parse_join_grp_spec(state,
+			     &join_integer_random_default_group);
 }
 
 inline void
-parse_intrp_integer_random_default(struct GenerateParseState *const restrict state)
+parse_join_integer_random_default(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_complete(state,
-			     &intrp_integer_random_default,
-			     &parse_intrp_integer_random_default_group);
+	parse_join_complete(state,
+			     &join_integer_random_default,
+			     &parse_join_integer_random_default_group);
 }
 
 
 inline void
-parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
+parse_join_integer_random_from_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_random_from_group);
+	parse_join_grp_spec(state,
+			     &join_integer_random_from_group);
 }
 
 inline void
-parse_intrp_integer_random_from(struct GenerateParseState *const restrict state)
+parse_join_integer_random_from(struct GenerateParseState *const restrict state)
 {
 	intmax_t parsed;
 
@@ -5014,20 +5055,20 @@ parse_intrp_integer_random_from(struct GenerateParseState *const restrict state)
 
 	state->specs.col->type_q.integer.scale.from = parsed;
 
-	parse_intrp_complete(state,
-			     &intrp_integer_random_from,
-			     &parse_intrp_integer_random_from_group);
+	parse_join_complete(state,
+			     &join_integer_random_from,
+			     &parse_join_integer_random_from_group);
 }
 
 inline void
-parse_intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
+parse_join_integer_random_upto_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_random_upto_group);
+	parse_join_grp_spec(state,
+			     &join_integer_random_upto_group);
 }
 
 inline void
-parse_intrp_integer_random_upto(struct GenerateParseState *const restrict state)
+parse_join_integer_random_upto(struct GenerateParseState *const restrict state)
 {
 	intmax_t parsed;
 
@@ -5059,20 +5100,20 @@ parse_intrp_integer_random_upto(struct GenerateParseState *const restrict state)
 
 	state->specs.col->type_q.integer.scale.upto = parsed;
 
-	parse_intrp_complete(state,
-			     &intrp_integer_random_upto,
-			     &parse_intrp_integer_random_upto_group);
+	parse_join_complete(state,
+			     &join_integer_random_upto,
+			     &parse_join_integer_random_upto_group);
 }
 
 inline void
-parse_intrp_integer_random_range_group(struct GenerateParseState *const restrict state)
+parse_join_integer_random_range_group(struct GenerateParseState *const restrict state)
 {
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_random_range_group);
+	parse_join_grp_spec(state,
+			     &join_integer_random_range_group);
 }
 
 inline void
-parse_intrp_integer_random_range(struct GenerateParseState *const restrict state)
+parse_join_integer_random_range(struct GenerateParseState *const restrict state)
 {
 	intmax_t parsed_min;
 	intmax_t parsed_max;
@@ -5134,46 +5175,46 @@ parse_intrp_integer_random_range(struct GenerateParseState *const restrict state
 	range->min = parsed_min;
 	range->max = parsed_max;
 
-	parse_intrp_complete(state,
-			     &intrp_integer_random_range,
-			     &parse_intrp_integer_random_range_group);
+	parse_join_complete(state,
+			     &join_integer_random_range,
+			     &parse_join_integer_random_range_group);
 }
 
 inline void
-parse_intrp_integer_random(struct GenerateParseState *const restrict state)
+parse_join_integer_random(struct GenerateParseState *const restrict state)
 {
 	/* TODO TODO TODO */
 }
 
 
-/* dispatch parsing of INTRP type qualifiers
+/* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
-parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
+parse_join_integer_qualifier(struct GenerateParseState *const restrict state)
 {
 	/* TODO TODO TODO */
 }
 
-/* TODO: intrp type qualifiers */
+/* TODO: join type qualifiers */
 inline void
-parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state)
+parse_join_u_integer_qualifier(struct GenerateParseState *const restrict state)
 {
 }
 inline void
-parse_intrp_string_qualifier(struct GenerateParseState *const restrict state)
+parse_join_string_qualifier(struct GenerateParseState *const restrict state)
 {
 }
 inline void
-parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state)
+parse_join_timestamp_qualifier(struct GenerateParseState *const restrict state)
 {
 }
 inline void
-parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state)
+parse_join_datetime_qualifier(struct GenerateParseState *const restrict state)
 {
 }
 
 inline void
-parse_intrp(struct GenerateParseState *const restrict state)
+parse_join(struct GenerateParseState *const restrict state)
 {
 	const char *restrict arg = *(state->argv.arg.from);
 
@@ -5181,117 +5222,34 @@ parse_intrp(struct GenerateParseState *const restrict state)
 		parse_next_fill(state);
 		return;
 	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break; /* parse long SPEC */
-
-	case 'i':
-		if (*rem == '\0')
-			parse_intrp_integer_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 'u':
-		if (*rem == '\0')
-			parse_intrp_u_integer_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 's':
-		if (*rem == '\0')
-			parse_intrp_string_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 't':
-		if (*rem == 's' && rem[1] == '\0')
-			parse_intrp_timestamp_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 'd':
-		if (*rem == 't' && rem[1] == '\0') {
-			parse_intrp_datetime_qualifier(state);
-			return;
-		}
-
-	default:
-		error_invalid_col_type(state);
-	}
-
-	switch (*rem) {
-	case 'i':
-		if (strings_equal("nteger", rem + 1l))
-			parse_intrp_integer_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 'u':
-		if (strings_equal("nsigned-integer", rem + 1l))
-			parse_intrp_u_integer_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 's':
-		if (strings_equal("tring", rem + 1l))
-			parse_intrp_string_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 't':
-		if (strings_equal("imestamp", rem + 1l))
-			parse_intrp_timestamp_qualifier(state);
-		else
-			error_invalid_col_type(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atetime", rem + 1l)) {
-			parse_intrp_datetime_qualifier(state);
-			return;
-		}
-
-	default:
-		error_invalid_col_type(state);
-	}
 }
 
+/* call when argv is pointing at '+' */
 inline void
-parse_next_intrp(struct GenerateParseState *const restrict state)
+parse_next_join(struct GenerateParseState *const restrict state)
 {
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from < state->argv.arg.until) {
 		++(state->specs.col);	/* increment col_spec interval */
-		parse_intrp(state);
+		parse_join(state);
 	} else {
-		intrp_spec_state_close(&state->specs.intrp);
-		generate_parse_complete(state);
+		error_expected_join(state);
 	}
 }
 
+/* call when argv is pointing at <-j, --join> */
 inline void
-parse_intrp_spec(struct GenerateParseState *const restrict state)
+parse_join_spec(struct GenerateParseState *const restrict state)
 {
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from < state->argv.arg.until) {
-		intrp_spec_state_init(&state->specs.intrp,
-				      &state->specs.col->type);
-		parse_intrp(state);
+		join_spec_state_init(&state->specs.join,
+				     &state->specs.col->type);
+		parse_join(state);
 	} else {
-		error_no_intrp_spec(state);
+		error_no_join_spec(state);
 	}
 }
 
@@ -7838,9 +7796,9 @@ parse_string_qualifier(struct GenerateParseState *const restrict state)
 			return;
 		}
 
-	case 'i':
+	case 'j':
 		if (*rem == '\0')
-			parse_intrp_spec(state);
+			parse_join_spec(state);
 		else
 			error_invalid_string_type_q(state);
 		return;
@@ -7961,9 +7919,9 @@ NEXT_DB_SPEC:		column_string_default(state);
 			return;
 		}
 
-	case 'i':
-		if (strings_equal("nterpolate", rem + 1l))
-			parse_intrp_spec(state);
+	case 'j':
+		if (strings_equal("oin", rem + 1l))
+			parse_join_spec(state);
 		else
 			error_invalid_string_type_q(state);
 		return;

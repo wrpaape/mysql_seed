@@ -215,11 +215,19 @@ invalid_hash_length_zero(const struct GenerateArgvState *const restrict argv);
 extern inline void
 invalid_hash_length_large(const struct GenerateArgvState *const restrict argv);
 
-/* parsing INTRP_SPEC */
+/* parsing JOIN_SPEC */
 extern inline void
-no_intrp_spec(const struct GenerateArgvState *const restrict argv);
+no_join_spec(const struct GenerateArgvState *const restrict argv);
 extern inline void
-error_no_intrp_spec(struct GenerateParseState *const restrict state);
+error_no_join_spec(struct GenerateParseState *const restrict state);
+extern inline void
+invalid_join(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_invalid_join(struct GenerateParseState *const restrict state);
+extern inline void
+expected_join(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_expected_join(struct GenerateParseState *const restrict state);
 
 /* parsing next SPEC */
 extern inline void
@@ -227,17 +235,13 @@ expected_col_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_col_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
-expected_next_intrp(const struct GenerateArgvState *const restrict argv);
-extern inline void
-error_expected_next_intrp(struct GenerateParseState *const restrict state);
-extern inline void
 expected_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_grp_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
-expected_intrp_grp_spec_close(const struct GenerateArgvState *const restrict argv);
+expected_join_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
-error_expected_intrp_grp_spec_close(struct GenerateParseState *const restrict state);
+error_expected_join_grp_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
 grp_spec_for_fixed_data(const struct GenerateArgvState *const restrict argv);
 extern inline void
@@ -416,34 +420,34 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 			      const uintmax_t max,
 			      const uintmax_t span);
 extern inline void
-assign_intrp_integer_random_from(size_t *const restrict intrp_length,
+assign_join_integer_random_from(size_t *const restrict join_length,
 				 struct IntegerRandSpec *const restrict rand_spec,
 				 unsigned int *const restrict ctor_flags,
 				 const intmax_t from);
 extern inline void
-assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
+assign_join_integer_random_upto(size_t *const restrict join_length,
 				 struct IntegerRandSpec *const restrict rand_spec,
 				 unsigned int *const restrict ctor_flags,
 				 const intmax_t upto);
 extern inline void
-assign_intrp_integer_random_range(size_t *const restrict intrp_length,
+assign_join_integer_random_range(size_t *const restrict join_length,
 				  struct IntegerRandSpec *const restrict rand_spec,
 				  unsigned int *const restrict ctor_flags,
 				  const intmax_t min,
 				  const intmax_t max,
 				  const uintmax_t span);
 extern inline void
-assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
+assign_join_u_integer_random_from(size_t *const restrict join_length,
 				   struct UIntegerRandSpec *const restrict rand_spec,
 				   unsigned int *const restrict ctor_flags,
 				   const uintmax_t from);
 extern inline void
-assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
+assign_join_u_integer_random_upto(size_t *const restrict join_length,
 				   struct UIntegerRandSpec *const restrict rand_spec,
 				   unsigned int *const restrict ctor_flags,
 				   const uintmax_t upto);
 extern inline void
-assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
+assign_join_u_integer_random_range(size_t *const restrict join_length,
 				    struct UIntegerRandSpec *const restrict rand_spec,
 				    unsigned int *const restrict ctor_flags,
 				    const uintmax_t min,
@@ -464,140 +468,140 @@ extern inline void
 parse_grp_spec(struct GenerateParseState *const restrict state,
 	       GenerateParseNode *const set_col_spec);
 
-/* INTRP_SPEC dispatch
+/* JOIN_SPEC dispatch
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
-intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
-		      struct PutLabelClosure *const restrict col_type);
+join_spec_state_init(struct JoinSpecState *const restrict join,
+		     struct PutLabelClosure *const restrict col_type);
 
 extern inline void
-intrp_spec_state_close(struct IntrpSpecState *const restrict intrp);
+join_spec_state_close(struct JoinSpecState *const restrict join);
 
 extern inline void
 parse_next_fill(struct GenerateParseState *const restrict state);
 
 extern inline void
-parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_intrp,
+parse_join_complete(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_join,
 		     GenerateParseNode *const handle_grp_spec);
 
 extern inline void
-parse_intrp_grp_spec(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_intrp);
+parse_join_grp_spec(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_join);
 
-/* set INTRP
+/* set JOIN
  *─────────────────────────────────────────────────────────────────────────── */
 /* integer */
 extern inline void
-intrp_integer_default(struct GenerateParseState *const restrict state);
+join_integer_default(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_default_group(struct GenerateParseState *const restrict state);
+join_integer_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_unique(struct GenerateParseState *const restrict state);
+join_integer_unique(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_unique_group(struct GenerateParseState *const restrict state);
+join_integer_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_fixed(struct GenerateParseState *const restrict state);
+join_integer_fixed(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_default(struct GenerateParseState *const restrict state);
+join_integer_random_default(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_default_group(struct GenerateParseState *const restrict state);
+join_integer_random_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_from(struct GenerateParseState *const restrict state);
+join_integer_random_from(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_from_group(struct GenerateParseState *const restrict state);
+join_integer_random_from_group(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_upto(struct GenerateParseState *const restrict state);
+join_integer_random_upto(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_upto_group(struct GenerateParseState *const restrict state);
+join_integer_random_upto_group(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_range(struct GenerateParseState *const restrict state);
+join_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
-intrp_integer_random_range_group(struct GenerateParseState *const restrict state);
+join_integer_random_range_group(struct GenerateParseState *const restrict state);
 
-/* parse INTRP type qualifiers
+/* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 /* integer */
 extern inline void
-parse_intrp_integer_default_group(struct GenerateParseState *const restrict state);
+parse_join_integer_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_default(struct GenerateParseState *const restrict state);
+parse_join_integer_default(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_unique_group(struct GenerateParseState *const restrict state);
+parse_join_integer_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_unique(struct GenerateParseState *const restrict state);
+parse_join_integer_unique(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_fixed(struct GenerateParseState *const restrict state);
+parse_join_integer_fixed(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_default_group(struct GenerateParseState *const restrict state);
+parse_join_integer_random_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_default(struct GenerateParseState *const restrict state);
+parse_join_integer_random_default(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state);
+parse_join_integer_random_from_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_from(struct GenerateParseState *const restrict state);
+parse_join_integer_random_from(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_upto_group(struct GenerateParseState *const restrict state);
+parse_join_integer_random_upto_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_upto(struct GenerateParseState *const restrict state);
+parse_join_integer_random_upto(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_range_group(struct GenerateParseState *const restrict state);
+parse_join_integer_random_range_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random_range(struct GenerateParseState *const restrict state);
+parse_join_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_integer_random(struct GenerateParseState *const restrict state);
+parse_join_integer_random(struct GenerateParseState *const restrict state);
 /* unsigned-integer */
 extern inline void
-parse_intrp_u_integer_default_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_default(struct GenerateParseState *const restrict state);
+parse_join_u_integer_default(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_unique_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_unique(struct GenerateParseState *const restrict state);
+parse_join_u_integer_unique(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_fixed(struct GenerateParseState *const restrict state);
+parse_join_u_integer_fixed(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_default_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_default_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_default(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_default(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_from_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_from_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_from(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_from(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_upto_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_upto_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_upto(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_upto(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_range_group(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_range_group(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random_range(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_random(struct GenerateParseState *const restrict state);
+parse_join_u_integer_random(struct GenerateParseState *const restrict state);
 
-/* dispatch parsing of INTRP type qualifiers
+/* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
+parse_join_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state);
+parse_join_u_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_string_qualifier(struct GenerateParseState *const restrict state);
+parse_join_string_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state);
+parse_join_timestamp_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
-parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state);
+parse_join_datetime_qualifier(struct GenerateParseState *const restrict state);
 
 
 extern inline void
-parse_intrp(struct GenerateParseState *const restrict state);
+parse_join(struct GenerateParseState *const restrict state);
 
 extern inline void
-parse_next_intrp(struct GenerateParseState *const restrict state);
+parse_next_join(struct GenerateParseState *const restrict state);
 
 extern inline void
-parse_intrp_spec(struct GenerateParseState *const restrict state);
+parse_join_spec(struct GenerateParseState *const restrict state);
 
 
 /* set COL_SPEC
