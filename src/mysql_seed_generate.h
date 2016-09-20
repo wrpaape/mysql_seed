@@ -3404,7 +3404,6 @@ assign_integer_random_range(struct PutLabelClosure *const restrict type,
 		*ctor_flags |= RAND_64_CTOR_FLAG;
 
 	} else if (max > INT32_MAX) {
-
 		type_set_bigint(type);
 
 		if (span < UINT32_MAX) {
@@ -3600,6 +3599,394 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 
 	} else {
 		type_set_int_unsigned(type);
+
+		range_cl->params.bound.uint32.threshold
+		= RANDOM_THRESHOLD((uint32_t) span);
+
+		range_cl->params.bound.uint32.span = (uint32_t) span;
+
+		range_cl->params.offset.uint32 = (uint32_t) min;
+
+		range_cl->generate = &generate_u_bound_32_offset_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_integer_random_from(size_t *const restrict intrp_length,
+				 struct IntegerRandSpec *const restrict rand_spec,
+				 unsigned int *const restrict ctor_flags,
+				 const intmax_t from)
+{
+	struct BoundOffsetIGeneratorClosure *const restrict from_cl
+	= &rand_spec->gen.from;
+
+	if (from < INT32_MIN) {
+		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		const uint64_t span = INT64_MAX - from + 1u;
+
+		from_cl->params.bound.uint64.threshold
+		= RANDOM_THRESHOLD(span);
+
+		from_cl->params.bound.uint64.span = span;
+
+		from_cl->params.offset.int64 = (int64_t) from;
+
+		from_cl->generate = &generate_i_bound_64_offset_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		*ctor_flags |= RAND_64_CTOR_FLAG;
+
+	} else if (from > INT32_MAX) {
+		*intrp_length += DIGIT_COUNT_INT64_MAX;
+
+		const uint64_t span = INT64_MAX - from + 1u;
+
+		if (span < UINT32_MAX) {
+			from_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			from_cl->params.bound.uint32.span = (uint32_t) span;
+
+			from_cl->params.offset.int64 = (int64_t) from;
+
+			from_cl->generate = &generate_i_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
+
+		} else {
+			from_cl->params.bound.uint64.threshold
+			= RANDOM_THRESHOLD(span);
+
+			from_cl->params.bound.uint64.span = span;
+
+			from_cl->params.offset.int64 = (int64_t) from;
+
+			from_cl->generate = &generate_i_bound_64_offset_64;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
+		}
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
+
+	} else {
+		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		const uint32_t span = INT32_MAX - from + 1u;
+
+		from_cl->params.bound.uint32.threshold
+		= RANDOM_THRESHOLD(span);
+
+		from_cl->params.bound.uint32.span = span;
+
+		from_cl->params.offset.int32 = (int32_t) from;
+
+		from_cl->generate = &generate_i_bound_32_offset_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
+				 struct IntegerRandSpec *const restrict rand_spec,
+				 unsigned int *const restrict ctor_flags,
+				 const intmax_t upto)
+{
+	struct BoundIGeneratorClosure *const restrict upto_cl
+	= &rand_spec->gen.upto;
+
+	if (upto > INT32_MAX) {
+		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		const uint64_t span = upto - INT64_MIN + 1u;
+
+		upto_cl->params.uint64.threshold
+		= RANDOM_THRESHOLD(span);
+
+		upto_cl->params.uint64.span = span;
+
+		upto_cl->generate = &generate_i_bound_64_offset_64_min;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		*ctor_flags |= RAND_64_CTOR_FLAG;
+
+	} else if (upto < INT32_MIN) {
+		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		const uint64_t span = upto - INT64_MIN + 1u;
+
+		if (span > UINT32_MAX) {
+			upto_cl->params.uint64.threshold
+			= RANDOM_THRESHOLD(span);
+
+			upto_cl->params.uint64.span = span;
+
+			upto_cl->generate = &generate_i_bound_64_offset_64_min;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
+
+		} else {
+			upto_cl->params.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			upto_cl->params.uint32.span = (uint32_t) span;
+
+			upto_cl->generate = &generate_i_bound_32_offset_64_min;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
+		}
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+	} else {
+		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		const uint64_t span = upto - INT32_MIN + 1u;
+
+		upto_cl->params.uint32.threshold
+		= RANDOM_THRESHOLD(span);
+
+		upto_cl->params.uint32.span = span;
+
+		upto_cl->generate = &generate_i_bound_32_offset_32_min;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_integer_random_range(size_t *const restrict intrp_length,
+				  struct IntegerRandSpec *const restrict rand_spec,
+				  unsigned int *const restrict ctor_flags,
+				  const intmax_t min,
+				  const intmax_t max,
+				  const uintmax_t span)
+{
+	struct BoundOffsetIGeneratorClosure *const restrict range_cl
+	= &rand_spec->gen.range;
+
+	if (min < INT32_MIN) {
+		*intrp_length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		range_cl->params.bound.uint64.threshold
+		= RANDOM_THRESHOLD((uint64_t) span);
+
+		range_cl->params.bound.uint64.span = (uint64_t) span;
+
+		range_cl->params.offset.int64 = (int64_t) min;
+
+		range_cl->generate = &generate_i_bound_64_offset_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		*ctor_flags |= RAND_64_CTOR_FLAG;
+
+	} else if (max > INT32_MAX) {
+		*intrp_length += DIGIT_COUNT_INT64_MAX;
+
+		if (span < UINT32_MAX) {
+			range_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			range_cl->params.bound.uint32.span = (uint32_t) span;
+
+			range_cl->params.offset.int64 = (int64_t) min;
+
+			range_cl->generate = &generate_i_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
+
+		} else {
+			range_cl->params.bound.uint64.threshold
+			= RANDOM_THRESHOLD((uint64_t) span);
+
+			range_cl->params.bound.uint64.span = (uint64_t) span;
+
+			range_cl->params.offset.int64 = (int64_t) min;
+
+			range_cl->generate = &generate_i_bound_64_offset_64;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
+		}
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MAX + 1u;
+
+	} else {
+		*intrp_length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		range_cl->params.bound.uint32.threshold
+		= RANDOM_THRESHOLD((uint32_t) span);
+
+		range_cl->params.bound.uint32.span = (uint32_t) span;
+
+		range_cl->params.offset.int32 = (int32_t) min;
+
+		range_cl->generate = &generate_i_bound_32_offset_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
+				   struct UIntegerRandSpec *const restrict rand_spec,
+				   unsigned int *const restrict ctor_flags,
+				   const uintmax_t from)
+{
+	struct BoundOffsetUGeneratorClosure *const restrict from_cl
+	= &rand_spec->gen.from;
+
+	if (from > UINT32_MAX) {
+		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+
+		const uint64_t span = UINT64_MAX - from + 1u;
+
+		if (span < UINT32_MAX) {
+			from_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			from_cl->params.bound.uint32.span = (uint32_t) span;
+
+			from_cl->params.offset.uint64 = (uint64_t) from;
+
+			from_cl->generate = &generate_u_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
+
+		} else {
+			from_cl->params.bound.uint64.threshold
+			= RANDOM_THRESHOLD(span);
+
+			from_cl->params.bound.uint64.span = span;
+
+			from_cl->params.offset.uint64 = (uint64_t) from;
+
+			from_cl->generate = &generate_u_bound_64_offset_64;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
+		}
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+	} else {
+		*intrp_length += DIGIT_COUNT_UINT32_MAX;
+
+		const uint32_t span = UINT32_MAX - from + 1u;
+
+		from_cl->params.bound.uint32.threshold
+		= RANDOM_THRESHOLD(span);
+
+		from_cl->params.bound.uint32.span = span;
+
+		from_cl->params.offset.uint32 = (uint32_t) from;
+
+		from_cl->generate = &generate_u_bound_32_offset_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
+				   struct UIntegerRandSpec *const restrict rand_spec,
+				   unsigned int *const restrict ctor_flags,
+				   const uintmax_t upto)
+{
+	struct BoundUGeneratorClosure *const restrict upto_cl
+	= &rand_spec->gen.upto;
+
+	if (upto > UINT32_MAX) {
+		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+
+		const uint64_t span = upto + 1u;
+
+		upto_cl->params.uint64.threshold
+		= RANDOM_THRESHOLD(span);
+
+		upto_cl->params.uint64.span = span;
+
+		upto_cl->generate = &generate_u_bound_64;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+		*ctor_flags |= RAND_64_CTOR_FLAG;
+
+	} else {
+		*intrp_length += DIGIT_COUNT_UINT32_MAX;
+
+		const uint32_t span = upto + 1u;
+
+		upto_cl->params.uint32.threshold
+		= RANDOM_THRESHOLD(span);
+
+		upto_cl->params.uint32.span = span;
+
+		upto_cl->generate = &generate_u_bound_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		*ctor_flags |= RAND_32_CTOR_FLAG;
+	}
+}
+
+inline void
+assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
+				    struct UIntegerRandSpec *const restrict rand_spec,
+				    unsigned int *const restrict ctor_flags,
+				    const uintmax_t min,
+				    const uintmax_t max,
+				    const uintmax_t span)
+{
+	struct BoundOffsetUGeneratorClosure *const restrict range_cl
+	= &rand_spec->gen.range;
+
+	if (max > UINT32_MAX) {
+		*intrp_length += DIGIT_COUNT_UINT64_MAX;
+
+		if (span > UINT32_MAX) {
+			range_cl->params.bound.uint32.threshold
+			= RANDOM_THRESHOLD((uint32_t) span);
+
+			range_cl->params.bound.uint32.span = (uint32_t) span;
+
+			range_cl->params.offset.uint64 = (uint64_t) min;
+
+			range_cl->generate = &generate_u_bound_32_offset_64;
+
+			*ctor_flags |= RAND_32_CTOR_FLAG;
+
+		} else {
+			range_cl->params.bound.uint64.threshold
+			= RANDOM_THRESHOLD((uint64_t) span);
+
+			range_cl->params.bound.uint64.span = (uint64_t) span;
+
+			range_cl->params.offset.uint64 = (uint64_t) min;
+
+			range_cl->generate = &generate_u_bound_64_offset_64;
+
+			*ctor_flags |= RAND_64_CTOR_FLAG;
+		}
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+	} else {
+		*intrp_length += DIGIT_COUNT_UINT32_MAX;
 
 		range_cl->params.bound.uint32.threshold
 		= RANDOM_THRESHOLD((uint32_t) span);
@@ -3969,13 +4356,13 @@ parse_next_intrp(struct GenerateParseState *const restrict state);
 inline void
 parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
 inline void
-parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state)
+parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state);
 inline void
-parse_intrp_string_qualifier(struct GenerateParseState *const restrict state)
+parse_intrp_string_qualifier(struct GenerateParseState *const restrict state);
 inline void
-parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state)
+parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state);
 inline void
-parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state)
+parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state);
 
 inline void
 intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
@@ -4092,7 +4479,7 @@ NEXT_TBL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
-		} else if (*rem == 's' && rem[1] == '\0')
+		} else if (*rem == 's' && rem[1] == '\0') {
 			set_intrp(state);
 			parse_intrp_timestamp_qualifier(state);
 		} else {
@@ -4108,6 +4495,7 @@ NEXT_DB_SPEC:		set_intrp(state);
 			parse_next_db_spec(state);
 			return;
 		} else if (*rem == 't' && rem[1] == '\0') {
+			set_intrp(state);
 			parse_intrp_datetime_qualifier(state);
 			return;
 		}
@@ -4429,6 +4817,108 @@ intrp_integer_random_default_group(struct GenerateParseState *const restrict sta
 	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
 }
 
+inline void
+intrp_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t from = col_spec->type_q.integer.scale.from;
+
+	switch (from) {
+	case INT32_MIN:
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case INT64_MIN:
+		type_set_bigint(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_from(&intrp->length,
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 from);
+
+		col_spec->build = &build_column_integer_random_from;
+	}
+}
+
+inline void
+intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t from = col_spec->type_q.integer.scale.from;
+
+	switch (from) {
+	case INT32_MIN:
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case INT64_MIN:
+		type_set_bigint(&col_spec->type);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_from(&intrp->length,
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 from);
+
+		col_spec->build = &build_column_integer_random_from_group;
+	}
+}
+
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -4638,6 +5128,13 @@ NEXT_DB_SPEC:		intrp_integer_random_default(state);
 	default:
 		error_invalid_rand_spec(state);
 	}
+}
+
+inline void
+parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_random_from_group);
 }
 
 

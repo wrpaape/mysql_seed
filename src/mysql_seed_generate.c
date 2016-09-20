@@ -415,6 +415,40 @@ assign_u_integer_random_range(struct PutLabelClosure *const restrict type,
 			      const uintmax_t min,
 			      const uintmax_t max,
 			      const uintmax_t span);
+extern inline void
+assign_intrp_integer_random_from(size_t *const restrict intrp_length,
+				 struct IntegerRandSpec *const restrict rand_spec,
+				 unsigned int *const restrict ctor_flags,
+				 const intmax_t from);
+extern inline void
+assign_intrp_integer_random_upto(size_t *const restrict intrp_length,
+				 struct IntegerRandSpec *const restrict rand_spec,
+				 unsigned int *const restrict ctor_flags,
+				 const intmax_t upto);
+extern inline void
+assign_intrp_integer_random_range(size_t *const restrict intrp_length,
+				  struct IntegerRandSpec *const restrict rand_spec,
+				  unsigned int *const restrict ctor_flags,
+				  const intmax_t min,
+				  const intmax_t max,
+				  const uintmax_t span);
+extern inline void
+assign_intrp_u_integer_random_from(size_t *const restrict intrp_length,
+				   struct UIntegerRandSpec *const restrict rand_spec,
+				   unsigned int *const restrict ctor_flags,
+				   const uintmax_t from);
+extern inline void
+assign_intrp_u_integer_random_upto(size_t *const restrict intrp_length,
+				   struct UIntegerRandSpec *const restrict rand_spec,
+				   unsigned int *const restrict ctor_flags,
+				   const uintmax_t upto);
+extern inline void
+assign_intrp_u_integer_random_range(size_t *const restrict intrp_length,
+				    struct UIntegerRandSpec *const restrict rand_spec,
+				    unsigned int *const restrict ctor_flags,
+				    const uintmax_t min,
+				    const uintmax_t max,
+				    const uintmax_t span);
 
 /* parse GRP_SPEC
  *─────────────────────────────────────────────────────────────────────────── */
@@ -453,6 +487,7 @@ parse_intrp_grp_spec(struct GenerateParseState *const restrict state,
 
 /* set INTRP
  *─────────────────────────────────────────────────────────────────────────── */
+/* integer */
 extern inline void
 intrp_integer_default(struct GenerateParseState *const restrict state);
 extern inline void
@@ -482,6 +517,7 @@ intrp_integer_random_range_group(struct GenerateParseState *const restrict state
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
+/* integer */
 extern inline void
 parse_intrp_integer_default_group(struct GenerateParseState *const restrict state);
 extern inline void
@@ -496,6 +532,18 @@ extern inline void
 parse_intrp_integer_random_default_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_integer_random(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_from(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_upto_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_upto(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_range_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_range(struct GenerateParseState *const restrict state);
 
 /* dispatch parsing of INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -509,6 +557,7 @@ extern inline void
 parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state);
+
 
 extern inline void
 parse_intrp(struct GenerateParseState *const restrict state);
