@@ -453,6 +453,8 @@ extern inline void
 intrp_integer_unique(struct GenerateParseState *const restrict state);
 extern inline void
 intrp_integer_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_fixed(struct GenerateParseState *const restrict state);
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -464,6 +466,8 @@ extern inline void
 parse_intrp_integer_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_integer_unique(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_fixed(struct GenerateParseState *const restrict state);
 
 /* dispatch parsing of INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */

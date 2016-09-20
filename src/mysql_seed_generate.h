@@ -4133,6 +4133,18 @@ intrp_integer_unique_group(struct GenerateParseState *const restrict state)
 		*counter_upto = grp_count;
 }
 
+inline void
+intrp_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+
+	state->specs.intrp.length += col_spec->type_q.integer.fixed.width;
+
+	col_spec->build = &build_column_integer_fixed;
+}
+
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -4164,6 +4176,76 @@ parse_intrp_integer_unique(struct GenerateParseState *const restrict state)
 	parse_column_complete(state,
 			      &intrp_integer_unique,
 			      &parse_intrp_integer_unique_group);
+}
+
+inline void
+parse_intrp_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed;
+	char *restrict from;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_fixed_integer(state);
+		return;
+	}
+
+	from = *(state->argv.arg.from);
+
+	const char *const restrict until = parse_int(&parsed,
+						     from);
+
+	if (until == NULL) {
+		error_invalid_fixed_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed < BIGINT_SIGNED_MIN) {
+		error_invalid_fixed_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed > BIGINT_SIGNED_MAX) {
+		error_invalid_fixed_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	struct StubBuilder *const restrict fixed_int
+	= &state->specs.col->type_q.integer.fixed;
+
+	if (parsed < 0ll) {
+		do {
+			++from;
+		} while (*from == '0');
+
+		--from;
+		*from = '-';
+
+		stub_builder_init(fixed_int,
+				  from,
+				  until + 1l - from);
+
+	} else if (parsed > 0ll) {
+		while (*from == '0')
+			++from;
+
+		stub_builder_init(fixed_int,
+				  from,
+				  until + 1l - from);
+
+	} else {
+		fixed_int->put_cl.bytes = "0";
+		fixed_int->put_cl.put	= put_string_width2;
+		fixed_int->width	= 2u;
+	}
+
+	parse_intrp_complete(state,
+			     &intrp_integer_fixed,
+			     &error_grp_spec_for_fixed_data);
 }
 
 
@@ -4210,6 +4292,13 @@ parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
 			error_invalid_integer_type_q(state);
 		return;
 
+	case 'f':
+		if (*rem == '\0')
+			parse_intrp_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
 	case 'c':
 		if (*rem == '\0') {
 NEXT_COL_SPEC:		intrp_integer_default(state);
@@ -4249,6 +4338,20 @@ NEXT_DB_SPEC:		intrp_integer_default(state);
 	case 'g':
 		if (strings_equal("roup", rem + 1l))
 			parse_intrp_integer_default_group(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_intrp_integer_unique(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_intrp_integer_fixed(state);
 		else
 			error_invalid_integer_type_q(state);
 		return;
