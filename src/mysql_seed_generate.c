@@ -227,13 +227,17 @@ expected_col_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_col_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
-expected_intrp_spec_close(const struct GenerateArgvState *const restrict argv);
+expected_next_intrp(const struct GenerateArgvState *const restrict argv);
 extern inline void
-error_expected_intrp_spec_close(struct GenerateParseState *const restrict state);
+error_expected_next_intrp(struct GenerateParseState *const restrict state);
 extern inline void
 expected_grp_spec_close(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_grp_spec_close(struct GenerateParseState *const restrict state);
+extern inline void
+expected_intrp_grp_spec_close(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_expected_intrp_grp_spec_close(struct GenerateParseState *const restrict state);
 extern inline void
 grp_spec_for_fixed_data(const struct GenerateArgvState *const restrict argv);
 extern inline void
@@ -443,6 +447,10 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 		     GenerateParseNode *const set_intrp,
 		     GenerateParseNode *const handle_grp_spec);
 
+extern inline void
+parse_intrp_grp_spec(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_intrp);
+
 /* set INTRP
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
@@ -455,6 +463,22 @@ extern inline void
 intrp_integer_unique_group(struct GenerateParseState *const restrict state);
 extern inline void
 intrp_integer_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_default(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_from(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_from_group(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_upto(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_upto_group(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_range(struct GenerateParseState *const restrict state);
+extern inline void
+intrp_integer_random_range_group(struct GenerateParseState *const restrict state);
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -468,6 +492,10 @@ extern inline void
 parse_intrp_integer_unique(struct GenerateParseState *const restrict state);
 extern inline void
 parse_intrp_integer_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_intrp_integer_random(struct GenerateParseState *const restrict state);
 
 /* dispatch parsing of INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */

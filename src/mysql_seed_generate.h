@@ -419,13 +419,17 @@ PARSE_ERROR_HEADER("cannot have GRP_SPEC for fixed column data, "	\
 PARSE_ERROR_HEADER("expected GROUP flag, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
-#define ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER				\
-PARSE_ERROR_HEADER("expected FILL flag, GROUP flag, COLUMN flag, TABLE"	\
-		   " flag, DATABASE flag, or end of arguments instead of")
+#define ERROR_EXPECTED_NEXT_INTRP_HEADER				\
+PARSE_ERROR_HEADER("expected COL_TYPE, GROUP flag, COLUMN flag, TABLE "	\
+		   "flag, DATABASE flag, or end of arguments instead of")
 
 #define ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected PART_TYPE, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
+
+#define ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER			\
+PARSE_ERROR_HEADER("expected PART_TYPE, COL_TYPE, COLUMN flag, TABLE "	\
+		   "flag, DATABASE flag, or end of arguments instead of")
 
 
 /* typedefs, struct declarations
@@ -2351,14 +2355,14 @@ error_expected_col_spec_close(struct GenerateParseState *const restrict state)
 }
 
 inline void
-expected_intrp_spec_close(const struct GenerateArgvState *const restrict argv)
+expected_next_intrp(const struct GenerateArgvState *const restrict argv)
 {
 	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER) - 1lu);
+			  ERROR_EXPECTED_NEXT_INTRP_HEADER,
+			  sizeof(ERROR_EXPECTED_NEXT_INTRP_HEADER) - 1lu);
 
 	ptr = put_string_inspect(ptr,
 				 *(argv->arg.from),
@@ -2378,9 +2382,9 @@ expected_intrp_spec_close(const struct GenerateArgvState *const restrict argv)
 }
 
 inline void
-error_expected_intrp_spec_close(struct GenerateParseState *const restrict state)
+error_expected_next_intrp(struct GenerateParseState *const restrict state)
 {
-	expected_intrp_spec_close(&state->argv);
+	expected_next_intrp(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -2415,6 +2419,41 @@ inline void
 error_expected_grp_spec_close(struct GenerateParseState *const restrict state)
 {
 	expected_grp_spec_close(&state->argv);
+	generate_parse_error(state);
+}
+
+inline void
+expected_intrp_grp_spec_close(const struct GenerateArgvState *const restrict argv)
+{
+	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
+
+	char *restrict ptr
+	= put_string_size(&buffer[0],
+			  ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER,
+			  sizeof(ERROR_EXPECTED_INTRP_GRP_SPEC_CLOSE_HEADER)
+			  - 1lu);
+
+	ptr = put_string_inspect(ptr,
+				 *(argv->arg.from),
+				 LENGTH_INSPECT_MAX);
+
+	ptr = put_string_size(ptr,
+			      IGNORING_DB_SPEC_STARTING_WITH,
+			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
+
+	ptr = put_inspect_args(ptr,
+			       argv->db_spec.from,
+			       argv->arg.from);
+
+	write_muffle(STDERR_FILENO,
+		     &buffer[0],
+		     ptr - &buffer[0]);
+}
+
+inline void
+error_expected_intrp_grp_spec_close(struct GenerateParseState *const restrict state)
+{
+	expected_intrp_grp_spec_close(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -3971,6 +4010,7 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 
 	if (state->argv.arg.from == state->argv.arg.until) {
 		set_intrp(state);
+		intrp_spec_state_close(&state->specs.intrp);
 		generate_parse_complete(state);
 		return;
 	}
@@ -3978,7 +4018,7 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 	const char *restrict arg = *(state->argv.arg.from);
 
 	if (*arg != '-') {
-NEXT_FILL:	set_intrp(state);
+		set_intrp(state);
 		parse_next_fill(state);
 		return;
 	}
@@ -3991,20 +4031,21 @@ NEXT_FILL:	set_intrp(state);
 		break; /* parse long SPEC */
 
 	case 'g':
-		if (*rem == '\0') {
+		if (*rem == '\0')
 			handle_grp_spec(state);
-			return;
-		}
-		goto NEXT_FILL;
+		else
+			error_expected_next_intrp(state);
+		return;
 
 	case 'c':
 		if (*rem == '\0') {
 NEXT_COL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_next_col_spec(state);
-			return;
+		} else {
+			error_expected_next_intrp(state);
 		}
-		goto NEXT_FILL;
+		return;
 
 	case 't':
 		if (*rem == '\0') {
@@ -4012,9 +4053,10 @@ NEXT_TBL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
-			return;
+		} else {
+			error_expected_next_intrp(state);
 		}
-		goto NEXT_FILL;
+		return;
 
 	case 'd':
 		if (*rem == '\0') {
@@ -4026,14 +4068,169 @@ NEXT_DB_SPEC:		set_intrp(state);
 		}
 
 	default:
-		goto NEXT_FILL;
+		error_expected_next_intrp(state);
+		return;
 	}
 
 
 	switch (*rem) {
 	case 'g':
-		if (strings_equal("roup", rem + 1l)) {
+		if (strings_equal("roup", rem + 1l))
 			handle_grp_spec(state);
+		else
+			error_expected_next_intrp(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_expected_next_intrp(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_expected_next_intrp(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_expected_next_intrp(state);
+	}
+}
+
+
+inline void
+parse_intrp_grp_spec(struct GenerateParseState *const restrict state,
+		     GenerateParseNode *const set_intrp)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_grp_count(state);
+		return;
+	}
+
+	struct ColSpec *const restrict col_spec = state->specs.col;
+	struct GrpSpec *const restrict grp_spec = &col_spec->grp_spec;
+
+	if (!parse_grp_count(&grp_spec->count,
+			     state->specs.tbl->row_count,
+			     &state->argv)) {
+		generate_parse_error(state);
+		return;
+	}
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		grp_spec->partition = &partition_groups_even;
+		set_intrp(state);
+		intrp_spec_state_close(&state->specs.intrp);
+		generate_parse_complete(state);
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+NEXT_FILL:	grp_spec->partition = &partition_groups_even;
+		set_intrp(state);
+		parse_next_fill(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break; /* parse long SPEC */
+
+	case 'e':
+		if (*rem == '\0') {
+PART_GROUPS_EVEN:	grp_spec->partition = &partition_groups_even;
+			parse_intrp_complete(state,
+					     set_intrp,
+					     &error_multiple_grp_specs);
+			return;
+		}
+		goto NEXT_FILL;
+
+	case 'l':
+		if (*rem == '\0') {
+PART_GROUPS_LINEAR:	grp_spec->partition = &partition_groups_linear;
+			parse_intrp_complete(state,
+					     set_intrp,
+					     &error_multiple_grp_specs);
+			return;
+		}
+		goto NEXT_FILL;
+
+	case 'g':
+		if (*rem == '\0') {
+			error_multiple_grp_specs(state);
+			return;
+		}
+		goto NEXT_FILL;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_intrp(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_next_col_spec(state);
+			return;
+		}
+		goto NEXT_FILL;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_intrp(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+			return;
+		}
+		goto NEXT_FILL;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_intrp(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		goto NEXT_FILL;
+	}
+
+	switch (*rem) {
+	case 'e':
+		if (strings_equal("ven", rem + 1l))
+			goto PART_GROUPS_EVEN;
+
+		goto NEXT_FILL;
+
+
+	case 'l':
+		if (strings_equal("inear", rem + 1l))
+			goto PART_GROUPS_LINEAR;
+
+		goto NEXT_FILL;
+
+	case 'g':
+		if (strings_equal("roup", rem + 1l)) {
+			error_multiple_grp_specs(state);
 			return;
 		}
 		goto NEXT_FILL;
@@ -4070,7 +4267,7 @@ intrp_integer_default(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
-	col_spec->build = &build_column_integer_unique;
+	col_spec->build	     = &build_column_integer_unique;
 
 	intrp->length	   += uint_digit_count(row_count);
 	intrp->set_col_type = &type_set_varchar;
@@ -4088,7 +4285,7 @@ intrp_integer_default_group(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
-	col_spec->build = &build_column_integer_unique_group;
+	col_spec->build	     = &build_column_integer_unique_group;
 
 	intrp->length	   += uint_digit_count(grp_count);
 	intrp->set_col_type = &type_set_varchar;
@@ -4106,7 +4303,7 @@ intrp_integer_unique(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
-	col_spec->build = &build_column_integer_unique;
+	col_spec->build	     = &build_column_integer_unique;
 
 	intrp->length	   += uint_digit_count(row_count);
 	intrp->set_col_type = &type_set_varchar;
@@ -4124,7 +4321,7 @@ intrp_integer_unique_group(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
 	col_spec->name.bytes = NULL;
-	col_spec->build = &build_column_integer_unique_group;
+	col_spec->build	     = &build_column_integer_unique_group;
 
 	intrp->length	   += uint_digit_count(grp_count);
 	intrp->set_col_type = &type_set_varchar;
@@ -4145,14 +4342,56 @@ intrp_integer_fixed(struct GenerateParseState *const restrict state)
 	col_spec->build = &build_column_integer_fixed;
 }
 
+inline void
+intrp_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	rand_spec->gen.unbound = &generate_i_32;
+	rand_spec->width_max   = DIGIT_COUNT_INT32_MIN + 2u;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_integer_random;
+
+	intrp->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	intrp->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+intrp_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	rand_spec->gen.unbound = &generate_i_32;
+	rand_spec->width_max   = DIGIT_COUNT_INT32_MIN + 2u;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_integer_random_group;
+
+	intrp->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	intrp->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
 parse_intrp_integer_default_group(struct GenerateParseState *const restrict state)
 {
-	parse_grp_spec(state,
-		       &intrp_integer_default_group);
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_default_group);
 }
 
 inline void
@@ -4166,16 +4405,16 @@ parse_intrp_integer_default(struct GenerateParseState *const restrict state)
 inline void
 parse_intrp_integer_unique_group(struct GenerateParseState *const restrict state)
 {
-	parse_grp_spec(state,
-		       &intrp_integer_unique_group);
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_unique_group);
 }
 
 inline void
 parse_intrp_integer_unique(struct GenerateParseState *const restrict state)
 {
-	parse_column_complete(state,
-			      &intrp_integer_unique,
-			      &parse_intrp_integer_unique_group);
+	parse_intrp_complete(state,
+			     &intrp_integer_unique,
+			     &parse_intrp_integer_unique_group);
 }
 
 inline void
@@ -4248,6 +4487,114 @@ parse_intrp_integer_fixed(struct GenerateParseState *const restrict state)
 			     &error_grp_spec_for_fixed_data);
 }
 
+inline void
+parse_intrp_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_random_default_group);
+}
+
+inline void
+parse_intrp_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_complete(state,
+			     &intrp_integer_random_default,
+			     &parse_intrp_integer_random_default_group);
+}
+
+inline void
+parse_intrp_integer_random(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		intrp_integer_random_default(state);
+		intrp_spec_state_close(&state->specs.intrp);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		intrp_integer_random_default(state);
+		parse_next_fill(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long integer qualifier */
+
+	case 'g':
+		if (*rem == '\0')
+			parse_intrp_integer_random_default_group(state);
+		else
+			error_invalid_rand_spec(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		intrp_integer_random_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		intrp_integer_random_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_rand_spec(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		intrp_integer_random_default(state);
+			intrp_spec_state_close(&state->specs.intrp);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_rand_spec(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_rand_spec(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+	default:
+		error_invalid_rand_spec(state);
+	}
+}
+
 
 /* dispatch parsing of INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -4295,6 +4642,13 @@ parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state)
 	case 'f':
 		if (*rem == '\0')
 			parse_intrp_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (*rem == '\0')
+			parse_intrp_integer_random(state);
 		else
 			error_invalid_integer_type_q(state);
 		return;
@@ -4352,6 +4706,13 @@ NEXT_DB_SPEC:		intrp_integer_default(state);
 	case 'f':
 		if (strings_equal("ixed", rem + 1l))
 			parse_intrp_integer_fixed(state);
+		else
+			error_invalid_integer_type_q(state);
+		return;
+
+	case 'r':
+		if (strings_equal("andom", rem + 1l))
+			parse_intrp_integer_random(state);
 		else
 			error_invalid_integer_type_q(state);
 		return;
