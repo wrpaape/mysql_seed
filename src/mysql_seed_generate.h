@@ -4919,6 +4919,216 @@ intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
 	}
 }
 
+inline void
+intrp_integer_random_upto(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t upto = col_spec->type_q.integer.scale.upto;
+
+	switch (upto) {
+	case INT32_MAX:
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case INT64_MAX:
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_upto(&intrp->length,
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 upto);
+
+		col_spec->build = &build_column_integer_random_upto;
+	}
+}
+
+inline void
+intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t upto = col_spec->type_q.integer.scale.upto;
+
+	switch (upto) {
+	case INT32_MAX:
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case INT64_MAX:
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_upto(&intrp->length,
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 upto);
+
+		col_spec->build = &build_column_integer_random_upto_group;
+	}
+}
+
+inline void
+intrp_integer_random_range(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	struct IntegerRange *const restrict range
+	= &col_spec->type_q.integer.scale.range;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t min    = range->min;
+	const intmax_t max    = range->max;
+	const uintmax_t delta = max - min;
+
+	switch (delta) {
+	case UINT32_MAX:
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_range(&intrp->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  min,
+						  max,
+						  delta + 1llu);
+
+		col_spec->build = &build_column_integer_random_range;
+	}
+}
+
+inline void
+intrp_integer_random_range_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	    = state->specs.col;
+	struct IntrpSpecState *const restrict intrp = &state->specs.intrp;
+	struct IntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.integer.rand_spec;
+
+	struct IntegerRange *const restrict range
+	= &col_spec->type_q.integer.scale.range;
+
+	col_spec->name.bytes = NULL;
+
+	intrp->set_col_type = &type_set_varchar;
+
+	const intmax_t min    = range->min;
+	const intmax_t max    = range->max;
+	const uintmax_t delta = max - min;
+
+	switch (delta) {
+	case UINT32_MAX:
+		intrp->length += (DIGIT_COUNT_INT32_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_32;
+
+		rand_spec->width_max = DIGIT_COUNT_INT32_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		intrp->length += (DIGIT_COUNT_INT64_MIN + 1lu);
+
+		rand_spec->gen.unbound = &generate_i_64;
+
+		rand_spec->width_max = DIGIT_COUNT_INT64_MIN + 2u;
+
+		col_spec->build = &build_column_integer_random_group;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_intrp_integer_random_range(&intrp->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  min,
+						  max,
+						  delta + 1llu);
+
+		col_spec->build = &build_column_integer_random_range_group;
+	}
+}
+
 
 /* parse INTRP type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -5037,6 +5247,172 @@ parse_intrp_integer_random_default(struct GenerateParseState *const restrict sta
 			     &parse_intrp_integer_random_default_group);
 }
 
+
+inline void
+parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_random_from_group);
+}
+
+inline void
+parse_intrp_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_from_min(state);
+		return;
+	}
+
+	if (parse_int(&parsed,
+		      *(state->argv.arg.from)) == NULL) {
+		error_invalid_min_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed < BIGINT_SIGNED_MIN) {
+		error_invalid_min_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed > BIGINT_SIGNED_MAX) {
+		error_invalid_min_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	state->specs.col->type_q.integer.scale.from = parsed;
+
+	parse_intrp_complete(state,
+			     &intrp_integer_random_from,
+			     &parse_intrp_integer_random_from_group);
+}
+
+inline void
+parse_intrp_integer_random_upto_group(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_random_upto_group);
+}
+
+inline void
+parse_intrp_integer_random_upto(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_upto_max(state);
+		return;
+	}
+
+	if (parse_int(&parsed,
+		      *(state->argv.arg.from)) == NULL) {
+		error_invalid_max_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed < BIGINT_SIGNED_MIN) {
+		error_invalid_max_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed > BIGINT_SIGNED_MAX) {
+		error_invalid_max_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	state->specs.col->type_q.integer.scale.upto = parsed;
+
+	parse_intrp_complete(state,
+			     &intrp_integer_random_upto,
+			     &parse_intrp_integer_random_upto_group);
+}
+
+inline void
+parse_intrp_integer_random_range_group(struct GenerateParseState *const restrict state)
+{
+	parse_intrp_grp_spec(state,
+			     &intrp_integer_random_range_group);
+}
+
+inline void
+parse_intrp_integer_random_range(struct GenerateParseState *const restrict state)
+{
+	intmax_t parsed_min;
+	intmax_t parsed_max;
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_range_min(state);
+		return;
+	}
+
+	if (parse_int(&parsed_min,
+		      *(state->argv.arg.from)) == NULL) {
+		error_invalid_min_integer_invalid(state);
+		return;
+	}
+
+#if (INTMAX_MIN < BIGINT_SIGNED_MIN)
+	if (parsed_min < BIGINT_SIGNED_MIN) {
+		error_invalid_min_integer_small(state);
+		return;
+	}
+#endif /* if (INTMAX_MIN < BIGINT_SIGNED_MIN) */
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed_min > BIGINT_SIGNED_MAX) {
+		error_invalid_min_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_random_range_max(state);
+		return;
+	}
+
+	if (parse_int(&parsed_max,
+		      *(state->argv.arg.from)) == NULL) {
+		error_invalid_max_integer_invalid(state);
+		return;
+	}
+
+	if (parsed_max < parsed_min) {
+		error_random_range_max_lt_min(state);
+		return;
+	}
+
+#if (INTMAX_MAX > BIGINT_SIGNED_MAX)
+	if (parsed_max > BIGINT_SIGNED_MAX) {
+		error_invalid_max_integer_large(state);
+		return;
+	}
+#endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
+
+	struct IntegerRange *const restrict range
+	= &state->specs.col->type_q.integer.scale.range;
+
+	range->min = parsed_min;
+	range->max = parsed_max;
+
+	parse_intrp_complete(state,
+			     &intrp_integer_random_range,
+			     &parse_intrp_integer_random_range_group);
+}
+
 inline void
 parse_intrp_integer_random(struct GenerateParseState *const restrict state)
 {
@@ -5128,13 +5504,6 @@ NEXT_DB_SPEC:		intrp_integer_random_default(state);
 	default:
 		error_invalid_rand_spec(state);
 	}
-}
-
-inline void
-parse_intrp_integer_random_from_group(struct GenerateParseState *const restrict state)
-{
-	parse_intrp_grp_spec(state,
-			     &intrp_integer_random_from_group);
 }
 
 
@@ -6827,7 +7196,6 @@ parse_integer_random_range(struct GenerateParseState *const restrict state)
 		return;
 	}
 #endif /* if (INTMAX_MAX > BIGINT_SIGNED_MAX) */
-
 
 	struct IntegerRange *const restrict range
 	= &state->specs.col->type_q.integer.scale.range;
