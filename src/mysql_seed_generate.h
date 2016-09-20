@@ -3963,8 +3963,19 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 
 /* INTRP_SPEC dispatch
  * ────────────────────────────────────────────────────────────────────────── */
+/* make compiler happy */
 inline void
 parse_next_intrp(struct GenerateParseState *const restrict state);
+inline void
+parse_intrp_integer_qualifier(struct GenerateParseState *const restrict state);
+inline void
+parse_intrp_u_integer_qualifier(struct GenerateParseState *const restrict state)
+inline void
+parse_intrp_string_qualifier(struct GenerateParseState *const restrict state)
+inline void
+parse_intrp_timestamp_qualifier(struct GenerateParseState *const restrict state)
+inline void
+parse_intrp_datetime_qualifier(struct GenerateParseState *const restrict state)
 
 inline void
 intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
@@ -4037,6 +4048,34 @@ parse_intrp_complete(struct GenerateParseState *const restrict state,
 			error_expected_next_intrp(state);
 		return;
 
+	case 'i':
+		if (*rem == '\0') {
+			set_intrp(state);
+			parse_intrp_integer_qualifier(state);
+		} else {
+			error_expected_next_intrp(state);
+		}
+		return;
+
+	case 'u':
+		if (*rem == '\0') {
+			set_intrp(state);
+			parse_intrp_u_integer_qualifier(state);
+		} else {
+			error_expected_next_intrp(state);
+		}
+		return;
+
+	case 's':
+		if (*rem == '\0') {
+			set_intrp(state);
+			parse_intrp_string_qualifier(state);
+		} else {
+			error_expected_next_intrp(state);
+		}
+		return;
+
+
 	case 'c':
 		if (*rem == '\0') {
 NEXT_COL_SPEC:		set_intrp(state);
@@ -4053,6 +4092,9 @@ NEXT_TBL_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_table_complete(state);
 			parse_next_tbl_spec(state);
+		} else if (*rem == 's' && rem[1] == '\0')
+			set_intrp(state);
+			parse_intrp_timestamp_qualifier(state);
 		} else {
 			error_expected_next_intrp(state);
 		}
@@ -4064,6 +4106,9 @@ NEXT_DB_SPEC:		set_intrp(state);
 			intrp_spec_state_close(&state->specs.intrp);
 			parse_database_complete(state);
 			parse_next_db_spec(state);
+			return;
+		} else if (*rem == 't' && rem[1] == '\0') {
+			parse_intrp_datetime_qualifier(state);
 			return;
 		}
 
@@ -4778,7 +4823,14 @@ parse_intrp(struct GenerateParseState *const restrict state)
 		if (*rem == '\0')
 			parse_intrp_integer_qualifier(state);
 		else
-			parse_next_fill(state);
+			error_invalid_col_type(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_intrp_u_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
 		return;
 
 	case 's':
@@ -4802,7 +4854,7 @@ parse_intrp(struct GenerateParseState *const restrict state)
 		}
 
 	default:
-		parse_next_fill(state);
+		error_invalid_col_type(state);
 	}
 
 	switch (*rem) {
@@ -4810,7 +4862,7 @@ parse_intrp(struct GenerateParseState *const restrict state)
 		if (strings_equal("nteger", rem + 1l))
 			parse_intrp_integer_qualifier(state);
 		else
-			parse_next_fill(state);
+			error_invalid_col_type(state);
 		return;
 
 	case 'u':
@@ -4841,7 +4893,7 @@ parse_intrp(struct GenerateParseState *const restrict state)
 		}
 
 	default:
-		parse_next_fill(state);
+		error_invalid_col_type(state);
 	}
 }
 
