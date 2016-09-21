@@ -440,8 +440,9 @@ PARSE_ERROR_HEADER("expected PART_TYPE, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
 #define ERROR_EXPECTED_JOIN_GRP_SPEC_CLOSE_HEADER			\
-PARSE_ERROR_HEADER("expected PART_TYPE, COL_TYPE, COLUMN flag, TABLE "	\
-		   "flag, DATABASE flag, or end of arguments instead of")
+PARSE_ERROR_HEADER("expected PART_TYPE, " INPUT_WRAP("'+'") ERROR_OPEN	\
+		   ", COLUMN flag, TABLE flag, DATABASE flag, or end "	\
+		   "of arguments instead of")
 
 
 /* typedefs, struct declarations
@@ -4286,8 +4287,7 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
 		return;
 	}
 
-	struct ColSpec *const restrict col_spec = state->specs.col;
-	struct GrpSpec *const restrict grp_spec = &col_spec->grp_spec;
+	struct GrpSpec *const restrict grp_spec = &state->specs.col->grp_spec;
 
 	if (!parse_grp_count(&grp_spec->count,
 			     state->specs.tbl->row_count,
@@ -4382,6 +4382,7 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 		error_expected_grp_spec_close(state);
 		return;
 	}
+
 
 	switch (*rem) {
 	case 'e':
@@ -4598,7 +4599,169 @@ inline void
 parse_join_grp_spec(struct GenerateParseState *const restrict state,
 		    GenerateParseNode *const set_join)
 {
-	/* TODO TODO TODO */
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_grp_count(state);
+		return;
+	}
+
+	struct GrpSpec *const restrict grp_spec = &state->specs.col->grp_spec;
+
+	if (!parse_grp_count(&grp_spec->count,
+			     state->specs.tbl->row_count,
+			     &state->argv)) {
+		generate_parse_error(state);
+		return;
+	}
+
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		grp_spec->partition = &partition_groups_even;
+		set_join(state);
+		join_spec_state_close(&state->specs.join);
+		generate_parse_complete(state);
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	switch (*arg) {
+	case '-':	/* parse flag */
+		break;
+
+	case '+':	/* next JOIN */
+		if (arg[1] == '\0') {
+			grp_spec->partition = &partition_groups_even;
+			set_join(state);
+			parse_next_join(state);
+			return;
+		}
+
+	default:
+		error_expected_join_grp_spec_close(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break; /* parse long SPEC */
+
+	case 'e':
+		if (*rem == '\0') {
+PART_GROUPS_EVEN:	grp_spec->partition = &partition_groups_even;
+			parse_join_complete(state,
+					    set_join,
+					    &error_multiple_grp_specs);
+		} else {
+			error_expected_join_grp_spec_close(state);
+		}
+		return;
+
+	case 'l':
+		if (*rem == '\0') {
+PART_GROUPS_LINEAR:	grp_spec->partition = &partition_groups_linear;
+			parse_join_complete(state,
+					    set_join,
+					    &error_multiple_grp_specs);
+		} else {
+			error_expected_join_grp_spec_close(state);
+		}
+		return;
+
+	case 'g':
+		if (*rem == '\0')
+			error_multiple_grp_specs(state);
+		else
+			error_expected_join_grp_spec_close(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_join(state);
+			join_spec_state_close(&state->specs.join);
+			parse_next_col_spec(state);
+		} else {
+			error_expected_join_grp_spec_close(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_join(state);
+			join_spec_state_close(&state->specs.join);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_expected_join_grp_spec_close(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
+			set_join(state);
+			join_spec_state_close(&state->specs.join);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_expected_join_grp_spec_close(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'e':
+		if (strings_equal("ven", rem + 1l))
+			goto PART_GROUPS_EVEN;
+
+		error_expected_join_grp_spec_close(state);
+		return;
+
+	case 'l':
+		if (strings_equal("inear", rem + 1l))
+			goto PART_GROUPS_LINEAR;
+
+		error_expected_join_grp_spec_close(state);
+		return;
+
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			error_multiple_grp_specs(state);
+		else
+			error_expected_join_grp_spec_close(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_expected_join_grp_spec_close(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_expected_join_grp_spec_close(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_expected_join_grp_spec_close(state);
+	}
 }
 
 /* set JOIN
@@ -6863,7 +7026,6 @@ parse_join_datetime_unique(struct GenerateParseState *const restrict state)
 }
 
 
-
 /* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
 inline void
@@ -7175,16 +7337,521 @@ NEXT_DB_SPEC:		join_u_integer_default(state);
 inline void
 parse_join_string_qualifier(struct GenerateParseState *const restrict state)
 {
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		join_string_default(state);
+		join_spec_state_close(&state->specs.join);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	switch (*arg) {
+	case '-':	/* parse flag */
+		break;
+
+	case '+':	/* next JOIN */
+		if (arg[1] == '\0') {
+			join_string_default(state);
+			parse_next_join(state);
+			return;
+		}
+
+	default:
+		error_invalid_string_type_q(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long string qualifier */
+
+	case 'g':
+		if (*rem == '\0')
+			parse_join_string_default_group(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'u':
+		switch (*rem) {
+		case '\0':
+			parse_join_string_unique(state);
+			return;
+
+		case 'u':
+			if (rem[1] == '\0') {
+				parse_join_string_uuid(state);
+				return;
+			}
+
+		default:
+			error_invalid_string_type_q(state);
+			return;
+		}
+
+	case 'f':
+		if (*rem == '\0')
+			parse_join_string_fixed(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'h':
+		if (*rem == '\0')
+			parse_join_string_hash(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'n':
+		switch (*rem) {
+		case '1':
+			if (rem[1] == '\0')
+				parse_join_string_names_first(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
+
+		case 'l':
+			if (rem[1] == '\0')
+				parse_join_string_names_last(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
+
+		case 'f':
+			if (rem[1] == '\0') {
+				parse_join_string_names_full(state);
+				return;
+			}
+
+		default:
+			error_invalid_string_type_q(state);
+			return;
+		}
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		join_string_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_string_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		join_string_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_string_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		join_string_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_string_type_q(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_join_string_default_group(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'u':
+		switch (rem[1]) {
+		case 'n':
+			if (strings_equal("ique", rem + 2l))
+				parse_join_string_unique(state);
+			else
+				error_invalid_string_type_q(state);
+			return;
+
+		case 'u':
+			if (strings_equal("id", rem + 2l)) {
+				parse_join_string_uuid(state);
+				return;
+			}
+
+		default:
+			error_invalid_string_type_q(state);
+			return;
+		}
+
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_join_string_fixed(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'h':
+		if (strings_equal("ash", rem + 1l))
+			parse_join_string_hash(state);
+		else
+			error_invalid_string_type_q(state);
+		return;
+
+	case 'n':
+		arg = string_starts_with(rem + 1l,
+					 "ames-");
+
+		if (arg == NULL) {
+			error_invalid_string_type_q(state);
+			return;
+		}
+
+		switch (*arg) {
+		case 'f':
+			switch (arg[1]) {
+			case 'i':
+				if (strings_equal("rst", arg + 2l))
+					parse_join_string_names_first(state);
+				else
+					error_invalid_string_type_q(state);
+				return;
+
+			case 'u':
+				if (strings_equal("ll", arg + 2l)) {
+					parse_join_string_names_full(state);
+					return;
+				}
+
+			default:
+				error_invalid_string_type_q(state);
+				return;
+			}
+
+		case 'l':
+			if (strings_equal("ast", arg + 1l)) {
+				parse_join_string_names_last(state);
+				return;
+			}
+
+		default:
+			error_invalid_string_type_q(state);
+			return;
+		}
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_string_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_string_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_string_type_q(state);
+	}
 }
 
 inline void
 parse_join_timestamp_qualifier(struct GenerateParseState *const restrict state)
 {
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		join_timestamp_default(state);
+		join_spec_state_close(&state->specs.join);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	switch (*arg) {
+	case '-':	/* parse flag */
+		break;
+
+	case '+':	/* next JOIN */
+		if (arg[1] == '\0') {
+			join_timestamp_default(state);
+			parse_next_join(state);
+			return;
+		}
+
+	default:
+		error_invalid_integer_type_q(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long string qualifier */
+	case 'g':
+		if (*rem == '\0')
+			parse_join_timestamp_default_group(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_join_timestamp_fixed(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_join_timestamp_unique(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		join_timestamp_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_timestamp_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		join_timestamp_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_timestamp_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		join_timestamp_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_timestamp_type_q(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_join_timestamp_default_group(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_join_timestamp_fixed(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_join_timestamp_unique(state);
+		else
+			error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_timestamp_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_timestamp_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_timestamp_type_q(state);
+	}
 }
+
 inline void
 parse_join_datetime_qualifier(struct GenerateParseState *const restrict state)
 {
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		join_datetime_default(state);
+		join_spec_state_close(&state->specs.join);
+		generate_parse_complete(state); /* done parsing */
+		return;
+	}
+
+	const char *restrict arg = *(state->argv.arg.from);
+
+	switch (*arg) {
+	case '-':	/* parse flag */
+		break;
+
+	case '+':	/* next JOIN */
+		if (arg[1] == '\0') {
+			join_datetime_default(state);
+			parse_next_join(state);
+			return;
+		}
+
+	default:
+		error_invalid_integer_type_q(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long string qualifier */
+	case 'g':
+		if (*rem == '\0')
+			parse_join_datetime_default_group(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'f':
+		if (*rem == '\0')
+			parse_join_datetime_fixed(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_join_datetime_unique(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'c':
+		if (*rem == '\0') {
+NEXT_COL_SPEC:		join_datetime_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_next_col_spec(state);
+		} else {
+			error_invalid_datetime_type_q(state);
+		}
+		return;
+
+	case 't':
+		if (*rem == '\0') {
+NEXT_TBL_SPEC:		join_datetime_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_table_complete(state);
+			parse_next_tbl_spec(state);
+		} else {
+			error_invalid_datetime_type_q(state);
+		}
+		return;
+
+	case 'd':
+		if (*rem == '\0') {
+NEXT_DB_SPEC:		join_datetime_default(state);
+			join_spec_state_close(&state->specs.join);
+			parse_database_complete(state);
+			parse_next_db_spec(state);
+			return;
+		}
+
+	default:
+		error_invalid_datetime_type_q(state);
+		return;
+	}
+
+
+	switch (*rem) {
+	case 'g':
+		if (strings_equal("roup", rem + 1l))
+			parse_join_datetime_default_group(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+	case 'f':
+		if (strings_equal("ixed", rem + 1l))
+			parse_join_datetime_fixed(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nique", rem + 1l))
+			parse_join_datetime_unique(state);
+		else
+			error_invalid_datetime_type_q(state);
+		return;
+
+	case 'c':
+		if (strings_equal("olumn", rem + 1l))
+			goto NEXT_COL_SPEC;
+
+		error_invalid_datetime_type_q(state);
+		return;
+
+	case 't':
+		if (strings_equal("able", rem + 1l))
+			goto NEXT_TBL_SPEC;
+
+		error_invalid_datetime_type_q(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atabase", rem + 1l))
+			goto NEXT_DB_SPEC;
+
+	default:
+		error_invalid_datetime_type_q(state);
+	}
 }
+
 
 /* call when argv is pointing at '+' */
 inline void
@@ -7201,10 +7868,10 @@ parse_next_join(struct GenerateParseState *const restrict state)
 
 	const char *restrict arg = *(state->argv.arg.from);
 
-	/* if (*arg != '-') { */
-	/* 	parse_join_string_fixed(state); */
-	/* 	return; */
-	/* } */
+	if (*arg != '-') {
+		parse_join_string_fixed(state);
+		return;
+	}
 
 }
 
