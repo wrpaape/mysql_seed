@@ -8,8 +8,11 @@
 
 /* macro constants
  *─────────────────────────────────────────────────────────────────────────── */
-#define SIZE_TIMESTAMP_STRING 20lu
-#define SIZE_DATETIME_STRING  20lu
+#define SIZE_TIMESTAMP_STRING	20lu
+#define LENGTH_TIMESTAMP_STRING 19lu
+
+#define SIZE_DATETIME_STRING	20lu
+#define LENGTH_DATETIME_STRING	19lu
 
 /* struct declarations, typedefs
  *─────────────────────────────────────────────────────────────────────────── */

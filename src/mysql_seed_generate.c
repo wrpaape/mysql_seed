@@ -576,6 +576,28 @@ extern inline void
 join_string_default(struct GenerateParseState *const restrict state);
 extern inline void
 join_string_default_group(struct GenerateParseState *const restrict state);
+/* timestamp */
+extern inline void
+join_timestamp_unique(struct GenerateParseState *const restrict state);
+extern inline void
+join_timestamp_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_timestamp_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+join_timestamp_default(struct GenerateParseState *const restrict state);
+extern inline void
+join_timestamp_default_group(struct GenerateParseState *const restrict state);
+/* datetime */
+extern inline void
+join_datetime_unique(struct GenerateParseState *const restrict state);
+extern inline void
+join_datetime_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_datetime_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+join_datetime_default(struct GenerateParseState *const restrict state);
+extern inline void
+join_datetime_default_group(struct GenerateParseState *const restrict state);
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */

@@ -5547,6 +5547,139 @@ join_string_default_group(struct GenerateParseState *const restrict state)
 		*counter_upto = grp_count;
 }
 
+/* timestamp */
+inline void
+join_timestamp_unique(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_unique;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+inline void
+join_timestamp_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_unique_group;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+inline void
+join_timestamp_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_fixed;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+inline void
+join_timestamp_fixed_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_fixed_group;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+inline void
+join_timestamp_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_unique;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+inline void
+join_timestamp_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_timestamp_unique_group;
+
+	state->specs.join.length += LENGTH_TIMESTAMP_STRING;
+}
+
+/* datetime */
+inline void
+join_datetime_unique(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_unique;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
+
+inline void
+join_datetime_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_unique_group;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
+
+inline void
+join_datetime_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_fixed;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
+
+inline void
+join_datetime_fixed_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_fixed_group;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
+
+inline void
+join_datetime_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_unique;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
+
+inline void
+join_datetime_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_datetime_unique_group;
+
+	state->specs.join.length += LENGTH_DATETIME_STRING;
+}
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
