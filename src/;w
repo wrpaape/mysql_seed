@@ -425,11 +425,6 @@ PARSE_ERROR_HEADER("invalid JOIN")
 PARSE_ERROR_HEADER("expected JOIN after " INPUT_WRAP("'+'") ERROR_OPEN	\
 		   ", ignoring DB_SPEC starting with")
 
-#define ERROR_EXPECTED_JOIN_CLOSE_HEADER				\
-PARSE_ERROR_HEADER("expected " INPUT_WRAP("'+'") ERROR_OPEN ", GROUP "	\
-		   "flag, COLUMN flag, TABLE flag, DATABASE flag, or "	\
-		   "end of arguments instead of")
-
 /* parsing next SPEC */
 #define ERROR_EXPECTED_COL_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected GROUP flag, COLUMN flag, TABLE flag, "	\
@@ -2397,41 +2392,6 @@ error_expected_join(struct GenerateParseState *const restrict state)
 	expected_join(&state->argv);
 	generate_parse_error(state);
 }
-
-inline void
-expected_join_close(const struct GenerateArgvState *const restrict argv)
-{
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_JOIN_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_JOIN_CLOSE_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
-
-	ptr = put_string_size(ptr,
-			      IGNORING_DB_SPEC_STARTING_WITH,
-			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
-
-	ptr = put_inspect_args(ptr,
-			       argv->db_spec.from,
-			       argv->arg.from);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
-error_expected_join_close(struct GenerateParseState *const restrict state)
-{
-	expected_join_close(&state->argv);
-	generate_parse_error(state);
-}
-
 
 
 
@@ -4485,118 +4445,13 @@ parse_join_complete(struct GenerateParseState *const restrict state,
 		    GenerateParseNode *const set_join,
 		    GenerateParseNode *const handle_grp_spec)
 {
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		set_join(state);
-		join_spec_state_close(&state->specs.join);
-		generate_parse_complete(state);
-		return;
-	}
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	switch (*arg) {
-	case '-':	/* parse flag */
-		break;
-
-	case '+':	/* next JOIN */
-		if (arg[1] == '\0') {
-			set_join(state);
-			parse_next_join(state);
-			return;
-		}
-
-	default:
-		error_expected_join_close(state);
-		return;
-	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break; /* parse long SPEC */
-
-	case 'g':
-		if (*rem == '\0')
-			handle_grp_spec(state);
-		else
-			error_expected_join_close(state);
-		return;
-
-	case 'c':
-		if (*rem == '\0') {
-NEXT_COL_SPEC:		set_join(state);
-			join_spec_state_close(&state->specs.join);
-			parse_next_col_spec(state);
-		} else {
-			error_expected_join_close(state);
-		}
-		return;
-
-	case 't':
-		if (*rem == '\0') {
-NEXT_TBL_SPEC:		set_join(state);
-			join_spec_state_close(&state->specs.join);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-		} else {
-			error_expected_join_close(state);
-		}
-		return;
-
-	case 'd':
-		if (*rem == '\0') {
-NEXT_DB_SPEC:		set_join(state);
-			join_spec_state_close(&state->specs.join);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-
-	default:
-		error_expected_join_close(state);
-		return;
-	}
-
-
-	switch (*rem) {
-	case 'g':
-		if (strings_equal("roup", rem + 1l))
-			handle_grp_spec(state);
-		else
-			error_expected_join_close(state);
-		return;
-
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
-			goto NEXT_COL_SPEC;
-
-		error_expected_join_close(state);
-		return;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto NEXT_TBL_SPEC;
-
-		error_expected_join_close(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto NEXT_DB_SPEC;
-
-	default:
-		error_expected_join_close(state);
-	}
+	/* TODO TODO TODO */
 }
 
 
 inline void
 parse_join_grp_spec(struct GenerateParseState *const restrict state,
-		    GenerateParseNode *const set_join)
+		     GenerateParseNode *const set_join)
 {
 	/* TODO TODO TODO */
 }
@@ -5806,35 +5661,34 @@ join_datetime_default_group(struct GenerateParseState *const restrict state)
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
-/* integer */
 inline void
 parse_join_integer_default_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_default_group);
+			     &join_integer_default_group);
 }
 
 inline void
 parse_join_integer_default(struct GenerateParseState *const restrict state)
 {
 	parse_join_complete(state,
-			    &join_integer_default,
-			    &parse_join_integer_default_group);
+			     &join_integer_default,
+			     &parse_join_integer_default_group);
 }
 
 inline void
 parse_join_integer_unique_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_unique_group);
+			     &join_integer_unique_group);
 }
 
 inline void
 parse_join_integer_unique(struct GenerateParseState *const restrict state)
 {
 	parse_join_complete(state,
-			    &join_integer_unique,
-			    &parse_join_integer_unique_group);
+			     &join_integer_unique,
+			     &parse_join_integer_unique_group);
 }
 
 inline void
@@ -5903,23 +5757,23 @@ parse_join_integer_fixed(struct GenerateParseState *const restrict state)
 	}
 
 	parse_join_complete(state,
-			    &join_integer_fixed,
-			    &error_grp_spec_for_fixed_data);
+			     &join_integer_fixed,
+			     &error_grp_spec_for_fixed_data);
 }
 
 inline void
 parse_join_integer_random_default_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_random_default_group);
+			     &join_integer_random_default_group);
 }
 
 inline void
 parse_join_integer_random_default(struct GenerateParseState *const restrict state)
 {
 	parse_join_complete(state,
-			    &join_integer_random_default,
-			    &parse_join_integer_random_default_group);
+			     &join_integer_random_default,
+			     &parse_join_integer_random_default_group);
 }
 
 
@@ -5927,7 +5781,7 @@ inline void
 parse_join_integer_random_from_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_random_from_group);
+			     &join_integer_random_from_group);
 }
 
 inline void
@@ -5964,15 +5818,15 @@ parse_join_integer_random_from(struct GenerateParseState *const restrict state)
 	state->specs.col->type_q.integer.scale.from = parsed;
 
 	parse_join_complete(state,
-			    &join_integer_random_from,
-			    &parse_join_integer_random_from_group);
+			     &join_integer_random_from,
+			     &parse_join_integer_random_from_group);
 }
 
 inline void
 parse_join_integer_random_upto_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_random_upto_group);
+			     &join_integer_random_upto_group);
 }
 
 inline void
@@ -6009,15 +5863,15 @@ parse_join_integer_random_upto(struct GenerateParseState *const restrict state)
 	state->specs.col->type_q.integer.scale.upto = parsed;
 
 	parse_join_complete(state,
-			    &join_integer_random_upto,
-			    &parse_join_integer_random_upto_group);
+			     &join_integer_random_upto,
+			     &parse_join_integer_random_upto_group);
 }
 
 inline void
 parse_join_integer_random_range_group(struct GenerateParseState *const restrict state)
 {
 	parse_join_grp_spec(state,
-			    &join_integer_random_range_group);
+			     &join_integer_random_range_group);
 }
 
 inline void
@@ -6107,11 +5961,9 @@ parse_join_integer_random(struct GenerateParseState *const restrict state)
 		break;
 
 	case '+':	/* next JOIN */
-		if (arg[1] == '\0') {
-			join_integer_random_default(state);
-			parse_next_join(state);
-			return;
-		}
+		join_integer_random_default(state);
+		parse_next_join(state);
+		return;
 
 	default:
 		error_invalid_rand_spec(state);
@@ -6240,403 +6092,6 @@ NEXT_DB_SPEC:		join_integer_random_default(state);
 	}
 }
 
-/* unsigned-integer */
-inline void
-parse_join_u_integer_default_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_default_group);
-}
-
-inline void
-parse_join_u_integer_default(struct GenerateParseState *const restrict state)
-{
-	parse_join_complete(state,
-			    &join_u_integer_default,
-			    &parse_join_u_integer_default_group);
-}
-
-inline void
-parse_join_u_integer_unique_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_unique_group);
-}
-
-inline void
-parse_join_u_integer_unique(struct GenerateParseState *const restrict state)
-{
-	parse_join_complete(state,
-			    &join_u_integer_unique,
-			    &parse_join_u_integer_unique_group);
-}
-
-inline void
-parse_join_u_integer_fixed(struct GenerateParseState *const restrict state)
-{
-	uintmax_t parsed;
-	char *restrict from;
-
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_fixed_u_integer(state);
-		return;
-	}
-
-	from = *(state->argv.arg.from);
-
-	const char *const restrict until = parse_uint(&parsed,
-						      from);
-
-	if (until == NULL) {
-		error_invalid_fixed_u_integer_invalid(state);
-		return;
-	}
-
-#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
-	if (parsed > BIGINT_UNSIGNED_MAX) {
-		error_invalid_fixed_u_integer_large(state);
-		return;
-	}
-#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
-
-	struct StubBuilder *const restrict fixed_int
-	= &state->specs.col->type_q.u_integer.fixed;
-
-	if (parsed > 0ll) {
-		while (*from == '0')
-			++from;
-
-		stub_builder_init(fixed_int,
-				  from,
-				  until + 1l - from);
-
-	} else {
-		fixed_int->put_cl.bytes = "0";
-		fixed_int->put_cl.put	= put_string_width2;
-		fixed_int->width	= 2u;
-	}
-
-	parse_join_complete(state,
-			    &join_u_integer_fixed,
-			    &error_grp_spec_for_fixed_data);
-}
-
-inline void
-parse_join_u_integer_random_default_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_random_default_group);
-}
-
-inline void
-parse_join_u_integer_random_default(struct GenerateParseState *const restrict state)
-{
-	parse_join_complete(state,
-			    &join_u_integer_random_default,
-			    &parse_join_u_integer_random_default_group);
-}
-
-inline void
-parse_join_u_integer_random_from_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_random_from_group);
-}
-
-inline void
-parse_join_u_integer_random_from(struct GenerateParseState *const restrict state)
-{
-	uintmax_t parsed;
-
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_random_from_min(state);
-		return;
-	}
-
-	if (parse_uint(&parsed,
-		       *(state->argv.arg.from)) == NULL) {
-		error_invalid_min_u_integer_invalid(state);
-		return;
-	}
-
-#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
-	if (parsed > BIGINT_UNSIGNED_MAX) {
-		error_invalid_min_u_integer_large(state);
-		return;
-	}
-#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
-
-	state->specs.col->type_q.u_integer.scale.from = parsed;
-
-	parse_join_complete(state,
-			    &join_u_integer_random_from,
-			    &parse_join_u_integer_random_from_group);
-}
-
-inline void
-parse_join_u_integer_random_upto_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_random_upto_group);
-}
-
-inline void
-parse_join_u_integer_random_upto(struct GenerateParseState *const restrict state)
-{
-	uintmax_t parsed;
-
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_random_upto_max(state);
-		return;
-	}
-
-	if (parse_uint(&parsed,
-		       *(state->argv.arg.from)) == NULL) {
-		error_invalid_max_u_integer_invalid(state);
-		return;
-	}
-
-#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
-	if (parsed > BIGINT_UNSIGNED_MAX) {
-		error_invalid_max_u_integer_large(state);
-		return;
-	}
-#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
-
-	state->specs.col->type_q.u_integer.scale.upto = parsed;
-
-	parse_join_complete(state,
-			    &join_u_integer_random_upto,
-			    &parse_join_u_integer_random_upto_group);
-}
-
-inline void
-parse_join_u_integer_random_range_group(struct GenerateParseState *const restrict state)
-{
-	parse_join_grp_spec(state,
-			    &join_u_integer_random_range_group);
-}
-
-inline void
-parse_join_u_integer_random_range(struct GenerateParseState *const restrict state)
-{
-	uintmax_t parsed_min;
-	uintmax_t parsed_max;
-
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_random_range_min(state);
-		return;
-	}
-
-	if (parse_uint(&parsed_min,
-		       *(state->argv.arg.from)) == NULL) {
-		error_invalid_min_u_integer_invalid(state);
-		return;
-	}
-
-#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
-	if (parsed_min > BIGINT_UNSIGNED_MAX) {
-		error_invalid_min_u_integer_large(state);
-		return;
-	}
-#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
-
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		error_no_random_range_max(state);
-		return;
-	}
-
-	if (parse_uint(&parsed_max,
-		       *(state->argv.arg.from)) == NULL) {
-		error_invalid_max_u_integer_invalid(state);
-		return;
-	}
-
-	if (parsed_max < parsed_min) {
-		error_random_range_max_lt_min(state);
-		return;
-	}
-
-#if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX)
-	if (parsed_max > BIGINT_UNSIGNED_MAX) {
-		error_invalid_max_u_integer_large(state);
-		return;
-	}
-#endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
-
-	struct UIntegerRange *const restrict range
-	= &state->specs.col->type_q.u_integer.scale.range;
-
-	range->min = parsed_min;
-	range->max = parsed_max;
-
-	parse_join_complete(state,
-			    &join_u_integer_random_range,
-			    &parse_join_u_integer_random_range_group);
-}
-
-inline void
-parse_join_u_integer_random(struct GenerateParseState *const restrict state)
-{
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		join_u_integer_random_default(state);
-		join_spec_state_close(&state->specs.join);
-		generate_parse_complete(state); /* done parsing */
-		return;
-	}
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	switch (*arg) {
-	case '-':	/* parse flag */
-		break;
-
-	case '+':	/* next JOIN */
-		if (arg[1] == '\0') {
-			join_u_integer_random_default(state);
-			parse_next_join(state);
-			return;
-		}
-
-	default:
-		error_invalid_rand_spec(state);
-		return;
-	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break;	/* parse long SPEC */
-
-	case 'g':
-		if (*rem == '\0')
-			parse_join_u_integer_random_default_group(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'f':
-		if (*rem == '\0')
-			parse_join_u_integer_random_from(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'u':
-		if (*rem == '\0')
-			parse_join_u_integer_random_upto(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'r':
-		if (*rem == '\0')
-			parse_join_u_integer_random_range(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'c':
-		if (*rem == '\0') {
-NEXT_COL_SPEC:		join_u_integer_random_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_next_col_spec(state);
-		} else {
-			error_invalid_rand_spec(state);
-		}
-		return;
-
-	case 't':
-		if (*rem == '\0') {
-NEXT_TBL_SPEC:		join_u_integer_random_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-		} else {
-			error_invalid_rand_spec(state);
-		}
-		return;
-
-	case 'd':
-		if (*rem == '\0') {
-NEXT_DB_SPEC:		join_u_integer_random_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-
-	default:
-		error_invalid_rand_spec(state);
-		return;
-	}
-
-	switch (*rem) {
-	case 'g':
-		if (strings_equal("roup", rem + 1l))
-			parse_join_u_integer_random_default_group(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'f':
-		if (strings_equal("rom", rem + 1l))
-			parse_join_u_integer_random_from(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'u':
-		if (strings_equal("pto", rem + 1l))
-			parse_join_u_integer_random_upto(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'r':
-		if (strings_equal("ange", rem + 1l))
-			parse_join_u_integer_random_range(state);
-		else
-			error_invalid_rand_spec(state);
-		return;
-
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
-			goto NEXT_COL_SPEC;
-
-		error_invalid_rand_spec(state);
-		return;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto NEXT_TBL_SPEC;
-
-		error_invalid_rand_spec(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto NEXT_DB_SPEC;
-
-	default:
-		error_invalid_rand_spec(state);
-	}
-}
-
 
 /* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -6646,311 +6101,22 @@ parse_join_integer_qualifier(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from == state->argv.arg.until) {
-		join_integer_default(state);
+		join_integer_random_default(state);
 		join_spec_state_close(&state->specs.join);
 		generate_parse_complete(state); /* done parsing */
 		return;
 	}
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	switch (*arg) {
-	case '-':	/* parse flag */
-		break;
-
-	case '+':	/* next JOIN */
-		if (arg[1] == '\0') {
-			join_integer_default(state);
-			parse_next_join(state);
-			return;
-		}
-
-	default:
-		error_invalid_integer_type_q(state);
-		return;
-	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break;	/* parse long integer qualifier */
-
-	case 'g':
-		if (*rem == '\0')
-			parse_join_integer_default_group(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'u':
-		if (*rem == '\0')
-			parse_join_integer_unique(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'f':
-		if (*rem == '\0')
-			parse_join_integer_fixed(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'r':
-		if (*rem == '\0')
-			parse_join_integer_random(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'c':
-		if (*rem == '\0') {
-NEXT_COL_SPEC:		join_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_next_col_spec(state);
-		} else {
-			error_invalid_integer_type_q(state);
-		}
-		return;
-
-	case 't':
-		if (*rem == '\0') {
-NEXT_TBL_SPEC:		join_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-		} else {
-			error_invalid_integer_type_q(state);
-		}
-		return;
-
-	case 'd':
-		if (*rem == '\0') {
-NEXT_DB_SPEC:		join_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-
-	default:
-		error_invalid_integer_type_q(state);
-		return;
-	}
-
-
-	switch (*rem) {
-	case 'g':
-		if (strings_equal("roup", rem + 1l))
-			parse_join_integer_default_group(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'u':
-		if (strings_equal("nique", rem + 1l))
-			parse_join_integer_unique(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'f':
-		if (strings_equal("ixed", rem + 1l))
-			parse_join_integer_fixed(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'r':
-		if (strings_equal("andom", rem + 1l))
-			parse_join_integer_random(state);
-		else
-			error_invalid_integer_type_q(state);
-		return;
-
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
-			goto NEXT_COL_SPEC;
-
-		error_invalid_integer_type_q(state);
-		return;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto NEXT_TBL_SPEC;
-
-		error_invalid_integer_type_q(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto NEXT_DB_SPEC;
-
-	default:
-		error_invalid_integer_type_q(state);
-	}
 }
 
+/* TODO: join type qualifiers */
 inline void
 parse_join_u_integer_qualifier(struct GenerateParseState *const restrict state)
 {
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		join_u_integer_default(state);
-		join_spec_state_close(&state->specs.join);
-		generate_parse_complete(state); /* done parsing */
-		return;
-	}
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	switch (*arg) {
-	case '-':	/* parse flag */
-		break;
-
-	case '+':	/* next JOIN */
-		if (arg[1] == '\0') {
-			join_u_integer_default(state);
-			parse_next_join(state);
-			return;
-		}
-
-	default:
-		error_invalid_u_integer_type_q(state);
-		return;
-	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break;	/* parse long u_integer qualifier */
-
-	case 'g':
-		if (*rem == '\0')
-			parse_join_u_integer_default_group(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'u':
-		if (*rem == '\0')
-			parse_join_u_integer_unique(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'f':
-		if (*rem == '\0')
-			parse_join_u_integer_fixed(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'r':
-		if (*rem == '\0')
-			parse_join_u_integer_random(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'c':
-		if (*rem == '\0') {
-NEXT_COL_SPEC:		join_u_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_next_col_spec(state);
-		} else {
-			error_invalid_u_integer_type_q(state);
-		}
-		return;
-
-	case 't':
-		if (*rem == '\0') {
-NEXT_TBL_SPEC:		join_u_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-		} else {
-			error_invalid_u_integer_type_q(state);
-		}
-		return;
-
-	case 'd':
-		if (*rem == '\0') {
-NEXT_DB_SPEC:		join_u_integer_default(state);
-			join_spec_state_close(&state->specs.join);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-
-	default:
-		error_invalid_u_integer_type_q(state);
-		return;
-	}
-
-
-	switch (*rem) {
-	case 'g':
-		if (strings_equal("roup", rem + 1l))
-			parse_join_u_integer_default_group(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'u':
-		if (strings_equal("nique", rem + 1l))
-			parse_join_u_integer_unique(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'f':
-		if (strings_equal("ixed", rem + 1l))
-			parse_join_u_integer_fixed(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'r':
-		if (strings_equal("andom", rem + 1l))
-			parse_join_u_integer_random(state);
-		else
-			error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
-			goto NEXT_COL_SPEC;
-
-		error_invalid_u_integer_type_q(state);
-		return;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto NEXT_TBL_SPEC;
-
-		error_invalid_u_integer_type_q(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto NEXT_DB_SPEC;
-
-	default:
-		error_invalid_u_integer_type_q(state);
-	}
 }
-
 inline void
 parse_join_string_qualifier(struct GenerateParseState *const restrict state)
 {
 }
-
 inline void
 parse_join_timestamp_qualifier(struct GenerateParseState *const restrict state)
 {
@@ -6972,14 +6138,6 @@ parse_next_join(struct GenerateParseState *const restrict state)
 	}
 
 	++(state->specs.col);	/* increment col_spec interval */
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	/* if (*arg != '-') { */
-	/* 	parse_join_string_fixed(state); */
-	/* 	return; */
-	/* } */
-
 }
 
 /* call when argv is pointing at <-j, --join> */
@@ -8655,6 +7813,7 @@ parse_u_integer_random_range(struct GenerateParseState *const restrict state)
 		return;
 	}
 #endif /* if (UINTMAX_MAX > BIGINT_UNSIGNED_MAX) */
+
 
 	struct UIntegerRange *const restrict range
 	= &state->specs.col->type_q.u_integer.scale.range;

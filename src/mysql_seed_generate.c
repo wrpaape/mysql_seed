@@ -228,6 +228,10 @@ extern inline void
 expected_join(const struct GenerateArgvState *const restrict argv);
 extern inline void
 error_expected_join(struct GenerateParseState *const restrict state);
+extern inline void
+expected_join_close(const struct GenerateArgvState *const restrict argv);
+extern inline void
+error_expected_join_close(struct GenerateParseState *const restrict state);
 
 /* parsing next SPEC */
 extern inline void
@@ -482,12 +486,12 @@ parse_next_fill(struct GenerateParseState *const restrict state);
 
 extern inline void
 parse_join_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_join,
-		     GenerateParseNode *const handle_grp_spec);
+		    GenerateParseNode *const set_join,
+		    GenerateParseNode *const handle_grp_spec);
 
 extern inline void
 parse_join_grp_spec(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_join);
+		    GenerateParseNode *const set_join);
 
 /* set JOIN
  *─────────────────────────────────────────────────────────────────────────── */
@@ -673,9 +677,6 @@ parse_join_timestamp_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
 parse_join_datetime_qualifier(struct GenerateParseState *const restrict state);
 
-
-extern inline void
-parse_join(struct GenerateParseState *const restrict state);
 
 extern inline void
 parse_next_join(struct GenerateParseState *const restrict state);
@@ -872,6 +873,8 @@ extern inline void
 parse_integer_random_range_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_integer_random_range(struct GenerateParseState *const restrict state);
+extern inline void
+parse_integer_random(struct GenerateParseState *const restrict state);
 
 
 extern inline void
@@ -900,6 +903,8 @@ extern inline void
 parse_u_integer_random_range_group(struct GenerateParseState *const restrict state);
 extern inline void
 parse_u_integer_random_range(struct GenerateParseState *const restrict state);
+extern inline void
+parse_u_integer_random(struct GenerateParseState *const restrict state);
 
 
 extern inline void
@@ -956,11 +961,7 @@ parse_datetime_unique(struct GenerateParseState *const restrict state);
 /* parse spec groups
  *─────────────────────────────────────────────────────────────────────────── */
 extern inline void
-parse_integer_random(struct GenerateParseState *const restrict state);
-extern inline void
 parse_integer_qualifier(struct GenerateParseState *const restrict state);
-extern inline void
-parse_u_integer_random(struct GenerateParseState *const restrict state);
 extern inline void
 parse_u_integer_qualifier(struct GenerateParseState *const restrict state);
 extern inline void
