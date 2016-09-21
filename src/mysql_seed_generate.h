@@ -6637,6 +6637,232 @@ NEXT_DB_SPEC:		join_u_integer_random_default(state);
 	}
 }
 
+/* string */
+inline void
+parse_join_string_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_default_group);
+}
+
+inline void
+parse_join_string_default(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_string_default,
+			    &parse_join_string_default_group);
+}
+
+inline void
+parse_join_string_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_unique_group);
+}
+
+inline void
+parse_join_string_unique(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_base_string(state);
+		return;
+	}
+
+	if (parse_base_string(&state->specs.col->type_q.string.base,
+			      &state->argv))
+		parse_join_complete(state,
+				    &join_string_unique,
+				    &parse_join_string_unique_group);
+	else
+		generate_parse_error(state);
+}
+
+inline void
+parse_join_string_fixed(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_fixed_string(state);
+		return;
+	}
+
+	if (parse_fixed_string(&state->specs.col->type_q.string.fixed,
+			       &state->argv))
+		parse_join_complete(state,
+				    &join_string_fixed,
+				    &error_grp_spec_for_fixed_data);
+	else
+		generate_parse_error(state);
+}
+
+inline void
+parse_join_string_uuid_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_uuid_group);
+}
+
+inline void
+parse_join_string_uuid(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_string_uuid,
+			    &parse_join_string_uuid_group);
+}
+
+inline void
+parse_join_string_hash_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_hash_group);
+}
+
+inline void
+parse_join_string_hash(struct GenerateParseState *const restrict state)
+{
+	++(state->argv.arg.from);
+
+	if (state->argv.arg.from == state->argv.arg.until) {
+		error_no_hash_length(state);
+		return;
+	}
+
+	if (parse_hash_length(&state->specs.col->type_q.string.scale.fixed,
+			      &state->argv))
+		parse_join_complete(state,
+				    &join_string_hash,
+				    &parse_join_string_hash_group);
+	else
+		generate_parse_error(state);
+}
+
+inline void
+parse_join_string_names_first_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_names_first_group);
+}
+
+inline void
+parse_join_string_names_first(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_string_names_first,
+			    &parse_join_string_names_first_group);
+}
+
+inline void
+parse_join_string_names_last_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_names_last_group);
+}
+
+inline void
+parse_join_string_names_last(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_string_names_last,
+			    &parse_join_string_names_last_group);
+}
+
+inline void
+parse_join_string_names_full_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_string_names_full_group);
+}
+
+inline void
+parse_join_string_names_full(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_string_names_full,
+			    &parse_join_string_names_full_group);
+}
+
+/* timestamp */
+inline void
+parse_join_timestamp_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_timestamp_default_group);
+}
+
+inline void
+parse_join_timestamp_default(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_timestamp_default,
+			    &parse_join_timestamp_default_group);
+}
+
+inline void
+parse_join_timestamp_fixed(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_timestamp_fixed,
+			    &error_grp_spec_for_fixed_data);
+}
+
+inline void
+parse_join_timestamp_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_timestamp_unique_group);
+}
+
+inline void
+parse_join_timestamp_unique(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_timestamp_unique,
+			    &parse_join_timestamp_unique_group);
+}
+
+/* datetime */
+inline void
+parse_join_datetime_default_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_datetime_default_group);
+}
+
+inline void
+parse_join_datetime_default(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_datetime_default,
+			    &parse_join_datetime_default_group);
+}
+
+inline void
+parse_join_datetime_fixed(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_datetime_fixed,
+			    &error_grp_spec_for_fixed_data);
+}
+
+inline void
+parse_join_datetime_unique_group(struct GenerateParseState *const restrict state)
+{
+	parse_join_grp_spec(state,
+			    &join_datetime_unique_group);
+}
+
+inline void
+parse_join_datetime_unique(struct GenerateParseState *const restrict state)
+{
+	parse_join_complete(state,
+			    &join_datetime_unique,
+			    &parse_join_datetime_unique_group);
+}
+
+
 
 /* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -8736,7 +8962,6 @@ parse_string_uuid_group(struct GenerateParseState *const restrict state)
 		       &column_string_uuid_group);
 }
 
-
 inline void
 parse_string_uuid(struct GenerateParseState *const restrict state)
 {
@@ -8819,6 +9044,7 @@ parse_string_names_full(struct GenerateParseState *const restrict state)
 			      &parse_string_names_full_group);
 }
 
+/* timestamp */
 inline void
 parse_timestamp_default_group(struct GenerateParseState *const restrict state)
 {
@@ -8857,6 +9083,7 @@ parse_timestamp_unique(struct GenerateParseState *const restrict state)
 			      &parse_timestamp_unique_group);
 }
 
+/* datetime */
 inline void
 parse_datetime_default_group(struct GenerateParseState *const restrict state)
 {

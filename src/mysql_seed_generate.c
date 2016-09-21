@@ -663,6 +663,60 @@ extern inline void
 parse_join_u_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
 parse_join_u_integer_random(struct GenerateParseState *const restrict state);
+/* string */
+extern inline void
+parse_join_string_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_unique(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_uuid_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_uuid(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_hash_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_hash(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_first_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_first(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_last_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_last(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_full_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_string_names_full(struct GenerateParseState *const restrict state);
+/* timestamp */
+extern inline void
+parse_join_timestamp_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_timestamp_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_timestamp_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_timestamp_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_timestamp_unique(struct GenerateParseState *const restrict state);
+/* datetime */
+extern inline void
+parse_join_datetime_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_datetime_default(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_datetime_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_datetime_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+parse_join_datetime_unique(struct GenerateParseState *const restrict state);
+
 
 /* dispatch parsing of JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
