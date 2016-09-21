@@ -472,7 +472,7 @@ parse_grp_spec(struct GenerateParseState *const restrict state,
  * ────────────────────────────────────────────────────────────────────────── */
 extern inline void
 join_spec_state_init(struct JoinSpecState *const restrict join,
-		     struct PutLabelClosure *const restrict col_type);
+		     struct ColSpec *const restrict base);
 
 extern inline void
 join_spec_state_close(struct JoinSpecState *const restrict join);
@@ -545,6 +545,37 @@ extern inline void
 join_u_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
 join_u_integer_random_range_group(struct GenerateParseState *const restrict state);
+/* string */
+extern inline void
+join_string_unique(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_uuid(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_uuid_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_hash(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_hash_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_first(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_first_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_last(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_last_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_full(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_names_full_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_default(struct GenerateParseState *const restrict state);
+extern inline void
+join_string_default_group(struct GenerateParseState *const restrict state);
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */

@@ -447,9 +447,9 @@ SetStringType(struct PutLabelClosure *const restrict type,
 	      const size_t length);
 
 struct JoinSpecState {
-	size_t length;			  /* accumlated (VAR)CHAR length */
-	struct PutLabelClosure *col_type; /* holds column type declaration */
-	SetStringType *set_col_type;
+	size_t length;			/* accumlated (VAR)CHAR length */
+	SetStringType *set_col_type;	/* &type_set_(var)char */
+	struct ColSpec *base;		/* base ColSpec */
 };
 
 struct GenerateSpecState {
@@ -4398,22 +4398,22 @@ parse_next_join(struct GenerateParseState *const restrict state);
 
 inline void
 join_spec_state_init(struct JoinSpecState *const restrict join,
-		     struct PutLabelClosure *const restrict col_type)
+		     struct ColSpec *const restrict base)
 {
 	join->length	   = 0lu;
-	join->col_type     = col_type;
 	join->set_col_type = &type_set_char;
+	join->base	   = base;
 }
 
 inline void
 join_spec_state_close(struct JoinSpecState *const restrict join)
 {
 	if (join->length > CHAR_LENGTH_MAX)
-		type_set_varchar(join->col_type,
+		type_set_varchar(&join->base->type,
 				 join->length);
 	else
-		join->set_col_type(join->col_type,
-				    join->length);
+		join->set_col_type(&join->base->type,
+				   join->length);
 }
 
 inline void
@@ -5303,6 +5303,250 @@ join_u_integer_random_range_group(struct GenerateParseState *const restrict stat
 	}
 }
 
+/* string */
+inline void
+join_string_unique(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_unique;
+
+	join->length += (  col_spec->type_q.string.base.length
+			 + uint_digit_count(row_count));
+
+	join->set_col_type = &type_set_varchar;
+
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
+}
+
+inline void
+join_string_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_unique_group;
+
+	join->length += (  col_spec->type_q.string.base.length
+			 + uint_digit_count(grp_count));
+
+	join->set_col_type = &type_set_varchar;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
+}
+
+inline void
+join_string_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+
+	/* '\0' is counted in length for fixed string */
+	state->specs.join.length += (col_spec->type_q.string.base.length - 1lu);
+
+	col_spec->build = &build_column_string_fixed;
+}
+
+inline void
+join_string_uuid(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_uuid;
+
+	state->specs.join.length += UUID_STRING_LENGTH;
+
+	state->database.ctor_flags |= RAND_32_UUID_CTOR_FLAG;
+}
+
+inline void
+join_string_uuid_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_uuid_group;
+
+	state->specs.join.length += UUID_STRING_LENGTH;
+
+	state->database.ctor_flags |= RAND_32_UUID_CTOR_FLAG;
+}
+
+inline void
+join_string_hash(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+
+	state->specs.join.length += col_spec->type_q.string.scale.fixed;
+
+	col_spec->build = &build_column_string_hash;
+}
+
+inline void
+join_string_hash_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+
+	state->specs.join.length += col_spec->type_q.string.scale.fixed;
+
+	col_spec->build = &build_column_string_hash_group;
+}
+
+inline void
+join_string_names_first(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_first;
+
+	join->length	  += FIRST_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_names_first_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_first_group;
+
+	join->length	  += FIRST_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_names_last(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_last;
+
+	join->length	  += LAST_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_names_last_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_last_group;
+
+	join->length	  += LAST_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_names_full(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_full;
+
+	join->length	  += FULL_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_names_full_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec   = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_names_full_group;
+
+	join->length	  += FULL_NAME_LENGTH_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_string_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct String *const restrict base_name   = &join->base->name;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_unique;
+
+	string_builder_init(&col_spec->type_q.string.base,
+			    base_name->bytes,
+			    base_name->length);
+
+	join->length += (  col_spec->type_q.string.base.length
+			 + uint_digit_count(row_count));
+
+	join->set_col_type = &type_set_varchar;
+
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
+}
+
+inline void
+join_string_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct String *const restrict base_name   = &join->base->name;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_string_unique;
+
+	string_builder_init(&col_spec->type_q.string.base,
+			    base_name->bytes,
+			    base_name->length);
+
+	join->length += (  col_spec->type_q.string.base.length
+			 + uint_digit_count(grp_count));
+
+	join->set_col_type = &type_set_varchar;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
+}
+
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
@@ -5653,7 +5897,7 @@ parse_join_spec(struct GenerateParseState *const restrict state)
 
 	if (state->argv.arg.from < state->argv.arg.until) {
 		join_spec_state_init(&state->specs.join,
-				     &state->specs.col->type);
+				     state->specs.col);
 		parse_join(state);
 	} else {
 		error_no_join_spec(state);
@@ -6458,8 +6702,8 @@ column_string_unique(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
 	type_set_varchar(&col_spec->type,
-			 (col_spec->type_q.string.base.length
-			  + uint_digit_count(row_count)));
+			 col_spec->type_q.string.base.length
+			 + uint_digit_count(row_count));
 
 	col_spec->build = &build_column_string_unique;
 
@@ -6476,8 +6720,8 @@ column_string_unique_group(struct GenerateParseState *const restrict state)
 	size_t *const restrict counter_upto	= &state->database.counter_upto;
 
 	type_set_varchar(&col_spec->type,
-			 (col_spec->type_q.string.base.length
-			  + uint_digit_count(grp_count)));
+			 col_spec->type_q.string.base.length
+			 + uint_digit_count(grp_count));
 
 	col_spec->build = &build_column_string_unique_group;
 
@@ -6653,8 +6897,8 @@ column_string_default(struct GenerateParseState *const restrict state)
 			    col_spec->name.length);
 
 	type_set_varchar(&col_spec->type,
-			 (col_spec->type_q.string.base.length
-			  + uint_digit_count(row_count)));
+			 col_spec->type_q.string.base.length
+			 + uint_digit_count(row_count));
 
 	col_spec->build = &build_column_string_unique;
 
@@ -6675,8 +6919,8 @@ column_string_default_group(struct GenerateParseState *const restrict state)
 			    col_spec->name.length);
 
 	type_set_varchar(&col_spec->type,
-			 (col_spec->type_q.string.base.length
-			  + uint_digit_count(grp_count)));
+			 col_spec->type_q.string.base.length
+			 + uint_digit_count(grp_count));
 
 	col_spec->build = &build_column_string_unique_group;
 
