@@ -4469,7 +4469,7 @@ join_integer_default(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique;
 
-	join->length	   += uint_digit_count(row_count);
+	join->length	  += uint_digit_count(row_count);
 	join->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
@@ -4487,7 +4487,7 @@ join_integer_default_group(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique_group;
 
-	join->length	   += uint_digit_count(grp_count);
+	join->length	  += uint_digit_count(grp_count);
 	join->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
@@ -4505,7 +4505,7 @@ join_integer_unique(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique;
 
-	join->length	   += uint_digit_count(row_count);
+	join->length	  += uint_digit_count(row_count);
 	join->set_col_type = &type_set_varchar;
 
 	if (row_count > *counter_upto)
@@ -4523,7 +4523,7 @@ join_integer_unique_group(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_unique_group;
 
-	join->length	   += uint_digit_count(grp_count);
+	join->length	  += uint_digit_count(grp_count);
 	join->set_col_type = &type_set_varchar;
 
 	if (grp_count > *counter_upto)
@@ -4557,7 +4557,7 @@ join_integer_random_default(struct GenerateParseState *const restrict state)
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_random;
 
-	join->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	join->length	  += (DIGIT_COUNT_INT32_MIN + 1lu);
 	join->set_col_type = &type_set_varchar;
 
 	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
@@ -4578,7 +4578,7 @@ join_integer_random_default_group(struct GenerateParseState *const restrict stat
 	col_spec->name.bytes = NULL;
 	col_spec->build	     = &build_column_integer_random_group;
 
-	join->length	   += (DIGIT_COUNT_INT32_MIN + 1lu);
+	join->length	  += (DIGIT_COUNT_INT32_MIN + 1lu);
 	join->set_col_type = &type_set_varchar;
 
 	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
@@ -4627,9 +4627,9 @@ join_integer_random_from(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_from(&join->length,
-						 rand_spec,
-						 &state->database.ctor_flags,
-						 from);
+						rand_spec,
+						&state->database.ctor_flags,
+						from);
 
 		col_spec->build = &build_column_integer_random_from;
 	}
@@ -4678,9 +4678,9 @@ join_integer_random_from_group(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_from(&join->length,
-						 rand_spec,
-						 &state->database.ctor_flags,
-						 from);
+						rand_spec,
+						&state->database.ctor_flags,
+						from);
 
 		col_spec->build = &build_column_integer_random_from_group;
 	}
@@ -4727,9 +4727,9 @@ join_integer_random_upto(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_upto(&join->length,
-						 rand_spec,
-						 &state->database.ctor_flags,
-						 upto);
+						rand_spec,
+						&state->database.ctor_flags,
+						upto);
 
 		col_spec->build = &build_column_integer_random_upto;
 	}
@@ -4776,9 +4776,9 @@ join_integer_random_upto_group(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_upto(&join->length,
-						 rand_spec,
-						 &state->database.ctor_flags,
-						 upto);
+						rand_spec,
+						&state->database.ctor_flags,
+						upto);
 
 		col_spec->build = &build_column_integer_random_upto_group;
 	}
@@ -4830,11 +4830,11 @@ join_integer_random_range(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_range(&join->length,
-						  rand_spec,
-						  &state->database.ctor_flags,
-						  min,
-						  max,
-						  delta + 1llu);
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 min,
+						 max,
+						 delta + 1llu);
 
 		col_spec->build = &build_column_integer_random_range;
 	}
@@ -4886,13 +4886,420 @@ join_integer_random_range_group(struct GenerateParseState *const restrict state)
 
 	default:
 		assign_join_integer_random_range(&join->length,
-						  rand_spec,
-						  &state->database.ctor_flags,
-						  min,
-						  max,
-						  delta + 1llu);
+						 rand_spec,
+						 &state->database.ctor_flags,
+						 min,
+						 max,
+						 delta + 1llu);
 
 		col_spec->build = &build_column_integer_random_range_group;
+	}
+}
+
+/* unsigned-integer */
+inline void
+join_u_integer_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_unique;
+
+	join->length	  += uint_digit_count(row_count);
+	join->set_col_type = &type_set_varchar;
+
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
+}
+
+inline void
+join_u_integer_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_unique_group;
+
+	join->length	  += uint_digit_count(grp_count);
+	join->set_col_type = &type_set_varchar;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
+}
+
+inline void
+join_u_integer_unique(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t row_count		    = state->specs.tbl->row_count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_unique;
+
+	join->length	  += uint_digit_count(row_count);
+	join->set_col_type = &type_set_varchar;
+
+	if (row_count > *counter_upto)
+		*counter_upto = row_count;
+}
+
+inline void
+join_u_integer_unique_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	const size_t grp_count		    = col_spec->grp_spec.count;
+	size_t *const restrict counter_upto = &state->database.counter_upto;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_unique_group;
+
+	join->length	  += uint_digit_count(grp_count);
+	join->set_col_type = &type_set_varchar;
+
+	if (grp_count > *counter_upto)
+		*counter_upto = grp_count;
+}
+
+inline void
+join_u_integer_fixed(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec = state->specs.col;
+
+	col_spec->name.bytes = NULL;
+
+	state->specs.join.length += col_spec->type_q.u_integer.fixed.width;
+
+	col_spec->build = &build_column_u_integer_fixed;
+}
+
+inline void
+join_u_integer_random_default(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	rand_spec->gen.unbound = &generate_u_32;
+	rand_spec->width_max   = DIGIT_COUNT_UINT32_MAX + 1u;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_random;
+
+	join->length	  += DIGIT_COUNT_UINT32_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_u_integer_random_default_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	rand_spec->gen.unbound = &generate_u_32;
+	rand_spec->width_max   = DIGIT_COUNT_UINT32_MAX + 1u;
+
+	col_spec->name.bytes = NULL;
+	col_spec->build	     = &build_column_u_integer_random_group;
+
+	join->length	  += DIGIT_COUNT_UINT32_MAX;
+	join->set_col_type = &type_set_varchar;
+
+	state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+}
+
+inline void
+join_u_integer_random_from(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t from = col_spec->type_q.u_integer.scale.from;
+
+	if (from == 0llu) {
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random;
+
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+
+	} else {
+		assign_join_u_integer_random_from(&join->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  from);
+
+		col_spec->build = &build_column_u_integer_random_from;
+	}
+}
+
+inline void
+join_u_integer_random_from_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t from = col_spec->type_q.u_integer.scale.from;
+
+	if (from == 0llu) {
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random_group;
+
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+
+	} else {
+		assign_join_u_integer_random_from(&join->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  from);
+
+		col_spec->build = &build_column_u_integer_random_from_group;
+	}
+}
+
+inline void
+join_u_integer_random_upto(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t upto = col_spec->type_q.u_integer.scale.upto;
+
+	switch (upto) {
+	case UINT32_MAX:
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		join->length += DIGIT_COUNT_UINT64_MAX;
+
+		rand_spec->gen.unbound = &generate_u_64;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_join_u_integer_random_upto(&join->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  upto);
+
+		col_spec->build = &build_column_u_integer_random_upto;
+	}
+}
+
+inline void
+join_u_integer_random_upto_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t upto = col_spec->type_q.u_integer.scale.upto;
+
+	switch (upto) {
+	case UINT32_MAX:
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random_group;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		join->length += DIGIT_COUNT_UINT64_MAX;
+
+		rand_spec->gen.unbound = &generate_u_64;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random_group;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_join_u_integer_random_upto(&join->length,
+						  rand_spec,
+						  &state->database.ctor_flags,
+						  upto);
+
+		col_spec->build = &build_column_u_integer_random_upto_group;
+	}
+}
+
+inline void
+join_u_integer_random_range(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	struct UIntegerRange *const restrict range
+	= &col_spec->type_q.u_integer.scale.range;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t min   = range->min;
+	const uintmax_t max   = range->max;
+	const uintmax_t delta = max - min;
+
+	switch (delta) {
+	case UINT32_MAX:
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		join->length += DIGIT_COUNT_UINT64_MAX;
+
+		rand_spec->gen.unbound = &generate_u_64;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_join_u_integer_random_range(&join->length,
+						   rand_spec,
+						   &state->database.ctor_flags,
+						   min,
+						   max,
+						   delta + 1llu);
+
+		col_spec->build = &build_column_u_integer_random_range;
+	}
+}
+
+inline void
+join_u_integer_random_range_group(struct GenerateParseState *const restrict state)
+{
+	struct ColSpec *const restrict col_spec	  = state->specs.col;
+	struct JoinSpecState *const restrict join = &state->specs.join;
+	struct UIntegerRandSpec *const restrict rand_spec
+	= &col_spec->type_q.u_integer.rand_spec;
+
+	struct UIntegerRange *const restrict range
+	= &col_spec->type_q.u_integer.scale.range;
+
+	col_spec->name.bytes = NULL;
+
+	join->set_col_type = &type_set_varchar;
+
+	const uintmax_t min   = range->min;
+	const uintmax_t max   = range->max;
+	const uintmax_t delta = max - min;
+
+	switch (delta) {
+	case UINT32_MAX:
+		join->length += DIGIT_COUNT_UINT32_MAX;
+
+		rand_spec->gen.unbound = &generate_u_32;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT32_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random_group;
+
+		state->database.ctor_flags |= RAND_32_CTOR_FLAG;
+		return;
+
+	case UINT64_MAX:
+		join->length += DIGIT_COUNT_UINT64_MAX;
+
+		rand_spec->gen.unbound = &generate_u_64;
+
+		rand_spec->width_max = DIGIT_COUNT_UINT64_MAX + 1u;
+
+		col_spec->build = &build_column_u_integer_random_group;
+
+		state->database.ctor_flags |= RAND_64_CTOR_FLAG;
+		return;
+
+	default:
+		assign_join_u_integer_random_range(&join->length,
+						   rand_spec,
+						   &state->database.ctor_flags,
+						   min,
+						   max,
+						   delta + 1llu);
+
+		col_spec->build = &build_column_u_integer_random_range_group;
 	}
 }
 

@@ -518,6 +518,33 @@ extern inline void
 join_integer_random_range(struct GenerateParseState *const restrict state);
 extern inline void
 join_integer_random_range_group(struct GenerateParseState *const restrict state);
+/* unsigned-integer */
+extern inline void
+join_u_integer_default(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_unique(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_unique_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_fixed(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_default(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_default_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_from(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_from_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_upto(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_upto_group(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_range(struct GenerateParseState *const restrict state);
+extern inline void
+join_u_integer_random_range_group(struct GenerateParseState *const restrict state);
 
 /* parse JOIN type qualifiers
  *─────────────────────────────────────────────────────────────────────────── */
