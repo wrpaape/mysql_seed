@@ -456,6 +456,7 @@ struct JoinSpecState {
 	size_t length;			/* accumlated (VAR)CHAR length */
 	SetStringType *set_col_type;	/* &type_set_(var)char */
 	struct ColSpec *base;		/* base ColSpec */
+	char *base_name;		/* save so not clobbered by joins */
 };
 
 struct GenerateSpecState {
@@ -4444,17 +4445,22 @@ join_spec_state_init(struct JoinSpecState *const restrict join,
 	join->length	   = 0lu;
 	join->set_col_type = &type_set_char;
 	join->base	   = base;
+	join->base_name	   = base->name.bytes;
 }
 
 inline void
 join_spec_state_close(struct JoinSpecState *const restrict join)
 {
+	struct ColSpec *const restrict base = join->base;
+
 	if (join->length > CHAR_LENGTH_MAX)
-		type_set_varchar(&join->base->type,
+		type_set_varchar(&base->type,
 				 join->length);
 	else
-		join->set_col_type(&join->base->type,
+		join->set_col_type(&base->type,
 				   join->length);
+
+	base->name.bytes = join->base_name;
 }
 
 inline void
@@ -7939,7 +7945,8 @@ parse_next_join(struct GenerateParseState *const restrict state)
 	++(state->argv.arg.from);
 
 	if (state->argv.arg.from < state->argv.arg.until) {
-		++(state->specs.col);	/* increment col_spec interval */
+		++(state->specs.col);	     /* increment col_spec interval */
+		++(state->database.columns); /* update column counter */
 		parse_join(state);
 	} else {
 		error_expected_join(state);
