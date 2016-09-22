@@ -442,9 +442,6 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 			col_spec = tbl_spec->col_specs.from;
 			do {
-				rowspan->separate
-				= (col_spec->name.bytes != NULL);
-
 				rowspan->parent	= row_block;
 
 				column_init(column,

@@ -15,8 +15,12 @@ build_column_string_fixed(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool separate = (col_spec->name.bytes != NULL);
+
 	const struct StringBuilder *const restrict fixed
-	= &column->spec->type_q.string.fixed;
+	= &col_spec->type_q.string.fixed;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -51,7 +55,8 @@ build_column_string_fixed(void *arg)
 	size_t length_rowspan;
 
 	do {
-		from->cell = ptr;
+		from->cell     = ptr;
+		from->separate = separate;
 
 		length_rowspan = fixed->length * from->parent->row_count;
 
@@ -80,8 +85,12 @@ build_column_string_unique(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool separate = (col_spec->name.bytes != NULL);
+
 	const struct StringBuilder *const restrict base
-	= &column->spec->type_q.string.base;
+	= &col_spec->type_q.string.base;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -126,7 +135,8 @@ build_column_string_unique(void *arg)
 	char *restrict *restrict count_until;
 
 	do {
-		from->cell = ptr;
+		from->cell     = ptr;
+		from->separate = separate;
 
 		count_until = count_ptr + from->parent->row_count;
 
@@ -165,8 +175,12 @@ build_column_string_unique_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool separate = (col_spec->name.bytes != NULL);
+
 	const struct StringBuilder *const restrict base
-	= &column->spec->type_q.string.base;
+	= &col_spec->type_q.string.base;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -215,7 +229,8 @@ build_column_string_unique_group(void *arg)
 				ptr,
 				base->length + 2lu);
 
-	from->cell = ptr;
+	from->cell     = ptr;
+	from->separate = separate;
 
 	rem_cells = from->parent->row_count - 1lu;
 
@@ -279,7 +294,8 @@ build_column_string_unique_group(void *arg)
 			if (from >= until)
 				break;
 
-			from->cell = ptr;
+			from->cell     = ptr;
+			from->separate = separate;
 
 			rem_cells = from->parent->row_count;
 		}
