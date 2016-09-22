@@ -459,10 +459,10 @@ struct JoinSpecState {
 };
 
 struct GenerateSpecState {
-	struct DbSpec  *db;
-	struct TblSpec *tbl;
-	struct ColSpec *col;
 	struct JoinSpecState join;
+	struct ColSpec *col;
+	struct TblSpec *tbl;
+	struct DbSpec  *db;
 };
 
 struct GenerateArgvState {
@@ -4458,30 +4458,6 @@ join_spec_state_close(struct JoinSpecState *const restrict join)
 }
 
 inline void
-parse_next_fill(struct GenerateParseState *const restrict state)
-{
-	/* TODO TODO TODO */
-	/* struct StringBuilder *const restrict fill */
-	/* = &state->specs.col->type_q.string.fixed; */
-
-	/* if (!parse_fixed_string(fill, */
-	/* 			&state->argv)) { */
-	/* 	generate_parse_error(state); */
-	/* 	return; */
-	/* } */
-
-	/* state->specs.join.length += fill->length; */
-
-	/* ++(state->argv.from); */
-
-	/* if (state->argv.from == state->argv.until) { */
-
-	/* } */
-
-	/* parse_next_join(state); */
-}
-
-inline void
 parse_join_complete(struct GenerateParseState *const restrict state,
 		    GenerateParseNode *const set_join,
 		    GenerateParseNode *const handle_grp_spec)
@@ -7852,6 +7828,109 @@ NEXT_DB_SPEC:		join_datetime_default(state);
 	}
 }
 
+inline void
+parse_join(struct GenerateParseState *const restrict state)
+{
+	const char *restrict arg = *(state->argv.arg.from);
+
+	if (*arg != '-') {
+		if (parse_fixed_string(&state->specs.col->type_q.string.fixed,
+				       &state->argv))
+			parse_join_complete(state,
+					    &join_string_fixed,
+					    &error_grp_spec_for_fixed_data);
+		else
+			generate_parse_error(state);
+		return;
+	}
+
+	++arg;
+	const char *const restrict rem = arg + 1l;
+
+	switch (*arg) {
+	case '-':
+		break;	/* parse long COL_TYPE */
+
+	case 'i':
+		if (*rem == '\0')
+			parse_join_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'u':
+		if (*rem == '\0')
+			parse_join_u_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 's':
+		if (*rem == '\0')
+			parse_join_string_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 't':
+		if (*rem == 's' && rem[1] == '\0')
+			parse_join_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (*rem == 't' && rem[1] == '\0') {
+			parse_join_datetime_qualifier(state);
+			return;
+		}
+
+	default:
+		error_invalid_col_type(state);
+		return;
+	}
+
+
+	/* long COL_TYPE */
+	switch (*rem) {
+	case 'i':
+		if (strings_equal("nteger", rem + 1l))
+			parse_join_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'u':
+		if (strings_equal("nsigned-integer", rem + 1l))
+			parse_join_u_integer_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 's':
+		if (strings_equal("tring", rem + 1l))
+			parse_join_string_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 't':
+		if (strings_equal("imestamp", rem + 1l))
+			parse_join_timestamp_qualifier(state);
+		else
+			error_invalid_col_type(state);
+		return;
+
+	case 'd':
+		if (strings_equal("atetime", rem + 1l)) {
+			parse_join_datetime_qualifier(state);
+			return;
+		}
+
+	default:
+		error_invalid_col_type(state);
+	}
+}
 
 /* call when argv is pointing at '+' */
 inline void
@@ -7859,20 +7938,12 @@ parse_next_join(struct GenerateParseState *const restrict state)
 {
 	++(state->argv.arg.from);
 
-	if (state->argv.arg.from == state->argv.arg.until) {
+	if (state->argv.arg.from < state->argv.arg.until) {
+		++(state->specs.col);	/* increment col_spec interval */
+		parse_join(state);
+	} else {
 		error_expected_join(state);
-		return;
 	}
-
-	++(state->specs.col);	/* increment col_spec interval */
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	if (*arg != '-') {
-		parse_join_string_fixed(state);
-		return;
-	}
-
 }
 
 /* call when argv is pointing at <-j, --join> */
@@ -7881,13 +7952,13 @@ parse_join_spec(struct GenerateParseState *const restrict state)
 {
 	++(state->argv.arg.from);
 
-	if (state->argv.arg.from == state->argv.arg.until) {
+	if (state->argv.arg.from < state->argv.arg.until) {
+		join_spec_state_init(&state->specs.join,
+				     state->specs.col);
+		parse_join(state);
+	} else {
 		error_no_join_spec(state);
-		return;
 	}
-
-	join_spec_state_init(&state->specs.join,
-			     state->specs.col);
 }
 
 
@@ -10889,6 +10960,7 @@ parse_col_type(struct GenerateParseState *const restrict state)
 		return;
 	}
 
+
 	/* long COL_TYPE */
 	switch (*rem) {
 	case 'i':
@@ -11304,7 +11376,8 @@ generate_dispatch(char *const restrict *const restrict arg,
 	state.argv.arg.until	 = arg_until;
 	state.argv.db_spec.until = db_spec_until;
 
-	state.specs.db = spec_alloc;
+	state.specs.join.base = NULL;
+	state.specs.db	      = spec_alloc;
 
 	state.generator.ctor_flags    = 0u;
 	state.generator.rows	      = 0llu;
@@ -11327,7 +11400,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 0
+#if 1
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {

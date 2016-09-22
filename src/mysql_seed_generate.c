@@ -482,9 +482,6 @@ extern inline void
 join_spec_state_close(struct JoinSpecState *const restrict join);
 
 extern inline void
-parse_next_fill(struct GenerateParseState *const restrict state);
-
-extern inline void
 parse_join_complete(struct GenerateParseState *const restrict state,
 		    GenerateParseNode *const set_join,
 		    GenerateParseNode *const handle_grp_spec);
@@ -733,8 +730,9 @@ parse_join_datetime_qualifier(struct GenerateParseState *const restrict state);
 
 
 extern inline void
+parse_join(struct GenerateParseState *const restrict state);
+extern inline void
 parse_next_join(struct GenerateParseState *const restrict state);
-
 extern inline void
 parse_join_spec(struct GenerateParseState *const restrict state);
 
