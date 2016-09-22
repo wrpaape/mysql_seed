@@ -74,6 +74,20 @@ loader_put_header(char *restrict ptr,
 }
 
 inline char *
+loader_put_field(char *restrict ptr,
+		 const struct ColSpec *const restrict col_spec)
+{
+	ptr = put_string_size(ptr,
+			      col_spec->name.bytes,
+			      col_spec->name.length);
+	*ptr = ' ';
+	++ptr;
+
+	return put_label_closure_call(&col_spec->type,
+				      ptr);
+}
+
+inline char *
 loader_put_body(char *restrict ptr,
 		const struct Database *const restrict database)
 {
@@ -96,24 +110,23 @@ loader_put_body(char *restrict ptr,
 		col_spec_from  = from->spec->col_specs.from;
 		col_spec_until = from->spec->col_specs.until;
 
+		ptr = loader_put_field(ptr,
+				       col_spec_from);
+
 		while (1) {
-			ptr = put_string_size(ptr,
-					      col_spec_from->name.bytes,
-					      col_spec_from->name.length);
-			*ptr = ' ';
-			++ptr;
-
-			ptr = put_label_closure_call(&col_spec_from->type,
-						     ptr);
-
 			++col_spec_from;
 
 			if (col_spec_from == col_spec_until)
 				break;
 
-			PUT_LOADER_CREATE_TABLE_FIELD_DELIM(ptr);
-		}
+			if (col_spec_from->name.bytes == NULL)
+				continue;
 
+			PUT_LOADER_CREATE_TABLE_FIELD_DELIM(ptr);
+
+			ptr = loader_put_field(ptr,
+					       col_spec_from);
+		}
 
 		PUT_LOADER_LOAD_TABLE_1(ptr);
 

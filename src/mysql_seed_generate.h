@@ -11383,8 +11383,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 	state.argv.arg.until	 = arg_until;
 	state.argv.db_spec.until = db_spec_until;
 
-	state.specs.join.base = NULL;
-	state.specs.db	      = spec_alloc;
+	state.specs.db = spec_alloc;
 
 	state.generator.ctor_flags    = 0u;
 	state.generator.rows	      = 0llu;
@@ -11398,7 +11397,6 @@ generate_dispatch(char *const restrict *const restrict arg,
 
 	state.exit_status = EXIT_SUCCESS;
 
-
 	/* populate specs according to argv */
 	parse_db_specs(&state);
 
@@ -11407,7 +11405,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 1
+#if 0
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {
@@ -11445,8 +11443,8 @@ generate_dispatch(char *const restrict *const restrict arg,
 	       state.generator.counter_upto,
 	       state.exit_status == EXIT_SUCCESS ? "SUCCESS" : "FAILURE");
 
-	free(spec_alloc);
-	exit(0);
+	/* free(spec_alloc); */
+	/* exit(0); */
 #endif
 
 	mysql_seed_generate(&state.generator,

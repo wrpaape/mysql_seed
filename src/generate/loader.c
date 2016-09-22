@@ -9,6 +9,10 @@ loader_put_header(char *restrict ptr,
 		  const struct Database *const restrict database);
 
 extern inline char *
+loader_put_field(char *restrict ptr,
+		 const struct ColSpec *const restrict col_spec);
+
+extern inline char *
 loader_put_body(char *restrict ptr,
 		const struct Database *const restrict database);
 
@@ -54,13 +58,11 @@ build_loader(void *arg)
 
 	char *restrict ptr = loader_put_header(contents,
 					       database);
-
 	ptr = loader_put_body(ptr,
 			      database);
 
 	database->loader.contents.length = ptr - contents;
 	database->loader.contents.bytes  = contents;
-
 
 	/* write contents to file */
 	file_handle_process(&database->loader,

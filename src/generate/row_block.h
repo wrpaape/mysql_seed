@@ -32,9 +32,13 @@ put_row_block_row(char *restrict ptr,
 	++from;
 
 	while (from < until) {
-		*ptr = FIELD_DELIM;
-		ptr  = put_rowspan_cell(ptr + 1l,
-					&from->cell);
+		if (from->separate) {
+			*ptr = FIELD_DELIM;
+			++ptr;
+		}
+
+		ptr = put_rowspan_cell(ptr,
+				       &from->cell);
 		++from;
 	}
 
@@ -49,16 +53,20 @@ copy_row_block_row(char *restrict ptr,
 	const struct Rowspan *const restrict last = until - 1l;
 
 	*ptr = '\n';
+	++ptr;
 
 	while (from < last) {
-		ptr  = put_string(ptr + 1l,
-				  from->cell);
-		*ptr = FIELD_DELIM;
-
+		ptr = put_string(ptr,
+				 from->cell);
 		++from;
+
+		if (from->separate) {
+			*ptr = FIELD_DELIM;
+			++ptr;
+		}
 	}
 
-	copy_string(ptr + 1l,
+	copy_string(ptr,
 		    last->cell);
 }
 

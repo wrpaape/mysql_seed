@@ -384,8 +384,9 @@ struct DbSpec {
 struct RowBlock;
 
 struct Rowspan {
-	struct RowBlock *parent;	/* get row_count, update total block length */
 	char *cell;			/* points to first cell */
+	bool separate;			/* is indepenedent column (not JOIN) */
+	struct RowBlock *parent;	/* get row_count, update block length */
 };
 
 struct RowspanInterval {

@@ -18,14 +18,19 @@ table_size_contents(const struct Table *const restrict table)
 			     + table->spec->name.length
 			     + table->parent->spec->name.length
 			     + table->total.length
-			     + (until - from - 1l);
+			     + from->name.length;
 
-	do {
-		size_contents += from->name.length;
+	while (1) {
 		++from;
-	} while (from < until);
 
-	return size_contents;
+		if (from == until)
+			return size_contents;
+
+		if (from->name.bytes == NULL)
+			continue;
+
+		size_contents += (1l + from->name.length);
+	}
 }
 
 inline char *
@@ -58,17 +63,24 @@ table_put_header(char *restrict ptr,
 
 	const struct ColSpec *restrict from = table->spec->col_specs.from;
 
-	while (1) {
-		ptr = put_string_size(ptr,
-				      from->name.bytes,
-				      from->name.length);
+	ptr = put_string_size(ptr,
+			      from->name.bytes,
+			      from->name.length);
 
+	while (1) {
 		++from;
 
 		if (from == until)
 			break;
 
+		if (from->name.bytes == NULL)
+			continue;
+
 		PUT_FIELD_DELIM(ptr);
+
+		ptr = put_string_size(ptr,
+				      from->name.bytes,
+				      from->name.length);
 	}
 
 	PUT_TABLE_HEADER_5(ptr);

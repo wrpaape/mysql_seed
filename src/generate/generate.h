@@ -296,7 +296,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	? count->row_count_max
 	: (count->row_count_max / COUNT_GENERATOR_WORKERS);
 
-	const size_t count_row_blocks_max = (count->rows
+	const size_t count_row_blocks_max = (  count->rows
 					     / row_block_row_count_max)
 					  + count->columns;
 
@@ -442,7 +442,10 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 			col_spec = tbl_spec->col_specs.from;
 			do {
-				rowspan->parent = row_block;
+				rowspan->separate
+				= (col_spec->name.bytes != NULL);
+
+				rowspan->parent	= row_block;
 
 				column_init(column,
 					    col_spec,
