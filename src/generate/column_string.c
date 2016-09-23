@@ -17,7 +17,7 @@ build_column_string_fixed(void *arg)
 
 	const struct ColSpec *const restrict col_spec = column->spec;
 
-	const bool separate = (col_spec->name.bytes != NULL);
+	const bool join = (col_spec->name.bytes == NULL);
 
 	const struct StringBuilder *const restrict fixed
 	= &col_spec->type_q.string.fixed;
@@ -27,7 +27,10 @@ build_column_string_fixed(void *arg)
 
 	const unsigned int col_count = table->col_count;
 
-	const size_t length_contents = fixed->length * table->spec->row_count;
+	/* do not account for FIELD_DELIM or \n in length of join columns */
+	const size_t size_column     = fixed->length;
+	const size_t length_column   = size_column - join;
+	const size_t length_contents = length_column * table->spec->row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -52,18 +55,18 @@ build_column_string_fixed(void *arg)
 
 	const char *restrict contents_until;
 
-	size_t length_rowspan;
+	struct RowBlock *restrict row_block;
 
 	do {
-		from->cell     = ptr;
-		from->separate = separate;
+		from->cell = ptr;
+		from->join = join;
 
-		length_rowspan = fixed->length * from->parent->row_count;
+		row_block = from->parent;
 
-		contents_until = ptr + length_rowspan;
+		contents_until = ptr + (size_column * row_block->row_count);
 
-		length_lock_increment(&from->parent->total,
-				      length_rowspan,
+		length_lock_increment(&row_block->total,
+				      length_column * row_block->row_count,
 				      &column->fail_cl);
 
 		do {
@@ -87,7 +90,7 @@ build_column_string_unique(void *arg)
 
 	const struct ColSpec *const restrict col_spec = column->spec;
 
-	const bool separate = (col_spec->name.bytes != NULL);
+	const bool join = (col_spec->name.bytes == NULL);
 
 	const struct StringBuilder *const restrict base
 	= &col_spec->type_q.string.base;
@@ -135,8 +138,8 @@ build_column_string_unique(void *arg)
 	char *restrict *restrict count_until;
 
 	do {
-		from->cell     = ptr;
-		from->separate = separate;
+		from->cell = ptr;
+		from->join = join;
 
 		count_until = count_ptr + from->parent->row_count;
 
@@ -177,7 +180,7 @@ build_column_string_unique_group(void *arg)
 
 	const struct ColSpec *const restrict col_spec = column->spec;
 
-	const bool separate = (col_spec->name.bytes != NULL);
+	const bool join = (col_spec->name.bytes == NULL);
 
 	const struct StringBuilder *const restrict base
 	= &col_spec->type_q.string.base;
@@ -229,8 +232,8 @@ build_column_string_unique_group(void *arg)
 				ptr,
 				base->length + 2lu);
 
-	from->cell     = ptr;
-	from->separate = separate;
+	from->cell = ptr;
+	from->join = join;
 
 	rem_cells = from->parent->row_count - 1lu;
 
@@ -294,8 +297,8 @@ build_column_string_unique_group(void *arg)
 			if (from >= until)
 				break;
 
-			from->cell     = ptr;
-			from->separate = separate;
+			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}

@@ -385,7 +385,7 @@ struct RowBlock;
 
 struct Rowspan {
 	char *cell;			/* points to first cell */
-	bool separate;			/* is indepenedent column (not JOIN) */
+	bool join;			/* is NOT indepenedent column */
 	struct RowBlock *parent;	/* get row_count, update block length */
 };
 

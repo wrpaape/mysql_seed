@@ -32,7 +32,7 @@ put_row_block_row(char *restrict ptr,
 	++from;
 
 	while (from < until) {
-		if (from->separate) {
+		if (!from->join) {
 			*ptr = FIELD_DELIM;
 			++ptr;
 		}
@@ -60,7 +60,7 @@ copy_row_block_row(char *restrict ptr,
 				 from->cell);
 		++from;
 
-		if (from->separate) {
+		if (!from->join) {
 			*ptr = FIELD_DELIM;
 			++ptr;
 		}
