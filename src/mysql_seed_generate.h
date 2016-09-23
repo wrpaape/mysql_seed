@@ -295,11 +295,6 @@ PARSE_ERROR_HEADER("invalid HASH_LENGTH")
 		"HASH_LENGTH_MAX (" HASH_LENGTH_MAX_STRING "), "	\
 		"ignoring DB_SPEC starting with:") "\n"
 
-/* parsing INTRP_SPEC */
-#define ERROR_NO_INTRP_SPEC						\
-PARSE_ERROR_HEADER("no INTRP_SPEC provided, ignoring DB_SPEC starting "	\
-		   "with")
-
 /* parsing RAND_SPEC */
 #define ERROR_INVALID_RAND_SPEC_HEADER					\
 PARSE_ERROR_HEADER("invalid RAND_SPEC component")
@@ -419,10 +414,6 @@ PARSE_ERROR_HEADER("cannot have GRP_SPEC for fixed column data, "	\
 PARSE_ERROR_HEADER("expected GROUP flag, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
 
-#define ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER				\
-PARSE_ERROR_HEADER("expected FILL flag, GROUP flag, COLUMN flag, TABLE"	\
-		   " flag, DATABASE flag, or end of arguments instead of")
-
 #define ERROR_EXPECTED_GRP_SPEC_CLOSE_HEADER				\
 PARSE_ERROR_HEADER("expected PART_TYPE, COLUMN flag, TABLE flag, "	\
 		   "DATABASE flag, or end of arguments instead of")
@@ -435,17 +426,10 @@ typedef void
 SetStringType(struct PutLabelClosure *const restrict type,
 	      const size_t length);
 
-struct IntrpSpecState {
-	size_t length;			  /* accumlated (VAR)CHAR length */
-	struct PutLabelClosure *col_type; /* holds column type declaration */
-	SetStringType *set_col_type;
-};
-
 struct GenerateSpecState {
 	struct DbSpec  *db;
 	struct TblSpec *tbl;
 	struct ColSpec *col;
-	struct IntrpSpecState intrp;
 };
 
 struct GenerateArgvState {
@@ -2288,34 +2272,6 @@ invalid_hash_length_large(const struct GenerateArgvState *const restrict argv)
 		     ptr - &buffer[0]);
 }
 
-/* parsing INTRP_SPEC */
-inline void
-no_intrp_spec(const struct GenerateArgvState *const restrict argv)
-{
-	char buffer[ARGV_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  ERROR_NO_INTRP_SPEC,
-			  sizeof(ERROR_NO_INTRP_SPEC) - 1lu);
-
-	ptr = put_inspect_args(ptr,
-			       argv->db_spec.from,
-			       argv->arg.from - 1l);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
-error_no_intrp_spec(struct GenerateParseState *const restrict state)
-{
-	no_intrp_spec(&state->argv);
-	*(state->valid.last) = NULL;
-	state->exit_status = EXIT_FAILURE;
-}
-
 
 /* parsing next SPEC */
 inline void
@@ -2349,40 +2305,6 @@ inline void
 error_expected_col_spec_close(struct GenerateParseState *const restrict state)
 {
 	expected_col_spec_close(&state->argv);
-	generate_parse_error(state);
-}
-
-inline void
-expected_intrp_spec_close(const struct GenerateArgvState *const restrict argv)
-{
-	char buffer[ARG_ARGV_INSPECT_BUFFER_SIZE];
-
-	char *restrict ptr
-	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER,
-			  sizeof(ERROR_EXPECTED_INTRP_SPEC_CLOSE_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
-
-	ptr = put_string_size(ptr,
-			      IGNORING_DB_SPEC_STARTING_WITH,
-			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
-
-	ptr = put_inspect_args(ptr,
-			       argv->db_spec.from,
-			       argv->arg.from);
-
-	write_muffle(STDERR_FILENO,
-		     &buffer[0],
-		     ptr - &buffer[0]);
-}
-
-inline void
-error_expected_intrp_spec_close(struct GenerateParseState *const restrict state)
-{
-	expected_intrp_spec_close(&state->argv);
 	generate_parse_error(state);
 }
 
@@ -3924,164 +3846,6 @@ NEXT_DB_SPEC:		grp_spec->partition = &partition_groups_even;
 
 
 
-/* INTRP_SPEC dispatch
- * ────────────────────────────────────────────────────────────────────────── */
-inline void
-intrp_spec_state_init(struct IntrpSpecState *const restrict intrp,
-		     struct PutLabelClosure *const restrict col_type)
-{
-	intrp->length	    = 0lu;
-	intrp->col_type     = col_type;
-	intrp->set_col_type = &type_set_char;
-}
-
-
-inline void
-intrp_spec_state_close(struct IntrpSpecState *const restrict intrp)
-{
-	if (intrp->length > CHAR_LENGTH_MAX)
-		type_set_varchar(intrp->col_type,
-				 intrp->length);
-	else
-		intrp->set_col_type(intrp->col_type,
-				    intrp->length);
-}
-
-inline void
-parse_next_fill(struct GenerateParseState *const restrict state)
-{
-
-}
-
-
-inline void
-parse_intrp_spec(struct GenerateParseState *const restrict state)
-{
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from < state->argv.arg.until) {
-		intrp_spec_state_init(&state->specs.intrp,
-				      &state->specs.col->type);
-		parse_next_fill(state);
-	} else {
-		error_no_intrp_spec(state);
-	}
-}
-
-inline void
-parse_intrp_complete(struct GenerateParseState *const restrict state,
-		     GenerateParseNode *const set_col_spec,
-		     GenerateParseNode *const handle_grp_spec)
-{
-	++(state->argv.arg.from);
-
-	if (state->argv.arg.from == state->argv.arg.until) {
-		set_col_spec(state);
-		generate_parse_complete(state);
-		return;
-	}
-
-	const char *restrict arg = *(state->argv.arg.from);
-
-	if (*arg != '-') {
-		error_expected_intrp_spec_close(state);
-		return;
-	}
-
-	++arg;
-	const char *const restrict rem = arg + 1l;
-
-	switch (*arg) {
-	case '-':
-		break; /* parse long SPEC */
-
-	case 'g':
-		if (*rem == '\0')
-			handle_grp_spec(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'f':
-		if (*rem == '\0')
-			parse_next_fill(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'c':
-		if (*rem == '\0') {
-NEXT_COL_SPEC:		set_col_spec(state);
-			intrp_spec_state_close(&state->specs.intrp);
-			parse_next_col_spec(state);
-		} else {
-			error_expected_intrp_spec_close(state);
-		}
-		return;
-
-	case 't':
-		if (*rem == '\0') {
-NEXT_TBL_SPEC:		set_col_spec(state);
-			intrp_spec_state_close(&state->specs.intrp);
-			parse_table_complete(state);
-			parse_next_tbl_spec(state);
-		} else {
-			error_expected_intrp_spec_close(state);
-		}
-		return;
-
-	case 'd':
-		if (*rem == '\0') {
-NEXT_DB_SPEC:		set_col_spec(state);
-			intrp_spec_state_close(&state->specs.intrp);
-			parse_database_complete(state);
-			parse_next_db_spec(state);
-			return;
-		}
-
-	default:
-		error_expected_intrp_spec_close(state);
-		return;
-	}
-
-
-	switch (*rem) {
-	case 'g':
-		if (strings_equal("roup", rem + 1l))
-			handle_grp_spec(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'f':
-		if (strings_equal("ill", rem + 1l))
-			parse_next_fill(state);
-		else
-			error_expected_intrp_spec_close(state);
-		return;
-
-	case 'c':
-		if (strings_equal("olumn", rem + 1l))
-			goto NEXT_COL_SPEC;
-
-		error_expected_intrp_spec_close(state);
-		return;
-
-	case 't':
-		if (strings_equal("able", rem + 1l))
-			goto NEXT_TBL_SPEC;
-
-		error_expected_intrp_spec_close(state);
-		return;
-
-	case 'd':
-		if (strings_equal("atabase", rem + 1l))
-			goto NEXT_DB_SPEC;
-
-	default:
-		error_expected_intrp_spec_close(state);
-	}
-}
 
 
 /* set COL_SPEC
