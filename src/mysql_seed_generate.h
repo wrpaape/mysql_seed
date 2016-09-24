@@ -421,7 +421,7 @@ PARSE_ERROR_HEADER("invalid JOIN")
 "\n" ERROR_WRAP("reason - not supported, ignoring DB_SPEC starting "	\
 		"with:") "\n"
 
-#define ERROR_EXPECTED_JOIN_HEADER					\
+#define ERROR_EXPECTED_JOIN						\
 PARSE_ERROR_HEADER("expected JOIN after " INPUT_WRAP("'+'") ERROR_OPEN	\
 		   ", ignoring DB_SPEC starting with")
 
@@ -2373,20 +2373,12 @@ expected_join(const struct GenerateArgvState *const restrict argv)
 
 	char *restrict ptr
 	= put_string_size(&buffer[0],
-			  ERROR_EXPECTED_JOIN_HEADER,
-			  sizeof(ERROR_EXPECTED_JOIN_HEADER) - 1lu);
-
-	ptr = put_string_inspect(ptr,
-				 *(argv->arg.from),
-				 LENGTH_INSPECT_MAX);
-
-	ptr = put_string_size(ptr,
-			      IGNORING_DB_SPEC_STARTING_WITH,
-			      sizeof(IGNORING_DB_SPEC_STARTING_WITH) - 1lu);
+			  ERROR_EXPECTED_JOIN,
+			  sizeof(ERROR_EXPECTED_JOIN) - 1lu);
 
 	ptr = put_inspect_args(ptr,
 			       argv->db_spec.from,
-			       argv->arg.from);
+			       argv->arg.from - 1l);
 
 	write_muffle(STDERR_FILENO,
 		     &buffer[0],
@@ -2397,7 +2389,8 @@ inline void
 error_expected_join(struct GenerateParseState *const restrict state)
 {
 	expected_join(&state->argv);
-	generate_parse_error(state);
+	*(state->valid.last) = NULL;
+	state->exit_status = EXIT_FAILURE;
 }
 
 inline void
@@ -11365,11 +11358,16 @@ generate_dispatch(char *const restrict *const restrict arg,
 		return EXIT_FAILURE;
 	}
 
+	/*
+	 * -d DB_NAME -t TBL_NAME ROW_COUNT -c COL_NAME -s -j JOIN_1 + JOIN_2 .... + JOIN_N
+	 */
+
 	struct DbSpec *const restrict
 	spec_alloc = malloc(sizeof(struct DbSpec)
 			    + sizeof(struct TblSpec)
-			    + (sizeof(struct ColSpec)
-			       * ((rem_argc - 5) / 3)));
+			    + ((((rem_argc - DB_SPEC_LENGTH_MIN) / 2) + 1)
+			       * sizeof(struct ColSpec)));
+			       /* * ((rem_argc - 5) / 3))); */
 
 	if (UNLIKELY(spec_alloc == NULL)) {
 		generate_failure_malloc();
@@ -11405,7 +11403,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 0
+#if 1
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {
