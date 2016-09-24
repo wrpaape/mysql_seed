@@ -12,6 +12,7 @@ MALLOC_FAILURE_MESSAGE("build_column_string_unique_group")
 void
 build_column_string_fixed(void *arg)
 {
+	printf("enter build_column_string_fixed, %p\n", pthread_self()); fflush(stdout);
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
@@ -79,6 +80,8 @@ build_column_string_fixed(void *arg)
 	} while (from < until);
 
 	thread_try_catch_close();
+
+	printf("exit build_column_string_fixed, %p\n", pthread_self()); fflush(stdout);
 }
 
 

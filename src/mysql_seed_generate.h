@@ -11403,7 +11403,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 1
+#if 0
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {
@@ -11449,7 +11449,11 @@ generate_dispatch(char *const restrict *const restrict arg,
 			    state.valid.head,
 			    &state.exit_status);
 
+	puts("FREEING spec_alloc"); fflush(stdout);
+
 	free(spec_alloc);
+
+	puts("did it"); fflush(stdout);
 
 	return state.exit_status;
 }
