@@ -5785,7 +5785,6 @@ join_string_default(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec	  = state->specs.col;
 	struct JoinSpecState *const restrict join = &state->specs.join;
-	struct String *const restrict base_name   = &join->base->name;
 	const size_t row_count		    = state->specs.tbl->row_count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
@@ -5793,8 +5792,8 @@ join_string_default(struct GenerateParseState *const restrict state)
 	col_spec->build	     = &build_column_string_unique;
 
 	string_builder_init(&col_spec->type_q.string.base,
-			    base_name->bytes,
-			    base_name->length);
+			    join->base_name,
+			    join->base->name.length);
 
 	join->length += (  col_spec->type_q.string.base.length
 			 + uint_digit_count(row_count));
@@ -5810,7 +5809,6 @@ join_string_default_group(struct GenerateParseState *const restrict state)
 {
 	struct ColSpec *const restrict col_spec	  = state->specs.col;
 	struct JoinSpecState *const restrict join = &state->specs.join;
-	struct String *const restrict base_name   = &join->base->name;
 	const size_t grp_count		    = col_spec->grp_spec.count;
 	size_t *const restrict counter_upto = &state->database.counter_upto;
 
@@ -5818,8 +5816,8 @@ join_string_default_group(struct GenerateParseState *const restrict state)
 	col_spec->build	     = &build_column_string_unique;
 
 	string_builder_init(&col_spec->type_q.string.base,
-			    base_name->bytes,
-			    base_name->length);
+			    join->base_name,
+			    join->base->name.length);
 
 	join->length += (  col_spec->type_q.string.base.length
 			 + uint_digit_count(grp_count));
@@ -11403,7 +11401,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 0
+#if 1
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {
@@ -11449,11 +11447,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 			    state.valid.head,
 			    &state.exit_status);
 
-	puts("FREEING spec_alloc"); fflush(stdout);
-
 	free(spec_alloc);
-
-	puts("did it"); fflush(stdout);
 
 	return state.exit_status;
 }

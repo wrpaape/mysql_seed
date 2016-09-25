@@ -726,9 +726,6 @@ DEAD_POOL_FAILURE_A:
 					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
-
-	puts("FREEING columns"); fflush(stdout);
-
 	/* free columns */
 	free_columns(columns,
 		     (const struct Column *const restrict) rowspans);
@@ -776,17 +773,11 @@ DEAD_POOL_FAILURE_B:
 		*exit_status = EXIT_FAILURE;
 	}
 
-	puts("FREEING COUNTER"); fflush(stdout);
-
 	/* free counter */
 	counter_free_internals(&generator.counter);
 
-	puts("FREEING generator_alloc"); fflush(stdout);
-
 	/* free initial allocation */
 	free(generator_alloc);
-
-	puts("DID IT"); fflush(stdout);
 }
 
 #endif /* ifndef MYSQL_SEED_GENERATE_GENERATE_H_ */

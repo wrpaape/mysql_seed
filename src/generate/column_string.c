@@ -12,7 +12,6 @@ MALLOC_FAILURE_MESSAGE("build_column_string_unique_group")
 void
 build_column_string_fixed(void *arg)
 {
-	printf("enter build_column_string_fixed, %p\n", pthread_self()); fflush(stdout);
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
@@ -23,20 +22,20 @@ build_column_string_fixed(void *arg)
 	const struct StringBuilder *const restrict fixed
 	= &col_spec->type_q.string.fixed;
 
+	/* do not account for FIELD_DELIM or \n in length of join columns */
+	const size_t size_column     = fixed->length;
+	const size_t length_column   = size_column - join;
+
 	struct Table *const restrict table
 	= column->parent;
 
 	const unsigned int col_count = table->col_count;
-
-	/* do not account for FIELD_DELIM or \n in length of join columns */
-	const size_t size_column     = fixed->length;
-	const size_t length_column   = size_column - join;
-	const size_t length_contents = length_column * table->spec->row_count;
+	const size_t row_count	     = table->spec->row_count;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
 
-	column->contents = malloc(length_contents);
+	column->contents = malloc(size_column * row_count);
 
 	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
@@ -46,7 +45,7 @@ build_column_string_fixed(void *arg)
 
 	/* increment table length */
 	length_lock_increment(&table->total,
-			      length_contents,
+			      length_column * row_count,
 			      &column->fail_cl);
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
@@ -80,23 +79,19 @@ build_column_string_fixed(void *arg)
 	} while (from < until);
 
 	thread_try_catch_close();
-
-	printf("exit build_column_string_fixed, %p\n", pthread_self()); fflush(stdout);
 }
 
 
 void
 build_column_string_unique(void *arg)
 {
+	puts("entering build_column_string_unique"); fflush(stdout);
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
 	const struct ColSpec *const restrict col_spec = column->spec;
 
 	const bool join = (col_spec->name.bytes == NULL);
-
-	const struct StringBuilder *const restrict base
-	= &col_spec->type_q.string.base;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -105,13 +100,18 @@ build_column_string_unique(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t length_contents = counter_size_upto(row_count)
-				     + (row_count * base->length);
+	const struct StringBuilder *const restrict base
+	= &col_spec->type_q.string.base;
+
+	const size_t size_contents = counter_size_upto(row_count)
+				   + (row_count * base->length);
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
 
-	column->contents = malloc(length_contents);
+	printf("mallocing: %zu\n", size_contents); fflush(stdout);
+
+	column->contents = malloc(size_contents);
 
 	if (UNLIKELY(column->contents == NULL)) {
 		handler_closure_call(&column->fail_cl,
@@ -119,9 +119,12 @@ build_column_string_unique(void *arg)
 		__builtin_unreachable();
 	}
 
-	/* increment table length */
+	printf("malloc'd: %zu\n", size_contents); fflush(stdout);
+
+	/* increment table length, do not account for FIELD_DELIM or \n in
+	 * length of join columns */
 	length_lock_increment(&table->total,
-			      length_contents,
+			      size_contents - (join * row_count),
 			      &column->fail_cl);
 
 	struct Counter *const restrict counter
@@ -140,13 +143,20 @@ build_column_string_unique(void *arg)
 
 	char *restrict *restrict count_until;
 
+	struct RowBlock *restrict row_block;
+
+	size_t length_rowspan;
+
 	do {
 		from->cell = ptr;
 		from->join = join;
 
-		count_until = count_ptr + from->parent->row_count;
+		row_block = from->parent;
+
+		count_until = count_ptr + row_block->row_count;
 
 		do {
+			printf("\tloopin: %p, %p\n", *count_ptr, base->put_cl.words); fflush(stdout);
 			ptr = put_string_closure_call(&base->put_cl,
 						      ptr);
 
@@ -156,8 +166,15 @@ build_column_string_unique(void *arg)
 			++count_ptr;
 		} while (count_ptr < count_until);
 
-		length_lock_increment(&from->parent->total,
-				      ptr - from->cell,
+		/* increment row_block length, do not account for FIELD_DELIM or
+		 * \n in length of join columns */
+		length_rowspan = ptr
+			       - (from->cell + (join * row_block->row_count));
+
+		printf("length_rowspan: %zu\n", length_rowspan); fflush(stdout);
+
+		length_lock_increment(&row_block->total,
+				      length_rowspan,
 				      &column->fail_cl);
 
 		/* skip to rowspan in next row */
@@ -165,6 +182,7 @@ build_column_string_unique(void *arg)
 	} while (from < until);
 
 	thread_try_catch_close();
+	puts("exiting build_column_string_unique"); fflush(stdout);
 }
 
 
