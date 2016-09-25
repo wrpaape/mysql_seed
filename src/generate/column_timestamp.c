@@ -18,6 +18,8 @@ build_column_timestamp_fixed(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const bool join = (column->spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -60,6 +62,7 @@ build_column_timestamp_fixed(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		contents_until = ptr
 			       + (sizeof(string) * from->parent->row_count);
@@ -89,6 +92,8 @@ build_column_timestamp_unique(void *arg)
 
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
+
+	const bool join = (column->spec->name.bytes == NULL);
 
 	struct Table *const restrict table
 	= column->parent;
@@ -134,6 +139,7 @@ build_column_timestamp_unique(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		contents_until = ptr
 			       + (sizeof(string) * from->parent->row_count);
@@ -173,6 +179,10 @@ build_column_timestamp_unique_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -180,10 +190,9 @@ build_column_timestamp_unique_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t length_column = sizeof(string) * row_count;
 
@@ -227,6 +236,7 @@ build_column_timestamp_unique_group(void *arg)
 					      row_count);
 
 	from->cell = ptr;
+	from->join = join;
 
 	length_rowspan = sizeof(string) * from->parent->row_count;
 
@@ -260,6 +270,7 @@ build_column_timestamp_unique_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			length_rowspan = sizeof(string)
 				       * from->parent->row_count;

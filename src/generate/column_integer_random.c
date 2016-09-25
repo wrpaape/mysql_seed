@@ -2,25 +2,18 @@
 
 #define BCIR_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random")
-
 #define BCIR_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_group")
-
 #define BCIRF_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_from")
-
 #define BCIRF_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_from_group")
-
 #define BCIRU_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_upto")
-
 #define BCIRU_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_upto_group")
-
 #define BCIRR_MALLOC_FAILURE						\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_range")
-
 #define BCIRR_GROUP_MALLOC_FAILURE					\
 MALLOC_FAILURE_MESSAGE("build_column_integer_random_range_group")
 
@@ -31,13 +24,16 @@ build_column_integer_random(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	IGenerator *const gen_unbound = rand_spec->gen.unbound;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -66,6 +62,7 @@ build_column_integer_random(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		rem_cells = from->parent->row_count;
 
@@ -110,13 +107,16 @@ build_column_integer_random_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	IGenerator *const gen_unbound = rand_spec->gen.unbound;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -124,10 +124,9 @@ build_column_integer_random_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (rand_spec->width_max * row_count);
@@ -163,6 +162,7 @@ build_column_integer_random_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -209,6 +209,7 @@ build_column_integer_random_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}
@@ -228,14 +229,17 @@ build_column_integer_random_from(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundOffsetIGeneratorClosure *const restrict from_cl
 	= &rand_spec->gen.from;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -264,6 +268,7 @@ build_column_integer_random_from(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		rem_cells = from->parent->row_count;
 
@@ -308,14 +313,17 @@ build_column_integer_random_from_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundOffsetIGeneratorClosure *const restrict from_cl
 	= &rand_spec->gen.from;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -323,10 +331,9 @@ build_column_integer_random_from_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (rand_spec->width_max * row_count);
@@ -362,6 +369,7 @@ build_column_integer_random_from_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -408,6 +416,7 @@ build_column_integer_random_from_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}
@@ -427,14 +436,17 @@ build_column_integer_random_upto(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundIGeneratorClosure *const restrict upto_cl
 	= &rand_spec->gen.upto;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -463,6 +475,7 @@ build_column_integer_random_upto(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		rem_cells = from->parent->row_count;
 
@@ -507,14 +520,17 @@ build_column_integer_random_upto_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundIGeneratorClosure *const restrict upto_cl
 	= &rand_spec->gen.upto;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -522,10 +538,9 @@ build_column_integer_random_upto_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (rand_spec->width_max * row_count);
@@ -561,6 +576,7 @@ build_column_integer_random_upto_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -607,6 +623,7 @@ build_column_integer_random_upto_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}
@@ -626,14 +643,17 @@ build_column_integer_random_range(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundOffsetIGeneratorClosure *const restrict range_cl
 	= &rand_spec->gen.range;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -662,6 +682,7 @@ build_column_integer_random_range(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		rem_cells = from->parent->row_count;
 
@@ -706,14 +727,17 @@ build_column_integer_random_range_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct IntegerRandSpec *const restrict rand_spec
-	= &column->spec->type_q.integer.rand_spec;
+	= &col_spec->type_q.integer.rand_spec;
 
 	const struct BoundOffsetIGeneratorClosure *const restrict range_cl
 	= &rand_spec->gen.range;
 
-	struct Table *const restrict table
-	= column->parent;
+	struct Table *const restrict table = column->parent;
 
 	const struct Rowspan *const restrict until = table->rowspans_until;
 
@@ -721,10 +745,9 @@ build_column_integer_random_range_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (rand_spec->width_max * row_count);
@@ -760,6 +783,7 @@ build_column_integer_random_range_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -806,6 +830,7 @@ build_column_integer_random_range_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}

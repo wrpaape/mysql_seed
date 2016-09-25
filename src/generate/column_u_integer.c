@@ -13,8 +13,12 @@ build_column_u_integer_fixed(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	const struct StubBuilder *const restrict fixed
-	= &column->spec->type_q.u_integer.fixed;
+	= &col_spec->type_q.u_integer.fixed;
 
 	struct Table *const restrict table
 	= column->parent;
@@ -50,6 +54,7 @@ build_column_u_integer_fixed(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		length_rowspan = fixed->width * from->parent->row_count;
 
@@ -77,6 +82,8 @@ build_column_u_integer_unique(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const bool join = (column->spec->name.bytes == NULL);
+
 	struct Rowspan *restrict from = column->rowspans_from;
 
 	struct Table *const restrict table
@@ -99,6 +106,7 @@ build_column_u_integer_unique(void *arg)
 
 	do {
 		from->cell = *count_ptr;
+		from->join = join;
 
 		count_ptr += from->parent->row_count;
 
@@ -132,6 +140,10 @@ build_column_u_integer_unique_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Rowspan *restrict from = column->rowspans_from;
 
 	struct Table *const restrict table
@@ -146,10 +158,9 @@ build_column_u_integer_unique_group(void *arg)
 	struct Counter *const restrict counter
 	= &table->parent->parent->counter;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t column_alloc = counter_size_mag_upto(group_count)
 				  * row_count;
@@ -177,6 +188,7 @@ build_column_u_integer_unique_group(void *arg)
 	group_string = ptr;
 
 	from->cell = ptr;
+	from->join = join;
 
 	rem_cells = from->parent->row_count - 1lu;
 
@@ -237,6 +249,7 @@ build_column_u_integer_unique_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}

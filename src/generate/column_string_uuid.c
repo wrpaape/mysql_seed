@@ -13,6 +13,8 @@ build_column_string_uuid(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const bool join = (column->spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -61,6 +63,7 @@ build_column_string_uuid(void *arg)
 		contents_until = ptr + size_rowspan;
 
 		from->cell = ptr;
+		from->join = join;
 
 		while (1) {
 			PUT_UUID_STRING(ptr,
@@ -96,6 +99,10 @@ build_column_string_uuid_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -105,10 +112,10 @@ build_column_string_uuid_group(void *arg)
 
 	const size_t length_column = UUID_STRING_SIZE * row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	= col_spec->grp_spec.partition;
 
 	const size_t length_contents = (sizeof(size_t) * group_count)
 				     + length_column;
@@ -145,6 +152,7 @@ build_column_string_uuid_group(void *arg)
 					      row_count);
 
 	from->cell = ptr;
+	from->join = join;
 
 	size_rowspan = UUID_STRING_SIZE * from->parent->row_count;
 
@@ -180,6 +188,7 @@ build_column_string_uuid_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			size_rowspan = UUID_STRING_SIZE
 				     * from->parent->row_count;

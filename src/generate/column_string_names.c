@@ -1,5 +1,21 @@
 #include "generate/column_string_names.h"
 
+/* failure messages
+ *─────────────────────────────────────────────────────────────────────────── */
+#define BCSN_FIRST_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_first")
+#define BCSN_FIRST_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_first_group")
+
+#define BCSN_LAST_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_last")
+#define BCSN_LAST_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_last_group")
+
+#define BCSN_FULL_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_full")
+#define BCSN_FULL_GROUP_MALLOC_FAILURE					\
+MALLOC_FAILURE_MESSAGE("build_column_string_names_full_group")
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */
@@ -447,6 +463,8 @@ build_column_string_names_first(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const bool join = (column->spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -475,6 +493,7 @@ build_column_string_names_first(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		ptr = put_single_names(ptr,
 				       &first_name_map,
@@ -512,6 +531,10 @@ build_column_string_names_first_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -521,10 +544,10 @@ build_column_string_names_first_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	= col_spec->grp_spec.partition;
 
 	struct Rowspan *restrict from = column->rowspans_from;
 
@@ -556,6 +579,7 @@ build_column_string_names_first_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -596,6 +620,7 @@ build_column_string_names_first_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}
@@ -615,6 +640,8 @@ build_column_string_names_last(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
+
+	const bool join = (column->spec->name.bytes == NULL);
 
 	struct Table *const restrict table
 	= column->parent;
@@ -644,6 +671,7 @@ build_column_string_names_last(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		ptr = put_single_names(ptr,
 				       &last_name_map,
@@ -681,6 +709,10 @@ build_column_string_names_last_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -690,10 +722,10 @@ build_column_string_names_last_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	= col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (LAST_NAME_SIZE_MAX * row_count);
@@ -725,6 +757,7 @@ build_column_string_names_last_group(void *arg)
 	rem_cells = from->parent->row_count;
 
 	from->cell = ptr;
+	from->join = join;
 
 	while (1) {
 		if (rem_cells > rem_group) {
@@ -765,6 +798,7 @@ build_column_string_names_last_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}
@@ -783,6 +817,8 @@ build_column_string_names_full(void *arg)
 {
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
+
+	const bool join = (column->spec->name.bytes == NULL);
 
 	struct Table *const restrict table
 	= column->parent;
@@ -812,6 +848,7 @@ build_column_string_names_full(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		ptr = put_full_names(ptr,
 				     from->parent->row_count);
@@ -849,6 +886,10 @@ build_column_string_names_full_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
+
 	struct Table *const restrict table
 	= column->parent;
 
@@ -858,10 +899,10 @@ build_column_string_names_full_group(void *arg)
 
 	const size_t row_count = table->spec->row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	= col_spec->grp_spec.partition;
 
 	const size_t size_est = (sizeof(size_t) * group_count)
 			      + (FULL_NAME_SIZE_MAX * row_count);
@@ -894,6 +935,7 @@ build_column_string_names_full_group(void *arg)
 				ptr - full_name);
 
 	from->cell = full_name;
+	from->join = join;
 
 	rem_cells = from->parent->row_count - 1lu;
 
@@ -943,6 +985,7 @@ build_column_string_names_full_group(void *arg)
 				break;
 
 			from->cell = ptr;
+			from->join = join;
 
 			rem_cells = from->parent->row_count;
 		}

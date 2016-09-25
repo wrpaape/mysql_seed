@@ -80,14 +80,13 @@ table_put_header(char *restrict ptr,
 		if (from == until)
 			break;
 
-		if (from->name.bytes == NULL)
-			continue;
+		if (from->name.bytes != NULL) {
+			PUT_FIELD_DELIM(ptr);
 
-		PUT_FIELD_DELIM(ptr);
-
-		ptr = put_string_size(ptr,
-				      from->name.bytes,
-				      from->name.length);
+			ptr = put_string_size(ptr,
+					      from->name.bytes,
+					      from->name.length);
+		}
 	}
 
 	PUT_TABLE_HEADER_5(ptr);

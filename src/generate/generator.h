@@ -73,7 +73,7 @@ PUT_STRING_WIDTH(PTR, TABLE_HEADER_1, 4)
 
 #define TABLE_HEADER_2							\
 "\n 2)"									\
-"\n 3) contains " FIELD_DELIM_WORD "-separated seed data for table:"	\
+"\n 3) contains " FIELD_DELIM_WORD "-separated ('\\'-escaped) seed data for table:"	\
 "\n 4)"									\
 "\n 5) \t"	/* <tbl_name> */
 #define PUT_TABLE_HEADER_2(PTR)						\

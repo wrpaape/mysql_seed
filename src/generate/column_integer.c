@@ -54,6 +54,7 @@ build_column_integer_fixed(void *arg)
 
 	do {
 		from->cell = ptr;
+		from->join = join;
 
 		length_rowspan = fixed->width * from->parent->row_count;
 
@@ -159,8 +160,7 @@ build_column_integer_unique_group(void *arg)
 
 	const size_t group_count = col_spec->grp_spec.count;
 
-	GroupPartitioner *const partition_groups
-	= col_spec->grp_spec.partition;
+	GroupPartitioner *const partition_groups = col_spec->grp_spec.partition;
 
 	const size_t column_alloc = counter_size_mag_upto(group_count)
 				  * row_count;

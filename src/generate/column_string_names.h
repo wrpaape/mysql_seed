@@ -39,31 +39,14 @@ SET_STRING_WIDTH(PTR, NAMES_LAST_TYPE_STRING, NAMES_LAST_TYPE_WIDTH)
 SET_STRING_WIDTH(PTR, NAMES_FULL_TYPE_STRING, NAMES_FULL_TYPE_WIDTH)
 
 
-/* failure messages
- *─────────────────────────────────────────────────────────────────────────── */
-#define BCSN_FIRST_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_first")
-#define BCSN_FIRST_GROUP_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_first_group")
-
-#define BCSN_LAST_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_last")
-#define BCSN_LAST_GROUP_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_last_group")
-
-#define BCSN_FULL_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_full")
-#define BCSN_FULL_GROUP_MALLOC_FAILURE					\
-MALLOC_FAILURE_MESSAGE("build_column_string_names_full_group")
-
-
-/* enum, struct declarations
+/* struct declarations
  *─────────────────────────────────────────────────────────────────────────── */
 struct NameMap {
 	const struct Stub *const restrict names;
 	const uint32_t threshold;
 	const uint32_t span;
 };
+
 
 /* global variables
  *─────────────────────────────────────────────────────────────────────────── */

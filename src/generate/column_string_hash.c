@@ -40,12 +40,13 @@ build_column_string_hash(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	struct Table *const restrict table
-	= column->parent;
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
 
 	/* length of hex character string */
 	const size_t length_hash
-	= column->spec->type_q.string.scale.fixed;
+	= col_spec->type_q.string.scale.fixed;
 
 	/* 1/0 -> odd/even number of hex charaters */
 	const size_t odd_nibble = length_hash & 1lu;
@@ -58,6 +59,8 @@ build_column_string_hash(void *arg)
 					    + (sizeof(word_t) * 2lu);
 
 	const size_t size_hash = length_hash + 1lu;
+
+	struct Table *const restrict table = column->parent;
 
 	const size_t length_column = size_hash * table->spec->row_count;
 
@@ -94,13 +97,6 @@ build_column_string_hash(void *arg)
 	const struct Rowspan *const restrict until = table->rowspans_until;
 	struct Rowspan *restrict from		   = column->rowspans_from;
 
-	/* inline char * */
-	/* (*const put_hash_state)(char *const restrict, */
-	/* 			struct HashState *const restrict) */
-	/* = (odd_nibble == 0lu) */
-	/* ? put_hash_state_even */
-	/* : put_hash_state_odd; */
-
 	/* direct call to put_hash_state function for inlining opportunity */
 	if (odd_nibble == 0lu) {
 		do {
@@ -113,6 +109,7 @@ build_column_string_hash(void *arg)
 			contents_until = ptr + length_rowspan;
 
 			from->cell = ptr;
+			from->join = join;
 
 			do {
 				ptr = put_hash_state_even(ptr,
@@ -132,6 +129,7 @@ build_column_string_hash(void *arg)
 			contents_until = ptr + length_rowspan;
 
 			from->cell = ptr;
+			from->join = join;
 
 			do {
 				ptr = put_hash_state_odd(ptr,
@@ -160,12 +158,13 @@ build_column_string_hash_group(void *arg)
 	struct Column *const restrict column
 	= (struct Column *const restrict) arg;
 
-	struct Table *const restrict table
-	= column->parent;
+	const struct ColSpec *const restrict col_spec = column->spec;
+
+	const bool join = (col_spec->name.bytes == NULL);
 
 	/* length of hex character string */
 	const size_t length_hash
-	= column->spec->type_q.string.scale.fixed;
+	= col_spec->type_q.string.scale.fixed;
 
 	/* 1/0 -> odd/even number of hex charaters */
 	const size_t odd_nibble = length_hash & 1lu;
@@ -179,14 +178,16 @@ build_column_string_hash_group(void *arg)
 
 	const size_t size_hash = length_hash + 1lu;
 
+	struct Table *const restrict table = column->parent;
+
 	const size_t row_count = table->spec->row_count;
 
 	const size_t length_column = size_hash * row_count;
 
-	const size_t group_count = column->spec->grp_spec.count;
+	const size_t group_count = col_spec->grp_spec.count;
 
 	GroupPartitioner *const partition_groups
-	= column->spec->grp_spec.partition;
+	= col_spec->grp_spec.partition;
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &column->contents);
@@ -223,6 +224,7 @@ build_column_string_hash_group(void *arg)
 			       row_count);
 
 	from->cell = ptr;
+	from->join = join;
 
 	length_rowspan = size_hash * from->parent->row_count;
 
@@ -267,6 +269,7 @@ build_column_string_hash_group(void *arg)
 					break;
 
 				from->cell = ptr;
+				from->join = join;
 
 				length_rowspan = size_hash
 					       * from->parent->row_count;
@@ -307,6 +310,7 @@ build_column_string_hash_group(void *arg)
 					break;
 
 				from->cell = ptr;
+				from->join = join;
 
 				length_rowspan = size_hash
 					       * from->parent->row_count;
