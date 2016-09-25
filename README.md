@@ -249,22 +249,6 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 
 ##Supported Data Types
 
-###String (VARCHAR, CHAR)
-
-####`<-s, --string>`  
-
-| Qualifier      | `COL_TYPE_Q`                   | description                                                              | example entries                                         | MySQL type declaration                            |
-| -------------- | ------------------------------ | ------------------------------------------------------------------------ | :-----------------------------------------------------: | ------------------------------------------------- |
-| None (Default) | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | username1<br/>username2<br/>...<br/>username*ROW_COUNT* | **CHAR(***length(COL_NAME)***)**                  |
-| Fixed          | `<-f, --fixed> <FIXED_STRING>` | all entries set to *FIXED_STRING*, **GRP_SPEC not allowed**              | foo bar<br/>foo bar<br/>...<br/>foo bar                 | **CHAR(***length(FIXED_STRING)***)**              |
-| Unique         | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*                | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
-| Hash           | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                       | **CHAR(***HASH_LENGTH***)**                       |
-| UUID           | `<-uu, --uuid>`              | Universally Unique Idenfiers (version 1) | 866d0c36-3a20-11b2-fb9d-d0a637edde91<br/>866d0c37-3a20-11b2-fb9d-d0a637edde91<br/>...<br/>d71dd15d-3a20-11b2-fb9d-d0a637edde91 | **CHAR(36)** |
-| First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph                     | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
-| Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia                    | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
-| Full Names     | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz<br/>Sue E Bell<br/>...<br/>Bob Joe Cook        | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
-
-
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
 
 ####`<-i, --integer>`
@@ -314,6 +298,22 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 | None (Default) | N/A              | ascending UTC timestamps (starting from current timestamp, 1 second apart) | 2016-09-02 18:08:25<br/>2016-09-02 18:08:26<br/>...<br/>2016-09-02 18:10:01 | **TIMESTAMP**          |
 | Fixed          | `<-f, --fixed>`  | all entries set to current UTC timestamp, **GRP_SPEC not allowed**         | 2016-09-02 18:08:25<br/>2016-09-02 18:08:25<br/>...<br/>2016-09-02 18:09:25 | **TIMESTAMP**          |
 | Unique         | `<-u, --unique>` | ascending UTC timestamps (starting from current timestamp, 1 second apart) | 2016-09-02 18:08:25<br/>2016-09-02 18:08:26<br/>...<br/>2016-09-02 18:10:01 | **TIMESTAMP**          |
+
+
+###String (VARCHAR, CHAR)
+
+####`<-s, --string>`  
+
+| Qualifier      | `COL_TYPE_Q`                   | description                                                              | example entries                                         | MySQL type declaration                            |
+| -------------- | ------------------------------ | ------------------------------------------------------------------------ | :-----------------------------------------------------: | ------------------------------------------------- |
+| None (Default) | N/A                            | *COL_NAME* concatenated with an ascending integer (starting from "1")    | username1<br/>username2<br/>...<br/>username*ROW_COUNT* | **CHAR(***length(COL_NAME)***)**                  |
+| Fixed          | `<-f, --fixed> <FIXED_STRING>` | all entries set to *FIXED_STRING*, **GRP_SPEC not allowed**              | foo bar<br/>foo bar<br/>...<br/>foo bar                 | **CHAR(***length(FIXED_STRING)***)**              |
+| Unique         | `<-u, --unique> <BASE_STRING>` | *BASE_STRING* concatenated with an ascending integer (starting from "1") | foo1<br/>foo2<br/>...<br/>foo*ROW_COUNT*                | **VARCHAR(***length(BASE_STRING*ROW_COUNT*)***)** |
+| Hash           | `<-h, --hash> <HASH_LENGTH>`   | shuffled strings of hexadecimal digits having length *HASH_LENGTH*       | af100<br/>92dd1<br/>...<br/>1d2ba                       | **CHAR(***HASH_LENGTH***)**                       |
+| UUID           | `<-uu, --uuid>`              | Universally Unique Idenfiers (version 1) | 866d0c36-3a20-11b2-fb9d-d0a637edde91<br/>866d0c37-3a20-11b2-fb9d-d0a637edde91<br/>...<br/>d71dd15d-3a20-11b2-fb9d-d0a637edde91 | **CHAR(36)** |
+| First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph                     | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
+| Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia                    | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
+| Full Names     | `<-nf, --names-full>`          | <*first_name*> [*initial* &#124; *first_name*] <*last_name*>             | Amy Cruz<br/>Sue E Bell<br/>...<br/>Bob Joe Cook        | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
 
 
 ##Features
