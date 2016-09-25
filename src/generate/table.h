@@ -5,32 +5,39 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/row_block.h" /* generator.h, string/thread utils */
 
-inline size_t
-table_size_contents(const struct Table *const restrict table)
+inline unsigned int
+table_size_contents(struct Table *const restrict table)
 {
-	const struct ColSpec *const restrict until
-	= table->spec->col_specs.until;
+	const struct TblSpec *const restrict tbl_spec = table->spec;
 
-	const struct ColSpec *restrict from = table->spec->col_specs.from;
+	const struct ColSpec *const restrict until = tbl_spec->col_specs.until;
+	const struct ColSpec *restrict from	   = tbl_spec->col_specs.from;
 
 	size_t size_contents = TABLE_HEADER_BASE_SIZE
 			     + table->file.path.length
-			     + table->spec->name.length
+			     + tbl_spec->name.length
 			     + table->parent->spec->name.length
 			     + table->total.length
 			     + from->name.length;
+
+	unsigned int count_joins = 0u;
 
 	while (1) {
 		++from;
 
 		if (from == until)
-			return size_contents;
+			break;
 
 		if (from->name.bytes == NULL)
-			continue;
-
-		size_contents += (1l + from->name.length);
+			++count_joins;
+		else
+			size_contents += (1l + from->name.length);
 	}
+
+	table->file.contents.length = size_contents
+				    - (count_joins * tbl_spec->row_count);
+
+	return count_joins;
 }
 
 inline char *

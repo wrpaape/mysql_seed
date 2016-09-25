@@ -2,8 +2,8 @@
 
 #define BTH_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_table_header")
 
-extern inline size_t
-table_size_contents(const struct Table *const restrict table);
+extern inline unsigned int
+table_size_contents(struct Table *const restrict table);
 
 extern inline char *
 table_put_header(char *restrict ptr,
@@ -15,7 +15,8 @@ build_table_header(void *arg)
 	struct Table *const restrict table
 	= (struct Table *const restrict) arg;
 
-	table->file.contents.length = table_size_contents(table);
+
+	const unsigned int count_joins = table_size_contents(table);
 
 	thread_try_catch_open(&free_nullify_cleanup,
 			      &table->file.contents.bytes);
@@ -40,7 +41,8 @@ build_table_header(void *arg)
 		if (from == upto)
 			break;
 
-		ptr += from->total.length;
+		/* no FIELD_DELIMs for join columns */
+		ptr += (from->total.length - (count_joins * from->row_count));
 
 		++from;
 	}

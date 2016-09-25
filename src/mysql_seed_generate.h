@@ -11401,7 +11401,7 @@ generate_dispatch(char *const restrict *const restrict arg,
 		free(spec_alloc);
 		return EXIT_FAILURE;
 	}
-#if 1
+#if 0
 	for (struct DbSpec *db_spec = state.valid.head;
 	     db_spec != NULL;
 	     db_spec = db_spec->next) {
