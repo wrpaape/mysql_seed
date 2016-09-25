@@ -249,8 +249,6 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 
 ##Supported Data Types
 
-###String (VARCHAR, CHAR)
-
 ###Integer (TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT)
 
 ####`<-i, --integer>`
@@ -302,6 +300,8 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 | Unique         | `<-u, --unique>` | ascending UTC timestamps (starting from current timestamp, 1 second apart) | 2016-09-02 18:08:25<br/>2016-09-02 18:08:26<br/>...<br/>2016-09-02 18:10:01 | **TIMESTAMP**          |
 
 
+###String (VARCHAR, CHAR)
+
 ####`<-s, --string>`  
 
 | Qualifier      | `COL_TYPE_Q`                   | description                                                              | example entries                                         | MySQL type declaration                            |
@@ -314,7 +314,15 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 | First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph                     | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
 | Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia                    | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
 | Full Names     | `<-nf, --names-full>`          | <*FIRST_NAME*> [*INITIAL* &#124; *FIRST_NAME*] <*LAST_NAME*>             | Amy Cruz<br/>Susan E Bell<br/>...<br/>Bob Joe Cook      | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
-| Join           | `<-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` | see below | Hello, my name is John, I am 28 years old, and I'm with group #1!<br/>Hello, my name is Samantha, I am 38 years old, and I'm with group #1!<br/>Hello, my name is Aaron, I am 17 years old, and I'm with group #2! | **CHAR(***Σlength(JOIN_i)***)** or **VARCHAR(***Σlength(JOIN_i)***)** (depends on variability of **JOIN**s and total length) |
+| Join           | `<-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` | *JOIN*s are expanded then concatenated into a single string column--see below for more details | Hello, my name is John, I am 28 years old, and I'm with group #1!<br/>Hello, my name is Samantha, I am 38 years old, and I'm with group #1!<br/>Hello, my name is Aaron, I am 17 years old, and I'm with group #2! | **CHAR(***Σlength(JOIN_i)***)** or **VARCHAR(***Σlength(JOIN_i)***)** (depends on variability of *JOIN*s and total length) |
+
+
+###Join Strings (VARCHAR, CHAR)
+
+####`<-s, --string> <-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]`  
+where
+####`JOIN := <COL_TYPE> [COL_TYPE_Q] [GRP_SPEC] | <FIXED_STRING>`  
+
 
 
 ##Features
