@@ -314,15 +314,58 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 | First Names    | `<-n1, --names-first>`         | random sample of American first names                                    | Robert<br/>Alice<br/>...<br/>Joseph                     | **VARCHAR(***FIRST_NAME_LENGTH_MAX***)**          |
 | Last Names     | `<-nl, --names-last>`          | random sample of American last names                                     | Smith<br/>Johnson<br/>...<br/>Garcia                    | **VARCHAR(***LAST_NAME_LENGTH_MAX***)**           |
 | Full Names     | `<-nf, --names-full>`          | <*FIRST_NAME*> [*INITIAL* &#124; *FIRST_NAME*] <*LAST_NAME*>             | Amy Cruz<br/>Susan E Bell<br/>...<br/>Bob Joe Cook      | **VARCHAR(***FULL_NAME_LENGTH_MAX***)**           |
-| Join           | `<-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` | *JOIN*s are expanded then concatenated into a single string column--see below for more details | Hello, my name is John, I am 28 years old, and I'm with group #1!<br/>Hello, my name is Samantha, I am 38 years old, and I'm with group #1!<br/>Hello, my name is Aaron, I am 17 years old, and I'm with group #2! | **CHAR(***Σlength(JOIN_i)***)** or **VARCHAR(***Σlength(JOIN_i)***)** (depends on variability of *JOIN*s and total length) |
+| Join           | `<-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` | `+`-delimited *JOIN*s are expanded and then concatenated into a single string column (see below for more details) | Hello, my name is John, I am 28 years old, and I'm with group #1!<br/>Hello, my name is Samantha, I am 38 years old, and I'm with group #1!<br/>...<br/>Hello, my name is Aaron, I am 17 years old, and I'm with group #*GRP_COUNT*! | **CHAR(***Σlength(JOIN_i)***)** or **VARCHAR(***Σlength(JOIN_i)***)** (depends on variability of *JOIN*s and total length) |
 
 
 ###Join Strings (VARCHAR, CHAR)
 
-####`<-s, --string> <-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]`  
-where
-####`JOIN := <COL_TYPE> [COL_TYPE_Q] [GRP_SPEC] | <FIXED_STRING>`  
+####`<-s, --string> <-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` where `JOIN := <COL_TYPE> [COL_TYPE_Q] [GRP_SPEC] | <FIXED_STRING>`  
 
+A Join String `COL_SPEC` will expand its `+`-delimited list of `JOIN` statements and then concatenate the result into a single string column. If `JOIN` starts with a `-`, it will be parsed identically to the latter portion of an independent 'COL_SPEC' (`<COL_TYPE> [COL_TYPE_Q] [GRP_SPEC]`), otherwise it will be interpreted as filler string (`<FIXED_STRING`). If a `<FIXED_STRING>` starting with a `-` is desired, an explicit Fixed String `JOIN` statement (`<-s, --string> <-f, --fixed> <FIXED_STRING>`) can be used to ensure correct interpretation. That being said, all `<COL_TYPE> [COL_TYPE_Q] [GRP_SPEC]` compositions supported in individual `COL_SPEC`s (**except** nested Join String declarations) can be expressed in a `JOIN`. MySQL typing for `CREATE` statements of a Join String column will be set to either `CHAR` or `VARCHAR` depending on whether or not the column's total length is constant and no more than `CHAR`-maximum of 255 UTF8 code points.
+
+**example**  
+The `COL_SPEC`
+```
+--column xml --string --join "<message id='" \
+                           + --string --hash 16 \
+                           + "' from='user" \
+                           + --integer \
+                           + "@example.com/resource' to='chatroom" \
+                           + --integer --group 3 --linear \
+                           + "@conference.example.com' type='groupchat'><body>Hello chatroom" \
+                           + --integer --group 3 --linear \
+                           + " from user" \
+                           + --integer \
+                           + "\!</body></message>"
+```
+will generate a column of XMPP groupchat stanzas distributed linearly across 3 separate multi-user chat rooms. `xml VARCHAR(151)` will be added to the `CREATE TABLE` statement in the `load_<DB_NAME>.mysql` script, and, for a table of 25 rows, the column data will look similar to this:
+```
+<message id='f2af7519924f4459' from='user1@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user1!</body></message>
+<message id='ceb87434c96755f4' from='user2@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user2!</body></message>
+<message id='8920c40acc278049' from='user3@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user3!</body></message>
+<message id='0f41b039caf09da9' from='user4@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user4!</body></message>
+<message id='d3498737688ed8df' from='user5@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user5!</body></message>
+<message id='403fdeab7d3fdb82' from='user6@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user6!</body></message>
+<message id='fd1f7964abc0b2f7' from='user7@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user7!</body></message>
+<message id='4bf157116c461d18' from='user8@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user8!</body></message>
+<message id='d1fcf9b4da6032aa' from='user9@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user9!</body></message>
+<message id='a1a9df2ffa571fa0' from='user10@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user10!</body></message>
+<message id='64843bc230f8cf53' from='user11@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user11!</body></message>
+<message id='f52021bab5e8980e' from='user12@example.com/resource' to='chatroom2@conference.example.com' type='groupchat'><body>Hello chatroom2 from user12!</body></message>
+<message id='fe78a4a581d7cc63' from='user13@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user13!</body></message>
+<message id='3ac48b42e6f0ddcd' from='user14@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user14!</body></message>
+<message id='9a877befba3d7f75' from='user15@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user15!</body></message>
+<message id='d975a0fbac388533' from='user16@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user16!</body></message>
+<message id='5a9e72ca58afd490' from='user17@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user17!</body></message>
+<message id='b04ecbe8cab311cb' from='user18@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user18!</body></message>
+<message id='9be7bcebd66e243a' from='user19@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user19!</body></message>
+<message id='92ca989a6b8836b5' from='user20@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user20!</body></message>
+<message id='43bb18e9f57bf4d4' from='user21@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user21!</body></message>
+<message id='a3c52edb08074669' from='user22@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user22!</body></message>
+<message id='6f0479812ad3c4db' from='user23@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user23!</body></message>
+<message id='25082191e6aa3be5' from='user24@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user24!</body></message>
+<message id='02d5b363661a53c0' from='user25@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user25!</body></message>
+```
 
 
 ##Features
