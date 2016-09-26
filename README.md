@@ -338,7 +338,7 @@ The `COL_SPEC`
                            + --integer \
                            + "\!</body></message>"
 ```
-will generate a column of XMPP groupchat stanzas distributed linearly across 3 separate multi-user chat rooms. `xml VARCHAR(151)` will be added to the `CREATE TABLE` statement in the `load_<DB_NAME>.mysql` script, and, for a table of 25 rows, the column data will look similar to this:
+will generate a column of XMPP groupchat stanzas distributed linearly across 3 separate multi-user chat rooms. `xml VARCHAR(151)` will be added to the `CREATE TABLE` statement in the `load_<DB_NAME>.mysql` script, and, for a table of 24 rows, the column data will look similar to this:
 ```
 <message id='f2af7519924f4459' from='user1@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user1!</body></message>
 <message id='ceb87434c96755f4' from='user2@example.com/resource' to='chatroom1@conference.example.com' type='groupchat'><body>Hello chatroom1 from user2!</body></message>
@@ -364,7 +364,6 @@ will generate a column of XMPP groupchat stanzas distributed linearly across 3 s
 <message id='a3c52edb08074669' from='user22@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user22!</body></message>
 <message id='6f0479812ad3c4db' from='user23@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user23!</body></message>
 <message id='25082191e6aa3be5' from='user24@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user24!</body></message>
-<message id='02d5b363661a53c0' from='user25@example.com/resource' to='chatroom3@conference.example.com' type='groupchat'><body>Hello chatroom3 from user25!</body></message>
 ```
 
 

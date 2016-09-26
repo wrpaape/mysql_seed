@@ -10,7 +10,7 @@
 # Development Mode
 # ──────────────────────────────────────────────────────────────────────────────
 # toggles utility flags, make targets
-DEVELOPMENT_MODE = F
+DEVELOPMENT_MODE = T
 
 
 # path to MySQL library dependency libmysqlclient.{dylib,so,lib} (leave empty if unsure where located)
