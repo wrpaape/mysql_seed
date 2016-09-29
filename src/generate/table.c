@@ -1,6 +1,6 @@
 #include "generate/table.h"
 
-#define BTH_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_table_header")
+#define BTI_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_table_init")
 
 extern inline unsigned int
 table_size_contents(struct Table *const restrict table);
@@ -10,7 +10,7 @@ table_put_header(char *restrict ptr,
 		 const struct Table *const restrict table);
 
 void
-build_table_header(void *arg)
+build_table_init(void *arg)
 {
 	struct Table *const restrict table
 	= (struct Table *const restrict) arg;
@@ -25,7 +25,7 @@ build_table_header(void *arg)
 
 	if (UNLIKELY(table->file.contents.bytes == NULL)) {
 		handler_closure_call(&table->fail_cl,
-				     BTH_MALLOC_FAILURE);
+				     BTI_MALLOC_FAILURE);
 		__builtin_unreachable();
 	}
 
@@ -51,8 +51,9 @@ build_table_header(void *arg)
 }
 
 
+
 void
-build_table_file(void *arg)
+build_table_write(void *arg)
 {
 	struct Table *const restrict table
 	= (struct Table *const restrict) arg;

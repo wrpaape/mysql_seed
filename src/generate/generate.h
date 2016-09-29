@@ -9,7 +9,7 @@
 #include "generate/column_string.h"	/* build_column_string_X|uuid */
 #include "generate/column_timestamp.h"	/* build_column_timestamp_X */
 #include "generate/column_datetime.h"	/* build_column_datetime_X */
-#include "generate/table.h"		/* build_table_header */
+#include "generate/table.h"		/* build_table_X */
 
 /* error messages
  *─────────────────────────────────────────────────────────────────────────── */
@@ -304,8 +304,8 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	= 1lu			/* build_counter */
 	+ count->columns	/* build_column_X */
 	+ count->databases	/* build_loader */
-	+ (count->tables * 2lu) /* build_table_header + write_file */
-	+ count_row_blocks_max; /* build_table_contents */
+	+ (count->tables * 2lu) /* build_table_init + build_table_write */
+	+ count_row_blocks_max; /* build_table_data */
 
 	const size_t count_rowspans_max = count_row_blocks_max
 					* count->columns;
@@ -543,7 +543,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 	}
 
 	/* build next set of tasks */
-	generator.build.table_headers.head = next_node;
+	generator.build.table_init.head = next_node;
 
 	next_node->prev = NULL;
 
@@ -551,7 +551,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 
 	while (1) {
 		procedure_closure_init(&next_node->task,
-				       &build_table_header,
+				       &build_table_init,
 				       table);
 		++table;
 		if (table == (const struct Table *const restrict) columns)
@@ -565,7 +565,7 @@ mysql_seed_generate(const struct GeneratorCounter *const restrict count,
 		next_node->prev = prev_node;
 	}
 
-	generator.build.table_headers.last = next_node;
+	generator.build.table_init.last = next_node;
 
 	next_node->next = NULL;
 
@@ -616,14 +616,14 @@ DEAD_POOL_FAILURE_A:
 
 	/* assign second set of tasks */
 	if (UNLIKELY(!thread_pool_reload(&generator.pool,
-					 &generator.build.table_headers,
+					 &generator.build.table_init,
 					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	/* build next set of tasks */
 	++next_node;
 
-	generator.build.table_contents.head = next_node;
+	generator.build.table_data.head = next_node;
 
 	next_node->prev = NULL;
 
@@ -646,7 +646,7 @@ DEAD_POOL_FAILURE_A:
 		next_node->prev = prev_node;
 	}
 
-	generator.build.table_contents.last = next_node;
+	generator.build.table_data.last = next_node;
 
 	next_node->next = NULL;
 
@@ -669,14 +669,14 @@ DEAD_POOL_FAILURE_A:
 
 	/* assign third set of tasks */
 	if (UNLIKELY(!thread_pool_reload(&generator.pool,
-					 &generator.build.table_contents,
+					 &generator.build.table_data,
 					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 
 	/* build fourth and final set of tasks */
 	++next_node;
 
-	generator.build.table_files.head = next_node;
+	generator.build.table_write.head = next_node;
 
 	next_node->prev = NULL;
 
@@ -684,7 +684,7 @@ DEAD_POOL_FAILURE_A:
 
 	while (1) {
 		procedure_closure_init(&next_node->task,
-				       &build_table_file,
+				       &build_table_write,
 				       table);
 		++table;
 		if (table == (const struct Table *const restrict) columns)
@@ -698,7 +698,7 @@ DEAD_POOL_FAILURE_A:
 		next_node->prev = prev_node;
 	}
 
-	generator.build.table_files.last = next_node;
+	generator.build.table_write.last = next_node;
 
 	next_node->next = NULL;
 
@@ -722,7 +722,7 @@ DEAD_POOL_FAILURE_A:
 
 	/* assign fourth and final set of tasks */
 	if (UNLIKELY(!thread_pool_reload(&generator.pool,
-					 &generator.build.table_files,
+					 &generator.build.table_write,
 					 &failure)))
 		goto LIVE_POOL_FAILURE_A;
 

@@ -97,9 +97,9 @@ table_put_header(char *restrict ptr,
 /* thread worker entry
  *─────────────────────────────────────────────────────────────────────────── */
 void
-build_table_header(void *arg);
+build_table_init(void *arg);
 
 void
-build_table_file(void *arg);
+build_table_write(void *arg);
 
 #endif /* ifndef MYSQL_SEED_GENERATE_TABLE_H_ */

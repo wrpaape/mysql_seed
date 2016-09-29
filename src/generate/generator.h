@@ -479,9 +479,9 @@ struct DatabaseInterval {
 
 struct GeneratorTaskList {
 	struct TaskStore counter_columns_loaders;
-	struct TaskStore table_headers;
-	struct TaskStore table_contents;
-	struct TaskStore table_files;
+	struct TaskStore table_init;
+	struct TaskStore table_data;
+	struct TaskStore table_write;
 };
 
 struct Generator {
