@@ -319,7 +319,8 @@ specifies MySQL password for target server. If `PASSWORD` is not specified (stan
 
 ###Join Strings (VARCHAR, CHAR)
 
-####`<-s, --string> <-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` where `JOIN := <COL_TYPE> [COL_TYPE_Q] [GRP_SPEC] | <FIXED_STRING>`  
+####`<-s, --string> <-j, --join> <JOIN_1> [+ JOIN_2] ... [+ JOIN_N]` where
+####`JOIN := <COL_TYPE> [COL_TYPE_Q] [GRP_SPEC] | <FIXED_STRING>`  
 
 A Join String `COL_SPEC` will expand its `+`-delimited list of `JOIN` statements and then concatenate the result into a single string column. If `JOIN` starts with a `-`, it will be parsed identically to the latter portion of an independent 'COL_SPEC' (`<COL_TYPE> [COL_TYPE_Q] [GRP_SPEC]`), otherwise it will be interpreted as filler string (`<FIXED_STRING`). If a `<FIXED_STRING>` starting with a `-` is desired, an explicit Fixed String `JOIN` statement (`<-s, --string> <-f, --fixed> <FIXED_STRING>`) can be used to ensure correct interpretation. That being said, all `<COL_TYPE> [COL_TYPE_Q] [GRP_SPEC]` compositions supported in individual `COL_SPEC`s (**except** nested Join String declarations) can be expressed in a `JOIN`. MySQL typing for `CREATE` statements of a Join String column will be set to either `CHAR` or `VARCHAR` depending on whether or not the column's total length is constant and no more than `CHAR`-maximum of 255 UTF8 code points.
 

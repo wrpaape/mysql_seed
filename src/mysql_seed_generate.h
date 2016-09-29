@@ -11365,7 +11365,6 @@ generate_dispatch(char *const restrict *const restrict arg,
 			    + sizeof(struct TblSpec)
 			    + ((((rem_argc - DB_SPEC_LENGTH_MIN) / 2) + 1)
 			       * sizeof(struct ColSpec)));
-			       /* * ((rem_argc - 5) / 3))); */
 
 	if (UNLIKELY(spec_alloc == NULL)) {
 		generate_failure_malloc();

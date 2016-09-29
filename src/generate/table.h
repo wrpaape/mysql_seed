@@ -5,13 +5,14 @@
  *─────────────────────────────────────────────────────────────────────────── */
 #include "generate/row_block.h" /* generator.h, string/thread utils */
 
+/* set table->file.contents.length to total file size and return count_joins */
 inline unsigned int
 table_size_contents(struct Table *const restrict table)
 {
 	const struct TblSpec *const restrict tbl_spec = table->spec;
 
-	const struct ColSpec *const restrict until = tbl_spec->col_specs.until;
 	const struct ColSpec *restrict from	   = tbl_spec->col_specs.from;
+	const struct ColSpec *const restrict until = tbl_spec->col_specs.until;
 
 	size_t size_contents = TABLE_HEADER_BASE_SIZE
 			     + table->file.path.length
@@ -34,8 +35,34 @@ table_size_contents(struct Table *const restrict table)
 			size_contents += (1l + from->name.length);
 	}
 
+	/* no FIELD_DELIMs for join columns */
 	table->file.contents.length = size_contents
 				    - (count_joins * tbl_spec->row_count);
+
+	return count_joins;
+}
+
+inline unsigned int
+table_size_contents_no_header(struct Table *const restrict table)
+{
+	const struct TblSpec *const restrict tbl_spec = table->spec;
+
+	const struct ColSpec *restrict from	   = tbl_spec->col_specs.from;
+	const struct ColSpec *const restrict until = tbl_spec->col_specs.until;
+
+	unsigned int count_joins = 0u;
+
+	do {
+		if (from->name.bytes == NULL)
+			++count_joins;
+
+		++from;
+	} while (from < until);
+
+	/* no FIELD_DELIMs for join columns */
+	table->file.contents.length = table->total.length
+				    - (  (count_joins * tbl_spec->row_count)
+				       + 1lu);	/* no initial \n */
 
 	return count_joins;
 }
@@ -98,6 +125,9 @@ table_put_header(char *restrict ptr,
  *─────────────────────────────────────────────────────────────────────────── */
 void
 build_table_init(void *arg);
+
+void
+build_table_init_no_header(void *arg);
 
 void
 build_table_write(void *arg);

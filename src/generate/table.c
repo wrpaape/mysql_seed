@@ -1,9 +1,14 @@
 #include "generate/table.h"
 
-#define BTI_MALLOC_FAILURE MALLOC_FAILURE_MESSAGE("build_table_init")
+#define BTI_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_table_init")
+#define BTINH_MALLOC_FAILURE						\
+MALLOC_FAILURE_MESSAGE("build_table_init_no_header")
 
 extern inline unsigned int
 table_size_contents(struct Table *const restrict table);
+extern inline unsigned int
+table_size_contents_no_header(struct Table *const restrict table);
 
 extern inline char *
 table_put_header(char *restrict ptr,
@@ -50,6 +55,44 @@ build_table_init(void *arg)
 	thread_try_catch_close();
 }
 
+void
+build_table_init_no_header(void *arg)
+{
+	struct Table *const restrict table
+	= (struct Table *const restrict) arg;
+
+	const unsigned int count_joins = table_size_contents_no_header(table);
+
+	thread_try_catch_open(&free_nullify_cleanup,
+			      &table->file.contents.bytes);
+
+	table->file.contents.bytes = malloc(table->file.contents.length);
+
+	if (UNLIKELY(table->file.contents.bytes == NULL)) {
+		handler_closure_call(&table->fail_cl,
+				     BTINH_MALLOC_FAILURE);
+		__builtin_unreachable();
+	}
+
+	char *restrict ptr = table->file.contents.bytes;
+
+	struct RowBlock *restrict from		   = table->row_blocks.from;
+	const struct RowBlock *const restrict upto = table->row_blocks.until - 1l;
+
+	while (1) {
+		from->contents = ptr;
+
+		if (from == upto)
+			break;
+
+		/* no FIELD_DELIMs for join columns */
+		ptr += (from->total.length - (count_joins * from->row_count));
+
+		++from;
+	}
+
+	thread_try_catch_close();
+}
 
 
 void
