@@ -41,7 +41,6 @@ endef
 # 	http://stackoverflow.com/questions/714100/os-detecting-makefile
 
 ifeq ($(OS),Windows_NT)
-
         SYSTEM_WINDOWS 	:= T
         SYS_ENV_FLAGS 	:= -DWIN32
 
@@ -93,14 +92,16 @@ else
         endif
 endif
 
-# Path delimiter and chain commands token
+# Path delimiter, chain commands token, executable file extension
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq (T,$(SYSTEM_WINDOWS))
 PATH_DELIM	:= \\
 CMD_DELIM 	:= &
+BIN_EXT		:= .exe
 else
 PATH_DELIM	:= /
 CMD_DELIM 	:= ;
+BIN_EXT		:= $(EMPTY)
 endif
 
 
@@ -184,7 +185,7 @@ SCRIPT_FILE_PATH		= $(call FILE_PATH,$1,$2.rb)
 SOURCE_FILE_PATH		= $(call FILE_PATH,$1,$2.c)
 HEADER_FILE_PATH		= $(call FILE_PATH,$1,$2.h)
 OBJECT_FILE_PATH		= $(call FILE_PATH,$1,$2.o)
-BINARY_FILE_PATH		= $(call FILE_PATH,$1,$2)
+BINARY_FILE_PATH		= $(call FILE_PATH,$1,$2$(BIN_EXT))
 
 # Project
 # ─────────────── source ───────────────────────────────────────────────────────
