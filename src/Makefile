@@ -175,6 +175,10 @@ ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
         else
                 LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.so)
         endif
+
+        ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
+	        $(error failed to locate library dependency libmysqlclient.{dylib,so,lib})
+        endif
 endif
 
 

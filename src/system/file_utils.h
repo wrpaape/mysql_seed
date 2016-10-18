@@ -610,7 +610,7 @@ open_mode_report(int *const restrict file_descriptor,
 	if (LIKELY(*file_descriptor >= 0))
 		return true;
 
-	switch(errno) {
+	switch (errno) {
 	FAIL_SWITCH_ERRNO_CASE_4(EACCES,
 				 "Search permission is denied for a component "
 				 "of the path prefix.",
@@ -1471,11 +1471,9 @@ write_report(const int file_descriptor,
 	FAIL_SWITCH_ERRNO_CASE_1(ESPIPE,
 				 "The file descriptor is associated with a pipe"
 				 ", socket, or FIFO.")
-	FAIL_SWITCH_ERRNO_CASE_3(EAGAIN,
+	FAIL_SWITCH_ERRNO_CASE_2(EAGAIN,
 				 "The file is marked for non-blocking I/O, and "
 				 "no data could be written immediately.",
-				 "The file descriptor is for a socket, is "
-				 "marked 'O_NONBLOCK', and write would block.",
 				 "The file descriptor is for a socket, is "
 				 "marked 'O_NONBLOCK', and write would block.")
 	FAIL_SWITCH_ERRNO_CASE_1(EBADF,

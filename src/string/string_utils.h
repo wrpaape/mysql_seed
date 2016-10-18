@@ -1993,13 +1993,18 @@ inline int
 string_compare(const char *restrict string1,
 	       const char *restrict string2)
 {
-	int comparison;
+	unsigned char token1;
+	unsigned char token2;
 
 	while (1) {
-		comparison = (*string1) - (*string2);
+		token1 = (unsigned char) *string1;
+		token2 = (unsigned char) *string2;
 
-		if ((*string1 == '\0') || (comparison != 0))
-			return comparison;
+		if (token1 != token2)
+			return (int) (token1 - token2);
+
+		if (token1 == '\0')
+			return 0;
 
 		++string1;
 		++string2;
