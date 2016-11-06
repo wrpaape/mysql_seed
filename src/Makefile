@@ -10,7 +10,7 @@
 # Development Mode
 # ──────────────────────────────────────────────────────────────────────────────
 # toggles utility flags, make targets
-DEVELOPMENT_MODE = T
+DEVELOPMENT_MODE = F
 
 
 # path to MySQL library dependency libmysqlclient.{dylib,so,lib} (leave empty if unsure where located)
@@ -169,15 +169,15 @@ endif
 # ──────────────────────────────────────────────────────────────────────────────
 ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
         ifeq      (T,$(SYSTEM_WINDOWS))
-                LIBMYSQLCLIENT := $(shell dir /s libmysqlclient.lib)
+                LIBMYSQLCLIENT := "$(shell dir /s "*libmysqlclient.*lib")"
         else ifeq (T,$(SYSTEM_OSX))
-                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.dylib)
+                LIBMYSQLCLIENT := "$(shell locate -l 1 "*libmysqlclient.*dylib")"
         else
-                LIBMYSQLCLIENT := $(shell locate -l 1 libmysqlclient.so)
+                LIBMYSQLCLIENT := "$(shell locate -l 1 "*libmysqlclient.*so")"
         endif
 
         ifeq ($(EMPTY),$(LIBMYSQLCLIENT))
-	        $(error failed to locate library dependency libmysqlclient.{dylib,so,lib})
+                $(error failed to locate library dependency libmysqlclient.{dylib,so,lib})
         endif
 endif
 
