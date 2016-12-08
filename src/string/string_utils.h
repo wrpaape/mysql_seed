@@ -2003,7 +2003,7 @@ string_compare(const char *restrict string1,
 		if (token1 != token2)
 			return token1 - token2;
 
-		if (token1 == '\0')
+		if (token1 == 0)
 			return 0;
 
 		++string1;
