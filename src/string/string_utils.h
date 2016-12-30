@@ -187,7 +187,7 @@ uint_digit_count(uintmax_t n)
 				}
 			} else {
 				if (n < 10000000000000llu) {
-					return 13llu;
+					return 13u;
 				} else {
 					if (n < 100000000000000llu) {
 						return 14u;
