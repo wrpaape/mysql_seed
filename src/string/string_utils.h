@@ -2180,7 +2180,7 @@ do_parse_uint_stop(uintmax_t *const restrict n,
 		}
 	}
 
-	if ((*string > '9' ) || (*string < '0' ))
+	if ((*string > '9') || (*string < '0'))
 		return NULL;
 
 	const char *const restrict start_ptr = string;
